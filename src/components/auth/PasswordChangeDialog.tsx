@@ -36,8 +36,8 @@ export const PasswordChangeDialog = () => {
       return;
     }
 
-    if (formData.newPassword.length < 6) {
-      setError("New password must be at least 6 characters");
+    if (formData.newPassword.length < 8) {
+      setError("New password must be at least 8 characters");
       setIsLoading(false);
       return;
     }
@@ -144,12 +144,12 @@ export const PasswordChangeDialog = () => {
               <Input
                 id="newPassword"
                 type="password"
-                placeholder="Flow143"
+                placeholder="Create a strong password (min 8 characters)"
                 className="pl-10"
                 value={formData.newPassword}
                 onChange={(e) => handleInputChange("newPassword", e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
               />
             </div>
           </div>
@@ -161,11 +161,12 @@ export const PasswordChangeDialog = () => {
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="Confirm Flow143"
+                placeholder="Confirm your new password"
                 className="pl-10"
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                 required
+                minLength={8}
               />
             </div>
           </div>
