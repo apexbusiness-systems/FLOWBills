@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import Invoices from "./pages/Invoices";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,14 @@ const AuthRoutes = () => {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/invoices" 
+        element={
+          <ProtectedRoute requiredRole="viewer">
+            <Invoices />
           </ProtectedRoute>
         } 
       />

@@ -1,5 +1,7 @@
 import { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { useInvoices } from "@/hooks/useInvoices";
 import AnimatedCounter from "@/components/ui/animated-counter";
 import StatusIndicator from "@/components/ui/status-indicator";
 
@@ -11,6 +13,7 @@ interface StatusCardProps {
   icon: LucideIcon;
   status?: "pending" | "approved" | "rejected" | "processing";
   description?: string;
+  onClick?: () => void;
 }
 
 const StatusCard = ({ 
@@ -20,8 +23,58 @@ const StatusCard = ({
   changeType = "neutral", 
   icon: Icon, 
   status,
-  description 
+  description,
+  onClick 
 }: StatusCardProps) => {
+  const navigate = useNavigate();
+  const { getInvoicesStats } = useInvoices();
+
+  // Use real data for invoice-related metrics
+  const getRealValue = (): string | number => {
+    const stats = getInvoicesStats();
+    
+    switch (title) {
+      case 'Monthly Volume':
+        return `$${(stats.totalAmount / 1000000).toFixed(1)}M`;
+      case 'Active Invoices':
+        return stats.totalCount;
+      case 'Processing Rate':
+        const rate = stats.totalCount > 0 
+          ? ((stats.approvedCount + stats.paidCount) / stats.totalCount) * 100
+          : 94.2; // Default rate
+        return `${rate.toFixed(1)}%`;
+      case 'Exception Queue':
+        return stats.rejectedCount + stats.pendingCount;
+      default:
+        return value;
+    }
+  };
+
+  const getRealChange = (): string => {
+    const stats = getInvoicesStats();
+    
+    switch (title) {
+      case 'Monthly Volume':
+        return `${stats.totalCount} invoices total`;
+      case 'Active Invoices':
+        return `${stats.pendingCount} pending approval`;
+      case 'Processing Rate':
+        return `${stats.approvedCount} approved`;
+      case 'Exception Queue':
+        return `${stats.rejectedCount} rejected`;
+      default:
+        return change || '';
+    }
+  };
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (title.includes('Invoice') || title.includes('Volume') || title.includes('Exception') || title.includes('Processing')) {
+      navigate('/invoices');
+    }
+  };
+
   const getStatusBadgeClass = () => {
     switch (status) {
       case "pending":
@@ -73,8 +126,14 @@ const StatusCard = ({
     return Math.round(val).toString();
   };
 
+  const displayValue = getRealValue();
+  const displayChange = getRealChange();
+
   return (
-    <div className="metric-card group hover-lift">
+    <div 
+      className="metric-card group hover-lift cursor-pointer"
+      onClick={handleClick}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/20 text-primary group-hover:from-primary/20 group-hover:to-primary/30 transition-all duration-300">
@@ -84,8 +143,8 @@ const StatusCard = ({
             <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
             <p className="text-3xl font-bold text-foreground">
               <AnimatedCounter 
-                value={formatValue(value)}
-                formatter={(val) => formatDisplay(val, value)}
+                value={formatValue(displayValue)}
+                formatter={(val) => formatDisplay(val, displayValue)}
                 duration={1500}
               />
             </p>
@@ -102,16 +161,16 @@ const StatusCard = ({
       </div>
       
       <div className="mt-4 flex items-center justify-between">
-        {change && (
+        {displayChange && (
           <span className={`text-sm font-medium ${getChangeClass()} flex items-center gap-1`}>
             {changeType === "increase" && "↗"}
             {changeType === "decrease" && "↘"}
-            {change}
+            {displayChange}
           </span>
         )}
         {description && (
           <p className="text-xs text-muted-foreground opacity-70 group-hover:opacity-100 transition-opacity">
-            {description}
+            {description || 'Click to view details'}
           </p>
         )}
       </div>

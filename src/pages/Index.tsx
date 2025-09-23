@@ -12,6 +12,7 @@ import {
   Zap
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -33,9 +34,10 @@ import heroImage from "@/assets/hero-oilgas.jpg";
 const Index = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showQuickActions, setShowQuickActions] = useState(false);
+  const navigate = useNavigate();
 
   const quickActions = [
-    { icon: Upload, label: "Upload Invoice", action: () => setActiveTab("inbox") },
+    { icon: Upload, label: "Upload Invoice", action: () => navigate('/invoices') },
     { icon: AlertTriangle, label: "View Exceptions", action: () => setActiveTab("exceptions") },
     { icon: Settings, label: "Manage Rules", action: () => setActiveTab("validation") },
     { icon: Bell, label: "Notifications", action: () => console.log("Show notifications") }
@@ -85,9 +87,13 @@ const Index = () => {
         <div className="mb-6 animate-fade-in">
           <div className="flex flex-wrap gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-3">
-              <Button variant="enterprise" className="gap-2 hover-scale">
+              <Button 
+                variant="enterprise" 
+                className="gap-2 hover-scale"
+                onClick={() => navigate('/invoices')}
+              >
                 <Upload className="h-4 w-4" />
-                Upload Invoices
+                Manage Invoices
               </Button>
               <Button variant="outline" className="gap-2 hover-scale">
                 <FileText className="h-4 w-4" />
