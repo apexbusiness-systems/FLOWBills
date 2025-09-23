@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import Invoices from "./pages/Invoices";
 import Exceptions from "./pages/Exceptions";
 import ValidationRules from "./pages/ValidationRules";
+import Compliance from "./pages/Compliance";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,14 @@ const AuthRoutes = () => {
         element={
           <ProtectedRoute requiredRole="operator">
             <ValidationRules />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/compliance" 
+        element={
+          <ProtectedRoute requiredRole="viewer">
+            <Compliance />
           </ProtectedRoute>
         } 
       />
