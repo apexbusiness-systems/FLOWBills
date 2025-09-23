@@ -11,6 +11,7 @@ import { healthChecker } from "@/lib/health-check";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import PasswordChange from "./pages/PasswordChange";
+import ClientIntegration from "./pages/ClientIntegration";
 import Profile from "./pages/Profile";
 import Invoices from "./pages/Invoices";
 import Exceptions from "./pages/Exceptions";
@@ -131,6 +132,10 @@ const AuthRoutes = () => {
             <Search />
           </ProtectedRoute>
         } 
+      />
+      <Route 
+        path="/client-integration" 
+        element={<ClientIntegration />} 
       />
       <Route 
         path="/" 
