@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Message {
@@ -49,8 +50,7 @@ const OilGasAssistant = ({ onTaskSuggestion, onNavigate }: OilGasAssistantProps)
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [openaiApiKey, setOpenaiApiKey] = useState("");
-  const [showApiKeyInput, setShowApiKeyInput] = useState(!openaiApiKey);
+  // Removed insecure API key handling
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognition = useRef<any>(null);
   const synthesis = useRef<SpeechSynthesis>(window.speechSynthesis);
@@ -120,65 +120,29 @@ const OilGasAssistant = ({ onTaskSuggestion, onNavigate }: OilGasAssistantProps)
   };
 
   const generateIndustryResponse = async (userMessage: string): Promise<string> => {
-    if (!openaiApiKey) {
-      return "Please provide your OpenAI API key to get industry-specific assistance.";
-    }
-
     try {
-      const systemPrompt = `You are an expert Oil & Gas Billing Assistant specializing in Canadian energy industry operations. You have deep knowledge of:
-
-REGULATORY FRAMEWORK:
-- Canadian Energy Regulator (CER) and provincial regulations
-- PIPEDA and Alberta PIPA data protection requirements
-- Joint Interest Billing (JIB) standards and procedures
-- Working interest calculations and allocations
-
-TECHNICAL SYSTEMS:
-- NOV (National Oilwell Varco) AccessNOV and MYNOV portals
-- Oracle E-Business Suite AP modules and configurations
-- EDI X12 810 (Invoice) and 820 (Payment) transactions
-- SAP Ariba cXML processing and integration
-- Microsoft Dynamics and NetSuite billing modules
-
-OPERATIONAL WORKFLOWS:
-- Three-way matching (Purchase Order, Receipt, Invoice)
-- Field ticket processing and allocation
-- Monthly billing cycles and cutoff procedures
-- Exception handling and approval workflows
-- Audit trails and compliance reporting
-
-INDUSTRY BEST PRACTICES:
-- Cost center allocations and working interest distributions
-- Vendor master data management
-- Invoice validation and approval hierarchies
-- Payment processing and remittance advice
-- Dispute resolution and exception management
-
-Provide practical, actionable advice specific to Canadian oil & gas operations. Include regulatory references when relevant and suggest specific workflow improvements.`;
-
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openaiApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userMessage }
-          ],
-          temperature: 0.2,
-          max_tokens: 1000
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get AI response');
+      // Use secure backend AI assistant endpoint
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return "Please sign in to access AI assistance.";
       }
 
-      const data = await response.json();
-      return data.choices[0]?.message?.content || "I apologize, but I couldn't generate a response. Please try rephrasing your question.";
+      const response = await supabase.functions.invoke('ai-assistant', {
+        body: {
+          prompt: userMessage,
+          context: 'Oil & Gas Billing Assistant specializing in Canadian energy industry operations'
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        console.error('AI Assistant error:', response.error);
+        return "I apologize, but I'm having trouble connecting to the AI service. Please try again later.";
+      }
+
+      return response.data?.response || "I apologize, but I couldn't generate a response at this time.";
       
     } catch (error) {
       console.error('AI Assistant Error:', error);
@@ -356,35 +320,7 @@ Provide practical, actionable advice specific to Canadian oil & gas operations. 
 
       {!isMinimized && (
         <>
-          {/* API Key Input */}
-          {showApiKeyInput && (
-            <div className="p-4 bg-muted/50 border-b border-border">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  OpenAI API Key (for industry-specific AI responses)
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    type="password"
-                    placeholder="Enter your OpenAI API key..."
-                    value={openaiApiKey}
-                    onChange={(e) => setOpenaiApiKey(e.target.value)}
-                    className="text-xs"
-                  />
-                  <Button 
-                    size="sm"
-                    onClick={() => setShowApiKeyInput(false)}
-                    disabled={!openaiApiKey}
-                  >
-                    Save
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Get your API key from <a href="https://platform.openai.com" target="_blank" className="text-primary hover:underline">platform.openai.com</a>
-                </p>
-              </div>
-            </div>
-          )}
+          {/* Secure AI Assistant - No API key needed */}
 
           {/* Quick Suggestions */}
           <div className="p-3 border-b border-border">
