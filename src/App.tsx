@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { FloatingPasswordChange } from "@/components/auth/FloatingPasswordChange";
 import ErrorBoundary from "@/components/error-boundary/ErrorBoundary";
 import { healthChecker } from "@/lib/health-check";
 import Index from "./pages/Index";
@@ -167,7 +166,6 @@ function App() {
                     <AuthRoutes />
                   </div>
                   <Footer />
-                  <FloatingPasswordChange />
                 </div>
               </AuthProvider>
             </BrowserRouter>
