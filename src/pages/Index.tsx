@@ -39,6 +39,7 @@ const Index = () => {
   const quickActions = [
     { icon: Upload, label: "Upload Invoice", action: () => navigate('/invoices') },
     { icon: AlertTriangle, label: "View Exceptions", action: () => setActiveTab("exceptions") },
+    { icon: Zap, label: "Create Workflow", action: () => navigate('/workflows') },
     { icon: Settings, label: "Manage Rules", action: () => setActiveTab("validation") },
     { icon: Bell, label: "Notifications", action: () => console.log("Show notifications") }
   ];
@@ -103,6 +104,14 @@ const Index = () => {
                 <Settings className="h-4 w-4" />
                 Configure Rules
               </Button>
+              <Button 
+                variant="outline" 
+                className="gap-2 hover-scale"
+                onClick={() => navigate('/workflows')}
+              >
+                <Zap className="h-4 w-4" />
+                Workflows
+              </Button>
             </div>
             <Button variant="ghost" className="gap-2 relative hover-scale">
               <Bell className="h-4 w-4" />
@@ -116,10 +125,11 @@ const Index = () => {
 
         {/* Enhanced Tabbed Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6 p-1 bg-muted/50 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-7 mb-6 p-1 bg-muted/50 backdrop-blur-sm">
             <TabsTrigger value="overview" className="hover-scale">Overview</TabsTrigger>
             <TabsTrigger value="inbox" className="hover-scale">Inbox</TabsTrigger>
             <TabsTrigger value="validation" className="hover-scale">Validation</TabsTrigger>
+            <TabsTrigger value="workflows" className="hover-scale">Workflows</TabsTrigger>
             <TabsTrigger value="exceptions" className="hover-scale relative">
               Exceptions
               <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive"></span>
@@ -231,12 +241,90 @@ const Index = () => {
             </section>
           </TabsContent>
 
-          <TabsContent value="validation" className="animate-fade-in">
-            <section aria-labelledby="validation-heading">
-              <h2 id="validation-heading" className="text-2xl font-semibold text-foreground mb-4">
-                Validation Rules Management
+          <TabsContent value="workflows" className="animate-fade-in">
+            <section aria-labelledby="workflows-heading">
+              <h2 id="workflows-heading" className="text-2xl font-semibold text-foreground mb-4">
+                Workflow Automation
               </h2>
-              <ValidationRules />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <p className="text-muted-foreground mb-4">
+                    Create and manage automated workflows for invoice processing, compliance checks, and system integrations.
+                  </p>
+                  <Button 
+                    onClick={() => navigate('/workflows')}
+                    className="w-full sm:w-auto gap-2"
+                  >
+                    <Zap className="h-4 w-4" />
+                    Open Workflow Manager
+                  </Button>
+                </div>
+                <div className="card-enterprise p-4">
+                  <h3 className="font-semibold mb-2">Quick Stats</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Active Workflows:</span>
+                      <span className="font-medium">3</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Running Instances:</span>
+                      <span className="font-medium">12</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Automation Rate:</span>
+                      <span className="font-medium text-status-approved">85%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="exceptions" className="animate-fade-in">
+            <section aria-labelledby="exceptions-heading">
+              <h2 id="exceptions-heading" className="text-2xl font-semibold text-foreground mb-4">
+                Exception Queue Management
+              </h2>
+              <ExceptionQueue />
+            </section>
+          </TabsContent>
+
+          <TabsContent value="workflows" className="animate-fade-in">
+            <section aria-labelledby="workflows-heading">
+              <h2 id="workflows-heading" className="text-2xl font-semibold text-foreground mb-4">
+                Workflow Automation
+              </h2>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <p className="text-muted-foreground mb-4">
+                    Create and manage automated workflows for invoice processing, compliance checks, and system integrations.
+                  </p>
+                  <Button 
+                    onClick={() => navigate('/workflows')}
+                    className="w-full sm:w-auto gap-2"
+                  >
+                    <Zap className="h-4 w-4" />
+                    Open Workflow Manager
+                  </Button>
+                </div>
+                <div className="card-enterprise p-4">
+                  <h3 className="font-semibold mb-2">Quick Stats</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Active Workflows:</span>
+                      <span className="font-medium">3</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Running Instances:</span>
+                      <span className="font-medium">12</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Automation Rate:</span>
+                      <span className="font-medium text-status-approved">85%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
           </TabsContent>
 

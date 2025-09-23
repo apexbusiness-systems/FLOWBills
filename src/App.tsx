@@ -14,6 +14,7 @@ import ValidationRules from "./pages/ValidationRules";
 import Compliance from "./pages/Compliance";
 import Integrations from "./pages/Integrations";
 import Analytics from "./pages/Analytics";
+import Workflows from "./pages/Workflows";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -91,6 +92,14 @@ const AuthRoutes = () => {
         element={
           <ProtectedRoute requiredRole="viewer">
             <Analytics />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/workflows" 
+        element={
+          <ProtectedRoute requiredRole="operator">
+            <Workflows />
           </ProtectedRoute>
         } 
       />
