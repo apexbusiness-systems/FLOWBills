@@ -52,7 +52,7 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/80 to-primary/70" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         <div className="relative h-full flex items-center justify-center px-6">
-          <div className="text-center text-white animate-fade-in">
+          <div className="text-center text-black animate-fade-in drop-shadow-lg">
             <h1 className="text-4xl font-bold mb-2 drop-shadow-lg">
               OilField Billing Platform
             </h1>
