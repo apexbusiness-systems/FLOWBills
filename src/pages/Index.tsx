@@ -58,6 +58,7 @@ const Index = () => {
               OilField Billing Platform
             </h1>
             <p className="text-xl opacity-90 mb-4 drop-shadow-md">
+              Enterprise-grade NOV-compatible billing automation for Canada's oil & gas industry
             </p>
             <div className="flex items-center justify-center gap-6 text-sm">
               <div className="flex items-center gap-2 glass-effect rounded-full px-3 py-1">
