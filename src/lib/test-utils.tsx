@@ -1,0 +1,165 @@
+import React, { ReactElement } from 'react';
+import { render, RenderOptions, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { AuthProvider } from '@/hooks/useAuth';
+import { vi } from 'vitest';
+import '@testing-library/jest-dom';
+
+// Create a test query client
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        staleTime: 1000 * 60 * 5,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
+
+// Test providers wrapper
+const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+  const testQueryClient = createTestQueryClient();
+  
+  return (
+    <QueryClientProvider client={testQueryClient}>
+      <BrowserRouter>
+        <TooltipProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </TooltipProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
+
+// Custom render function
+const customRender = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>,
+) => render(ui, { wrapper: AllTheProviders, ...options });
+
+// Mock user data for testing
+export const mockUser = {
+  id: 'test-user-id',
+  email: 'test@example.com',
+  role: 'admin' as const,
+  user_metadata: {
+    full_name: 'Test User',
+  },
+  app_metadata: {},
+  aud: 'authenticated',
+  created_at: '2023-01-01T00:00:00.000Z',
+  updated_at: '2023-01-01T00:00:00.000Z',
+};
+
+// Mock authenticated user context
+export const mockAuthContext = {
+  user: mockUser,
+  loading: false,
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+  signUp: vi.fn(),
+};
+
+// Mock Supabase client
+export const mockSupabase = {
+  from: vi.fn(() => ({
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    gte: vi.fn().mockReturnThis(),
+    lte: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
+    match: vi.fn().mockReturnThis(),
+    ilike: vi.fn().mockReturnThis(),
+    single: vi.fn(),
+    maybeSingle: vi.fn(),
+  })),
+  auth: {
+    getSession: vi.fn(),
+    signInWithPassword: vi.fn(),
+    signUp: vi.fn(),
+    signOut: vi.fn(),
+    onAuthStateChange: vi.fn(),
+  },
+  storage: {
+    from: vi.fn(() => ({
+      upload: vi.fn(),
+      download: vi.fn(),
+      remove: vi.fn(),
+      getPublicUrl: vi.fn(),
+    })),
+  },
+};
+
+// Mock data generators
+export const generateMockInvoice = (overrides: any = {}) => ({
+  id: 'mock-invoice-1',
+  vendor_name: 'Test Vendor',
+  invoice_number: 'INV-001',
+  invoice_date: '2023-01-01',
+  amount: 1000,
+  status: 'pending',
+  user_id: 'test-user-id',
+  created_at: '2023-01-01T00:00:00.000Z',
+  updated_at: '2023-01-01T00:00:00.000Z',
+  ...overrides,
+});
+
+// Test environment setup
+export const setupTestEnvironment = () => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+
+  global.IntersectionObserver = class IntersectionObserver {
+    constructor() {}
+    observe() {}
+    disconnect() {}
+    unobserve() {}
+  };
+
+  global.ResizeObserver = class ResizeObserver {
+    constructor() {}
+    observe() {}
+    disconnect() {}
+    unobserve() {}
+  };
+
+  global.fetch = vi.fn();
+  
+  const localStorageMock = {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+  };
+  Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock,
+  });
+};
+
+// Re-export everything
+export { screen, fireEvent, waitFor };
+export { customRender as render };
+export { createTestQueryClient };
