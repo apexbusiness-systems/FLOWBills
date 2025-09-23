@@ -26,6 +26,8 @@ import ExceptionQueue from "@/components/dashboard/ExceptionQueue";
 import SystemHealthCheck from "@/components/dashboard/SystemHealthCheck";
 import SecurityDashboard from "@/components/dashboard/SecurityDashboard";
 import FloatingActionButton from "@/components/ui/floating-action-button";
+import OilGasAssistant from "@/components/ai/OilGasAssistant";
+import SmartSuggestions from "@/components/ai/SmartSuggestions";
 import heroImage from "@/assets/hero-oilgas.jpg";
 
 const Index = () => {
@@ -251,6 +253,26 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Smart Suggestions Panel */}
+      <SmartSuggestions
+        onApplySuggestion={(suggestion) => {
+          console.log('Applying suggestion:', suggestion);
+          // Auto-navigate to relevant section based on suggestion
+          if (suggestion.category === 'compliance') {
+            setActiveTab('compliance');
+          } else if (suggestion.category === 'workflow') {
+            setActiveTab('validation');
+          }
+        }}
+        onDismiss={(id) => console.log('Dismissed suggestion:', id)}
+      />
+
+      {/* AI Assistant */}
+      <OilGasAssistant 
+        onTaskSuggestion={(task) => console.log('Task suggestion:', task)}
+        onNavigate={(section) => setActiveTab(section)}
+      />
 
       {/* Floating Action Button with Quick Actions */}
       <FloatingActionButton
