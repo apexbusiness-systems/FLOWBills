@@ -121,7 +121,7 @@ const Auth = () => {
             <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
               <Building2 className="h-6 w-6 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Flow Billing</h1>
+            <h1 className="text-2xl font-bold text-foreground">FLOW Bills</h1>
           </div>
           <p className="text-muted-foreground">
             Oil & Gas Invoice Management Platform
