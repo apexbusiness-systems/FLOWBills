@@ -49,8 +49,8 @@ const OilGasAssistant = ({ onTaskSuggestion, onNavigate }: OilGasAssistantProps)
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [perplexityApiKey, setPerplexityApiKey] = useState("");
-  const [showApiKeyInput, setShowApiKeyInput] = useState(!perplexityApiKey);
+  const [openaiApiKey, setOpenaiApiKey] = useState("");
+  const [showApiKeyInput, setShowApiKeyInput] = useState(!openaiApiKey);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognition = useRef<any>(null);
   const synthesis = useRef<SpeechSynthesis>(window.speechSynthesis);
@@ -120,8 +120,8 @@ const OilGasAssistant = ({ onTaskSuggestion, onNavigate }: OilGasAssistantProps)
   };
 
   const generateIndustryResponse = async (userMessage: string): Promise<string> => {
-    if (!perplexityApiKey) {
-      return "Please provide your Perplexity API key to get industry-specific assistance.";
+    if (!openaiApiKey) {
+      return "Please provide your OpenAI API key to get industry-specific assistance.";
     }
 
     try {
@@ -156,25 +156,20 @@ INDUSTRY BEST PRACTICES:
 
 Provide practical, actionable advice specific to Canadian oil & gas operations. Include regulatory references when relevant and suggest specific workflow improvements.`;
 
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${perplexityApiKey}`,
+          'Authorization': `Bearer ${openaiApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.1-sonar-large-128k-online',
+          model: 'gpt-4o',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userMessage }
           ],
           temperature: 0.2,
-          top_p: 0.9,
-          max_tokens: 1000,
-          search_domain_filter: ['canada.ca', 'aer.ca', 'bcogc.ca', 'nov.com'],
-          search_recency_filter: 'month',
-          frequency_penalty: 1,
-          presence_penalty: 0
+          max_tokens: 1000
         }),
       });
 
@@ -366,26 +361,26 @@ Provide practical, actionable advice specific to Canadian oil & gas operations. 
             <div className="p-4 bg-muted/50 border-b border-border">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  Perplexity API Key (for industry-specific AI responses)
+                  OpenAI API Key (for industry-specific AI responses)
                 </label>
                 <div className="flex gap-2">
                   <Input
                     type="password"
-                    placeholder="Enter your Perplexity API key..."
-                    value={perplexityApiKey}
-                    onChange={(e) => setPerplexityApiKey(e.target.value)}
+                    placeholder="Enter your OpenAI API key..."
+                    value={openaiApiKey}
+                    onChange={(e) => setOpenaiApiKey(e.target.value)}
                     className="text-xs"
                   />
                   <Button 
                     size="sm"
                     onClick={() => setShowApiKeyInput(false)}
-                    disabled={!perplexityApiKey}
+                    disabled={!openaiApiKey}
                   >
                     Save
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Get your API key from <a href="https://perplexity.ai" target="_blank" className="text-primary hover:underline">perplexity.ai</a>
+                  Get your API key from <a href="https://platform.openai.com" target="_blank" className="text-primary hover:underline">platform.openai.com</a>
                 </p>
               </div>
             </div>
