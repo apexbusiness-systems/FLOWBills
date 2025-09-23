@@ -182,13 +182,41 @@
   }
 
   .card-enterprise {
-    @apply rounded-lg border bg-card p-6 text-card-foreground;
+    @apply rounded-lg border bg-card p-6 text-card-foreground animate-fade-in;
     box-shadow: var(--shadow-card);
     transition: var(--transition-smooth);
   }
 
   .card-enterprise:hover {
     box-shadow: var(--shadow-enterprise);
+    transform: translateY(-1px);
+  }
+
+  /* Interactive Elements */
+  .story-link {
+    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  .glass-effect {
+    @apply backdrop-blur-sm bg-white/80 border border-white/20;
+  }
+
+  .loading-shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .loading-shimmer::after {
+    @apply absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent;
+    content: '';
+    animation: shimmer 2s infinite;
   }
 
   /* Status indicators */
@@ -206,5 +234,19 @@
 
   .status-processing {
     @apply bg-status-processing text-status-processing-foreground;
+  }
+
+  /* Enhanced interactive states */
+  .interactive-card {
+    @apply card-enterprise hover-lift cursor-pointer border-2 border-transparent hover:border-primary/20 transition-all duration-300;
+  }
+
+  .metric-card {
+    @apply card-enterprise bg-gradient-to-br from-card to-card/50 relative overflow-hidden;
+  }
+
+  .metric-card::before {
+    @apply absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/10 to-transparent rounded-full -translate-y-10 translate-x-10;
+    content: '';
   }
 }

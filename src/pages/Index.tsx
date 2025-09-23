@@ -7,7 +7,9 @@ import {
   CheckCircle,
   Upload,
   Settings,
-  Bell
+  Bell,
+  Plus,
+  Zap
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -22,41 +24,51 @@ import InvoiceUpload from "@/components/dashboard/InvoiceUpload";
 import ValidationRules from "@/components/dashboard/ValidationRules";
 import ExceptionQueue from "@/components/dashboard/ExceptionQueue";
 import SystemHealthCheck from "@/components/dashboard/SystemHealthCheck";
+import FloatingActionButton from "@/components/ui/floating-action-button";
 import heroImage from "@/assets/hero-oilgas.jpg";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [showQuickActions, setShowQuickActions] = useState(false);
+
+  const quickActions = [
+    { icon: Upload, label: "Upload Invoice", action: () => setActiveTab("inbox") },
+    { icon: AlertTriangle, label: "View Exceptions", action: () => setActiveTab("exceptions") },
+    { icon: Settings, label: "Manage Rules", action: () => setActiveTab("validation") },
+    { icon: Bell, label: "Notifications", action: () => console.log("Show notifications") }
+  ];
 
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       
-      {/* Hero Section */}
+      {/* Enhanced Hero Section */}
       <div 
-        className="relative h-64 bg-cover bg-center bg-no-repeat"
+        className="relative h-64 bg-cover bg-center bg-no-repeat overflow-hidden"
         style={{ backgroundImage: `url(${heroImage})` }}
         role="img"
         aria-label="Oil and gas industrial facility"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/80 to-primary/70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         <div className="relative h-full flex items-center justify-center px-6">
-          <div className="text-center text-white">
-            <h1 className="text-4xl font-bold mb-2">
+          <div className="text-center text-white animate-fade-in">
+            <h1 className="text-4xl font-bold mb-2 drop-shadow-lg">
               OilField Billing Platform
             </h1>
-            <p className="text-xl opacity-90 mb-4">
+            <p className="text-xl opacity-90 mb-4 drop-shadow-md">
               Enterprise-grade NOV-compatible billing automation for Canada's oil & gas industry
             </p>
             <div className="flex items-center justify-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 glass-effect rounded-full px-3 py-1">
                 <CheckCircle className="h-4 w-4" />
                 <span>SOC 2 Compliant</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 glass-effect rounded-full px-3 py-1">
                 <CheckCircle className="h-4 w-4" />
                 <span>PIPEDA/PIPA Ready</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 glass-effect rounded-full px-3 py-1">
                 <CheckCircle className="h-4 w-4" />
                 <span>NOV Certified</span>
               </div>
@@ -66,47 +78,53 @@ const Index = () => {
       </div>
 
       <main className="p-6">
-        {/* Quick Actions */}
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-3">
-            <Button variant="enterprise" className="gap-2">
-              <Upload className="h-4 w-4" />
-              Upload Invoices
-            </Button>
-            <Button variant="outline" className="gap-2">
-              <FileText className="h-4 w-4" />
-              Generate Report
-            </Button>
-            <Button variant="outline" className="gap-2">
-              <Settings className="h-4 w-4" />
-              Configure Rules
-            </Button>
-            <Button variant="ghost" className="gap-2 relative">
+        {/* Enhanced Quick Actions Bar */}
+        <div className="mb-6 animate-fade-in">
+          <div className="flex flex-wrap gap-3 items-center justify-between">
+            <div className="flex flex-wrap gap-3">
+              <Button variant="enterprise" className="gap-2 hover-scale">
+                <Upload className="h-4 w-4" />
+                Upload Invoices
+              </Button>
+              <Button variant="outline" className="gap-2 hover-scale">
+                <FileText className="h-4 w-4" />
+                Generate Report
+              </Button>
+              <Button variant="outline" className="gap-2 hover-scale">
+                <Settings className="h-4 w-4" />
+                Configure Rules
+              </Button>
+            </div>
+            <Button variant="ghost" className="gap-2 relative hover-scale">
               <Bell className="h-4 w-4" />
               Notifications
-              <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center animate-bounce-subtle">
                 3
               </span>
             </Button>
           </div>
         </div>
 
-        {/* Tabbed Interface */}
+        {/* Enhanced Tabbed Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="inbox">Inbox</TabsTrigger>
-            <TabsTrigger value="validation">Validation</TabsTrigger>
-            <TabsTrigger value="exceptions">Exceptions</TabsTrigger>
-            <TabsTrigger value="compliance">Compliance</TabsTrigger>
-            <TabsTrigger value="integrations">Systems</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 mb-6 p-1 bg-muted/50 backdrop-blur-sm">
+            <TabsTrigger value="overview" className="hover-scale">Overview</TabsTrigger>
+            <TabsTrigger value="inbox" className="hover-scale">Inbox</TabsTrigger>
+            <TabsTrigger value="validation" className="hover-scale">Validation</TabsTrigger>
+            <TabsTrigger value="exceptions" className="hover-scale relative">
+              Exceptions
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive"></span>
+            </TabsTrigger>
+            <TabsTrigger value="compliance" className="hover-scale">Compliance</TabsTrigger>
+            <TabsTrigger value="integrations" className="hover-scale">Systems</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-8">
+          <TabsContent value="overview" className="space-y-8 animate-fade-in">
             {/* Key Metrics */}
             <section aria-labelledby="metrics-heading">
-              <h2 id="metrics-heading" className="text-2xl font-semibold text-foreground mb-4">
-                Key Metrics
+              <h2 id="metrics-heading" className="text-2xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                <TrendingUp className="h-6 w-6 text-primary" />
+                Key Performance Metrics
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatusCard
@@ -149,7 +167,8 @@ const Index = () => {
 
             {/* Workflow Pipeline */}
             <section aria-labelledby="workflow-heading">
-              <h2 id="workflow-heading" className="text-2xl font-semibold text-foreground mb-4">
+              <h2 id="workflow-heading" className="text-2xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Zap className="h-6 w-6 text-primary" />
                 Invoice Processing Workflow
               </h2>
               <WorkflowPipeline />
@@ -179,7 +198,7 @@ const Index = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="inbox">
+          <TabsContent value="inbox" className="animate-fade-in">
             <section aria-labelledby="inbox-heading">
               <h2 id="inbox-heading" className="text-2xl font-semibold text-foreground mb-4">
                 Invoice Inbox & Upload
@@ -188,7 +207,7 @@ const Index = () => {
             </section>
           </TabsContent>
 
-          <TabsContent value="validation">
+          <TabsContent value="validation" className="animate-fade-in">
             <section aria-labelledby="validation-heading">
               <h2 id="validation-heading" className="text-2xl font-semibold text-foreground mb-4">
                 Validation Rules Management
@@ -197,7 +216,7 @@ const Index = () => {
             </section>
           </TabsContent>
 
-          <TabsContent value="exceptions">
+          <TabsContent value="exceptions" className="animate-fade-in">
             <section aria-labelledby="exceptions-heading">
               <h2 id="exceptions-heading" className="text-2xl font-semibold text-foreground mb-4">
                 Exception Queue Management
@@ -206,7 +225,7 @@ const Index = () => {
             </section>
           </TabsContent>
 
-          <TabsContent value="compliance">
+          <TabsContent value="compliance" className="animate-fade-in">
             <section aria-labelledby="compliance-tab-heading">
               <h2 id="compliance-tab-heading" className="text-2xl font-semibold text-foreground mb-4">
                 Security & Compliance Dashboard
@@ -217,7 +236,7 @@ const Index = () => {
             </section>
           </TabsContent>
 
-          <TabsContent value="integrations">
+          <TabsContent value="integrations" className="animate-fade-in">
             <section aria-labelledby="integrations-heading">
               <h2 id="integrations-heading" className="text-2xl font-semibold text-foreground mb-4">
                 System Integrations & NOV Status
@@ -230,6 +249,46 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Floating Action Button with Quick Actions */}
+      <FloatingActionButton
+        variant="primary"
+        ariaLabel="Quick actions menu"
+        onClick={() => setShowQuickActions(!showQuickActions)}
+      >
+        <Plus className={`h-6 w-6 transition-transform duration-300 ${showQuickActions ? 'rotate-45' : ''}`} />
+      </FloatingActionButton>
+
+      {/* Quick Actions Menu */}
+      {showQuickActions && (
+        <div className="fixed bottom-20 right-6 z-40 animate-scale-in">
+          <div className="flex flex-col gap-3 p-4 bg-card border border-border rounded-lg shadow-xl backdrop-blur-sm">
+            {quickActions.map((action, index) => (
+              <Button
+                key={index}
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  action.action();
+                  setShowQuickActions(false);
+                }}
+                className="justify-start gap-3 hover-scale"
+              >
+                <action.icon className="h-4 w-4" />
+                {action.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Click outside to close quick actions */}
+      {showQuickActions && (
+        <div 
+          className="fixed inset-0 z-30" 
+          onClick={() => setShowQuickActions(false)}
+        />
+      )}
     </div>
   );
 };
