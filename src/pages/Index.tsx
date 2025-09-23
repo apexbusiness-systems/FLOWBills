@@ -28,6 +28,8 @@ import SecurityDashboard from "@/components/dashboard/SecurityDashboard";
 import FloatingActionButton from "@/components/ui/floating-action-button";
 import OilGasAssistant from "@/components/ai/OilGasAssistant";
 import SmartSuggestions from "@/components/ai/SmartSuggestions";
+import PlatformSpecs from "@/components/dashboard/PlatformSpecs";
+import ClientMetrics from "@/components/dashboard/ClientMetrics";
 import heroImage from "@/assets/hero-oilgas.jpg";
 
 const Index = () => {
@@ -110,8 +112,10 @@ const Index = () => {
 
         {/* Enhanced Tabbed Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6 p-1 bg-muted/50 backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-8 mb-6 p-1 bg-muted/50 backdrop-blur-sm">
             <TabsTrigger value="overview" className="hover-scale">Overview</TabsTrigger>
+            <TabsTrigger value="specs" className="hover-scale">Platform Specs</TabsTrigger>
+            <TabsTrigger value="clients" className="hover-scale">Client Stats</TabsTrigger>
             <TabsTrigger value="inbox" className="hover-scale">Inbox</TabsTrigger>
             <TabsTrigger value="validation" className="hover-scale">Validation</TabsTrigger>
             <TabsTrigger value="exceptions" className="hover-scale relative">
@@ -199,6 +203,24 @@ const Index = () => {
                 </section>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="specs" className="animate-fade-in">
+            <section aria-labelledby="specs-heading">
+              <h2 id="specs-heading" className="text-2xl font-semibold text-foreground mb-4">
+                Complete Platform Specifications
+              </h2>
+              <PlatformSpecs />
+            </section>
+          </TabsContent>
+
+          <TabsContent value="clients" className="animate-fade-in">
+            <section aria-labelledby="clients-heading">
+              <h2 id="clients-heading" className="text-2xl font-semibold text-foreground mb-4">
+                Client Statistics & Performance Metrics
+              </h2>
+              <ClientMetrics />
+            </section>
           </TabsContent>
 
           <TabsContent value="inbox" className="animate-fade-in">
