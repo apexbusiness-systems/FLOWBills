@@ -10,6 +10,7 @@ import ErrorBoundary from "@/components/error-boundary/ErrorBoundary";
 import { healthChecker } from "@/lib/health-check";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import PasswordChange from "./pages/PasswordChange";
 import Profile from "./pages/Profile";
 import Invoices from "./pages/Invoices";
 import Exceptions from "./pages/Exceptions";
@@ -54,6 +55,10 @@ const AuthRoutes = () => {
       <Route 
         path="/auth" 
         element={user ? <Navigate to="/" replace /> : <Auth />} 
+      />
+      <Route 
+        path="/change-password" 
+        element={<PasswordChange />} 
       />
       <Route 
         path="/profile" 
