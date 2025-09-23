@@ -116,15 +116,17 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-primary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
-              <Droplet className="h-6 w-6 text-black fill-black" />
+        <div className="text-center mb-12 animate-fade-in">
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="h-16 w-16 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg hover-scale">
+              <Droplet className="h-10 w-10 text-black fill-black" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">FLOW Bills</h1>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              FLOW Bills
+            </h1>
           </div>
-          <p className="text-muted-foreground">
-            Oil & Gas Invoice Management Platform
+          <p className="text-lg text-muted-foreground max-w-sm mx-auto leading-relaxed">
+            Enterprise Oil & Gas Invoice Management Platform
           </p>
         </div>
 
