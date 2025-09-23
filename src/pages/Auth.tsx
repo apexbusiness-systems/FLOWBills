@@ -118,8 +118,8 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-10 w-10 bg-black rounded-lg flex items-center justify-center">
-              <Droplet className="h-6 w-6 text-white fill-white" />
+            <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
+              <Droplet className="h-6 w-6 text-black fill-black" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">FLOW Bills</h1>
           </div>
