@@ -57,7 +57,7 @@ const Index = () => {
         <div className="relative h-full flex items-center justify-center px-6">
           <div className="text-center text-black animate-fade-in drop-shadow-lg">
             <h1 className="text-4xl font-bold mb-2 drop-shadow-lg">
-              OilField Billing Platform
+              FLOW Billing
             </h1>
             <p className="text-xl opacity-90 mb-4 drop-shadow-md">
               Enterprise-grade billing automation for Canada's oil & gas industry
