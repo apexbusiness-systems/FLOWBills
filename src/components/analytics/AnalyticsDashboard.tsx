@@ -125,7 +125,7 @@ const AnalyticsDashboard = () => {
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
               <h4 className="font-medium text-foreground mb-2">Invoice Processing</h4>
               <p className="text-sm text-muted-foreground">
-                {metrics.processed_invoices > metrics.pending_invoices 
+                {metrics.approvedInvoices > metrics.pendingInvoices 
                   ? "Processing is ahead of incoming invoices"
                   : "Processing backlog detected - consider workflow optimization"
                 }
@@ -135,7 +135,7 @@ const AnalyticsDashboard = () => {
             <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20">
               <h4 className="font-medium text-foreground mb-2">Exception Management</h4>
               <p className="text-sm text-muted-foreground">
-                {metrics.exception_rate < 10 
+                {metrics.efficiencyRate > 90 
                   ? "Exception rate is within acceptable range"
                   : "High exception rate - review validation rules"
                 }
@@ -145,7 +145,7 @@ const AnalyticsDashboard = () => {
             <div className="p-4 rounded-lg bg-status-approved/5 border border-status-approved/20">
               <h4 className="font-medium text-foreground mb-2">Compliance Status</h4>
               <p className="text-sm text-muted-foreground">
-                {metrics.compliance_score >= 90 
+                {metrics.complianceScore >= 90 
                   ? "Excellent compliance score maintained"
                   : "Compliance attention needed - review overdue items"
                 }

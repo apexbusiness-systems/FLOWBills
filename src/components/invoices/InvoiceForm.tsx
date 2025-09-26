@@ -43,8 +43,7 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
     invoice_date: invoice?.invoice_date || new Date().toISOString().split('T')[0],
     due_date: invoice?.due_date || '',
     status: invoice?.status || 'pending' as const,
-    notes: invoice?.notes || '',
-    file_name: invoice?.file_name || '',
+    description: invoice?.description || '',
     file_url: invoice?.file_url || ''
   });
 
@@ -264,13 +263,13 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
 
               {/* Notes */}
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="description">Description</Label>
                 <Textarea
-                  id="notes"
-                  placeholder="Additional notes or comments..."
+                  id="description"
+                  placeholder="Additional description or comments..."
                   rows={3}
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
                 />
               </div>
 

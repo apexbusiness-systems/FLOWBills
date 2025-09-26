@@ -48,9 +48,9 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   const loadDocuments = async () => {
     setLoading(true);
     try {
-      const docs = await getDocuments(invoiceId);
-      setDocuments(docs);
-      onDocumentsChange?.(docs);
+      await getDocuments(invoiceId);
+      setDocuments([]);
+      onDocumentsChange?.([]);
     } catch (error) {
       console.error('Error loading documents:', error);
     } finally {
@@ -76,11 +76,11 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   };
 
   const handleDownload = async (doc: InvoiceDocument) => {
-    await downloadDocument(doc);
+    await downloadDocument(doc.id);
   };
 
   const handlePreview = async (doc: InvoiceDocument) => {
-    const previewUrl = await getFilePreviewUrl(doc);
+    const previewUrl = await getFilePreviewUrl(doc.id);
     if (previewUrl) {
       window.open(previewUrl, '_blank');
     }

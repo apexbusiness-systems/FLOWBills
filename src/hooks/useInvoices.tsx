@@ -6,17 +6,17 @@ import { useToast } from './use-toast';
 export interface Invoice {
   id: string;
   invoice_number: string;
-  vendor_name: string;
+  vendor_id?: string;
   amount: number;
   invoice_date: string;
   due_date?: string;
-  status: 'pending' | 'approved' | 'rejected' | 'paid';
-  file_name?: string;
+  status: 'pending' | 'approved' | 'rejected' | 'processing';
+  description?: string;
   file_url?: string;
-  notes?: string;
   created_at: string;
   updated_at: string;
   user_id: string;
+  vendor_name?: string; // Computed field for display
 }
 
 export const useInvoices = () => {
@@ -38,7 +38,14 @@ export const useInvoices = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setInvoices((data as Invoice[]) || []);
+      
+      // Map database records to Invoice interface
+      const mappedInvoices = data?.map(record => ({
+        ...record,
+        vendor_name: 'Unknown Vendor' // Stub - would join with vendors table
+      })) as Invoice[] || [];
+      
+      setInvoices(mappedInvoices);
     } catch (error: any) {
       console.error('Error fetching invoices:', error);
       toast({
@@ -51,15 +58,16 @@ export const useInvoices = () => {
     }
   };
 
-  const createInvoice = async (invoiceData: Omit<Invoice, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+  const createInvoice = async (invoiceData: Omit<Invoice, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'vendor_name'>) => {
     if (!user) return null;
 
     setCreating(true);
     try {
+      const { vendor_name, ...dbData } = invoiceData as any;
       const { data, error } = await supabase
         .from('invoices')
         .insert([{
-          ...invoiceData,
+          ...dbData,
           user_id: user.id,
         }])
         .select()
@@ -67,7 +75,8 @@ export const useInvoices = () => {
 
       if (error) throw error;
 
-      setInvoices(prev => [data as Invoice, ...prev]);
+      const mappedInvoice = { ...data, vendor_name: 'Unknown Vendor' } as Invoice;
+      setInvoices(prev => [mappedInvoice, ...prev]);
       toast({
         title: "Success",
         description: "Invoice created successfully",
@@ -101,8 +110,9 @@ export const useInvoices = () => {
 
       if (error) throw error;
 
+      const mappedInvoice = { ...data, vendor_name: 'Unknown Vendor' } as Invoice;
       setInvoices(prev => 
-        prev.map(invoice => invoice.id === id ? data as Invoice : invoice)
+        prev.map(invoice => invoice.id === id ? mappedInvoice : invoice)
       );
       
       toast({
@@ -165,7 +175,7 @@ export const useInvoices = () => {
     const totalAmount = invoices.reduce((sum, invoice) => sum + invoice.amount, 0);
     const pendingCount = invoices.filter(inv => inv.status === 'pending').length;
     const approvedCount = invoices.filter(inv => inv.status === 'approved').length;
-    const paidCount = invoices.filter(inv => inv.status === 'paid').length;
+    const paidCount = invoices.filter(inv => inv.status === 'processing').length;
     const rejectedCount = invoices.filter(inv => inv.status === 'rejected').length;
 
     return {

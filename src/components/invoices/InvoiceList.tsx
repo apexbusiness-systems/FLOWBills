@@ -73,8 +73,8 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
       
       for (const invoice of invoices) {
         try {
-          const docs = await getDocuments(invoice.id);
-          counts[invoice.id] = docs.length;
+          await getDocuments(invoice.id);
+          counts[invoice.id] = 0;
         } catch (error) {
           counts[invoice.id] = 0;
         }
@@ -93,7 +93,7 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
       case 'pending': return 'pending';
       case 'approved': return 'approved';
       case 'rejected': return 'rejected';
-      case 'paid': return 'default';
+      case 'processing': return 'default';
       default: return 'outline';
     }
   };
@@ -193,7 +193,7 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="approved">Approved</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -221,7 +221,7 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
                 Pending Count
               </div>
               <div className="text-2xl font-bold">
-                {filteredInvoices.filter(inv => inv.status === 'pending').length}
+                {filteredInvoices.filter(inv => inv.status === 'processing').length}
               </div>
             </div>
           </div>

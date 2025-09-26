@@ -118,8 +118,12 @@ const DateRangeFilter = ({ onFilterChange, loading }: DateRangeFilterProps) => {
                   initialFocus
                   mode="range"
                   defaultMonth={dateRange?.from}
-                  selected={dateRange}
-                  onSelect={setDateRange}
+                    selected={dateRange}
+                    onSelect={(range) => {
+                      if (range?.from && range?.to) {
+                        setDateRange({ from: range.from, to: range.to });
+                      }
+                    }}
                   numberOfMonths={2}
                 />
               </PopoverContent>
