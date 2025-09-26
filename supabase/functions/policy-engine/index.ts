@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { toMessage } from "../_shared/errors.ts";
+
+type Vendor = { bank_account?: string | null };
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -170,8 +173,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
-    console.error('Policy engine error:', error);
+  } catch (err: unknown) {
+    console.error('Policy engine error:', err);
     
     const errorResponse: PolicyEngineResponse = {
       success: false,
@@ -180,7 +183,7 @@ serve(async (req) => {
       final_decision: 'block',
       required_approvals: 0,
       routing_reason: 'Policy engine error',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: toMessage(err)
     };
 
     return new Response(JSON.stringify(errorResponse), {
@@ -223,7 +226,9 @@ async function evaluatePolicy(policy: any, invoiceData: any, supabase: any): Pro
           .single();
 
         if (currentVendor.data?.bank_account) {
-          const duplicates = vendors?.filter((v: any) => v.bank_account === currentVendor.data.bank_account);
+          const list: Vendor[] = vendors ?? [];
+          const targetAcct = currentVendor.data?.bank_account ?? null;
+          const duplicates = list.filter((v: Vendor) => v.bank_account != null && v.bank_account === targetAcct);
           if (duplicates && duplicates.length > 0) {
             triggered = true;
             details = `Bank account shared with ${duplicates.length} other vendors`;
@@ -237,8 +242,8 @@ async function evaluatePolicy(policy: any, invoiceData: any, supabase: any): Pro
       }
     }
 
-  } catch (error) {
-    console.error(`Error evaluating policy ${policy.policy_name}:`, error);
+  } catch (err: unknown) {
+    console.error(`Error evaluating policy ${policy.policy_name}:`, err);
   }
 
   return {

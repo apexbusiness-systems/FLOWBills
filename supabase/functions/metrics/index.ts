@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { toMessage } from "../_shared/errors.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -87,12 +88,12 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
-    console.error('Metrics collection error:', error);
+  } catch (err: unknown) {
+    console.error('Metrics collection error:', err);
     
     return new Response(JSON.stringify({
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: toMessage(err)
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -224,9 +225,9 @@ async function collectMetrics(supabase: any, startTime: Date, endTime: Date): Pr
       invoice_processing_duration_avg: 2500, // Mock data in ms
     };
 
-  } catch (error) {
-    console.error('Error collecting metrics:', error);
-    throw error;
+  } catch (err: unknown) {
+    console.error('Error collecting metrics:', err);
+    throw err;
   }
 }
 

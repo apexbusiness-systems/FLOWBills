@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { toMessage } from "../_shared/errors.ts";
+
+const u = <T>(v: T | null | undefined): T | undefined => (v ?? undefined);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -55,28 +58,35 @@ serve(async (req) => {
     
     const processingTime = Date.now() - startTime;
     
+    const extracted_data = {
+      invoice_number: u(mockExtraction.fields.invoice_number),
+      amount: u(mockExtraction.fields.amount),
+      currency: u(mockExtraction.fields.currency),
+      vendor_name: u(mockExtraction.fields.vendor_name),
+      invoice_date: u(mockExtraction.fields.invoice_date),
+      due_date: u(mockExtraction.fields.due_date),
+      po_number: u(mockExtraction.fields.po_number),
+    };
+    
+    const ocr_metadata = {
+      processing_time: processingTime,
+      method: 'tesseract-simulation',
+      confidence_average: Object.values(mockExtraction.confidence_scores).reduce((a, b) => a + b, 0) / Object.values(mockExtraction.confidence_scores).length
+    };
+    
     const response: OCRResponse = {
       success: true,
-      extracted_data: {
-        invoice_number: mockExtraction.fields.invoice_number || undefined,
-        amount: mockExtraction.fields.amount || undefined,
-        currency: mockExtraction.fields.currency || undefined,
-        vendor_name: mockExtraction.fields.vendor_name || undefined,
-        invoice_date: mockExtraction.fields.invoice_date || undefined,
-        due_date: mockExtraction.fields.due_date || undefined,
-        po_number: mockExtraction.fields.po_number || undefined,
-      },
+      extracted_data,
       raw_text: mockExtraction.raw_text,
       confidence_scores: mockExtraction.confidence_scores,
-      ocr_metadata: {
-        processing_time: processingTime,
-        method: 'tesseract-simulation',
-        confidence_average: Object.values(mockExtraction.confidence_scores).reduce((a, b) => a + b, 0) / Object.values(mockExtraction.confidence_scores).length
-      }
+      ocr_metadata
     };
 
-    // Update invoice with OCR results if invoice_id provided
+    // Update invoice with OCR results if invoice_id provided  
     if (invoice_id) {
+      const avg = response.ocr_metadata?.confidence_average ?? 0;
+      const confidence_score = Math.round(avg);
+      
       const { error: updateError } = await supabase
         .from('invoices')
         .update({
@@ -84,7 +94,7 @@ serve(async (req) => {
           field_confidence_scores: mockExtraction.confidence_scores,
           ocr_metadata: response.ocr_metadata,
           extracted_data: mockExtraction.fields,
-          confidence_score: Math.round(response.ocr_metadata?.confidence_average || 0)
+          confidence_score
         })
         .eq('id', invoice_id);
 
@@ -94,11 +104,12 @@ serve(async (req) => {
     }
 
     // Log audit event
+    const avg = response.ocr_metadata?.confidence_average ?? 0;
     await supabase.from('audit_logs').insert({
       action: 'OCR_EXTRACTION',
       entity_type: 'invoice',
       entity_id: invoice_id || crypto.randomUUID(),
-      new_values: { ocr_confidence: response.ocr_metadata?.confidence_average || 0 },
+      new_values: { ocr_confidence: avg },
       user_id: null // System action
     });
 
@@ -106,12 +117,12 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
-    console.error('OCR extraction error:', error);
+  } catch (err: unknown) {
+    console.error('OCR extraction error:', err);
     
     const errorResponse: OCRResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: toMessage(err)
     };
 
     return new Response(JSON.stringify(errorResponse), {
