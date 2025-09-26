@@ -5,7 +5,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { SessionSecurityProvider } from "@/hooks/useSessionSecurity";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { SecurityHeaders } from "@/components/security/SecurityHeaders";
 import ErrorBoundary from "@/components/error-boundary/ErrorBoundary";
 import { healthChecker } from "@/lib/health-check";
 import Index from "./pages/Index";
@@ -181,16 +183,19 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ErrorBoundary>
+          <SecurityHeaders />
           <Toaster />
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              <div className="min-h-screen flex flex-col">
-                <div className="flex-1">
-                  <AuthRoutes />
+              <SessionSecurityProvider>
+                <div className="min-h-screen flex flex-col">
+                  <div className="flex-1">
+                    <AuthRoutes />
+                  </div>
+                  <Footer />
                 </div>
-                <Footer />
-              </div>
+              </SessionSecurityProvider>
             </AuthProvider>
           </BrowserRouter>
         </ErrorBoundary>
