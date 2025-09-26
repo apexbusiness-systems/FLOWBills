@@ -5,30 +5,27 @@ import { useToast } from './use-toast';
 
 export interface ComplianceRecord {
   id: string;
-  user_id: string;
-  title: string;
-  record_type: string;
-  description?: string;
-  compliance_date: string;
-  due_date?: string;
-  completed_date?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'overdue' | 'cancelled';
+  entity_id: string;
+  entity_type: string;
+  regulation: string;
+  status: string;
   risk_level: 'low' | 'medium' | 'high' | 'critical';
-  responsible_party?: string;
-  documents: any[];
+  last_audit_date?: string;
+  next_audit_date?: string;
+  audit_notes?: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface ComplianceStats {
   total: number;
+  compliant: number;
+  nonCompliant: number;
   pending: number;
-  in_progress: number;
-  completed: number;
+  dueSoon: number;
   overdue: number;
-  due_soon: number;
-  by_risk_level: Record<string, number>;
-  by_type: Record<string, number>;
+  highRisk: number;
+  byType: Record<string, number>;
 }
 
 export const useCompliance = () => {
@@ -40,18 +37,15 @@ export const useCompliance = () => {
   const fetchRecords = useCallback(async (filters?: {
     status?: string;
     risk_level?: string;
-    record_type?: string;
+    entity_type?: string;
     due_soon?: boolean;
   }) => {
-    if (!user) return;
-
     setLoading(true);
     try {
       let query = supabase
         .from('compliance_records')
         .select('*')
-        .eq('user_id', user.id)
-        .order('due_date', { ascending: true, nullsFirst: false });
+        .order('created_at', { ascending: false });
 
       if (filters?.status) {
         query = query.eq('status', filters.status);
@@ -59,13 +53,13 @@ export const useCompliance = () => {
       if (filters?.risk_level) {
         query = query.eq('risk_level', filters.risk_level);
       }
-      if (filters?.record_type) {
-        query = query.eq('record_type', filters.record_type);
+      if (filters?.entity_type) {
+        query = query.eq('entity_type', filters.entity_type);
       }
       if (filters?.due_soon) {
-        const nextWeek = new Date();
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        query = query.lte('due_date', nextWeek.toISOString().split('T')[0]);
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+        query = query.lte('next_audit_date', thirtyDaysFromNow.toISOString());
       }
 
       const { data, error } = await query;
@@ -82,36 +76,30 @@ export const useCompliance = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [toast]);
 
   const createRecord = useCallback(async (recordData: {
-    title: string;
-    record_type: string;
-    description?: string;
-    compliance_date: string;
-    due_date?: string;
+    entity_id: string;
+    entity_type: string;
+    regulation: string;
+    status: string;
     risk_level: 'low' | 'medium' | 'high' | 'critical';
-    responsible_party?: string;
+    last_audit_date?: string;
+    next_audit_date?: string;
+    audit_notes?: string;
   }) => {
-    if (!user) return null;
-
     try {
       const { data, error } = await supabase
         .from('compliance_records')
-        .insert({
-          ...recordData,
-          user_id: user.id,
-          status: 'pending',
-          documents: []
-        })
+        .insert(recordData)
         .select()
         .single();
 
       if (error) throw error;
 
       toast({
-        title: "Record Created",
-        description: `Compliance record "${recordData.title}" has been created`,
+        title: "Success",
+        description: "Compliance record created successfully",
       });
 
       await fetchRecords();
@@ -125,26 +113,23 @@ export const useCompliance = () => {
       });
       return null;
     }
-  }, [user, toast, fetchRecords]);
+  }, [toast, fetchRecords]);
 
   const updateRecord = useCallback(async (
-    recordId: string,
-    updates: Partial<Omit<ComplianceRecord, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+    recordId: string, 
+    updates: Partial<Omit<ComplianceRecord, 'id' | 'created_at' | 'updated_at'>>
   ) => {
-    if (!user) return false;
-
     try {
       const { error } = await supabase
         .from('compliance_records')
         .update(updates)
-        .eq('id', recordId)
-        .eq('user_id', user.id);
+        .eq('id', recordId);
 
       if (error) throw error;
 
       toast({
-        title: "Record Updated",
-        description: "Compliance record has been updated successfully",
+        title: "Success",
+        description: "Compliance record updated successfully",
       });
 
       await fetchRecords();
@@ -158,30 +143,24 @@ export const useCompliance = () => {
       });
       return false;
     }
-  }, [user, toast, fetchRecords]);
+  }, [toast, fetchRecords]);
 
   const markCompleted = useCallback(async (recordId: string) => {
-    return await updateRecord(recordId, {
-      status: 'completed',
-      completed_date: new Date().toISOString().split('T')[0]
-    });
+    return await updateRecord(recordId, { status: 'compliant' });
   }, [updateRecord]);
 
   const deleteRecord = useCallback(async (recordId: string) => {
-    if (!user) return false;
-
     try {
       const { error } = await supabase
         .from('compliance_records')
         .delete()
-        .eq('id', recordId)
-        .eq('user_id', user.id);
+        .eq('id', recordId);
 
       if (error) throw error;
 
       toast({
-        title: "Record Deleted",
-        description: "Compliance record has been deleted successfully",
+        title: "Success",
+        description: "Compliance record deleted successfully",
       });
 
       await fetchRecords();
@@ -195,43 +174,41 @@ export const useCompliance = () => {
       });
       return false;
     }
-  }, [user, toast, fetchRecords]);
+  }, [toast, fetchRecords]);
 
-  const getComplianceStats = useCallback(async (): Promise<ComplianceStats | null> => {
-    if (!user) return null;
-
+  const getComplianceStats = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('compliance_records')
-        .select('status, risk_level, record_type, due_date')
-        .eq('user_id', user.id);
+        .select('status, risk_level, next_audit_date, entity_type');
 
       if (error) throw error;
 
-      const today = new Date().toISOString().split('T')[0];
-      const nextWeek = new Date();
-      nextWeek.setDate(nextWeek.getDate() + 7);
-      const nextWeekStr = nextWeek.toISOString().split('T')[0];
+      const now = new Date();
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(now.getDate() + 30);
 
-      const stats: ComplianceStats = {
+      const stats = {
         total: data.length,
+        compliant: data.filter(r => r.status === 'compliant').length,
+        nonCompliant: data.filter(r => r.status === 'non_compliant').length,
         pending: data.filter(r => r.status === 'pending').length,
-        in_progress: data.filter(r => r.status === 'in_progress').length,
-        completed: data.filter(r => r.status === 'completed').length,
-        overdue: data.filter(r => 
-          r.due_date && r.due_date < today && r.status !== 'completed'
-        ).length,
-        due_soon: data.filter(r => 
-          r.due_date && r.due_date >= today && r.due_date <= nextWeekStr && r.status !== 'completed'
-        ).length,
-        by_risk_level: data.reduce((acc: Record<string, number>, record) => {
-          acc[record.risk_level] = (acc[record.risk_level] || 0) + 1;
+        dueSoon: data.filter(r => {
+          if (!r.next_audit_date) return false;
+          const dueDate = new Date(r.next_audit_date);
+          return dueDate <= thirtyDaysFromNow && r.status !== 'compliant';
+        }).length,
+        overdue: data.filter(r => {
+          if (!r.next_audit_date) return false;
+          const dueDate = new Date(r.next_audit_date);
+          return dueDate < now && r.status !== 'compliant';
+        }).length,
+        highRisk: data.filter(r => r.risk_level === 'high' || r.risk_level === 'critical').length,
+        byType: data.reduce((acc, r) => {
+          const type = r.entity_type || 'unknown';
+          acc[type] = (acc[type] || 0) + 1;
           return acc;
-        }, {}),
-        by_type: data.reduce((acc: Record<string, number>, record) => {
-          acc[record.record_type] = (acc[record.record_type] || 0) + 1;
-          return acc;
-        }, {})
+        }, {} as Record<string, number>),
       };
 
       return stats;
@@ -239,23 +216,19 @@ export const useCompliance = () => {
       console.error('Error fetching compliance stats:', error);
       return null;
     }
-  }, [user]);
+  }, []);
 
   const getUpcomingDeadlines = useCallback(async (days: number = 30) => {
-    if (!user) return [];
-
     try {
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + days);
-      
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + days);
+
       const { data, error } = await supabase
         .from('compliance_records')
         .select('*')
-        .eq('user_id', user.id)
-        .neq('status', 'completed')
-        .not('due_date', 'is', null)
-        .lte('due_date', futureDate.toISOString().split('T')[0])
-        .order('due_date', { ascending: true });
+        .lte('next_audit_date', targetDate.toISOString())
+        .neq('status', 'compliant')
+        .order('next_audit_date', { ascending: true });
 
       if (error) throw error;
       return (data || []) as ComplianceRecord[];
@@ -263,22 +236,18 @@ export const useCompliance = () => {
       console.error('Error fetching upcoming deadlines:', error);
       return [];
     }
-  }, [user]);
+  }, []);
 
   const getOverdueRecords = useCallback(async () => {
-    if (!user) return [];
-
     try {
-      const today = new Date().toISOString().split('T')[0];
-      
+      const now = new Date().toISOString();
+
       const { data, error } = await supabase
         .from('compliance_records')
         .select('*')
-        .eq('user_id', user.id)
-        .neq('status', 'completed')
-        .not('due_date', 'is', null)
-        .lt('due_date', today)
-        .order('due_date', { ascending: true });
+        .lt('next_audit_date', now)
+        .neq('status', 'compliant')
+        .order('next_audit_date', { ascending: true });
 
       if (error) throw error;
       return (data || []) as ComplianceRecord[];
@@ -286,52 +255,34 @@ export const useCompliance = () => {
       console.error('Error fetching overdue records:', error);
       return [];
     }
-  }, [user]);
+  }, []);
 
-  const generateComplianceReport = useCallback(async (
-    startDate: string, 
-    endDate: string
-  ) => {
-    if (!user) return null;
-
+  const generateComplianceReport = useCallback(async (startDate: string, endDate: string) => {
     try {
       const { data, error } = await supabase
         .from('compliance_records')
         .select('*')
-        .eq('user_id', user.id)
-        .gte('compliance_date', startDate)
-        .lte('compliance_date', endDate)
-        .order('compliance_date', { ascending: false });
+        .gte('created_at', startDate)
+        .lte('created_at', endDate)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const report = {
-        period: { startDate, endDate },
+      return {
+        period: { start: startDate, end: endDate },
+        records: (data || []) as ComplianceRecord[],
         summary: {
-          total_records: data.length,
-          completed: data.filter(r => r.status === 'completed').length,
-          overdue: data.filter(r => {
-            const today = new Date().toISOString().split('T')[0];
-            return r.due_date && r.due_date < today && r.status !== 'completed';
-          }).length,
-          by_type: data.reduce((acc: Record<string, number>, record) => {
-            acc[record.record_type] = (acc[record.record_type] || 0) + 1;
-            return acc;
-          }, {}),
-          by_risk_level: data.reduce((acc: Record<string, number>, record) => {
-            acc[record.risk_level] = (acc[record.risk_level] || 0) + 1;
-            return acc;
-          }, {})
-        },
-        records: data as ComplianceRecord[]
+          total: data?.length || 0,
+          compliant: data?.filter(r => r.status === 'compliant').length || 0,
+          nonCompliant: data?.filter(r => r.status === 'non_compliant').length || 0,
+          pending: data?.filter(r => r.status === 'pending').length || 0,
+        }
       };
-
-      return report;
     } catch (error: any) {
       console.error('Error generating compliance report:', error);
       return null;
     }
-  }, [user]);
+  }, []);
 
   return {
     records,

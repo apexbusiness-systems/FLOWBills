@@ -1,10 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import LoadingSkeleton from '@/components/ui/loading-skeleton';
@@ -13,9 +21,8 @@ import { AlertTriangle, CheckCircle, Clock, Search, Filter, Eye } from 'lucide-r
 import { format } from 'date-fns';
 
 const ExceptionList = () => {
-  const { exceptions, loading, fetchExceptions, updateExceptionStatus } = useExceptions();
+  const { exceptions, loading, fetchExceptions, updateException } = useExceptions();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [selectedException, setSelectedException] = useState<Exception | null>(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
@@ -23,55 +30,60 @@ const ExceptionList = () => {
 
   useEffect(() => {
     const filters: any = {};
-    if (statusFilter !== 'all') filters.status = statusFilter;
     if (severityFilter !== 'all') filters.severity = severityFilter;
     
     fetchExceptions(filters);
-  }, [fetchExceptions, statusFilter, severityFilter]);
+  }, [fetchExceptions, severityFilter]);
 
-  const filteredExceptions = exceptions.filter(exception =>
-    exception.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exception.exception_type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredExceptions = exceptions.filter(exception => {
+    const matchesSearch = searchTerm === '' || 
+      exception.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exception.exception_type.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesSearch;
+  });
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical': return 'destructive';
       case 'high': return 'destructive';
-      case 'medium': return 'secondary';
-      case 'low': return 'outline';
-      default: return 'outline';
+      case 'medium': return 'default';
+      case 'low': return 'secondary';
+      default: return 'default';
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'destructive';
-      case 'investigating': return 'secondary';
-      case 'resolved': return 'default';
-      case 'dismissed': return 'outline';
-      default: return 'outline';
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+      case 'high':
+        return <AlertTriangle className="h-4 w-4" />;
+      case 'medium':
+        return <Clock className="h-4 w-4" />;
+      case 'low':
+        return <CheckCircle className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'open': return <AlertTriangle className="h-4 w-4" />;
-      case 'investigating': return <Clock className="h-4 w-4" />;
-      case 'resolved': return <CheckCircle className="h-4 w-4" />;
-      case 'dismissed': return <Eye className="h-4 w-4" />;
-      default: return <AlertTriangle className="h-4 w-4" />;
-    }
+  const handleViewException = (exception: Exception) => {
+    setSelectedException(exception);
   };
 
-  const handleResolve = async () => {
+  const handleResolveException = (exception: Exception) => {
+    setSelectedException(exception);
+    setResolveDialogOpen(true);
+    setResolutionNotes('');
+  };
+
+  const handleMarkResolved = async () => {
     if (!selectedException) return;
 
-    const success = await updateExceptionStatus(
-      selectedException.id,
-      'resolved',
-      resolutionNotes
-    );
+    const success = await updateException(selectedException.id, {
+      resolved_at: new Date().toISOString(),
+      resolution_notes: resolutionNotes
+    });
 
     if (success) {
       setResolveDialogOpen(false);
@@ -80,230 +92,218 @@ const ExceptionList = () => {
     }
   };
 
-  const handleStatusChange = async (exceptionId: string, newStatus: string) => {
-    await updateExceptionStatus(exceptionId, newStatus as any);
+  const formatExceptionType = (type: string) => {
+    return type.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   if (loading) {
-    return <LoadingSkeleton className="h-96" />;
+    return <LoadingSkeleton />;
   }
 
   return (
     <div className="space-y-6">
-      {/* Header and Filters */}
-      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Exception Management</h2>
-          <p className="text-muted-foreground">Track and resolve processing exceptions</p>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search exceptions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 w-full sm:w-64"
-            />
+      <Card>
+        <CardHeader>
+          <CardTitle>Exception Management</CardTitle>
+          <CardDescription>
+            Review and resolve invoice processing exceptions
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search exceptions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={severityFilter} onValueChange={setSeverityFilter}>
+              <SelectTrigger className="w-48">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filter by severity" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Severities</SelectItem>
+                <SelectItem value="critical">Critical</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-32">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="investigating">Investigating</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-              <SelectItem value="dismissed">Dismissed</SelectItem>
-            </SelectContent>
-          </Select>
 
-          <Select value={severityFilter} onValueChange={setSeverityFilter}>
-            <SelectTrigger className="w-full sm:w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Severity</SelectItem>
-              <SelectItem value="critical">Critical</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Exception Cards */}
-      <div className="grid gap-4">
-        {filteredExceptions.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <CheckCircle className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Exceptions Found</h3>
-              <p className="text-muted-foreground text-center">
-                {searchTerm || statusFilter !== 'all' || severityFilter !== 'all'
-                  ? 'No exceptions match your current filters.'
-                  : 'Great! No exceptions to resolve at the moment.'}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredExceptions.map((exception) => (
-            <Card key={exception.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(exception.status)}
-                      <CardTitle className="text-lg">{exception.exception_type}</CardTitle>
-                      <Badge variant={getSeverityColor(exception.severity)}>
-                        {exception.severity}
-                      </Badge>
-                      <Badge variant={getStatusColor(exception.status)}>
-                        {exception.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Created {format(new Date(exception.created_at), 'MMM d, yyyy h:mm a')}
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                <p className="text-foreground">{exception.description}</p>
-                
-                {exception.resolution_notes && (
-                  <div className="p-3 bg-muted rounded-lg">
-                    <p className="text-sm font-medium text-foreground mb-1">Resolution Notes:</p>
-                    <p className="text-sm text-muted-foreground">{exception.resolution_notes}</p>
-                    {exception.resolved_at && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Resolved {format(new Date(exception.resolved_at), 'MMM d, yyyy h:mm a')}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-2">
-                  {exception.status === 'open' && (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleStatusChange(exception.id, 'investigating')}
-                      >
-                        Start Investigation
-                      </Button>
-                      <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
-                        <DialogTrigger asChild>
+          {filteredExceptions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <AlertTriangle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No exceptions found matching your criteria</p>
+            </div>
+          ) : (
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Severity</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredExceptions.map((exception) => (
+                    <TableRow key={exception.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getSeverityIcon(exception.severity)}
+                          <span className="font-medium">
+                            {formatExceptionType(exception.exception_type)}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-md">
+                          <p className="text-sm">{exception.description}</p>
+                          {exception.invoice_id && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Invoice: {exception.invoice_id}
+                            </p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getSeverityColor(exception.severity)}>
+                          {exception.severity}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(exception.created_at), 'MMM dd, yyyy HH:mm')}
+                      </TableCell>
+                      <TableCell>
+                        {exception.resolved_at ? (
+                          <Badge variant="secondary">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Resolved
+                          </Badge>
+                        ) : (
+                          <Badge variant="default">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Open
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
                           <Button
+                            variant="outline"
                             size="sm"
-                            onClick={() => setSelectedException(exception)}
+                            onClick={() => handleViewException(exception)}
                           >
-                            Resolve
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Resolve Exception</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="resolution-notes">Resolution Notes</Label>
-                              <Textarea
-                                id="resolution-notes"
-                                placeholder="Describe how this exception was resolved..."
-                                value={resolutionNotes}
-                                onChange={(e) => setResolutionNotes(e.target.value)}
-                                rows={4}
-                              />
-                            </div>
-                            <div className="flex gap-2 justify-end">
-                              <Button
-                                variant="outline"
-                                onClick={() => {
-                                  setResolveDialogOpen(false);
-                                  setSelectedException(null);
-                                  setResolutionNotes('');
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                              <Button onClick={handleResolve}>
-                                Mark as Resolved
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </>
-                  )}
-                  
-                  {exception.status === 'investigating' && (
-                    <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button
-                          size="sm"
-                          onClick={() => setSelectedException(exception)}
-                        >
-                          Resolve
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Resolve Exception</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="resolution-notes">Resolution Notes</Label>
-                            <Textarea
-                              id="resolution-notes"
-                              placeholder="Describe how this exception was resolved..."
-                              value={resolutionNotes}
-                              onChange={(e) => setResolutionNotes(e.target.value)}
-                              rows={4}
-                            />
-                          </div>
-                          <div className="flex gap-2 justify-end">
+                          {!exception.resolved_at && (
                             <Button
                               variant="outline"
-                              onClick={() => {
-                                setResolveDialogOpen(false);
-                                setSelectedException(null);
-                                setResolutionNotes('');
-                              }}
+                              size="sm"
+                              onClick={() => handleResolveException(exception)}
                             >
-                              Cancel
+                              Resolve
                             </Button>
-                            <Button onClick={handleResolve}>
-                              Mark as Resolved
-                            </Button>
-                          </div>
+                          )}
                         </div>
-                      </DialogContent>
-                    </Dialog>
-                  )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-                  {exception.status !== 'dismissed' && exception.status !== 'resolved' && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleStatusChange(exception.id, 'dismissed')}
-                    >
-                      Dismiss
-                    </Button>
+      {/* View Exception Dialog */}
+      {selectedException && !resolveDialogOpen && (
+        <Dialog open={!!selectedException} onOpenChange={() => setSelectedException(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Exception Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Type</Label>
+                <p className="text-sm mt-1">{formatExceptionType(selectedException.exception_type)}</p>
+              </div>
+              <div>
+                <Label>Description</Label>
+                <p className="text-sm mt-1">{selectedException.description}</p>
+              </div>
+              <div>
+                <Label>Severity</Label>
+                <Badge variant={getSeverityColor(selectedException.severity)} className="mt-1">
+                  {selectedException.severity}
+                </Badge>
+              </div>
+              <div>
+                <Label>Created At</Label>
+                <p className="text-sm mt-1">{format(new Date(selectedException.created_at), 'PPP pp')}</p>
+              </div>
+              {selectedException.resolved_at && (
+                <>
+                  <div>
+                    <Label>Resolved At</Label>
+                    <p className="text-sm mt-1">{format(new Date(selectedException.resolved_at), 'PPP pp')}</p>
+                  </div>
+                  {selectedException.resolution_notes && (
+                    <div>
+                      <Label>Resolution Notes</Label>
+                      <p className="text-sm mt-1">{selectedException.resolution_notes}</p>
+                    </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedException(null)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Resolve Exception Dialog */}
+      <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Resolve Exception</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="resolution-notes">Resolution Notes</Label>
+              <Textarea
+                id="resolution-notes"
+                placeholder="Describe how this exception was resolved..."
+                value={resolutionNotes}
+                onChange={(e) => setResolutionNotes(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResolveDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleMarkResolved}>
+              Mark as Resolved
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

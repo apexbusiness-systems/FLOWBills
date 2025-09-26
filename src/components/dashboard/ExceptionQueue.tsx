@@ -13,7 +13,7 @@ const ExceptionQueue = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchExceptions({ status: 'open' });
+    fetchExceptions({});
     getExceptionStats().then(setStats);
   }, [fetchExceptions, getExceptionStats]);
 
@@ -67,14 +67,13 @@ const ExceptionQueue = () => {
             displayExceptions.map((exception) => (
               <div key={exception.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  {getStatusIcon(exception.status)}
+                  <AlertTriangle className="h-4 w-4" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{exception.exception_type}</p>
                     <p className="text-sm text-muted-foreground truncate">{exception.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(exception.created_at), 'MMM d, h:mm a')}
-                    </p>
-                  </div>
+                    <div className="text-sm text-muted-foreground">
+                      Severity: {exception.severity}
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={getSeverityColor(exception.severity)}>

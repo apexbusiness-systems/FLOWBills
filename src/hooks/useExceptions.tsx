@@ -5,13 +5,10 @@ import { useToast } from './use-toast';
 
 export interface Exception {
   id: string;
-  user_id: string;
   invoice_id?: string;
-  validation_rule_id?: string;
-  exception_type: string;
+  exception_type: 'duplicate' | 'amount_variance' | 'vendor_mismatch' | 'missing_po' | 'compliance_issue';
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'open' | 'investigating' | 'resolved' | 'dismissed';
   resolution_notes?: string;
   resolved_by?: string;
   resolved_at?: string;
@@ -26,23 +23,16 @@ export const useExceptions = () => {
   const { toast } = useToast();
 
   const fetchExceptions = useCallback(async (filters?: {
-    status?: string;
     severity?: string;
     invoice_id?: string;
   }) => {
-    if (!user) return;
-
     setLoading(true);
     try {
       let query = supabase
         .from('exceptions')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (filters?.status) {
-        query = query.eq('status', filters.status);
-      }
       if (filters?.severity) {
         query = query.eq('severity', filters.severity);
       }
@@ -64,25 +54,18 @@ export const useExceptions = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [toast]);
 
   const createException = useCallback(async (exceptionData: {
     invoice_id?: string;
-    validation_rule_id?: string;
-    exception_type: string;
+    exception_type: 'duplicate' | 'amount_variance' | 'vendor_mismatch' | 'missing_po' | 'compliance_issue';
     description: string;
     severity: 'low' | 'medium' | 'high' | 'critical';
   }) => {
-    if (!user) return null;
-
     try {
       const { data, error } = await supabase
         .from('exceptions')
-        .insert({
-          ...exceptionData,
-          user_id: user.id,
-          status: 'open'
-        })
+        .insert(exceptionData)
         .select()
         .single();
 
@@ -104,38 +87,26 @@ export const useExceptions = () => {
       });
       return null;
     }
-  }, [user, toast, fetchExceptions]);
+  }, [toast, fetchExceptions]);
 
-  const updateExceptionStatus = useCallback(async (
+  const updateException = useCallback(async (
     exceptionId: string,
-    status: 'open' | 'investigating' | 'resolved' | 'dismissed',
-    resolutionNotes?: string
+    updateData: Partial<Exception>
   ) => {
-    if (!user) return false;
-
     try {
-      const updateData: any = {
-        status,
-        updated_at: new Date().toISOString()
-      };
-
-      if (status === 'resolved' && resolutionNotes) {
-        updateData.resolution_notes = resolutionNotes;
-        updateData.resolved_by = user.id;
-        updateData.resolved_at = new Date().toISOString();
-      }
-
       const { error } = await supabase
         .from('exceptions')
-        .update(updateData)
-        .eq('id', exceptionId)
-        .eq('user_id', user.id);
+        .update({
+          ...updateData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', exceptionId);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: `Exception marked as ${status}`,
+        description: "Exception updated successfully",
       });
 
       await fetchExceptions();
@@ -149,24 +120,20 @@ export const useExceptions = () => {
       });
       return false;
     }
-  }, [user, toast, fetchExceptions]);
+  }, [toast, fetchExceptions]);
 
   const getExceptionStats = useCallback(async () => {
-    if (!user) return null;
-
     try {
       const { data, error } = await supabase
         .from('exceptions')
-        .select('status, severity')
-        .eq('user_id', user.id);
+        .select('severity, resolved_at');
 
       if (error) throw error;
 
       const stats = {
         total: data.length,
-        open: data.filter(e => e.status === 'open').length,
-        investigating: data.filter(e => e.status === 'investigating').length,
-        resolved: data.filter(e => e.status === 'resolved').length,
+        resolved: data.filter(e => e.resolved_at).length,
+        unresolved: data.filter(e => !e.resolved_at).length,
         critical: data.filter(e => e.severity === 'critical').length,
         high: data.filter(e => e.severity === 'high').length,
       };
@@ -176,14 +143,14 @@ export const useExceptions = () => {
       console.error('Error fetching exception stats:', error);
       return null;
     }
-  }, [user]);
+  }, []);
 
   return {
     exceptions,
     loading,
     fetchExceptions,
     createException,
-    updateExceptionStatus,
+    updateException,
     getExceptionStats,
   };
 };
