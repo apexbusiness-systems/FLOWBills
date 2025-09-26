@@ -14,16 +14,485 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      approvals: {
+        Row: {
+          amount_approved: number | null
+          approval_date: string | null
+          approval_level: number | null
+          approver_id: string | null
+          auto_approved: boolean | null
+          comments: string | null
+          created_at: string
+          id: string
+          invoice_id: string
+          status: Database["public"]["Enums"]["approval_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          amount_approved?: number | null
+          approval_date?: string | null
+          approval_level?: number | null
+          approver_id?: string | null
+          auto_approved?: boolean | null
+          comments?: string | null
+          created_at?: string
+          id?: string
+          invoice_id: string
+          status?: Database["public"]["Enums"]["approval_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          amount_approved?: number | null
+          approval_date?: string | null
+          approval_level?: number | null
+          approver_id?: string | null
+          auto_approved?: boolean | null
+          comments?: string | null
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          status?: Database["public"]["Enums"]["approval_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approvals_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      compliance_records: {
+        Row: {
+          audit_notes: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          last_audit_date: string | null
+          next_audit_date: string | null
+          regulation: string
+          risk_level: Database["public"]["Enums"]["risk_level"] | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          audit_notes?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          last_audit_date?: string | null
+          next_audit_date?: string | null
+          regulation: string
+          risk_level?: Database["public"]["Enums"]["risk_level"] | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audit_notes?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          last_audit_date?: string | null
+          next_audit_date?: string | null
+          regulation?: string
+          risk_level?: Database["public"]["Enums"]["risk_level"] | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      consent_logs: {
+        Row: {
+          consent_given: boolean
+          consent_text: string | null
+          consent_type: Database["public"]["Enums"]["consent_type"]
+          created_at: string
+          email: string | null
+          id: string
+          ip_address: unknown | null
+          phone: string | null
+          user_agent: string | null
+          user_id: string | null
+          withdrawal_date: string | null
+        }
+        Insert: {
+          consent_given: boolean
+          consent_text?: string | null
+          consent_type: Database["public"]["Enums"]["consent_type"]
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: unknown | null
+          phone?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          withdrawal_date?: string | null
+        }
+        Update: {
+          consent_given?: boolean
+          consent_text?: string | null
+          consent_type?: Database["public"]["Enums"]["consent_type"]
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: unknown | null
+          phone?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          withdrawal_date?: string | null
+        }
+        Relationships: []
+      }
+      exceptions: {
+        Row: {
+          created_at: string
+          description: string
+          exception_type: Database["public"]["Enums"]["exception_type"]
+          id: string
+          invoice_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["risk_level"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          exception_type: Database["public"]["Enums"]["exception_type"]
+          id?: string
+          invoice_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["risk_level"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          exception_type?: Database["public"]["Enums"]["exception_type"]
+          id?: string
+          invoice_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["risk_level"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exceptions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount: number
+          confidence_score: number | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          due_date: string | null
+          duplicate_hash: string | null
+          extracted_data: Json | null
+          file_url: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          line_items: Json | null
+          po_number: string | null
+          status: Database["public"]["Enums"]["invoice_status"] | null
+          tax_amount: number | null
+          updated_at: string
+          user_id: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          amount: number
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          due_date?: string | null
+          duplicate_hash?: string | null
+          extracted_data?: Json | null
+          file_url?: string | null
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          line_items?: Json | null
+          po_number?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"] | null
+          tax_amount?: number | null
+          updated_at?: string
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          amount?: number
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          due_date?: string | null
+          duplicate_hash?: string | null
+          extracted_data?: Json | null
+          file_url?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          line_items?: Json | null
+          po_number?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"] | null
+          tax_amount?: number | null
+          updated_at?: string
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          interest_type: string | null
+          lead_source: string | null
+          lead_status: string | null
+          message: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          interest_type?: string | null
+          lead_source?: string | null
+          lead_status?: string | null
+          message?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          interest_type?: string | null
+          lead_source?: string | null
+          lead_status?: string | null
+          message?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      review_queue: {
+        Row: {
+          assigned_to: string | null
+          confidence_score: number | null
+          created_at: string
+          flagged_fields: Json | null
+          id: string
+          invoice_id: string
+          priority: number | null
+          reason: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          flagged_fields?: Json | null
+          id?: string
+          invoice_id: string
+          priority?: number | null
+          reason: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          flagged_fields?: Json | null
+          id?: string
+          invoice_id?: string
+          priority?: number | null
+          reason?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_queue_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vendors: {
+        Row: {
+          address: Json | null
+          contact_info: Json | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          payment_terms: number | null
+          risk_score: number | null
+          tax_id: string | null
+          updated_at: string
+          vendor_code: string | null
+          vendor_name: string
+        }
+        Insert: {
+          address?: Json | null
+          contact_info?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          payment_terms?: number | null
+          risk_score?: number | null
+          tax_id?: string | null
+          updated_at?: string
+          vendor_code?: string | null
+          vendor_name: string
+        }
+        Update: {
+          address?: Json | null
+          contact_info?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          payment_terms?: number | null
+          risk_score?: number | null
+          tax_id?: string | null
+          updated_at?: string
+          vendor_code?: string | null
+          vendor_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_uuid: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      approval_status: "pending" | "approved" | "rejected"
+      consent_type: "email" | "sms" | "data_processing" | "marketing"
+      exception_type:
+        | "duplicate"
+        | "amount_variance"
+        | "vendor_mismatch"
+        | "missing_po"
+        | "compliance_issue"
+      invoice_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "processing"
+        | "duplicate"
+      risk_level: "low" | "medium" | "high" | "critical"
+      user_role: "admin" | "operator" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +619,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      approval_status: ["pending", "approved", "rejected"],
+      consent_type: ["email", "sms", "data_processing", "marketing"],
+      exception_type: [
+        "duplicate",
+        "amount_variance",
+        "vendor_mismatch",
+        "missing_po",
+        "compliance_issue",
+      ],
+      invoice_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "processing",
+        "duplicate",
+      ],
+      risk_level: ["low", "medium", "high", "critical"],
+      user_role: ["admin", "operator", "viewer"],
+    },
   },
 } as const
