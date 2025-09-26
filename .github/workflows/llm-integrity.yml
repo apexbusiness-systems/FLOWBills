@@ -1,0 +1,101 @@
+name: LLM Integrity Protection
+on: 
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  llm-protection:
+    runs-on: ubuntu-latest
+    name: Protect Oil & Gas LLM Configuration
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for unauthorized LLM changes
+        run: |
+          set -e
+          echo "🔒 Checking for changes to protected LLM files..."
+          
+          # Get changed files
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ rag/)
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ rag/)
+          fi
+          
+          if [ -n "$CHANGED" ]; then
+            echo "⚠️  LLM files changed:"
+            echo "$CHANGED"
+            
+            # For PR events, check if CTO approval is present
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              # Check if user is authorized or has CTO approval
+              if [[ "${{ github.event.pull_request.user.login }}" != "cto-bot" ]] && \
+                 ! echo "${{ github.event.pull_request.requested_reviewers.*.login }}" | grep -qi "cto"; then
+                echo "❌ SECURITY: LLM changes require CTO team approval"
+                echo "Please request review from @cto-team"
+                exit 1
+              fi
+            fi
+          else
+            echo "✅ No protected LLM files changed"
+          fi
+
+      - name: Verify LLM manifest integrity
+        if: hashFiles('llm/manifest.json') != ''
+        run: |
+          echo "🔍 Verifying LLM manifest checksum..."
+          
+          # Extract expected checksum
+          EXPECTED=$(jq -r .checksum_sha256 llm/manifest.json)
+          
+          # Calculate actual checksum
+          ACTUAL=$(shasum -a 256 llm/manifest.json | awk '{print $1}')
+          
+          echo "Expected: $EXPECTED"
+          echo "Actual:   $ACTUAL"
+          
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "❌ SECURITY: LLM manifest checksum mismatch!"
+            echo "This indicates tampering or corruption of the LLM configuration."
+            exit 1
+          fi
+          
+          echo "✅ LLM manifest integrity verified"
+
+      - name: Validate LLM environment consistency
+        run: |
+          echo "🔧 Checking LLM environment variable consistency..."
+          
+          # Check if required env vars are documented
+          if ! grep -q "LLM_PROVIDER" .env.example 2>/dev/null; then
+            echo "⚠️  LLM_PROVIDER not found in .env.example"
+          fi
+          
+          if ! grep -q "LLM_LOCK" .env.example 2>/dev/null; then
+            echo "⚠️  LLM_LOCK not found in .env.example"
+          fi
+          
+          echo "✅ Environment validation complete"
+
+      - name: Security scan for hardcoded secrets
+        run: |
+          echo "🔐 Scanning for hardcoded API keys in LLM files..."
+          
+          # Check for potential hardcoded secrets (basic patterns)
+          if grep -r -i "api[_-]key\s*=\s*['\"][^'\"]*['\"]" llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ 2>/dev/null; then
+            echo "❌ SECURITY: Potential hardcoded API key detected"
+            exit 1
+          fi
+          
+          if grep -r -E "(sk-|pk-)[a-zA-Z0-9]{32,}" llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ 2>/dev/null; then
+            echo "❌ SECURITY: Potential OpenAI API key pattern detected"
+            exit 1
+          fi
+          
+          echo "✅ No hardcoded secrets found"

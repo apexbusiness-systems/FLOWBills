@@ -1,0 +1,20 @@
+# FlowAi Code Ownership Rules
+# Oil & Gas LLM Protection - CTO Team Approval Required
+
+# LLM Core Files - NO CHANGES WITHOUT CTO APPROVAL
+/llm/** @cto-team
+/supabase/functions/llm/** @cto-team
+/supabase/functions/oil-gas-assistant/** @cto-team
+
+# RAG & Industry Data
+/rag/** @cto-team
+/docs/LLM.md @cto-team
+/docs/RAG.md @cto-team
+/docs/Evals.md @cto-team
+
+# Security & Compliance
+/docs/Compliance.md @cto-team
+/.github/workflows/llm-integrity.yml @cto-team
+
+# Frontend O&G Components (Engineering Review)
+/src/components/ai/OilGasAssistant.tsx @engineering-team

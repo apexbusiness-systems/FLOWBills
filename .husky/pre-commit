@@ -1,0 +1,23 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# FlowAi LLM Protection - Pre-commit Hook
+echo "🔒 FlowAi Pre-commit: Checking for protected file changes..."
+
+# Check if staged files include protected LLM directories
+if git diff --cached --name-only | grep -E '^(llm/|supabase/functions/llm/|supabase/functions/oil-gas-assistant/|rag/)'; then
+  echo "❌ SECURITY: LLM area is locked and requires CTO approval"
+  echo "Files in the following directories require special authorization:"
+  echo "  - llm/"
+  echo "  - supabase/functions/llm/"
+  echo "  - supabase/functions/oil-gas-assistant/"
+  echo "  - rag/"
+  echo ""
+  echo "Please:"
+  echo "1. Seek CTO team approval before making these changes"
+  echo "2. Use 'git commit --no-verify' ONLY with explicit CTO permission"
+  echo "3. Ensure all changes are documented and reviewed"
+  exit 1
+fi
+
+echo "✅ Pre-commit check passed"
