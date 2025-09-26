@@ -120,16 +120,49 @@ export const logSecurityEvent = (event: string, details: any) => {
 };
 
 /**
- * Content Security Policy headers (for reference - needs server implementation)
+ * Content Security Policy headers (strict policy for production)
  */
 export const CSP_POLICY = {
   "default-src": "'self'",
-  "script-src": "'self' 'unsafe-inline'",
+  "script-src": "'self' 'nonce-{NONCE}' https://www.googletagmanager.com https://www.google-analytics.com",
   "style-src": "'self' 'unsafe-inline'",
   "img-src": "'self' data: https:",
-  "connect-src": "'self' https:",
-  "font-src": "'self'",
+  "connect-src": "'self' https://*.supabase.co https://www.google-analytics.com https://region1.google-analytics.com",
+  "font-src": "'self' data:",
   "object-src": "'none'",
   "media-src": "'self'",
-  "frame-src": "'none'"
+  "frame-src": "'none'",
+  "frame-ancestors": "'none'",
+  "base-uri": "'self'",
+  "upgrade-insecure-requests": ""
+};
+
+/**
+ * Generate CSP nonce for runtime script execution
+ */
+export const generateCSPNonce = (): string => {
+  return crypto.randomUUID().replace(/-/g, '');
+};
+
+/**
+ * Apply CSP nonce to HTML at runtime (for Vite builds)
+ */
+export const applySPNonce = () => {
+  if (typeof window === 'undefined') return;
+  
+  const nonce = generateCSPNonce();
+  
+  // Update CSP meta tag with actual nonce
+  const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+  if (cspMeta) {
+    const content = cspMeta.getAttribute('content');
+    if (content) {
+      cspMeta.setAttribute('content', content.replace('CSP_NONCE_PLACEHOLDER', nonce));
+    }
+  }
+  
+  // Apply nonce to inline scripts
+  document.querySelectorAll('script[nonce="CSP_NONCE_PLACEHOLDER"]').forEach(script => {
+    script.setAttribute('nonce', nonce);
+  });
 };

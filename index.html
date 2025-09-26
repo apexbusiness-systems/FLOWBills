@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://static.klaviyo.com https://a.klaviyo.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://region1.google-analytics.com https://a.klaviyo.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-CSP_NONCE_PLACEHOLDER' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://region1.google-analytics.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;" />
     <title>FlowBills - Oil & Gas Invoice Management</title>
     
     <!-- PWA Meta Tags -->
@@ -33,16 +33,13 @@
     
     <!-- GTM -->
     <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-XXXX"></script>
-    <script>
+    <script nonce="CSP_NONCE_PLACEHOLDER">
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
       new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
       j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       'https://www.googletagmanager.com/gtm.js?id=GTM-XXXX'+dl;f.parentNode.insertBefore(j,f);})
       (window,document,'script','dataLayer','GTM-XXXX');
     </script>
-    
-    <!-- Klaviyo -->
-    <script async src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=KLAVIYO_PUBLIC_KEY"></script>
   </head>
 
   <body>
