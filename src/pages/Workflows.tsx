@@ -10,7 +10,7 @@ import { toast } from '@/hooks/use-toast';
 type ViewMode = 'list' | 'builder' | 'templates';
 
 const Workflows = () => {
-  const { workflows, instances, loading, createWorkflow, updateWorkflow, deleteWorkflow, startWorkflow } = useWorkflows();
+  const { workflows, instances, loading, createWorkflow, updateWorkflow, deleteWorkflow, startWorkflow, executeWorkflow } = useWorkflows();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
 
@@ -50,7 +50,7 @@ const Workflows = () => {
 
   const handleExecuteWorkflow = async (workflowId: string) => {
     // For demo purposes, we'll use a dummy entity
-    await startWorkflow(workflowId, 'invoice', 'demo-entity-id');
+    await executeWorkflow(workflowId, 'invoice', 'demo-entity-id');
   };
 
   const handleSelectTemplate = (template: any) => {

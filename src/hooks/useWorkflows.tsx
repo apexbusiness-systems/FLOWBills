@@ -146,6 +146,9 @@ export const useWorkflows = () => {
     return true;
   };
 
+  // Legacy API kept for compatibility - executeWorkflow is alias for startWorkflow
+  const executeWorkflow = startWorkflow;
+
   const getWorkflowTemplates = () => {
     // Return predefined workflow templates
     return [
@@ -223,6 +226,7 @@ export const useWorkflows = () => {
     updateWorkflow,
     deleteWorkflow,
     startWorkflow,
+    executeWorkflow, // Legacy alias for startWorkflow
     pauseWorkflow,
     resumeWorkflow,
     cancelWorkflow,
