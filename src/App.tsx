@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "@/components/error-boundary/ErrorBoundary";
 import { healthChecker } from "@/lib/health-check";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import PasswordChange from "./pages/PasswordChange";
 import ClientIntegration from "./pages/ClientIntegration";
@@ -21,6 +22,9 @@ import Integrations from "./pages/Integrations";
 import Analytics from "./pages/Analytics";
 import Workflows from "./pages/Workflows";
 import Search from "./pages/Search";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Security from "./pages/Security";
 import NotFound from "./pages/NotFound";
 import { Footer } from "@/components/ui/footer";
 
@@ -138,12 +142,28 @@ const AuthRoutes = () => {
         element={<ClientIntegration />} 
       />
       <Route 
-        path="/" 
+        path="/dashboard" 
         element={
           <ProtectedRoute>
             <Index />
           </ProtectedRoute>
         } 
+      />
+      <Route 
+        path="/privacy" 
+        element={<Privacy />} 
+      />
+      <Route 
+        path="/terms" 
+        element={<Terms />} 
+      />
+      <Route 
+        path="/security" 
+        element={<Security />} 
+      />
+      <Route 
+        path="/" 
+        element={user ? <Navigate to="/dashboard" replace /> : <Landing />} 
       />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
