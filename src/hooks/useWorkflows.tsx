@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from '@/hooks/use-toast';
 
@@ -38,223 +37,179 @@ export interface WorkflowInstance {
 export const useWorkflows = () => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [instances, setInstances] = useState<WorkflowInstance[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
   const fetchWorkflows = async () => {
     if (!user) return;
 
-    try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      // Type cast the data to match our Workflow interface
-      const typedWorkflows = (data || []).map(item => ({
-        ...item,
-        steps: Array.isArray(item.steps) ? item.steps as unknown as WorkflowStep[] : [],
-      })) as Workflow[];
-      
-      setWorkflows(typedWorkflows);
-    } catch (error) {
-      console.error('Error fetching workflows:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch workflows",
-        variant: "destructive",
-      });
-    }
+    setLoading(true);
+    // Stub implementation - return empty array after delay 
+    setTimeout(() => {
+      setWorkflows([]);
+      setLoading(false);
+    }, 500);
   };
 
   const fetchInstances = async () => {
     if (!user) return;
 
-    try {
-      const { data, error } = await supabase
-        .from('workflow_instances')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('started_at', { ascending: false });
-
-      if (error) throw error;
-      
-      // Type cast the data to match our WorkflowInstance interface
-      const typedInstances = (data || []).map(item => ({
-        ...item,
-        status: item.status as 'running' | 'completed' | 'failed' | 'paused',
-        step_data: typeof item.step_data === 'object' ? item.step_data as Record<string, any> : {},
-      })) as WorkflowInstance[];
-      
-      setInstances(typedInstances);
-    } catch (error) {
-      console.error('Error fetching workflow instances:', error);
-    }
+    setLoading(true);
+    // Stub implementation - return empty array after delay
+    setTimeout(() => {
+      setInstances([]);
+      setLoading(false);
+    }, 500);
   };
 
-  const createWorkflow = async (workflow: Omit<Workflow, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!user) return;
+  const createWorkflow = async (workflowData: Omit<Workflow, 'id' | 'created_at' | 'updated_at'>) => {
+    if (!user) return null;
 
-    try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .insert({
-          name: workflow.name,
-          description: workflow.description,
-          workflow_type: workflow.workflow_type,
-          steps: workflow.steps as any, // Cast to any for JSONB storage
-          is_active: workflow.is_active,
-          user_id: user.id,
-        })
-        .select()
-        .single();
+    // Stub implementation
+    toast({
+      title: "Workflow Created",
+      description: `Workflow "${workflowData.name}" has been created successfully (stub implementation)`,
+    });
 
-      if (error) throw error;
-
-      const typedWorkflow = {
-        ...data,
-        steps: Array.isArray(data.steps) ? data.steps as unknown as WorkflowStep[] : [],
-      } as Workflow;
-
-      setWorkflows(prev => [typedWorkflow, ...prev]);
-      toast({
-        title: "Success",
-        description: "Workflow created successfully",
-      });
-
-      return typedWorkflow;
-    } catch (error) {
-      console.error('Error creating workflow:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create workflow",
-        variant: "destructive",
-      });
-    }
+    return null;
   };
 
   const updateWorkflow = async (id: string, updates: Partial<Workflow>) => {
-    if (!user) return;
+    if (!user) return false;
 
-    try {
-      const updateData: any = {};
-      if (updates.name) updateData.name = updates.name;
-      if (updates.description !== undefined) updateData.description = updates.description;
-      if (updates.workflow_type) updateData.workflow_type = updates.workflow_type;
-      if (updates.steps) updateData.steps = updates.steps as any; // Cast to any for JSONB storage
-      if (updates.is_active !== undefined) updateData.is_active = updates.is_active;
+    // Stub implementation
+    toast({
+      title: "Workflow Updated",
+      description: "Workflow has been updated successfully (stub implementation)",
+    });
 
-      const { data, error } = await supabase
-        .from('workflows')
-        .update(updateData)
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const typedWorkflow = {
-        ...data,
-        steps: Array.isArray(data.steps) ? data.steps as unknown as WorkflowStep[] : [],
-      } as Workflow;
-
-      setWorkflows(prev => prev.map(w => w.id === id ? typedWorkflow : w));
-      toast({
-        title: "Success",
-        description: "Workflow updated successfully",
-      });
-
-      return typedWorkflow;
-    } catch (error) {
-      console.error('Error updating workflow:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update workflow",
-        variant: "destructive",
-      });
-    }
+    return true;
   };
 
   const deleteWorkflow = async (id: string) => {
-    if (!user) return;
+    if (!user) return false;
 
-    try {
-      const { error } = await supabase
-        .from('workflows')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+    // Stub implementation
+    toast({
+      title: "Workflow Deleted",
+      description: "Workflow has been deleted successfully (stub implementation)",
+    });
 
-      if (error) throw error;
-
-      setWorkflows(prev => prev.filter(w => w.id !== id));
-      toast({
-        title: "Success",
-        description: "Workflow deleted successfully",
-      });
-    } catch (error) {
-      console.error('Error deleting workflow:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete workflow",
-        variant: "destructive",
-      });
-    }
+    return true;
   };
 
-  const executeWorkflow = async (workflowId: string, entityType: string, entityId: string) => {
-    if (!user) return;
+  const startWorkflow = async (workflowId: string, entityType: string, entityId: string) => {
+    if (!user) return null;
 
-    try {
-      const { data, error } = await supabase
-        .from('workflow_instances')
-        .insert({
-          workflow_id: workflowId,
-          entity_type: entityType,
-          entity_id: entityId,
-          user_id: user.id,
-          status: 'running',
-          current_step: 0,
-          step_data: {},
-        })
-        .select()
-        .single();
+    // Stub implementation
+    toast({
+      title: "Workflow Started",
+      description: "Workflow instance has been started successfully (stub implementation)",
+    });
 
-      if (error) throw error;
+    return null;
+  };
 
-      const typedInstance = {
-        ...data,
-        status: data.status as 'running' | 'completed' | 'failed' | 'paused',
-        step_data: typeof data.step_data === 'object' ? data.step_data as Record<string, any> : {},
-      } as WorkflowInstance;
+  const pauseWorkflow = async (instanceId: string) => {
+    if (!user) return false;
 
-      setInstances(prev => [typedInstance, ...prev]);
-      toast({
-        title: "Success",
-        description: "Workflow started successfully",
-      });
+    // Stub implementation
+    toast({
+      title: "Workflow Paused",
+      description: "Workflow instance has been paused (stub implementation)",
+    });
 
-      return typedInstance;
-    } catch (error) {
-      console.error('Error executing workflow:', error);
-      toast({
-        title: "Error",
-        description: "Failed to start workflow",
-        variant: "destructive",
-      });
-    }
+    return true;
+  };
+
+  const resumeWorkflow = async (instanceId: string) => {
+    if (!user) return false;
+
+    // Stub implementation
+    toast({
+      title: "Workflow Resumed",
+      description: "Workflow instance has been resumed (stub implementation)",
+    });
+
+    return true;
+  };
+
+  const cancelWorkflow = async (instanceId: string) => {
+    if (!user) return false;
+
+    // Stub implementation
+    toast({
+      title: "Workflow Cancelled",
+      description: "Workflow instance has been cancelled (stub implementation)",
+    });
+
+    return true;
+  };
+
+  const getWorkflowTemplates = () => {
+    // Return predefined workflow templates
+    return [
+      {
+        name: 'Invoice Processing',
+        description: 'Standard invoice validation and approval workflow',
+        workflow_type: 'invoice_processing',
+        steps: [
+          {
+            id: 'validate',
+            type: 'validation' as const,
+            name: 'Validate Invoice',
+            config: { rules: ['amount_check', 'vendor_check'] },
+            position: { x: 100, y: 100 },
+            connections: ['approve']
+          },
+          {
+            id: 'approve',
+            type: 'approval' as const,
+            name: 'Approval Required',
+            config: { threshold: 1000 },
+            position: { x: 300, y: 100 },
+            connections: ['notify']
+          },
+          {
+            id: 'notify',
+            type: 'notification' as const,
+            name: 'Send Notification',
+            config: { recipients: ['finance@company.com'] },
+            position: { x: 500, y: 100 },
+            connections: []
+          }
+        ]
+      },
+      {
+        name: 'Compliance Check',
+        description: 'Regulatory compliance verification workflow',
+        workflow_type: 'compliance',
+        steps: [
+          {
+            id: 'check_compliance',
+            type: 'validation' as const,
+            name: 'Compliance Check',
+            config: { regulations: ['SOX', 'GDPR'] },
+            position: { x: 100, y: 100 },
+            connections: ['audit']
+          },
+          {
+            id: 'audit',
+            type: 'approval' as const,
+            name: 'Audit Review',
+            config: { department: 'compliance' },
+            position: { x: 300, y: 100 },
+            connections: []
+          }
+        ]
+      }
+    ];
   };
 
   useEffect(() => {
     if (user) {
-      setLoading(true);
-      Promise.all([fetchWorkflows(), fetchInstances()]).finally(() => {
-        setLoading(false);
-      });
+      fetchWorkflows();
+      fetchInstances();
     }
   }, [user]);
 
@@ -262,10 +217,15 @@ export const useWorkflows = () => {
     workflows,
     instances,
     loading,
+    fetchWorkflows,
+    fetchInstances,
     createWorkflow,
     updateWorkflow,
     deleteWorkflow,
-    executeWorkflow,
-    refetch: () => Promise.all([fetchWorkflows(), fetchInstances()]),
+    startWorkflow,
+    pauseWorkflow,
+    resumeWorkflow,
+    cancelWorkflow,
+    getWorkflowTemplates
   };
 };

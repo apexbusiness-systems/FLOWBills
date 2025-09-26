@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Shield, Zap, BarChart3, FileText, Clock, ArrowRight } from 'lucide-react';
-import { LeadCaptureDialog } from '@/components/marketing/LeadCaptureDialog';
+import LeadCaptureDialog from '@/components/marketing/LeadCaptureDialog';
 import { useAuth } from '@/hooks/useAuth';
 
 const Landing = () => {

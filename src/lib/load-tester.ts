@@ -432,7 +432,7 @@ export const LoadTestScenarios = {
             invoice_number: `BT-${Math.floor(Math.random() * 100000)}-${i}`,
             invoice_date: new Date().toISOString().split('T')[0],
             amount: Math.random() * 10000,
-            status: 'pending',
+            status: 'pending' as const,
             user_id: '00000000-0000-0000-0000-000000000000'
           }))
         ),

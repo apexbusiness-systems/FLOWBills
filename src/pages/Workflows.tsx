@@ -10,7 +10,7 @@ import { toast } from '@/hooks/use-toast';
 type ViewMode = 'list' | 'builder' | 'templates';
 
 const Workflows = () => {
-  const { workflows, instances, loading, createWorkflow, updateWorkflow, deleteWorkflow, executeWorkflow } = useWorkflows();
+  const { workflows, instances, loading, createWorkflow, updateWorkflow, deleteWorkflow } = useWorkflows();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
 

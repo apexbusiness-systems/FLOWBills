@@ -32,10 +32,10 @@ export class HealthChecker {
       api: false
     };
 
-    // Database health check
+    // Database health check - use existing invoices table for connectivity test
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('invoices')
         .select('count')
         .limit(1);
       
@@ -117,7 +117,7 @@ export class HealthChecker {
   async checkDatabaseConnection(): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('invoices')
         .select('count')
         .limit(1);
       return !error;

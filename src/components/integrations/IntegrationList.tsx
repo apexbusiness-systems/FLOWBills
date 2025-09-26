@@ -146,18 +146,12 @@ const IntegrationList = ({
                   
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>
-                      Last sync: {formatLastSync(integration.last_sync_at)}
+                      Last sync: {formatLastSync(integration.last_sync)}
                     </span>
                     <span>
-                      Syncs: {integration.sync_count}
+                      Type: {integration.integration_type}
                     </span>
                   </div>
-                  
-                  {integration.error_message && (
-                    <p className="text-sm text-destructive mt-1">
-                      {integration.error_message}
-                    </p>
-                  )}
                 </div>
               </div>
 

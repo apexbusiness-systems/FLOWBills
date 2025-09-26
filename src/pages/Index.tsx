@@ -343,4 +343,4 @@ const Index = () => {
   );
 };
 
-export default Landing;
+export default Index;
