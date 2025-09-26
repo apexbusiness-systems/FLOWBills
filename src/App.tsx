@@ -147,7 +147,7 @@ const AuthRoutes = () => {
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <Index />
+            <Landing />
           </ProtectedRoute>
         } 
       />
@@ -165,7 +165,7 @@ const AuthRoutes = () => {
       />
       <Route 
         path="/" 
-        element={user ? <Navigate to="/dashboard" replace /> : <Landing />} 
+        element={<Landing />}
       />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
