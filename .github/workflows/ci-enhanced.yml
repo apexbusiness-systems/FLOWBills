@@ -1,0 +1,90 @@
+name: Enhanced CI Pipeline
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  ci-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
+
+      - name: Run CI pipeline
+        run: pnpm ci
+        env:
+          CI: true
+
+      - name: Check for Critical vulnerabilities
+        run: |
+          if grep -q '"severity": "CRITICAL"' artifacts/osv-report.json; then
+            echo "Critical vulnerabilities found!"
+            cat artifacts/osv-report.json | jq '.vulnerabilities[] | select(.severity == "CRITICAL")'
+            exit 1
+          fi
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: artifacts/sbom.json
+
+      - name: Upload OSV report
+        uses: actions/upload-artifact@v4
+        with:
+          name: osv-vulnerability-report
+          path: artifacts/osv-report.json
+
+      - name: Run Deno checks for edge functions
+        run: |
+          cd supabase/functions
+          for dir in */; do
+            if [ -f "$dir/index.ts" ]; then
+              echo "Checking $dir"
+              deno check "$dir/index.ts"
+            fi
+          done
+
+  rls-tests:
+    runs-on: ubuntu-latest
+    needs: ci-pipeline
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run RLS policy tests
+        run: pnpm test -- --grep "RLS"
+        env:
+          CI: true
