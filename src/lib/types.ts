@@ -12,7 +12,7 @@ export type EinvoiceVM = {
 };
 
 export function toVM(row: EinvoiceRow): EinvoiceVM {
-  const errs = (row.validation_results as any) ?? [];
+  const errs = (row.validation_results as any) ?? []
   return {
     id: row.id,
     format: row.format,
@@ -20,5 +20,5 @@ export function toVM(row: EinvoiceRow): EinvoiceVM {
     createdAt: row.created_at,
     validated: row.status === 'validated',
     issues: Array.isArray(errs) ? errs : []
-  };
+  }
 }
