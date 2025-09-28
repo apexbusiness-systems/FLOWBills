@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:Faktura xmlns:tns="http://crd.gov.pl/wzor/2021/12/27/11148/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <tns:Naglowek>
+    <tns:KodFormularza kodSystemowy="FA (2)" wersjaSchemy="1-0E">FA</tns:KodFormularza>
+    <tns:WariantFormularza>2</tns:WariantFormularza>
+    <tns:DataWytworzeniaPliku>2025-01-15</tns:DataWytworzeniaPliku>
+    <tns:NazwaSystemu>FlowBills KSeF Adapter</tns:NazwaSystemu>
+  </tns:Naglowek>
+  
+  <tns:Podmiot1>
+    <tns:DaneIdentyfikacyjne>
+      <tns:NIP>1234567890</tns:NIP>
+      <tns:Nazwa>Example Company Sp. z o.o.</tns:Nazwa>
+    </tns:DaneIdentyfikacyjne>
+    <tns:Adres>
+      <tns:KodKraju>PL</tns:KodKraju>
+      <tns:Wojewodztwo>mazowieckie</tns:Wojewodztwo>
+      <tns:Powiat>Warszawa</tns:Powiat>
+      <tns:Gmina>Warszawa</tns:Gmina>
+      <tns:Ulica>ul. Przykładowa</tns:Ulica>
+      <tns:NrDomu>123</tns:NrDomu>
+      <tns:KodPocztowy>00-001</tns:KodPocztowy>
+      <tns:Poczta>Warszawa</tns:Poczta>
+    </tns:Adres>
+  </tns:Podmiot1>
+  
+  <tns:Fa>
+    <!-- Data sprzedaży -->
+    <tns:P_1>2025-01-15</tns:P_1>
+    
+    <!-- Numer faktury -->
+    <tns:P_2A>FV/2025/001</tns:P_2A>
+    
+    <!-- Nabywca -->
+    <tns:P_3A>9876543210</tns:P_3A>
+    <tns:P_3B>Customer Company Ltd.</tns:P_3B>
+    <tns:P_3C>ul. Kliencka 456</tns:P_3C>
+    <tns:P_3D>02-002 Kraków</tns:P_3D>
+    
+    <!-- Data wystawienia -->
+    <tns:P_6>2025-01-15</tns:P_6>
+    
+    <!-- Kwoty netto wg stawek VAT -->
+    <tns:P_13_1>1000.00</tns:P_13_1>  <!-- 23% -->
+    <tns:P_14_1>230.00</tns:P_14_1>   <!-- VAT 23% -->
+    
+    <!-- Kwota VAT -->
+    <tns:P_15>230.00</tns:P_15>
+    
+    <!-- Kwota brutto -->
+    <tns:P_16>1230.00</tns:P_16>
+    
+    <!-- Pozycje faktury -->
+    <tns:FaWiersz>
+      <tns:P_7>Usługi konsultingowe IT</tns:P_7>
+      <tns:P_8A>szt.</tns:P_8A>
+      <tns:P_8B>1</tns:P_8B>
+      <tns:P_9A>1000.00</tns:P_9A>
+      <tns:P_11>1000.00</tns:P_11>
+      <tns:P_12>23</tns:P_12>
+    </tns:FaWiersz>
+    
+    <!-- Termin płatności -->
+    <tns:P_106E_2>2025-02-14</tns:P_106E_2>
+    <tns:P_106E_3>1230.00</tns:P_106E_3>
+  </tns:Fa>
+</tns:Faktura>

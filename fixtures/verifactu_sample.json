@@ -1,0 +1,74 @@
+{
+  "IDVersion": "1.0",
+  "Titular": {
+    "NombreRazon": "Empresa Ejemplo S.L.",
+    "NIF": "B12345678"
+  },
+  "RegistroFacturacion": {
+    "IDEmisorFactura": "B12345678",
+    "NumSerieFactura": "FAC-2025-001",
+    "FechaExpedicionFactura": "15-01-2025",
+    "TipoFactura": "F1",
+    "ClaveRegimenEspecialOTrascendencia": "01",
+    "ImporteTotal": "1210.00",
+    "BaseImponible": [
+      {
+        "BaseImponible": "1000.00",
+        "TipoImpositivo": "21.00",
+        "CuotaImpuesto": "210.00"
+      }
+    ],
+    "Destinatarios": [
+      {
+        "IDDestinatario": "A87654321",
+        "NombreRazon": "Cliente Ejemplo S.A.",
+        "CodigoPostal": "28001",
+        "Pais": "ES"
+      }
+    ],
+    "Desglose": [
+      {
+        "Sujeta": {
+          "NoExenta": {
+            "TipoNoExenta": "S1",
+            "DesgloseIVA": {
+              "DetalleIVA": [
+                {
+                  "TipoImpositivo": "21.00",
+                  "BaseImponible": "1000.00",
+                  "CuotaImpuesto": "210.00"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "Software": {
+    "LicenciaTBAI": "TBAI-SOFTWARE-001",
+    "EntidadDesarrolladora": {
+      "NIF": "B99999999"
+    },
+    "Nombre": "FlowBills Veri*factu Adapter",
+    "Version": "1.0"
+  },
+  "Huella": "A1B2C3D4E5F67890123456789ABCDEF0",
+  "FechaHoraHusoGeneral": "15-01-2025 10:30:00",
+  "SistemaInformatico": {
+    "NombreRazon": "FlowBills Systems",
+    "NIF": "B88888888",
+    "IDOtro": {
+      "CodigoPais": "ES",
+      "IDType": "02",
+      "ID": "FLOW001"
+    },
+    "NombreSistemaInformatico": "FlowBills ERP",
+    "IdSistemaInformatico": "FB-ERP-2025",
+    "Version": "2.1.0",
+    "NumeroInstalacion": "001",
+    "TipoUsoPosibleSoloVerifactu": "S",
+    "TipoUsoPosibleMultiOT": "S",
+    "IndicadorMultiplesOT": "N"
+  }
+}
