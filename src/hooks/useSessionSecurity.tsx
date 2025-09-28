@@ -82,7 +82,36 @@ export const SessionSecurityProvider = ({ children }: { children: ReactNode }) =
     return () => clearInterval(interval);
   }, [user, session, lastActivity, sessionTimeoutMinutes, warningShown, toast, signOut]);
 
-  // Initialize or update session record
+  // Generate device fingerprint for enhanced security
+  const generateDeviceFingerprint = (): string => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx?.fillText('Device fingerprint', 10, 10);
+    const canvasData = canvas.toDataURL();
+    
+    const fingerprint = {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      platform: navigator.platform,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+      canvas: canvasData.substring(0, 100), // First 100 chars of canvas data
+      cookieEnabled: navigator.cookieEnabled,
+      doNotTrack: navigator.doNotTrack
+    };
+    
+    // Simple hash function for fingerprint
+    let hash = 0;
+    const str = JSON.stringify(fingerprint);
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString(16);
+  };
+
+  // Initialize or update session record with device fingerprinting
   useEffect(() => {
     if (!user || !session) return;
 
@@ -90,6 +119,7 @@ export const SessionSecurityProvider = ({ children }: { children: ReactNode }) =
       try {
         const sessionToken = session.access_token;
         const userAgent = navigator.userAgent;
+        const deviceFingerprint = generateDeviceFingerprint();
         
         const { error } = await supabase
           .from('user_sessions')
@@ -97,6 +127,7 @@ export const SessionSecurityProvider = ({ children }: { children: ReactNode }) =
             user_id: user.id,
             session_token: sessionToken,
             user_agent: userAgent,
+            device_fingerprint: deviceFingerprint,
             last_activity: new Date().toISOString(),
             expires_at: new Date(Date.now() + sessionTimeoutMinutes * 60 * 1000).toISOString(),
             is_active: true
@@ -107,6 +138,12 @@ export const SessionSecurityProvider = ({ children }: { children: ReactNode }) =
 
         if (error) {
           console.error('Failed to initialize session record:', error);
+        } else {
+          // Log successful session initialization
+          await logSecurityEvent('session_initialized', {
+            device_fingerprint: deviceFingerprint,
+            user_agent: userAgent.substring(0, 100) // Limit length for storage
+          });
         }
       } catch (error) {
         console.error('Session initialization error:', error);

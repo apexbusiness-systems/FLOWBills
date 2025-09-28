@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { SessionSecurityProvider } from "@/hooks/useSessionSecurity";
+import { CSRFProvider } from "@/hooks/useCSRFProtection";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { SecurityHeaders } from "@/components/security/SecurityHeaders";
 import ErrorBoundary from "@/components/error-boundary/ErrorBoundary";
@@ -189,12 +190,14 @@ function App() {
           <BrowserRouter>
             <AuthProvider>
               <SessionSecurityProvider>
-                <div className="min-h-screen flex flex-col">
-                  <div className="flex-1">
-                    <AuthRoutes />
+                <CSRFProvider>
+                  <div className="min-h-screen flex flex-col">
+                    <div className="flex-1">
+                      <AuthRoutes />
+                    </div>
+                    <Footer />
                   </div>
-                  <Footer />
-                </div>
+                </CSRFProvider>
               </SessionSecurityProvider>
             </AuthProvider>
           </BrowserRouter>

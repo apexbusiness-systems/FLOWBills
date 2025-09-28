@@ -2,14 +2,96 @@
 import { toast } from "@/hooks/use-toast";
 
 /**
- * Input sanitization to prevent XSS attacks
+ * Enhanced input sanitization to prevent XSS attacks
  */
 export const sanitizeInput = (input: string): string => {
   return input
     .replace(/[<>]/g, '') // Remove potential HTML tags
     .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/vbscript:/gi, '') // Remove VBScript protocol
     .replace(/on\w+=/gi, '') // Remove event handlers
+    .replace(/data:/gi, '') // Remove data URIs
+    .replace(/\0/g, '') // Remove null bytes
+    .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
     .trim();
+};
+
+/**
+ * Advanced input validation with type checking
+ */
+export const validateInputAdvanced = (
+  input: any,
+  options: {
+    type?: 'string' | 'number' | 'email' | 'uuid';
+    maxLength?: number;
+    minLength?: number;
+    allowedChars?: RegExp;
+    required?: boolean;
+  } = {}
+): { valid: boolean; error?: string; sanitized?: any } => {
+  const { type = 'string', maxLength, minLength, allowedChars, required = true } = options;
+  
+  // Check if required
+  if (required && (input === null || input === undefined || input === '')) {
+    return { valid: false, error: 'Field is required' };
+  }
+  
+  if (!required && (input === null || input === undefined || input === '')) {
+    return { valid: true, sanitized: input };
+  }
+  
+  // Type validation
+  switch (type) {
+    case 'string':
+      if (typeof input !== 'string') {
+        return { valid: false, error: 'Must be a string' };
+      }
+      const sanitized = sanitizeInput(input);
+      
+      if (minLength && sanitized.length < minLength) {
+        return { valid: false, error: `Must be at least ${minLength} characters` };
+      }
+      if (maxLength && sanitized.length > maxLength) {
+        return { valid: false, error: `Must be no more than ${maxLength} characters` };
+      }
+      if (allowedChars && !allowedChars.test(sanitized)) {
+        return { valid: false, error: 'Contains invalid characters' };
+      }
+      
+      return { valid: true, sanitized };
+      
+    case 'number':
+      const num = Number(input);
+      if (isNaN(num)) {
+        return { valid: false, error: 'Must be a valid number' };
+      }
+      return { valid: true, sanitized: num };
+      
+    case 'email':
+      if (typeof input !== 'string') {
+        return { valid: false, error: 'Email must be a string' };
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const sanitizedEmail = sanitizeInput(input);
+      if (!emailRegex.test(sanitizedEmail)) {
+        return { valid: false, error: 'Invalid email format' };
+      }
+      return { valid: true, sanitized: sanitizedEmail };
+      
+    case 'uuid':
+      if (typeof input !== 'string') {
+        return { valid: false, error: 'UUID must be a string' };
+      }
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const sanitizedUuid = sanitizeInput(input);
+      if (!uuidRegex.test(sanitizedUuid)) {
+        return { valid: false, error: 'Invalid UUID format' };
+      }
+      return { valid: true, sanitized: sanitizedUuid };
+      
+    default:
+      return { valid: false, error: 'Unknown validation type' };
+  }
 };
 
 /**
@@ -120,21 +202,37 @@ export const logSecurityEvent = (event: string, details: any) => {
 };
 
 /**
- * Content Security Policy headers (strict policy for production)
+ * Enhanced Content Security Policy for production security
  */
 export const CSP_POLICY = {
   "default-src": "'self'",
-  "script-src": "'self' 'nonce-{NONCE}' https://www.googletagmanager.com https://www.google-analytics.com",
-  "style-src": "'self' 'unsafe-inline'",
-  "img-src": "'self' data: https:",
-  "connect-src": "'self' https://*.supabase.co https://www.google-analytics.com https://region1.google-analytics.com",
-  "font-src": "'self' data:",
+  "script-src": "'self' 'nonce-{NONCE}' https://www.googletagmanager.com https://www.google-analytics.com 'strict-dynamic'",
+  "style-src": "'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "img-src": "'self' data: https: blob:",
+  "connect-src": "'self' https://yvyjzlbosmtesldczhnm.supabase.co https://api.openai.com https://www.google-analytics.com https://region1.google-analytics.com wss://yvyjzlbosmtesldczhnm.supabase.co",
+  "font-src": "'self' data: https://fonts.gstatic.com",
   "object-src": "'none'",
-  "media-src": "'self'",
+  "media-src": "'self' blob:",
   "frame-src": "'none'",
   "frame-ancestors": "'none'",
   "base-uri": "'self'",
-  "upgrade-insecure-requests": ""
+  "form-action": "'self'",
+  "manifest-src": "'self'",
+  "worker-src": "'self' blob:",
+  "upgrade-insecure-requests": "",
+  "block-all-mixed-content": ""
+};
+
+/**
+ * Additional security headers for comprehensive protection
+ */
+export const SECURITY_HEADERS = {
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  "X-Frame-Options": "DENY",
+  "X-Content-Type-Options": "nosniff",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
 };
 
 /**

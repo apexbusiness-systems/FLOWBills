@@ -11,6 +11,36 @@ interface InvoiceAnalysis {
   vendor_id?: string;
 }
 
+// Enhanced input validation schema
+const validateInput = (input: any): { valid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+  
+  if (!input || typeof input !== 'object') {
+    errors.push('Invalid input format');
+    return { valid: false, errors };
+  }
+  
+  // Validate required fields
+  if (!input.invoice_id || typeof input.invoice_id !== 'string') {
+    errors.push('Invalid or missing invoice_id');
+  }
+  
+  if (typeof input.confidence_score !== 'number' || input.confidence_score < 0 || input.confidence_score > 100) {
+    errors.push('Invalid confidence_score (must be number between 0-100)');
+  }
+  
+  if (typeof input.amount !== 'number' || input.amount < 0) {
+    errors.push('Invalid amount (must be positive number)');
+  }
+  
+  // Sanitize risk factors
+  if (input.risk_factors && !Array.isArray(input.risk_factors)) {
+    errors.push('Invalid risk_factors (must be array)');
+  }
+  
+  return { valid: errors.length === 0, errors };
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -22,7 +52,61 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { invoice } = await req.json() as { invoice: InvoiceAnalysis };
+    // Get client IP and user agent for rate limiting
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+    
+    // Rate limiting check
+    const { data: rateLimitData, error: rateLimitError } = await supabase
+      .rpc('check_rate_limit', {
+        identifier: clientIP,
+        action_type: 'hil_routing',
+        max_requests: 100, // 100 requests per hour
+        window_minutes: 60
+      });
+    
+    if (rateLimitError || !rateLimitData) {
+      console.warn('Rate limit exceeded for IP:', clientIP);
+      return new Response(JSON.stringify({ 
+        error: 'Rate limit exceeded. Please try again later.',
+        routing_decision: 'human_review',
+        requires_human_review: true
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const requestBody = await req.json();
+    const { invoice } = requestBody as { invoice: InvoiceAnalysis };
+    
+    // Enhanced input validation
+    const validation = validateInput(invoice);
+    if (!validation.valid) {
+      console.error('Input validation failed:', validation.errors);
+      
+      // Log security event for invalid input
+      await supabase.from('security_events').insert({
+        event_type: 'invalid_input_hil_router',
+        severity: 'medium',
+        details: {
+          errors: validation.errors,
+          ip_address: clientIP,
+          user_agent: userAgent,
+          input_sample: JSON.stringify(invoice).substring(0, 500)
+        }
+      });
+      
+      return new Response(JSON.stringify({ 
+        error: 'Invalid input data',
+        details: validation.errors,
+        routing_decision: 'human_review',
+        requires_human_review: true
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
     console.log('HIL routing for invoice:', invoice.invoice_id);
 
