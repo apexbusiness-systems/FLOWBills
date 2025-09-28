@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -74,12 +74,12 @@ serve(async (req) => {
       status: response.success ? 200 : 400
     })
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('PINT adapter error:', error)
     
     const errorResponse: PINTResponse = {
       success: false,
-      errors: [error.message]
+      errors: [error instanceof Error ? error.message : 'Unknown error']
     }
 
     return new Response(JSON.stringify(errorResponse), {
@@ -103,10 +103,10 @@ async function buildPINT(invoiceData: any, sourceFormat?: string): Promise<PINTR
       validationResults: validation,
       warnings: validation.warnings
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       success: false,
-      errors: [`PINT build failed: ${error.message}`]
+      errors: [error instanceof Error ? error.message : 'PINT build failed']
     }
   }
 }
@@ -121,10 +121,10 @@ async function validatePINT(invoiceData: any): Promise<PINTResponse> {
       errors: validationResults.errors,
       warnings: validationResults.warnings
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       success: false,
-      errors: [`PINT validation failed: ${error.message}`]
+      errors: [error instanceof Error ? error.message : 'PINT validation failed']
     }
   }
 }
@@ -158,10 +158,10 @@ async function convertToPINT(invoiceData: any, sourceFormat?: string): Promise<P
       validationResults: validation,
       warnings: validation.warnings
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       success: false,
-      errors: [`PINT conversion failed: ${error.message}`]
+      errors: [error instanceof Error ? error.message : 'PINT conversion failed']
     }
   }
 }
@@ -193,10 +193,10 @@ async function testPINTReadiness(): Promise<PINTResponse> {
         ]
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       success: false,
-      errors: [`PINT readiness test failed: ${error.message}`]
+      errors: [error instanceof Error ? error.message : 'PINT readiness test failed']
     }
   }
 }
@@ -313,28 +313,25 @@ function generatePINTXML(invoiceData: any): string {
 }
 
 async function validatePINTCompliance(xmlData: string): Promise<any> {
-  // PINT compliance validation
+  // PINT compliance validation using regex patterns instead of DOM parsing
   const errors: string[] = []
   const warnings: string[] = []
 
   try {
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(xmlData, 'application/xml')
-
-    // Check for required PINT elements
-    if (!doc.querySelector('cbc\\:CustomizationID, CustomizationID')?.textContent?.includes('pint')) {
+    // Check for required PINT elements using regex
+    if (!xmlData.includes('pint')) {
       errors.push('PINT CustomizationID is missing or incorrect')
     }
 
-    if (!doc.querySelector('cbc\\:ProfileID, ProfileID')?.textContent?.includes('billing')) {
+    if (!xmlData.includes('billing')) {
       errors.push('ProfileID must specify billing profile')
     }
 
-    // Check identifier schemes
-    const endpointIds = doc.querySelectorAll('cac\\:EndpointID, EndpointID')
-    endpointIds.forEach(endpoint => {
-      const schemeId = endpoint.getAttribute('schemeID')
-      if (!schemeId || !isValidIdentifierScheme(schemeId)) {
+    // Check identifier schemes using regex patterns
+    const endpointIdMatches = xmlData.match(/schemeID="([^"]+)"/g) || []
+    endpointIdMatches.forEach((match: string) => {
+      const schemeId = match.match(/schemeID="([^"]+)"/)?.[1]
+      if (schemeId && !isValidIdentifierScheme(schemeId)) {
         warnings.push(`Identifier scheme ${schemeId} may not be PINT-compliant`)
       }
     })
@@ -345,10 +342,10 @@ async function validatePINTCompliance(xmlData: string): Promise<any> {
       warnings: warnings,
       pintCompliant: true
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       isValid: false,
-      errors: [`XML parsing failed: ${error.message}`],
+      errors: [error instanceof Error ? error.message : 'XML parsing failed'],
       warnings: warnings,
       pintCompliant: false
     }

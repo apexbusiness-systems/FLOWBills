@@ -75,11 +75,11 @@ async function checkDuplicateBank(supabase: any, document: any, tenantId: string
         risk_score: 85,
         details: {
           duplicate_iban: bankInfo.iban,
-          conflicting_vendors: ibanMatches.map(v => ({ id: v.id, name: v.vendor_name }))
+          conflicting_vendors: ibanMatches.map((v: any) => ({ id: v.id, name: v.vendor_name }))
         },
         evidence: [
           `IBAN ${bankInfo.iban} is associated with ${ibanMatches.length} other vendor(s)`,
-          `Vendors: ${ibanMatches.map(v => v.vendor_name).join(', ')}`
+          `Vendors: ${ibanMatches.map((v: any) => v.vendor_name).join(', ')}`
         ]
       };
     }
@@ -93,11 +93,11 @@ async function checkDuplicateBank(supabase: any, document: any, tenantId: string
         risk_score: 80,
         details: {
           duplicate_account: bankInfo.account_number,
-          conflicting_vendors: accountMatches.map(v => ({ id: v.id, name: v.vendor_name }))
+          conflicting_vendors: accountMatches.map((v: any) => ({ id: v.id, name: v.vendor_name }))
         },
         evidence: [
           `Bank account ${bankInfo.account_number} is associated with ${accountMatches.length} other vendor(s)`,
-          `Vendors: ${accountMatches.map(v => v.vendor_name).join(', ')}`
+          `Vendors: ${accountMatches.map((v: any) => v.vendor_name).join(', ')}`
         ]
       };
     }
@@ -126,11 +126,11 @@ async function checkDuplicateTaxId(supabase: any, document: any, tenantId: strin
         risk_score: 90,
         details: {
           duplicate_vat_id: taxInfo.vat_id,
-          conflicting_vendors: vatMatches.map(v => ({ id: v.id, name: v.vendor_name }))
+          conflicting_vendors: vatMatches.map((v: any) => ({ id: v.id, name: v.vendor_name }))
         },
         evidence: [
           `VAT ID ${taxInfo.vat_id} is associated with ${vatMatches.length} other vendor(s)`,
-          `Vendors: ${vatMatches.map(v => v.vendor_name).join(', ')}`
+          `Vendors: ${vatMatches.map((v: any) => v.vendor_name).join(', ')}`
         ]
       };
     }
@@ -155,12 +155,12 @@ async function checkAmountAnomaly(supabase: any, document: any, tenantId: string
     
   if (!historicalDocs || historicalDocs.length < 5) return null; // Need enough data
   
-  const amounts = historicalDocs.map(d => parseFloat(d.total_amount)).filter(a => !isNaN(a));
+  const amounts = historicalDocs.map((d: any) => parseFloat(d.total_amount)).filter((a: number) => !isNaN(a));
   if (amounts.length === 0) return null;
   
   // Calculate statistical thresholds
-  const mean = amounts.reduce((sum, a) => sum + a, 0) / amounts.length;
-  const variance = amounts.reduce((sum, a) => sum + Math.pow(a - mean, 2), 0) / amounts.length;
+  const mean = amounts.reduce((sum: number, a: number) => sum + a, 0) / amounts.length;
+  const variance = amounts.reduce((sum: number, a: number) => sum + Math.pow(a - mean, 2), 0) / amounts.length;
   const stdDev = Math.sqrt(variance);
   
   const currentAmount = parseFloat(document.total_amount);

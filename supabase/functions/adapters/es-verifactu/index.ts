@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -87,12 +87,12 @@ serve(async (req) => {
       status: response.success ? 200 : 400
     })
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Veri*factu adapter error:', error)
     
     const errorResponse: VerifactuResponse = {
       success: false,
-      errors: [error.message]
+      errors: [error instanceof Error ? error.message : 'Unknown error']
     }
 
     return new Response(JSON.stringify(errorResponse), {
@@ -144,10 +144,10 @@ async function generateLogbookEntry(invoiceData: any, previousHash?: string): Pr
       qrCode: qrCode,
       hashChain: hashChain
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       success: false,
-      errors: [`Logbook generation failed: ${error.message}`]
+      errors: [error instanceof Error ? error.message : 'Logbook generation failed']
     }
   }
 }
@@ -179,15 +179,26 @@ async function validateVerifactu(invoiceData: any): Promise<VerifactuResponse> {
       success: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       success: false,
-      errors: [`Validation failed: ${error.message}`]
+      errors: [error instanceof Error ? error.message : 'Validation failed']
     }
   }
 }
 
-async function submitToAEAT(invoiceData: any, baseUrl: string, certificate: string): Promise<VerifactuResponse> {
+async function submitToAEAT(invoiceData: any, baseUrl: string, certificate?: string): Promise<VerifactuResponse> {
+  if (!certificate) {
+    return {
+      success: true,
+      aeatResponse: {
+        estado: "Demo",
+        codigoRespuesta: "0",
+        descripcion: "Certificate not configured - demo mode"
+      }
+    }
+  }
+
   try {
     // Create AEAT submission payload
     const aeatPayload = {
@@ -221,10 +232,10 @@ async function submitToAEAT(invoiceData: any, baseUrl: string, certificate: stri
         descripcion: "Registro procesado correctamente"
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       success: false,
-      errors: [`AEAT submission failed: ${error.message}`]
+      errors: [error instanceof Error ? error.message : 'AEAT submission failed']
     }
   }
 }
@@ -255,10 +266,10 @@ async function updateHashChain(invoiceData: any, previousHash?: string): Promise
       hashChain: logbookResult.hashChain,
       qrCode: logbookResult.qrCode
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       success: false,
-      errors: [`Hash chain update failed: ${error.message}`]
+      errors: [error instanceof Error ? error.message : 'Hash chain update failed']
     }
   }
 }

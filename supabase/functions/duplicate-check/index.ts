@@ -242,7 +242,7 @@ serve(async (req) => {
         ip_address: req.headers.get('x-forwarded-for')?.split(',')[0],
         user_agent: req.headers.get('user-agent'),
         details: { 
-          error_type: error.name || 'unknown',
+          error_type: error instanceof Error ? error.name : 'unknown',
           endpoint: 'duplicate-check',
           timestamp: new Date().toISOString()
         }

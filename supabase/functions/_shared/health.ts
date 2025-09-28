@@ -64,7 +64,7 @@ export const healthResponses = {
       return new Response(
         JSON.stringify({ 
           status: 'not ready', 
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
           timestamp: new Date().toISOString()
         }),
         { 
