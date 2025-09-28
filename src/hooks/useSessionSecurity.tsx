@@ -82,7 +82,7 @@ export const SessionSecurityProvider = ({ children }: { children: ReactNode }) =
     return () => clearInterval(interval);
   }, [user, session, lastActivity, sessionTimeoutMinutes, warningShown, toast, signOut]);
 
-  // Generate device fingerprint for enhanced security
+  // Generate enhanced device fingerprint for security
   const generateDeviceFingerprint = (): string => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -92,12 +92,17 @@ export const SessionSecurityProvider = ({ children }: { children: ReactNode }) =
     const fingerprint = {
       userAgent: navigator.userAgent,
       language: navigator.language,
+      languages: navigator.languages?.join(',') || '',
       platform: navigator.platform,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
       canvas: canvasData.substring(0, 100), // First 100 chars of canvas data
       cookieEnabled: navigator.cookieEnabled,
-      doNotTrack: navigator.doNotTrack
+      doNotTrack: navigator.doNotTrack,
+      hardwareConcurrency: navigator.hardwareConcurrency || 0,
+      maxTouchPoints: navigator.maxTouchPoints || 0,
+      connection: (navigator as any).connection?.effectiveType || 'unknown',
+      plugins: Array.from(navigator.plugins).map(p => p.name).join(',').substring(0, 200)
     };
     
     // Simple hash function for fingerprint

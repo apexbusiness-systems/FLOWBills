@@ -104,17 +104,33 @@ export const secureRequest = async (
   
   // Add CSRF token for state-changing operations
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method?.toUpperCase() || 'GET')) {
-    if (csrfToken) {
-      headers.set('X-CSRF-Token', csrfToken);
+    if (!csrfToken) {
+      throw new Error('CSRF token required for state-changing operations');
     }
+    headers.set('X-CSRF-Token', csrfToken);
   }
 
-  // Add security headers
+  // Add comprehensive security headers
   headers.set('X-Requested-With', 'XMLHttpRequest');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // Validate URL to prevent SSRF attacks
+  try {
+    const parsedUrl = new URL(url, window.location.origin);
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      throw new Error('Invalid URL protocol');
+    }
+  } catch (error) {
+    throw new Error('Invalid URL format');
+  }
   
   return fetch(url, {
     ...options,
     headers,
-    credentials: 'same-origin' // Important for CSRF protection
+    credentials: 'same-origin', // Important for CSRF protection
+    // Add timeout to prevent hanging requests
+    signal: AbortSignal.timeout(30000)
   });
 };

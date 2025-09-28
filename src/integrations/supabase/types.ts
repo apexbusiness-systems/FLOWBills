@@ -675,12 +675,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bootstrap_admin_user: {
+        Args: { admin_email: string; admin_password: string }
+        Returns: string
+      }
+      cleanup_stale_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
       log_admin_pii_access: {
         Args: { record_id: string; table_name: string }
+        Returns: boolean
+      }
+      log_security_violation: {
+        Args: {
+          severity_level?: string
+          target_user_id?: string
+          violation_details?: Json
+          violation_type: string
+        }
+        Returns: boolean
+      }
+      validate_session_integrity: {
+        Args: { session_data: Json }
         Returns: boolean
       }
       validate_session_security: {

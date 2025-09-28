@@ -2,6 +2,56 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 10; // 10 requests per minute per IP
+const rateLimitStore = new Map<string, number[]>();
+
+// Enhanced rate limiting function
+function checkRateLimit(clientIp: string): boolean {
+  const now = Date.now();
+  const requests = rateLimitStore.get(clientIp) || [];
+  
+  // Remove old requests outside the window
+  const validRequests = requests.filter(time => now - time < RATE_LIMIT_WINDOW);
+  
+  if (validRequests.length >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+  
+  validRequests.push(now);
+  rateLimitStore.set(clientIp, validRequests);
+  return true;
+}
+
+// Enhanced input validation with security checks
+function validateInputSecurity(input: any): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  // Check for potential XSS/injection attempts
+  const suspiciousPatterns = [
+    /<script[^>]*>.*?<\/script>/gi,
+    /javascript:/gi,
+    /on\w+\s*=/gi,
+    /eval\s*\(/gi,
+    /'(\s*union\s+select|;\s*drop\s+table)/gi
+  ];
+  
+  const inputString = JSON.stringify(input);
+  for (const pattern of suspiciousPatterns) {
+    if (pattern.test(inputString)) {
+      errors.push(`Potential security threat detected: ${pattern.source}`);
+    }
+  }
+  
+  // Check for oversized payloads
+  if (inputString.length > 50000) { // 50KB limit
+    errors.push('Request payload too large');
+  }
+  
+  return { valid: errors.length === 0, errors };
+}
+
 interface InvoiceAnalysis {
   invoice_id: string;
   confidence_score: number;
@@ -46,7 +96,28 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
+    // Rate limiting
+    const clientIp = req.headers.get('x-forwarded-for') || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+    
+    if (!checkRateLimit(clientIp)) {
+      console.warn(`Rate limit exceeded for IP: ${clientIp}`);
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
