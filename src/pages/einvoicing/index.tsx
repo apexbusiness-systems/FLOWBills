@@ -47,10 +47,10 @@ export default function EInvoicing() {
         .from('einvoice_documents')
         .insert({
           document_id: documentId,
-          format,
+          format: format as 'bis30' | 'xrechnung' | 'facturx',
           xml_content: xmlContent,
-          status: 'pending',
-          tenant_id: user?.id
+          status: 'pending' as const,
+          tenant_id: user?.id || ''
         });
         
       if (error) throw error;
