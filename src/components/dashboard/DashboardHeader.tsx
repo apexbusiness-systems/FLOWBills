@@ -62,7 +62,7 @@ const DashboardHeader = () => {
             <img 
               src={companyLogo} 
               alt="FLOWBills.ca Logo" 
-              className="h-8 w-8 object-cover"
+              className="h-8 w-8 object-contain"
             />
           </button>
           <div className="hidden sm:block">

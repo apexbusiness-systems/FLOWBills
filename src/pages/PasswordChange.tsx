@@ -9,7 +9,7 @@ const PasswordChange = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="h-12 w-12 rounded-xl flex items-center justify-center overflow-hidden shadow-sm">
-              <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-12 w-12 object-cover" />
+              <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-12 w-12 object-contain" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               FLOW Bills

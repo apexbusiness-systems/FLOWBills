@@ -226,7 +226,7 @@ const Auth = () => {
               <img 
                 src={companyLogo} 
                 alt="FLOWBills.ca Logo" 
-                className="h-20 w-20 object-cover"
+                className="h-20 w-20 object-contain"
               />
             </div>
             <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent tracking-tight">
