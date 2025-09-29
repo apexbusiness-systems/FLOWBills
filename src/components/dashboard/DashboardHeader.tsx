@@ -1,4 +1,5 @@
 import { Building2, Bell, User, LogOut, Shield, Settings, Home, ArrowLeft } from "lucide-react";
+import companyLogo from "@/assets/company-logo.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -55,10 +56,14 @@ const DashboardHeader = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
+            className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
             aria-label="Go to homepage"
           >
-            <Building2 className="h-5 w-5" />
+            <img 
+              src={companyLogo} 
+              alt="FLOWBills.ca Logo" 
+              className="h-8 w-8 object-cover"
+            />
           </button>
           <div className="hidden sm:block">
             <button 
