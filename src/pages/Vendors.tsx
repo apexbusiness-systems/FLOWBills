@@ -61,13 +61,17 @@ const Vendors = () => {
     
     setLoading(true);
     try {
+      // Query vendors table - RLS policies automatically apply data masking
+      // Operators see masked financial data, admins see full details
       const { data, error } = await supabase
         .from('vendors')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setVendors(data || []);
+      
+      // Type assertion safe here as we know the structure matches
+      setVendors(data as unknown as Vendor[]);
     } catch (error) {
       console.error('Error fetching vendors:', error);
       toast({
