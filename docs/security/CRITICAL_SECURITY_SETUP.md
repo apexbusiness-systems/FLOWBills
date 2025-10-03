@@ -175,6 +175,94 @@ const { data } = await supabase
 
 ---
 
+## 4. Consent Logs RLS Policy Hardening (IMPLEMENTED ✅)
+
+**Risk Level:** 🔴 **CRITICAL**  
+**Status:** ✅ **COMPLETED**  
+**Implementation:** Secured RLS policies with audit logging
+
+### What Was Fixed:
+
+The `consent_logs` table had an overly permissive policy that allowed ANY authenticated user to insert consent records for ANY user. This was a privilege escalation vulnerability.
+
+**Previous Insecure Policy:**
+```sql
+-- INSECURE: Any authenticated user could insert consent for anyone
+CREATE POLICY "System can record consent" 
+ON consent_logs FOR INSERT 
+WITH CHECK (true);  -- ❌ NO ACCESS CONTROL!
+```
+
+### Current Protection:
+
+✅ **User-scoped policies with role-based overrides:**
+
+```sql
+-- Users can only record their own consent
+CREATE POLICY "Users can record own consent"
+  ON public.consent_logs FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+-- Admins can record consent for support cases
+CREATE POLICY "Admins can record any consent"
+  ON public.consent_logs FOR INSERT
+  TO authenticated
+  WITH CHECK (get_user_role(auth.uid()) = 'admin'::user_role);
+
+-- Anonymous consent for lead capture forms
+CREATE POLICY "Anonymous users can record consent"
+  ON public.consent_logs FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (user_id IS NULL);
+```
+
+### Audit Logging:
+
+All consent insertions are now logged to `security_events`:
+
+```sql
+CREATE TRIGGER trigger_audit_consent_insertion
+  AFTER INSERT ON public.consent_logs
+  FOR EACH ROW
+  EXECUTE FUNCTION public.audit_consent_insertion();
+```
+
+**Logged Details:**
+- Who recorded the consent (actor)
+- For which user (user_id)
+- Consent type and decision (given/withdrawn)
+- Whether anonymous or authenticated
+- IP address and timestamp
+
+### Security Benefits:
+
+- ✅ **Prevents privilege escalation** - Users can't insert consent for others
+- ✅ **Maintains CASL/PIPEDA compliance** - Consent logging still works
+- ✅ **Admin override capability** - Support team can help users when needed
+- ✅ **Anonymous lead capture** - Marketing forms still work securely
+- ✅ **Full audit trail** - All consent events logged to security_events
+- ✅ **Zero breaking changes** - Existing code continues to work
+
+### Verification:
+
+Check consent audit logs:
+```sql
+SELECT 
+  event_type,
+  user_id,
+  details->>'consent_type' as consent_type,
+  details->>'consent_given' as consent_given,
+  details->>'is_anonymous' as is_anonymous,
+  created_at
+FROM security_events
+WHERE event_type = 'consent_recorded'
+ORDER BY created_at DESC
+LIMIT 20;
+```
+
+---
+
 ## Additional Security Recommendations
 
 ### Immediate (This Week):
