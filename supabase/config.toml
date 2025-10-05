@@ -1,10 +1,1 @@
 project_id = "yvyjzlbosmtesldczhnm"
-
-[functions.pl-ksef]
-verify_jwt = false
-
-[functions.es-verifactu]
-verify_jwt = false
-
-[functions.pint]
-verify_jwt = false
