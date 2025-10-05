@@ -1035,7 +1035,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_sessions_safe: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string | null
+          ip_address: unknown | null
+          is_active: boolean | null
+          last_activity: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       bootstrap_admin_user: {
@@ -1049,6 +1081,10 @@ export type Database = {
       cleanup_stale_sessions: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      get_consent_pii_secure: {
+        Args: { consent_id: string; justification: string }
+        Returns: Json
       }
       get_user_role: {
         Args: { user_uuid: string }
@@ -1078,6 +1114,10 @@ export type Database = {
           p_ip_address: unknown
           p_phone: string
         }
+        Returns: boolean
+      }
+      validate_my_session: {
+        Args: { session_id: string }
         Returns: boolean
       }
       validate_session_integrity: {

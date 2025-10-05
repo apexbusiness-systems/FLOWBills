@@ -126,6 +126,8 @@ export const SessionSecurityProvider = ({ children }: { children: ReactNode }) =
         const userAgent = navigator.userAgent;
         const deviceFingerprint = generateDeviceFingerprint();
         
+        // Note: INSERT/UPDATE operations still use user_sessions table directly
+        // The safe view (user_sessions_safe) is only for SELECT operations
         const { error } = await supabase
           .from('user_sessions')
           .upsert({
@@ -167,7 +169,7 @@ export const SessionSecurityProvider = ({ children }: { children: ReactNode }) =
         setLastActivity(Date.now());
         setWarningShown(false);
         
-        // Update session record
+        // Update session record (UPDATE operations still use user_sessions table)
         await supabase
           .from('user_sessions')
           .update({

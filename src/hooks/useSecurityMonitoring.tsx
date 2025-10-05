@@ -120,8 +120,9 @@ export const useSecurityMonitoring = () => {
 
     try {
       // Check for suspicious session patterns
+      // Use safe view to avoid exposing session tokens
       const { data: sessions, error } = await supabase
-        .from('user_sessions')
+        .from('user_sessions_safe')
         .select('*')
         .eq('user_id', user.id)
         .eq('is_active', true);
@@ -152,7 +153,7 @@ export const useSecurityMonitoring = () => {
       );
 
       if (oldSessions && oldSessions.length > 0) {
-        // Deactivate old sessions
+        // Deactivate old sessions (UPDATE operations still use user_sessions table)
         await supabase
           .from('user_sessions')
           .update({ is_active: false })
