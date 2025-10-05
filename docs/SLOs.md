@@ -301,19 +301,70 @@ When error budget reaches:
 - **Incident Response**: SLO-focused incident management
 - **Regular Updates**: Quarterly training updates
 
-## Phase 3 (Supabase)
-- Availability (Edge Functions): 99.9% 30d
-- Latency p95: /einvoice_validate < 300ms; /einvoice_send < 500ms (excluding AP transit)
-- AP send success: ≥ 99.0% over 7d (excluding partner outages)
-- STP uplift target: +10–20 pts (HIL sampling v2)
+## E-Invoicing Infrastructure SLOs
 
-### Burn-rate Alerts
-Page if: BR_1h ≥ 2.0 AND BR_6h ≥ 1.0. Ticket if: BR_24h ≥ 1.0.
+### Availability
+- **Target**: 99.9% availability over 30-day rolling window
+- **Scope**: Edge Functions (`einvoice_validate`, `einvoice_send`, `einvoice_receive`)
+- **Error Budget**: 43 minutes downtime per month
+- **Measurement**: HTTP 5xx responses / total requests
+
+### Latency (p95)
+- **`/einvoice_validate`**: < 300ms
+- **`/einvoice_send`**: < 500ms (excluding partner AP transit time)
+- **`/einvoice_receive`**: < 400ms
+- **`/metrics`**: < 100ms
+
+### Peppol AP Send Success Rate
+- **Target**: ≥ 99.0% over 7-day rolling window
+- **Scope**: Outbound messages to Peppol Access Point
+- **Exclusions**: Partner AP outages (verified via status page)
+- **Measurement**: `(sent_count / (sent_count + failed_after_retries)) * 100`
+
+## Multi-Window Burn Rate Alerting
+
+Implements Google SRE [multi-window, multi-burn-rate](https://sre.google/workbook/alerting-on-slos/) approach.
+
+### Critical Alert (Page)
+**Trigger**: 2% error budget consumed in 1 hour
+- Short window burn rate (1h): ≥ 14.4x
+- Long window burn rate (5m): ≥ 14.4x
+- **Action**: Page on-call engineer immediately
+
+### High Alert (Ticket)
+**Trigger**: 5% error budget consumed in 6 hours
+- Short window burn rate (6h): ≥ 6.0x
+- Long window burn rate (30m): ≥ 6.0x
+- **Action**: Create incident ticket, investigate within 4 hours
+
+### Medium Alert (Ticket)
+**Trigger**: 10% error budget consumed in 24 hours
+- Short window burn rate (24h): ≥ 3.0x
+- Long window burn rate (2h): ≥ 3.0x
+- **Action**: Create backlog ticket, review in next business day
+
+### Formulas
+```
+error_budget_remaining = 1 - (error_rate_30d / (1 - slo_target))
+burn_rate = error_rate_window / (1 - slo_target)
+```
+
+Example: For 99.9% SLO (0.1% error budget):
+- 1h window with 1.44% errors = 14.4x burn rate → **PAGE**
+- 6h window with 0.6% errors = 6.0x burn rate → **TICKET HIGH**
+
+## Monitoring Dashboard Panels
+
+1. **Availability**: 30d rolling error rate vs 0.1% threshold
+2. **Latency Heatmap**: p50, p95, p99 for each endpoint
+3. **Error Budget**: Remaining % with burn-down projection
+4. **Queue Depth**: `peppol_send` queue size and age
+5. **HIL Metrics**: Queue size, resolution time, STP rate
 
 ---
 
 **Document Metadata**:
-- **Last Updated**: January 2024
-- **Next Review**: April 2024
+- **Last Updated**: October 2025
+- **Next Review**: January 2026
 - **Owner**: Platform Engineering Team
 - **Reviewers**: Engineering Leadership, Operations Team

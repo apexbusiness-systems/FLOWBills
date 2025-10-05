@@ -281,6 +281,79 @@ This compliance framework is reviewed quarterly and updated as needed to reflect
 - System modifications and enhancements
 - Lessons learned from compliance activities
 
-**Last Updated**: January 2024
-**Next Review**: April 2024
-**Version**: 2.0
+## E-Invoicing Standards Compliance
+
+### EN 16931 (European Semantic Model)
+FlowBills.ca validates invoices against the **EN 16931** core semantic data model, which defines the minimum information requirements for cross-border e-invoices in the EU.
+
+**Validation Coverage**:
+- ✅ Mandatory business terms (BT-1 to BT-205)
+- ✅ Seller/Buyer party identification
+- ✅ Invoice line items with prices and VAT
+- ✅ Payment instructions
+- ⚠️ Optional: Allowances/Charges (user input required)
+
+**Responsibility Boundary**:
+- FlowBills validates **semantic correctness** (required fields, data types, code lists)
+- Users are responsible for **business accuracy** (correct amounts, valid VAT rates, legitimate parties)
+
+### Peppol BIS Billing 3.0
+Peppol Business Interoperability Specification (BIS) Billing 3.0 is a **CIUS** (Core Invoice Usage Specification) built on EN 16931.
+
+**Additional Validation**:
+- ✅ CustomizationID and ProfileID identifiers
+- ✅ Peppol Endpoint IDs (scheme + identifier)
+- ✅ SBDH envelope structure for AS4 transmission
+- ✅ Restricted code lists (e.g., ISO 4217 currencies, UNCL5305 VAT categories)
+
+**Peppol Network Compliance**:
+- FlowBills generates correct SBDH envelopes per [Peppol Transport Infrastructure](https://docs.peppol.eu/edelivery/envelope/)
+- Partner **Peppol Access Point** handles:
+  - AS4 protocol conformance
+  - SMP lookups for receiver capabilities
+  - Certificate-based message signing
+  - Network-level transmission
+
+### XRechnung (Germany)
+**Standard Version**: XRechnung 2.3 (based on EN 16931)
+
+**Validation**:
+- ✅ CrossIndustryInvoice format (UN/CEFACT CII)
+- ✅ CustomizationID: `urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_2.3`
+- ✅ BuyerReference (Leitweg-ID) for B2G invoices
+- ⚠️ German-specific VAT rules (19% standard, 7% reduced) — user responsibility
+
+**Regulatory Note**:
+- Mandatory for B2G in Germany since November 27, 2020
+- FlowBills ensures **technical compliance**; users ensure **tax compliance** (correct VAT ID, reverse charge logic, etc.)
+
+### Factur-X (France/Germany)
+**Standard**: Factur-X 1.0 (hybrid PDF/A-3 + XML)
+
+**Validation**:
+- ✅ CrossIndustryDocument format
+- ✅ Profile: `urn:factur-x.eu:1p0:basicwl` (Basic Without Lines) or higher
+- ⚠️ PDF/A-3 embedding not validated (use certified Factur-X tool for PDF generation)
+
+**French B2B Mandate**:
+- E-invoicing mandatory for French B2B from 2026 (phased rollout)
+- FlowBills validates **XML structure**; users must ensure PDF rendering matches legal requirements
+
+## Responsibility Matrix
+
+| Requirement | FlowBills Responsibility | User Responsibility | Partner AP Responsibility |
+|-------------|--------------------------|---------------------|---------------------------|
+| EN 16931 semantic validation | ✅ Full | Accurate business data | N/A |
+| BIS 3.0 CIUS validation | ✅ Full | Valid Peppol IDs | N/A |
+| SBDH envelope format | ✅ Full | N/A | AS4 transmission |
+| XRechnung format | ✅ Full | German VAT compliance | N/A |
+| Factur-X XML | ✅ Full | PDF/A-3 generation | N/A |
+| Network delivery | Enqueue + retry | N/A | ✅ Full (SMP, AS4, certs) |
+| Data privacy (PIPEDA) | ✅ Full | Consent for email notifications | N/A |
+| Tax compliance | N/A | ✅ Full (VAT rates, IDs) | N/A |
+
+---
+
+**Last Updated**: October 2025
+**Next Review**: January 2026
+**Version**: 3.0

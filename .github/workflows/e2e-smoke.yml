@@ -1,0 +1,79 @@
+name: E2E Smoke Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      
+      - name: Start Supabase local
+        run: supabase start
+      
+      - name: Create .env.local for functions
+        run: |
+          cat > .env.local <<EOF
+          SUPABASE_URL=http://localhost:54321
+          SUPABASE_ANON_KEY=$(supabase status | grep "anon key" | awk '{print $NF}')
+          SUPABASE_SERVICE_ROLE_KEY=$(supabase status | grep "service_role key" | awk '{print $NF}')
+          PEPPOL_WEBHOOK_SECRET=test-secret-12345
+          HIL_CONFIDENCE_THRESHOLD=70
+          EOF
+      
+      - name: Start Supabase Functions
+        run: |
+          supabase functions serve --env-file .env.local &
+          sleep 10
+      
+      - name: Smoke Test - Validate BIS3 Invoice
+        run: |
+          RESPONSE=$(curl -s -X POST http://localhost:54321/functions/v1/einvoice_validate \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $(supabase status | grep "anon key" | awk '{print $NF}')" \
+            -d @- <<'PAYLOAD'
+          {
+            "document_id": "TEST-001",
+            "xml_content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Invoice xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\" xmlns:cbc=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\" xmlns:cac=\"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\"><cbc:ID>INV-001</cbc:ID><cbc:IssueDate>2025-01-01</cbc:IssueDate><cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode><cac:AccountingSupplierParty><cac:Party><cbc:EndpointID schemeID=\"0088\">1234567890123</cbc:EndpointID><cac:PartyName><cbc:Name>Test Supplier</cbc:Name></cac:PartyName></cac:Party></cac:AccountingSupplierParty><cac:AccountingCustomerParty><cac:Party><cbc:EndpointID schemeID=\"0088\">0987654321098</cbc:EndpointID><cac:PartyName><cbc:Name>Test Customer</cbc:Name></cac:PartyName></cac:Party></cac:AccountingCustomerParty></Invoice>",
+            "format": "bis30",
+            "tenant_id": "test-tenant"
+          }
+          PAYLOAD
+          )
+          
+          echo "Response: $RESPONSE"
+          
+          if echo "$RESPONSE" | grep -q "\"validation_passed\":true"; then
+            echo "✅ Validation passed"
+          else
+            echo "❌ Validation failed"
+            exit 1
+          fi
+      
+      - name: Smoke Test - Metrics Endpoint
+        run: |
+          RESPONSE=$(curl -s http://localhost:54321/functions/v1/metrics?format=prometheus)
+          
+          echo "Metrics Response:"
+          echo "$RESPONSE"
+          
+          if echo "$RESPONSE" | grep -q "einvoice_validated_total"; then
+            echo "✅ Metrics endpoint working"
+          else
+            echo "❌ Metrics endpoint failed"
+            exit 1
+          fi
+      
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
