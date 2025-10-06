@@ -131,8 +131,12 @@
 - [x] React pages use correct Supabase client
 - [x] Role-based access control enforced in UI
 - [x] Error handling with toast notifications
-- [ ] Enable Leaked Password Protection in Supabase Auth
-- [ ] Run final security scan (`supabase-linter`)
+- [ ] **REQUIRED:** Enable Leaked Password Protection in Supabase Auth
+  - 📖 **Guide:** `docs/security/LEAKED_PASSWORD_PROTECTION_SETUP.md`
+  - 🔗 **Link:** https://supabase.com/dashboard/project/yvyjzlbosmtesldczhnm/auth/providers
+  - ⏱️ **Time:** 5 minutes
+  - ⚠️ **BLOCKER:** Cannot deploy to production without this
+- [ ] Run final security scan (`npm run db:lint`)
 - [ ] Execute E2E smoke tests (`npm run test:e2e`)
 
 ### Post-Deployment
