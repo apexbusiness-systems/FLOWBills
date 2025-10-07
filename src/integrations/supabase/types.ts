@@ -1035,6 +1035,48 @@ export type Database = {
       }
     }
     Views: {
+      consent_logs_safe: {
+        Row: {
+          consent_given: boolean | null
+          consent_text: string | null
+          consent_type: Database["public"]["Enums"]["consent_type"] | null
+          created_at: string | null
+          email_masked: string | null
+          id: string | null
+          ip_address: unknown | null
+          phone_masked: string | null
+          user_agent: string | null
+          user_id: string | null
+          withdrawal_date: string | null
+        }
+        Insert: {
+          consent_given?: boolean | null
+          consent_text?: string | null
+          consent_type?: Database["public"]["Enums"]["consent_type"] | null
+          created_at?: string | null
+          email_masked?: never
+          id?: string | null
+          ip_address?: unknown | null
+          phone_masked?: never
+          user_agent?: string | null
+          user_id?: string | null
+          withdrawal_date?: string | null
+        }
+        Update: {
+          consent_given?: boolean | null
+          consent_text?: string | null
+          consent_type?: Database["public"]["Enums"]["consent_type"] | null
+          created_at?: string | null
+          email_masked?: never
+          id?: string | null
+          ip_address?: unknown | null
+          phone_masked?: never
+          user_agent?: string | null
+          user_id?: string | null
+          withdrawal_date?: string | null
+        }
+        Relationships: []
+      }
       user_sessions_safe: {
         Row: {
           created_at: string | null
