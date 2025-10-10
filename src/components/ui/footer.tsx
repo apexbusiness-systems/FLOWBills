@@ -1,4 +1,3 @@
-import React from "react";
 import { TrackLink } from "@/components/ui/TrackLink";
 
 export const Footer = () => {

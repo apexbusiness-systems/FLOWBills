@@ -2,124 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Enterprise Oil & Gas Billing Platform Design System
-   WCAG 2.2 AA compliant colors and design tokens
-   All colors MUST be HSL for accessibility calculations
-*/
+/* 
+ * Enterprise Oil & Gas Billing Platform 
+ * Design System - WCAG 2.2 AA Compliant Colors (HSL)
+ */
 
 @layer base {
   :root {
-    /* Core enterprise palette - professional amber/yellow and grays */
+    /* Core palette - WCAG AA compliant contrast */
     --background: 0 0% 100%;
-    --foreground: 215 25% 20%;
-
+    --foreground: 222 47% 11%;
+    
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 20%;
-
+    --card-foreground: 222 47% 11%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 20%;
+    --popover-foreground: 222 47% 11%;
+    
+    --primary: 203 89% 25%;      /* Deep maritime blue (#0766A7) */
+    --primary-variant: 203 89% 35%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 28 74% 55%;     /* Energy orange (#E8953A) */
+    --secondary-foreground: 0 0% 0%;
+    
+    --muted: 215 25% 95%;
+    --muted-foreground: 215 15% 40%;
+    
+    --accent: 203 89% 95%;
+    --accent-foreground: 203 89% 25%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
+    
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
 
-    /* Primary: Professional enterprise amber/yellow with proper contrast */
-    --primary: 45 95% 50%;
-    --primary-foreground: 0 0% 0%;
-    --primary-light: 48 90% 60%;
-    --primary-dark: 42 100% 35%;
+    /* Status colors for invoice workflow */
+    --status-pending: 48 96% 53%;
+    --status-approved: 142 71% 45%;
+    --status-rejected: 0 84% 60%;
+    --status-review: 262 52% 47%;
 
-    /* Secondary: Complementary orange accent */
-    --secondary: 25 95% 48%;
-    --secondary-foreground: 0 0% 98%;
-    --secondary-light: 25 95% 58%;
-    --secondary-muted: 45 40% 95%;
-
-    /* Status colors for workflow states */
-    --status-pending: 35 85% 55%;
-    --status-pending-foreground: 35 50% 15%;
-    --status-approved: 142 70% 35%;
-    --status-approved-foreground: 0 0% 98%;
-    --status-rejected: 0 84% 45%;
-    --status-rejected-foreground: 0 0% 98%;
-    --status-processing: 45 80% 45%;
-    --status-processing-foreground: 0 0% 0%;
-
-    /* Enterprise grays */
-    --muted: 215 15% 96%;
-    --muted-foreground: 215 25% 45%;
-
-    --accent: 215 15% 96%;
-    --accent-foreground: 215 25% 20%;
-
-    --destructive: 0 84% 45%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 215 15% 88%;
-    --input: 215 15% 94%;
-    --ring: 45 95% 50%;
-
+    /* Enterprise UI elements */
+    --border: 215 25% 88%;
+    --input: 215 25% 88%;
+    --ring: 203 89% 25%;
+    
+    /* Radius system */
     --radius: 0.5rem;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(203 89% 25%), hsl(203 89% 35%));
+    --gradient-secondary: linear-gradient(135deg, hsl(28 74% 55%), hsl(28 74% 65%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(215 25% 98%));
 
-    /* Enterprise gradients and effects - updated for yellow theme */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-light)));
-    --shadow-enterprise: 0 4px 20px -2px hsl(var(--primary) / 0.25);
-    --shadow-card: 0 2px 8px -1px hsl(var(--border) / 0.5);
+    /* Shadows - Oil & gas industrial feel */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
 
-    /* Animation and transition tokens */
-    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-enterprise: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Accessibility: Focus and interaction states */
-    --focus-ring: 2px solid hsl(var(--ring));
-    --focus-offset: 2px;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 45 95% 50%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 45 95% 50%;
+    /* Accessibility */
+    --focus-ring: 0 0 0 3px hsl(203 89% 25% / 0.2);
   }
 
   .dark {
-    --background: 215 25% 15%;
-    --foreground: 0 0% 98%;
-
-    --card: 215 25% 15%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 215 25% 15%;
-    --popover-foreground: 0 0% 98%;
-
-    /* Primary: Brighter amber for dark mode with white text */
-    --primary: 48 100% 65%;
-    --primary-foreground: 0 0% 0%;
-    --primary-light: 50 100% 75%;
-    --primary-dark: 45 95% 55%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 48 100% 65%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 48 100% 65%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 48 100% 65%;
+    /* Dark mode - maintains WCAG AA compliance */
+    --background: 222 47% 8%;
+    --foreground: 215 25% 95%;
+    
+    --card: 222 47% 11%;
+    --card-foreground: 215 25% 95%;
+    
+    --popover: 222 47% 11%;
+    --popover-foreground: 215 25% 95%;
+    
+    --primary: 203 89% 45%;
+    --primary-variant: 203 89% 55%;
+    --primary-foreground: 222 47% 8%;
+    
+    --secondary: 28 74% 55%;
+    --secondary-foreground: 222 47% 8%;
+    
+    --muted: 215 15% 18%;
+    --muted-foreground: 215 15% 65%;
+    
+    --accent: 203 89% 18%;
+    --accent-foreground: 203 89% 80%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    --border: 215 15% 20%;
+    --input: 215 15% 20%;
+    --ring: 203 89% 45%;
   }
 }
 
@@ -127,19 +118,18 @@
   * {
     @apply border-border;
   }
-
+  
   body {
     @apply bg-background text-foreground;
   }
 
-  /* WCAG 2.2 AA Accessibility Enhancements */
+  /* Focus visible accessibility */
   *:focus-visible {
-    outline: var(--focus-ring);
-    outline-offset: var(--focus-offset);
-    border-radius: var(--radius);
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 
-  /* Reduce motion for users who prefer it */
+  /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     * {
       animation-duration: 0.01ms !important;
@@ -148,73 +138,51 @@
     }
   }
 
-  /* High contrast mode support */
+  /* High contrast mode */
   @media (prefers-contrast: high) {
     :root {
-      --border: 215 25% 40%;
-      --ring: 215 25% 15%;
+      --border: 215 25% 50%;
+      --ring: 203 89% 20%;
     }
-  }
-  
-  /* Hotfix: stop decorative overlays from intercepting taps/clicks */
-  [data-decorative="true"], 
-  .decorative, 
-  .bg-overlay, 
-  .gradient-overlay {
-    pointer-events: none !important;
-  }
-  
-  /* Ensure interactive elements remain clickable */
-  html, body {
-    height: 100%;
-  }
-  
-  header, 
-  footer, 
-  a, 
-  button, 
-  input, 
-  select, 
-  textarea {
-    pointer-events: auto;
   }
 }
 
+/* Decorative overlays should never intercept clicks */
+html, body { height: 100%; }
+[data-decorative="true"], .decorative, .bg-overlay, .gradient-overlay { 
+  pointer-events: none !important; 
+}
+header, footer, a, button, input, select, textarea, [role="button"], [role="link"] { 
+  pointer-events: auto; 
+}
+
 @layer components {
-  /* Enterprise component patterns */
+  /* Enterprise button styles */
   .btn-enterprise {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
-    @apply disabled:pointer-events-none disabled:opacity-50;
-    min-height: 44px; /* WCAG touch target size */
-    min-width: 44px;
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200;
+    @apply shadow-md hover:shadow-lg active:shadow-sm;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
   }
 
   .btn-primary {
-    @apply btn-enterprise bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg;
-    background: var(--gradient-primary);
-    box-shadow: var(--shadow-enterprise);
-    font-weight: 600;
+    @apply btn-enterprise bg-primary text-primary-foreground;
+    @apply hover:bg-primary/90;
   }
 
   .btn-secondary {
-    @apply btn-enterprise bg-secondary text-secondary-foreground hover:bg-secondary/90;
+    @apply btn-enterprise bg-secondary text-secondary-foreground;
+    @apply hover:bg-secondary/90;
   }
 
+  /* Card styles */
   .card-enterprise {
-    @apply rounded-lg border bg-card p-6 text-card-foreground animate-fade-in;
-    box-shadow: var(--shadow-card);
-    transition: var(--transition-smooth);
+    @apply rounded-lg border bg-card text-card-foreground shadow-md;
+    @apply transition-shadow duration-200 hover:shadow-lg;
   }
 
-  .card-enterprise:hover {
-    box-shadow: var(--shadow-enterprise);
-    transform: translateY(-1px);
-  }
-
-  /* Interactive Elements */
+  /* Story/feature hover effects */
   .story-link {
-    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
+    @apply block transition-transform duration-200 hover:-translate-y-1;
   }
 
   .hover-scale {
@@ -222,45 +190,56 @@
   }
 
   .hover-lift {
-    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+    @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-lg;
   }
 
+  /* Glass morphism effect for overlays */
   .glass-effect {
-    @apply backdrop-blur-sm bg-black/20 border border-black/30 text-black;
+    @apply bg-background/80 backdrop-blur-md border border-border/50;
   }
 
+  /* Loading shimmer animation */
   .loading-shimmer {
-    @apply relative overflow-hidden;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
-  .loading-shimmer::after {
-    @apply absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent;
-    content: '';
-    animation: shimmer 2s infinite;
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
   }
 
   /* Status indicators */
   .status-pending {
-    @apply bg-status-pending text-status-pending-foreground;
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400;
   }
 
   .status-approved {
-    @apply bg-status-approved text-status-approved-foreground;
+    @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
   }
 
   .status-rejected {
-    @apply bg-status-rejected text-status-rejected-foreground;
+    @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
   }
 
-  .status-processing {
-    @apply bg-status-processing text-status-processing-foreground;
+  .status-review {
+    @apply bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400;
   }
 
-  /* Enhanced interactive states */
+  /* Enhanced card with hover effect for interactive items */
   .interactive-card {
-    @apply card-enterprise hover-lift cursor-pointer border-2 border-transparent hover:border-primary/30 transition-all duration-300;
+    @apply card-enterprise cursor-pointer;
+    @apply hover:-translate-y-1 hover:border-primary/50;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Metric/KPI card style */
   .metric-card {
     @apply card-enterprise bg-gradient-to-br from-card to-card/50 relative overflow-hidden;
   }

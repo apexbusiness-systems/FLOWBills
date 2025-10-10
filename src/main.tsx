@@ -7,9 +7,7 @@ import { performanceMonitor } from "./lib/performance-monitor";
 import { queryOptimizer } from "./lib/query-optimizer";
 
 // Apply CSP nonce at runtime
-console.log('[FlowBills] Initializing application...');
 applySPNonce();
-console.log('[FlowBills] CSP nonce applied');
 
 // Initialize performance monitoring ONCE - only in production
 if (!import.meta.env.DEV) {
@@ -46,18 +44,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('[FlowBills] Mounting React application...');
 const rootElement = document.getElementById("root");
-if (!rootElement) {
-  console.error('[FlowBills] Root element not found!');
-} else {
-  console.log('[FlowBills] Root element found, creating React root...');
-  try {
-    const root = createRoot(rootElement);
-    console.log('[FlowBills] Rendering App component...');
-    root.render(<App />);
-    console.log('[FlowBills] App component rendered successfully');
-  } catch (error) {
-    console.error('[FlowBills] Error rendering app:', error);
-  }
-}
+if (!rootElement) throw new Error("Root element not found");
+
+createRoot(rootElement).render(<App />);
