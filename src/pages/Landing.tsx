@@ -70,11 +70,11 @@ const Landing = () => {
               Contact
             </Button>
             {user ? (
-              <Button onClick={() => navigate('/dashboard')} className="btn-primary shadow-lg">
+              <Button onClick={() => navigate('/dashboard')} className="btn-secondary shadow-lg">
                 Dashboard
               </Button>
             ) : (
-              <Button onClick={() => navigate('/auth')} className="btn-primary shadow-lg">
+              <Button onClick={() => navigate('/auth')} className="btn-secondary shadow-lg">
                 Sign In
               </Button>
             )}
@@ -95,7 +95,7 @@ const Landing = () => {
         <div className="relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
             AI-Powered Invoice Processing for
-            <span className="text-primary block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent drop-shadow-none">Canadian Oil & Gas</span>
+            <span className="text-secondary block drop-shadow-md">Canadian Oil & Gas</span>
           </h1>
           
           <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
@@ -104,7 +104,7 @@ const Landing = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" onClick={() => handleCTA('demo')} className="btn-primary text-lg px-8 py-6 hover:scale-105 transition-all duration-300">
+            <Button size="lg" onClick={() => handleCTA('demo')} className="btn-secondary text-lg px-8 py-6 hover:scale-105 transition-all duration-300">
               Book Free Demo
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
@@ -117,15 +117,15 @@ const Landing = () => {
           {/* Key Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <div className="text-3xl font-bold text-primary mb-2 drop-shadow-md">95%</div>
+              <div className="text-3xl font-bold text-secondary mb-2 drop-shadow-md">95%</div>
               <div className="text-white/90">Straight-Through Processing</div>
             </div>
             <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <div className="text-3xl font-bold text-primary mb-2 drop-shadow-md">80%</div>
+              <div className="text-3xl font-bold text-secondary mb-2 drop-shadow-md">80%</div>
               <div className="text-white/90">Cost Reduction</div>
             </div>
             <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <div className="text-3xl font-bold text-primary mb-2 drop-shadow-md">24/7</div>
+              <div className="text-3xl font-bold text-secondary mb-2 drop-shadow-md">24/7</div>
               <div className="text-white/90">Processing Uptime</div>
             </div>
           </div>
