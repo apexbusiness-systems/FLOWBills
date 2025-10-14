@@ -1,0 +1,84 @@
+name: P14 — Weekly DR Drill
+on:
+  schedule:
+    # Every Sunday at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: 'us-east-1'
+  SUPABASE_PROJECT_ID: 'yvyjzlbosmtesldczhnm'
+
+jobs:
+  dr-drill:
+    name: 🔧 Disaster Recovery Drill
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Make DR drill script executable
+        run: chmod +x scripts/dr-drill.sh
+
+      - name: Run DR drill
+        id: dr-drill
+        run: |
+          ./scripts/dr-drill.sh
+        env:
+          BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+
+      - name: Upload DR drill report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dr-drill-report-${{ github.run_number }}
+          path: dr-drill-report-*.json
+          retention-days: 90
+
+      - name: Notify on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#infrastructure'
+          text: |
+            🚨 DR Drill Failed
+            
+            Weekly disaster recovery drill has failed.
+            Run: ${{ github.run_number }}
+            Workflow: ${{ github.workflow }}
+            
+            Action required: Review DR drill logs and fix issues.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Notify on success
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'success'
+          channel: '#infrastructure'
+          text: |
+            ✅ DR Drill Completed Successfully
+            
+            Weekly disaster recovery drill passed all tests.
+            Run: ${{ github.run_number }}
+            
+            All backup restoration procedures validated.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

@@ -1,0 +1,111 @@
+name: P17 — Daily Monitoring Report
+on:
+  schedule:
+    # Daily at 09:00 America/Edmonton (16:00 UTC in summer, 17:00 UTC in winter)
+    # Using 16:00 UTC for summer (DST) schedule
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+
+env:
+  SUPABASE_PROJECT_ID: 'yvyjzlbosmtesldczhnm'
+
+jobs:
+  generate-daily-report:
+    name: 📊 Generate Daily Report
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Trigger daily report generation
+        id: report
+        run: |
+          RESPONSE=$(curl -X POST \
+            "https://${{ env.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/daily-report" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json")
+          
+          echo "Report generated:"
+          echo "$RESPONSE" | jq '.'
+          
+          # Extract formatted report
+          FORMATTED_REPORT=$(echo "$RESPONSE" | jq -r '.formatted_report')
+          
+          # Save to file
+          echo "$FORMATTED_REPORT" > daily-report.txt
+          
+          # Also save JSON
+          echo "$RESPONSE" | jq '.metrics' > daily-metrics.json
+
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-report-${{ github.run_number }}
+          path: |
+            daily-report.txt
+            daily-metrics.json
+          retention-days: 90
+
+      - name: Post to Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'custom'
+          channel: '#daily-reports'
+          custom_payload: |
+            {
+              "text": "📊 Daily Report — $(date +%Y-%m-%d)",
+              "attachments": [{
+                "color": "good",
+                "text": "$(cat daily-report.txt)"
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Check SLO violations
+        run: |
+          AVAILABILITY=$(jq -r '.availability' daily-metrics.json)
+          P95_LATENCY=$(jq -r '.p95_latency_ms' daily-metrics.json)
+          ERROR_RATIO=$(jq -r '.error_ratio' daily-metrics.json)
+          STP_RATE=$(jq -r '.stp_rate' daily-metrics.json)
+          
+          VIOLATIONS=""
+          
+          if (( $(echo "$AVAILABILITY < 99.5" | bc -l) )); then
+            VIOLATIONS="${VIOLATIONS}\n⚠️ Availability: ${AVAILABILITY}% (SLO: ≥99.5%)"
+          fi
+          
+          if (( $(echo "$P95_LATENCY > 800" | bc -l) )); then
+            VIOLATIONS="${VIOLATIONS}\n⚠️ P95 Latency: ${P95_LATENCY}ms (SLO: ≤800ms)"
+          fi
+          
+          if (( $(echo "$ERROR_RATIO > 0.5" | bc -l) )); then
+            VIOLATIONS="${VIOLATIONS}\n⚠️ Error Ratio: ${ERROR_RATIO}% (SLO: ≤0.5%)"
+          fi
+          
+          if (( $(echo "$STP_RATE < 85" | bc -l) )); then
+            VIOLATIONS="${VIOLATIONS}\n⚠️ STP Rate: ${STP_RATE}% (Target: ≥85%)"
+          fi
+          
+          if [ -n "$VIOLATIONS" ]; then
+            echo "::warning::SLO violations detected:${VIOLATIONS}"
+          else
+            echo "✅ All SLOs met"
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#alerts'
+          text: |
+            🚨 Daily Report Generation Failed
+            
+            Failed to generate daily monitoring report.
+            Run: ${{ github.run_number }}
+            
+            Action required: Check workflow logs.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
