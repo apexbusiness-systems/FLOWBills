@@ -1,6 +1,5 @@
 // P4: Idempotency Middleware for Edge Functions
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createHash } from "https://deno.land/std@0.168.0/hash/mod.ts";
 
 export interface IdempotentResponse {
   status: number;
@@ -36,9 +35,11 @@ export async function withIdempotency(
 
   // Hash request body for conflict detection
   const body = await req.text();
-  const hash = createHash("sha256");
-  hash.update(body);
-  const requestHash = hash.toString();
+  const encoder = new TextEncoder();
+  const data = encoder.encode(body);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const requestHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
   // Check for existing idempotency key
   const { data: existing } = await supabase
