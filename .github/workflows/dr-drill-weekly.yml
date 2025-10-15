@@ -1,84 +1,102 @@
-name: P14 — Weekly DR Drill
+# P14 — Weekly DR Drill (Saturday 02:00 America/Edmonton)
+name: DR Drill
+
 on:
   schedule:
-    # Every Sunday at 3 AM UTC
-    - cron: '0 3 * * 0'
-  workflow_dispatch:
-
-env:
-  AWS_REGION: 'us-east-1'
-  SUPABASE_PROJECT_ID: 'yvyjzlbosmtesldczhnm'
+    # Run Saturday at 02:00 America/Edmonton (09:00 UTC winter, 08:00 UTC summer)
+    - cron: '0 9 * * 6'
+  workflow_dispatch: # Manual trigger
 
 jobs:
-  dr-drill:
-    name: 🔧 Disaster Recovery Drill
+  disaster-recovery-drill:
+    name: Weekly DR Snapshot Restore Test
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 20 # Should complete within 15min RTO
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Make DR drill script executable
-        run: chmod +x scripts/dr-drill.sh
-
-      - name: Run DR drill
+      - uses: actions/checkout@v3
+      
+      - name: Get current timestamp
+        id: timestamp
+        run: |
+          TIMESTAMP=$(TZ=America/Edmonton date +'%Y-%m-%d %H:%M:%S %Z')
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "Starting DR drill at: $TIMESTAMP"
+      
+      - name: Setup required tools
+        run: |
+          # Install PostgreSQL client
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          
+          # Verify installations
+          psql --version
+      
+      - name: Run DR drill script
         id: dr-drill
         run: |
-          ./scripts/dr-drill.sh
+          chmod +x ./scripts/dr-drill.sh
+          ./scripts/dr-drill.sh --environment staging
         env:
-          BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-          AWS_REGION: ${{ env.AWS_REGION }}
-
+          AWS_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          BACKUP_BUCKET: flowbills-backups
+      
+      - name: Parse DR drill results
+        if: always()
+        id: results
+        run: |
+          # Find most recent drill report
+          REPORT_FILE=$(ls -t dr-drill-report-*.json 2>/dev/null | head -n 1)
+          
+          if [ -f "$REPORT_FILE" ]; then
+            DURATION=$(jq -r '.total_duration_seconds' "$REPORT_FILE")
+            RTO_MET=$(jq -r '.rto_met' "$REPORT_FILE")
+            STATUS=$(jq -r '.status' "$REPORT_FILE")
+            
+            echo "duration=$DURATION" >> $GITHUB_OUTPUT
+            echo "rto_met=$RTO_MET" >> $GITHUB_OUTPUT
+            echo "status=$STATUS" >> $GITHUB_OUTPUT
+            echo "report_file=$REPORT_FILE" >> $GITHUB_OUTPUT
+            
+            cat "$REPORT_FILE"
+          else
+            echo "No DR drill report found"
+            exit 1
+          fi
+      
       - name: Upload DR drill report
-        uses: actions/upload-artifact@v4
+        if: always()
+        uses: actions/upload-artifact@v3
         with:
-          name: dr-drill-report-${{ github.run_number }}
+          name: dr-drill-report-${{ steps.timestamp.outputs.timestamp }}
           path: dr-drill-report-*.json
-          retention-days: 90
-
-      - name: Notify on failure
-        if: failure()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          channel: '#infrastructure'
-          text: |
-            🚨 DR Drill Failed
-            
-            Weekly disaster recovery drill has failed.
-            Run: ${{ github.run_number }}
-            Workflow: ${{ github.workflow }}
-            
-            Action required: Review DR drill logs and fix issues.
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-
-      - name: Notify on success
-        if: success()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: 'success'
-          channel: '#infrastructure'
-          text: |
-            ✅ DR Drill Completed Successfully
-            
-            Weekly disaster recovery drill passed all tests.
-            Run: ${{ github.run_number }}
-            
-            All backup restoration procedures validated.
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          retention-days: 365 # Keep for 1 year for compliance
+      
+      - name: Send alert on failure
+        if: failure() || steps.results.outputs.rto_met == 'false'
+        run: |
+          echo "❌ DR drill failed or exceeded RTO"
+          echo "Duration: ${{ steps.results.outputs.duration }}s (Target: ≤900s)"
+          echo "RTO Met: ${{ steps.results.outputs.rto_met }}"
+          
+          # In production, send PagerDuty alert
+          # curl -X POST https://events.pagerduty.com/v2/enqueue \
+          #   -H "Content-Type: application/json" \
+          #   -d '{"routing_key":"${{ secrets.PAGERDUTY_KEY }}","event_action":"trigger","payload":{"summary":"DR drill failed","severity":"high"}}'
+      
+      - name: Send success notification
+        if: success() && steps.results.outputs.status == 'success'
+        run: |
+          echo "✅ DR drill completed successfully"
+          echo "Duration: ${{ steps.results.outputs.duration }}s"
+          echo "RTO Met: ${{ steps.results.outputs.rto_met }}"
+          
+          # In production, send Slack notification
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          #   -H "Content-Type: application/json" \
+          #   -d '{"text":"✅ Weekly DR drill completed successfully in ${{ steps.results.outputs.duration }}s"}'

@@ -59,3 +59,9 @@ verify_jwt = false
 
 [functions.crm-sync]
 verify_jwt = true
+
+[functions.dsar-export]
+verify_jwt = true
+
+[functions.dsar-delete]
+verify_jwt = true

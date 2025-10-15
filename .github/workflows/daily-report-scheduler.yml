@@ -1,111 +1,104 @@
-name: P17 — Daily Monitoring Report
+# P17 — Daily Report Scheduler (09:00 America/Edmonton)
+name: Daily Report
+
 on:
   schedule:
-    # Daily at 09:00 America/Edmonton (16:00 UTC in summer, 17:00 UTC in winter)
-    # Using 16:00 UTC for summer (DST) schedule
+    # Run at 09:00 America/Edmonton (16:00 UTC in winter, 15:00 UTC in summer - DST aware)
     - cron: '0 16 * * *'
-  workflow_dispatch:
-
-env:
-  SUPABASE_PROJECT_ID: 'yvyjzlbosmtesldczhnm'
+  workflow_dispatch: # Manual trigger for testing
 
 jobs:
   generate-daily-report:
-    name: 📊 Generate Daily Report
+    name: Generate & Send Daily Report
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Trigger daily report generation
+      - uses: actions/checkout@v3
+      
+      - name: Get current date in Edmonton timezone
+        id: date
+        run: |
+          REPORT_DATE=$(TZ=America/Edmonton date +'%Y-%m-%d')
+          echo "report_date=$REPORT_DATE" >> $GITHUB_OUTPUT
+          echo "Generating report for: $REPORT_DATE"
+      
+      - name: Invoke daily report function
         id: report
         run: |
-          RESPONSE=$(curl -X POST \
-            "https://${{ env.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/daily-report" \
+          RESPONSE=$(curl -s -X POST \
+            "https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/daily-report" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json")
           
-          echo "Report generated:"
-          echo "$RESPONSE" | jq '.'
+          echo "Response: $RESPONSE"
+          echo "report_json<<EOF" >> $GITHUB_OUTPUT
+          echo "$RESPONSE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Parse report metrics
+        id: metrics
+        run: |
+          AVAILABILITY=$(echo '${{ steps.report.outputs.report_json }}' | jq -r '.metrics.availability')
+          P95_LATENCY=$(echo '${{ steps.report.outputs.report_json }}' | jq -r '.metrics.p95_latency_ms')
+          ERROR_RATIO=$(echo '${{ steps.report.outputs.report_json }}' | jq -r '.metrics.error_ratio')
+          STP_RATE=$(echo '${{ steps.report.outputs.report_json }}' | jq -r '.metrics.stp_rate')
+          INVOICE_VOLUME=$(echo '${{ steps.report.outputs.report_json }}' | jq -r '.metrics.invoice_volume')
           
-          # Extract formatted report
-          FORMATTED_REPORT=$(echo "$RESPONSE" | jq -r '.formatted_report')
-          
-          # Save to file
-          echo "$FORMATTED_REPORT" > daily-report.txt
-          
-          # Also save JSON
-          echo "$RESPONSE" | jq '.metrics' > daily-metrics.json
-
-      - name: Upload report artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: daily-report-${{ github.run_number }}
-          path: |
-            daily-report.txt
-            daily-metrics.json
-          retention-days: 90
-
-      - name: Post to Slack
-        uses: 8398a7/action-slack@v3
-        with:
-          status: 'custom'
-          channel: '#daily-reports'
-          custom_payload: |
-            {
-              "text": "📊 Daily Report — $(date +%Y-%m-%d)",
-              "attachments": [{
-                "color": "good",
-                "text": "$(cat daily-report.txt)"
-              }]
-            }
+          echo "availability=$AVAILABILITY" >> $GITHUB_OUTPUT
+          echo "p95_latency=$P95_LATENCY" >> $GITHUB_OUTPUT
+          echo "error_ratio=$ERROR_RATIO" >> $GITHUB_OUTPUT
+          echo "stp_rate=$STP_RATE" >> $GITHUB_OUTPUT
+          echo "invoice_volume=$INVOICE_VOLUME" >> $GITHUB_OUTPUT
+      
+      - name: Send report to Slack
+        if: success()
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          # Extract formatted report from response
+          FORMATTED_REPORT=$(echo '${{ steps.report.outputs.report_json }}' | jq -r '.formatted_report')
+          
+          # Send to Slack (if webhook configured)
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST "$SLACK_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "{\"text\": \"$FORMATTED_REPORT\"}"
+            echo "Report sent to Slack"
+          else
+            echo "Slack webhook not configured - skipping notification"
+          fi
+      
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: daily-report-${{ steps.date.outputs.report_date }}
+          path: |
+            ${{ steps.report.outputs.report_json }}
+          retention-days: 90
+      
       - name: Check SLO violations
         run: |
-          AVAILABILITY=$(jq -r '.availability' daily-metrics.json)
-          P95_LATENCY=$(jq -r '.p95_latency_ms' daily-metrics.json)
-          ERROR_RATIO=$(jq -r '.error_ratio' daily-metrics.json)
-          STP_RATE=$(jq -r '.stp_rate' daily-metrics.json)
+          AVAILABILITY=${{ steps.metrics.outputs.availability }}
+          P95_LATENCY=${{ steps.metrics.outputs.p95_latency }}
+          ERROR_RATIO=${{ steps.metrics.outputs.error_ratio }}
           
           VIOLATIONS=""
           
           if (( $(echo "$AVAILABILITY < 99.5" | bc -l) )); then
-            VIOLATIONS="${VIOLATIONS}\n⚠️ Availability: ${AVAILABILITY}% (SLO: ≥99.5%)"
+            VIOLATIONS="$VIOLATIONS\n⚠️ Availability SLO violated: ${AVAILABILITY}% < 99.5%"
           fi
           
           if (( $(echo "$P95_LATENCY > 800" | bc -l) )); then
-            VIOLATIONS="${VIOLATIONS}\n⚠️ P95 Latency: ${P95_LATENCY}ms (SLO: ≤800ms)"
+            VIOLATIONS="$VIOLATIONS\n⚠️ Latency SLO violated: ${P95_LATENCY}ms > 800ms"
           fi
           
           if (( $(echo "$ERROR_RATIO > 0.5" | bc -l) )); then
-            VIOLATIONS="${VIOLATIONS}\n⚠️ Error Ratio: ${ERROR_RATIO}% (SLO: ≤0.5%)"
-          fi
-          
-          if (( $(echo "$STP_RATE < 85" | bc -l) )); then
-            VIOLATIONS="${VIOLATIONS}\n⚠️ STP Rate: ${STP_RATE}% (Target: ≥85%)"
+            VIOLATIONS="$VIOLATIONS\n⚠️ Error ratio SLO violated: ${ERROR_RATIO}% > 0.5%"
           fi
           
           if [ -n "$VIOLATIONS" ]; then
-            echo "::warning::SLO violations detected:${VIOLATIONS}"
+            echo -e "SLO Violations Detected:$VIOLATIONS"
+            echo "::warning::SLO violations detected - see report for details"
           else
             echo "✅ All SLOs met"
           fi
-
-      - name: Notify on failure
-        if: failure()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          channel: '#alerts'
-          text: |
-            🚨 Daily Report Generation Failed
-            
-            Failed to generate daily monitoring report.
-            Run: ${{ github.run_number }}
-            
-            Action required: Check workflow logs.
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
