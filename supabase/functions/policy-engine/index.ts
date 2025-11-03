@@ -1,7 +1,39 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { toMessage } from "../_shared/errors.ts";
-...
+import { corsHeaders } from '../_shared/cors.ts';
+
+// Type definitions
+interface PolicyRequest {
+  invoice_id: string;
+  invoice_data: {
+    amount: number;
+    vendor_id?: string;
+    confidence_score?: number;
+  };
+  policy_types?: string[];
+}
+
+interface PolicyResult {
+  policy_id: string;
+  policy_name: string;
+  triggered: boolean;
+  actions: any;
+  details?: string;
+}
+
+interface PolicyEngineResponse {
+  success: boolean;
+  invoice_id: string;
+  policies_evaluated: PolicyResult[];
+  final_decision: 'auto_approve' | 'require_approval' | 'flag_for_review' | 'block';
+  required_approvals: number;
+  routing_reason: string;
   error?: string;
+}
+
+interface Vendor {
+  id: string;
+  bank_account: string | null;
 }
 
 Deno.serve(async (req) => {
