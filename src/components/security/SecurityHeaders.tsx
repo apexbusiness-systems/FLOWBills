@@ -63,9 +63,9 @@ const SECURITY_HEADERS = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=()',
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-  'Cross-Origin-Embedder-Policy': 'require-corp',
+  'Cross-Origin-Embedder-Policy': 'credentialless',
   'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Resource-Policy': 'same-origin'
+  'Cross-Origin-Resource-Policy': 'cross-origin'
 };
 
 export const SecurityHeaders = () => {
