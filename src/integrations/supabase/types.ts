@@ -14,608 +14,177 @@ export type Database = {
   }
   public: {
     Tables: {
-      approvals: {
+      activities: {
         Row: {
-          amount_approved: number | null
-          approval_date: string | null
-          approval_level: number | null
-          approver_id: string | null
-          auto_approved: boolean | null
-          comments: string | null
-          created_at: string
-          id: string
-          invoice_id: string
-          status: Database["public"]["Enums"]["approval_status"] | null
-          updated_at: string
-        }
-        Insert: {
-          amount_approved?: number | null
-          approval_date?: string | null
-          approval_level?: number | null
-          approver_id?: string | null
-          auto_approved?: boolean | null
-          comments?: string | null
-          created_at?: string
-          id?: string
-          invoice_id: string
-          status?: Database["public"]["Enums"]["approval_status"] | null
-          updated_at?: string
-        }
-        Update: {
-          amount_approved?: number | null
-          approval_date?: string | null
-          approval_level?: number | null
-          approver_id?: string | null
-          auto_approved?: boolean | null
-          comments?: string | null
-          created_at?: string
-          id?: string
-          invoice_id?: string
-          status?: Database["public"]["Enums"]["approval_status"] | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "approvals_invoice_id_fkey"
-            columns: ["invoice_id"]
-            isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      audit_logs: {
-        Row: {
-          action: string
-          created_at: string
-          entity_id: string
+          activity_type: string
+          created_at: string | null
+          description: string
+          entity_id: string | null
           entity_type: string
           id: string
-          ip_address: unknown | null
-          new_values: Json | null
-          old_values: Json | null
+          ip_address: unknown
+          metadata: Json | null
           user_agent: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
-          action: string
-          created_at?: string
-          entity_id: string
+          activity_type: string
+          created_at?: string | null
+          description: string
+          entity_id?: string | null
           entity_type: string
           id?: string
-          ip_address?: unknown | null
-          new_values?: Json | null
-          old_values?: Json | null
+          ip_address?: unknown
+          metadata?: Json | null
           user_agent?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
-          action?: string
-          created_at?: string
-          entity_id?: string
+          activity_type?: string
+          created_at?: string | null
+          description?: string
+          entity_id?: string | null
           entity_type?: string
           id?: string
-          ip_address?: unknown | null
-          new_values?: Json | null
-          old_values?: Json | null
+          ip_address?: unknown
+          metadata?: Json | null
           user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      billing_customers: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          stripe_customer_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          stripe_customer_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          stripe_customer_id?: string
-          updated_at?: string
           user_id?: string
         }
         Relationships: []
       }
-      billing_events: {
-        Row: {
-          created_at: string
-          event_data: Json
-          event_type: string
-          id: string
-          processed_at: string
-          stripe_event_id: string
-        }
-        Insert: {
-          created_at?: string
-          event_data: Json
-          event_type: string
-          id?: string
-          processed_at?: string
-          stripe_event_id: string
-        }
-        Update: {
-          created_at?: string
-          event_data?: Json
-          event_type?: string
-          id?: string
-          processed_at?: string
-          stripe_event_id?: string
-        }
-        Relationships: []
-      }
-      billing_subscriptions: {
-        Row: {
-          cancel_at_period_end: boolean
-          created_at: string
-          current_period_end: string
-          current_period_start: string
-          customer_id: string
-          id: string
-          plan_id: string
-          status: string
-          stripe_price_id: string
-          stripe_subscription_id: string
-          updated_at: string
-        }
-        Insert: {
-          cancel_at_period_end?: boolean
-          created_at?: string
-          current_period_end: string
-          current_period_start: string
-          customer_id: string
-          id?: string
-          plan_id: string
-          status: string
-          stripe_price_id: string
-          stripe_subscription_id: string
-          updated_at?: string
-        }
-        Update: {
-          cancel_at_period_end?: boolean
-          created_at?: string
-          current_period_end?: string
-          current_period_start?: string
-          customer_id?: string
-          id?: string
-          plan_id?: string
-          status?: string
-          stripe_price_id?: string
-          stripe_subscription_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "billing_subscriptions_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "billing_customers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      billing_usage: {
-        Row: {
-          created_at: string
-          customer_id: string
-          id: string
-          metric: string
-          period_end: string
-          period_start: string
-          quantity: number
-          reported_to_stripe_at: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          customer_id: string
-          id?: string
-          metric: string
-          period_end: string
-          period_start: string
-          quantity: number
-          reported_to_stripe_at?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          customer_id?: string
-          id?: string
-          metric?: string
-          period_end?: string
-          period_start?: string
-          quantity?: number
-          reported_to_stripe_at?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "billing_usage_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "billing_customers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       compliance_records: {
         Row: {
-          audit_notes: string | null
-          created_at: string
-          entity_id: string
-          entity_type: string
-          id: string
-          last_audit_date: string | null
-          next_audit_date: string | null
-          regulation: string
-          risk_level: Database["public"]["Enums"]["risk_level"] | null
-          status: string | null
-          updated_at: string
-        }
-        Insert: {
-          audit_notes?: string | null
-          created_at?: string
-          entity_id: string
-          entity_type: string
-          id?: string
-          last_audit_date?: string | null
-          next_audit_date?: string | null
-          regulation: string
-          risk_level?: Database["public"]["Enums"]["risk_level"] | null
-          status?: string | null
-          updated_at?: string
-        }
-        Update: {
-          audit_notes?: string | null
-          created_at?: string
-          entity_id?: string
-          entity_type?: string
-          id?: string
-          last_audit_date?: string | null
-          next_audit_date?: string | null
-          regulation?: string
-          risk_level?: Database["public"]["Enums"]["risk_level"] | null
-          status?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      consent_logs: {
-        Row: {
-          consent_given: boolean
-          consent_text: string | null
-          consent_type: Database["public"]["Enums"]["consent_type"]
-          created_at: string
-          email: string | null
-          id: string
-          ip_address: unknown | null
-          phone: string | null
-          user_agent: string | null
-          user_id: string | null
-          withdrawal_date: string | null
-        }
-        Insert: {
-          consent_given: boolean
-          consent_text?: string | null
-          consent_type: Database["public"]["Enums"]["consent_type"]
-          created_at?: string
-          email?: string | null
-          id?: string
-          ip_address?: unknown | null
-          phone?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-          withdrawal_date?: string | null
-        }
-        Update: {
-          consent_given?: boolean
-          consent_text?: string | null
-          consent_type?: Database["public"]["Enums"]["consent_type"]
-          created_at?: string
-          email?: string | null
-          id?: string
-          ip_address?: unknown | null
-          phone?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-          withdrawal_date?: string | null
-        }
-        Relationships: []
-      }
-      consent_rate_limits: {
-        Row: {
-          attempt_count: number
-          blocked_until: string | null
-          created_at: string
-          id: string
-          ip_address: unknown
-          last_attempt_at: string
-        }
-        Insert: {
-          attempt_count?: number
-          blocked_until?: string | null
-          created_at?: string
-          id?: string
-          ip_address: unknown
-          last_attempt_at?: string
-        }
-        Update: {
-          attempt_count?: number
-          blocked_until?: string | null
-          created_at?: string
-          id?: string
-          ip_address?: unknown
-          last_attempt_at?: string
-        }
-        Relationships: []
-      }
-      country_validations: {
-        Row: {
-          country_code: string
-          created_at: string
-          document_id: string | null
-          error_messages: Json | null
-          id: string
-          rule_type: Database["public"]["Enums"]["validation_rule_type"]
-          tenant_id: string
-          validation_metadata: Json | null
-          validation_passed: boolean
-          warnings: Json | null
-        }
-        Insert: {
-          country_code: string
-          created_at?: string
-          document_id?: string | null
-          error_messages?: Json | null
-          id?: string
-          rule_type: Database["public"]["Enums"]["validation_rule_type"]
-          tenant_id?: string
-          validation_metadata?: Json | null
-          validation_passed: boolean
-          warnings?: Json | null
-        }
-        Update: {
-          country_code?: string
-          created_at?: string
-          document_id?: string | null
-          error_messages?: Json | null
-          id?: string
-          rule_type?: Database["public"]["Enums"]["validation_rule_type"]
-          tenant_id?: string
-          validation_metadata?: Json | null
-          validation_passed?: boolean
-          warnings?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "country_validations_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "einvoice_documents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      crm_sync_logs: {
-        Row: {
-          action: string
-          created_at: string
-          entity_data: Json | null
-          entity_id: string
-          entity_type: string
-          error_message: string | null
-          id: string
-          sync_status: string
-          synced_at: string | null
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          entity_data?: Json | null
-          entity_id: string
-          entity_type: string
-          error_message?: string | null
-          id?: string
-          sync_status?: string
-          synced_at?: string | null
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          entity_data?: Json | null
-          entity_id?: string
-          entity_type?: string
-          error_message?: string | null
-          id?: string
-          sync_status?: string
-          synced_at?: string | null
-        }
-        Relationships: []
-      }
-      einvoice_documents: {
-        Row: {
-          confidence_score: number | null
-          country_code: string | null
-          created_at: string
-          currency: string | null
-          document_id: string
+          completed_date: string | null
+          compliance_date: string
+          created_at: string | null
+          description: string | null
+          documents: Json | null
           due_date: string | null
-          format: Database["public"]["Enums"]["einvoice_format"]
           id: string
-          issue_date: string | null
-          receiver_id: string | null
-          sender_id: string | null
-          status: Database["public"]["Enums"]["einvoice_status"]
-          tenant_id: string
-          total_amount: number | null
-          updated_at: string
-          validation_results: Json | null
-          xml_content: string | null
+          record_type: string
+          responsible_party: string | null
+          risk_level: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          confidence_score?: number | null
-          country_code?: string | null
-          created_at?: string
-          currency?: string | null
-          document_id: string
+          completed_date?: string | null
+          compliance_date: string
+          created_at?: string | null
+          description?: string | null
+          documents?: Json | null
           due_date?: string | null
-          format: Database["public"]["Enums"]["einvoice_format"]
           id?: string
-          issue_date?: string | null
-          receiver_id?: string | null
-          sender_id?: string | null
-          status?: Database["public"]["Enums"]["einvoice_status"]
-          tenant_id?: string
-          total_amount?: number | null
-          updated_at?: string
-          validation_results?: Json | null
-          xml_content?: string | null
+          record_type: string
+          responsible_party?: string | null
+          risk_level?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          confidence_score?: number | null
-          country_code?: string | null
-          created_at?: string
-          currency?: string | null
-          document_id?: string
+          completed_date?: string | null
+          compliance_date?: string
+          created_at?: string | null
+          description?: string | null
+          documents?: Json | null
           due_date?: string | null
-          format?: Database["public"]["Enums"]["einvoice_format"]
           id?: string
-          issue_date?: string | null
-          receiver_id?: string | null
-          sender_id?: string | null
-          status?: Database["public"]["Enums"]["einvoice_status"]
-          tenant_id?: string
-          total_amount?: number | null
-          updated_at?: string
-          validation_results?: Json | null
-          xml_content?: string | null
+          record_type?: string
+          responsible_party?: string | null
+          risk_level?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
-      einvoice_policies: {
+      csp_violations: {
         Row: {
-          actions: Json
-          conditions: Json
-          created_at: string
+          blocked_uri: string | null
+          disposition: string | null
+          document_uri: string | null
           id: string
-          is_active: boolean
-          policy_name: string
-          policy_type: string
-          priority: number
-          tenant_id: string
-          updated_at: string
+          metadata: Json | null
+          original_policy: string | null
+          timestamp: string
+          user_agent: string | null
+          violated_directive: string | null
         }
         Insert: {
-          actions?: Json
-          conditions?: Json
-          created_at?: string
+          blocked_uri?: string | null
+          disposition?: string | null
+          document_uri?: string | null
           id?: string
-          is_active?: boolean
-          policy_name: string
-          policy_type: string
-          priority?: number
-          tenant_id?: string
-          updated_at?: string
+          metadata?: Json | null
+          original_policy?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          violated_directive?: string | null
         }
         Update: {
-          actions?: Json
-          conditions?: Json
-          created_at?: string
+          blocked_uri?: string | null
+          disposition?: string | null
+          document_uri?: string | null
           id?: string
-          is_active?: boolean
-          policy_name?: string
-          policy_type?: string
-          priority?: number
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      email_templates: {
-        Row: {
-          body_template: string
-          created_at: string
-          id: string
-          is_active: boolean
-          subject_template: string
-          template_name: string
-          template_type: string
-          updated_at: string
-          variables: Json | null
-        }
-        Insert: {
-          body_template: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          subject_template: string
-          template_name: string
-          template_type: string
-          updated_at?: string
-          variables?: Json | null
-        }
-        Update: {
-          body_template?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          subject_template?: string
-          template_name?: string
-          template_type?: string
-          updated_at?: string
-          variables?: Json | null
+          metadata?: Json | null
+          original_policy?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          violated_directive?: string | null
         }
         Relationships: []
       }
       exceptions: {
         Row: {
-          created_at: string
+          created_at: string | null
           description: string
-          exception_type: Database["public"]["Enums"]["exception_type"]
+          exception_type: string
           id: string
           invoice_id: string | null
           resolution_notes: string | null
           resolved_at: string | null
           resolved_by: string | null
-          severity: Database["public"]["Enums"]["risk_level"] | null
-          updated_at: string
+          severity: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          validation_rule_id: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description: string
-          exception_type: Database["public"]["Enums"]["exception_type"]
+          exception_type: string
           id?: string
           invoice_id?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
-          severity?: Database["public"]["Enums"]["risk_level"] | null
-          updated_at?: string
+          severity?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          validation_rule_id?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string
-          exception_type?: Database["public"]["Enums"]["exception_type"]
+          exception_type?: string
           id?: string
           invoice_id?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
-          severity?: Database["public"]["Enums"]["risk_level"] | null
-          updated_at?: string
+          severity?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          validation_rule_id?: string | null
         }
         Relationships: [
           {
@@ -625,215 +194,151 @@ export type Database = {
             referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      fraud_flags: {
-        Row: {
-          created_at: string
-          details: Json
-          entity_id: string
-          entity_type: string
-          flag_type: string
-          id: string
-          resolved_at: string | null
-          resolved_by: string | null
-          risk_score: number
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          details: Json
-          entity_id: string
-          entity_type: string
-          flag_type: string
-          id?: string
-          resolved_at?: string | null
-          resolved_by?: string | null
-          risk_score?: number
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          details?: Json
-          entity_id?: string
-          entity_type?: string
-          flag_type?: string
-          id?: string
-          resolved_at?: string | null
-          resolved_by?: string | null
-          risk_score?: number
-          status?: string
-        }
-        Relationships: []
-      }
-      fraud_flags_einvoice: {
-        Row: {
-          created_at: string
-          details: Json
-          document_id: string | null
-          flag_type: Database["public"]["Enums"]["fraud_flag_type"]
-          id: string
-          resolved_at: string | null
-          resolved_by: string | null
-          risk_score: number
-          status: string
-          tenant_id: string
-        }
-        Insert: {
-          created_at?: string
-          details?: Json
-          document_id?: string | null
-          flag_type: Database["public"]["Enums"]["fraud_flag_type"]
-          id?: string
-          resolved_at?: string | null
-          resolved_by?: string | null
-          risk_score?: number
-          status?: string
-          tenant_id?: string
-        }
-        Update: {
-          created_at?: string
-          details?: Json
-          document_id?: string | null
-          flag_type?: Database["public"]["Enums"]["fraud_flag_type"]
-          id?: string
-          resolved_at?: string | null
-          resolved_by?: string | null
-          risk_score?: number
-          status?: string
-          tenant_id?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "fraud_flags_einvoice_document_id_fkey"
-            columns: ["document_id"]
+            foreignKeyName: "exceptions_validation_rule_id_fkey"
+            columns: ["validation_rule_id"]
             isOneToOne: false
-            referencedRelation: "einvoice_documents"
+            referencedRelation: "validation_rules"
             referencedColumns: ["id"]
           },
         ]
       }
-      idempotency_keys: {
+      integration_status: {
         Row: {
-          completed_at: string | null
-          created_at: string
-          expires_at: string
+          config: Json | null
+          created_at: string | null
+          error_message: string | null
           id: string
-          idempotency_key: string
-          request_hash: string
-          response_body: Json | null
-          response_status: number | null
-          status: string
+          integration_name: string
+          integration_type: string
+          last_sync_at: string | null
+          next_sync_at: string | null
+          status: string | null
+          sync_count: number | null
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          completed_at?: string | null
-          created_at?: string
-          expires_at: string
+          config?: Json | null
+          created_at?: string | null
+          error_message?: string | null
           id?: string
-          idempotency_key: string
-          request_hash: string
-          response_body?: Json | null
-          response_status?: number | null
-          status: string
+          integration_name: string
+          integration_type: string
+          last_sync_at?: string | null
+          next_sync_at?: string | null
+          status?: string | null
+          sync_count?: number | null
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          completed_at?: string | null
-          created_at?: string
-          expires_at?: string
+          config?: Json | null
+          created_at?: string | null
+          error_message?: string | null
           id?: string
-          idempotency_key?: string
-          request_hash?: string
-          response_body?: Json | null
-          response_status?: number | null
-          status?: string
+          integration_name?: string
+          integration_type?: string
+          last_sync_at?: string | null
+          next_sync_at?: string | null
+          status?: string | null
+          sync_count?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
+      }
+      invoice_documents: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          invoice_id: string | null
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          invoice_id?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          invoice_id?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_documents_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoices: {
         Row: {
           amount: number
-          approval_policy_id: string | null
-          confidence_score: number | null
-          created_at: string
-          currency: string | null
-          description: string | null
+          created_at: string | null
           due_date: string | null
-          duplicate_hash: string | null
-          extracted_data: Json | null
-          field_confidence_scores: Json | null
+          file_name: string | null
           file_url: string | null
           id: string
           invoice_date: string
           invoice_number: string
-          line_items: Json | null
-          ocr_metadata: Json | null
-          po_number: string | null
-          raw_text: string | null
-          status: Database["public"]["Enums"]["invoice_status"] | null
-          tax_amount: number | null
-          updated_at: string
-          user_id: string | null
-          vendor_id: string | null
+          notes: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          vendor_name: string
         }
         Insert: {
           amount: number
-          approval_policy_id?: string | null
-          confidence_score?: number | null
-          created_at?: string
-          currency?: string | null
-          description?: string | null
+          created_at?: string | null
           due_date?: string | null
-          duplicate_hash?: string | null
-          extracted_data?: Json | null
-          field_confidence_scores?: Json | null
+          file_name?: string | null
           file_url?: string | null
           id?: string
           invoice_date: string
           invoice_number: string
-          line_items?: Json | null
-          ocr_metadata?: Json | null
-          po_number?: string | null
-          raw_text?: string | null
-          status?: Database["public"]["Enums"]["invoice_status"] | null
-          tax_amount?: number | null
-          updated_at?: string
-          user_id?: string | null
-          vendor_id?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          vendor_name: string
         }
         Update: {
           amount?: number
-          approval_policy_id?: string | null
-          confidence_score?: number | null
-          created_at?: string
-          currency?: string | null
-          description?: string | null
+          created_at?: string | null
           due_date?: string | null
-          duplicate_hash?: string | null
-          extracted_data?: Json | null
-          field_confidence_scores?: Json | null
+          file_name?: string | null
           file_url?: string | null
           id?: string
           invoice_date?: string
           invoice_number?: string
-          line_items?: Json | null
-          ocr_metadata?: Json | null
-          po_number?: string | null
-          raw_text?: string | null
-          status?: Database["public"]["Enums"]["invoice_status"] | null
-          tax_amount?: number | null
-          updated_at?: string
-          user_id?: string | null
-          vendor_id?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vendor_name?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "invoices_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       leads: {
         Row: {
@@ -842,7 +347,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
-          interest_type: string | null
+          interest_type: string
           lead_source: string | null
           lead_status: string | null
           message: string | null
@@ -855,7 +360,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
-          interest_type?: string | null
+          interest_type: string
           lead_source?: string | null
           lead_status?: string | null
           message?: string | null
@@ -868,7 +373,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
-          interest_type?: string | null
+          interest_type?: string
           lead_source?: string | null
           lead_status?: string | null
           message?: string | null
@@ -877,796 +382,265 @@ export type Database = {
         }
         Relationships: []
       }
-      model_stats: {
+      profiles: {
         Row: {
-          confidence: number | null
-          created_at: string
-          drift_stat: Json | null
+          company_name: string | null
+          created_at: string | null
+          department: string | null
+          full_name: string | null
           id: string
-          model: string
-          payload: Json | null
-          stage: string
-          tenant_id: string
+          is_active: boolean | null
+          job_title: string | null
+          last_login_at: string | null
+          manager_id: string | null
+          phone: string | null
+          role: string | null
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          confidence?: number | null
-          created_at?: string
-          drift_stat?: Json | null
+          company_name?: string | null
+          created_at?: string | null
+          department?: string | null
+          full_name?: string | null
           id?: string
-          model: string
-          payload?: Json | null
-          stage: string
-          tenant_id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          last_login_at?: string | null
+          manager_id?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          confidence?: number | null
-          created_at?: string
-          drift_stat?: Json | null
+          company_name?: string | null
+          created_at?: string | null
+          department?: string | null
+          full_name?: string | null
           id?: string
-          model?: string
-          payload?: Json | null
-          stage?: string
-          tenant_id?: string
-        }
-        Relationships: []
-      }
-      peppol_messages: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          direction: string
-          document_id: string | null
-          document_type_id: string | null
-          error_details: Json | null
-          id: string
-          last_attempt_at: string | null
-          max_retries: number | null
-          message_id: string
-          process_id: string | null
-          receiver_participant_id: string | null
-          retry_count: number | null
-          scheduled_at: string | null
-          sender_participant_id: string | null
-          status: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          direction: string
-          document_id?: string | null
-          document_type_id?: string | null
-          error_details?: Json | null
-          id?: string
-          last_attempt_at?: string | null
-          max_retries?: number | null
-          message_id: string
-          process_id?: string | null
-          receiver_participant_id?: string | null
-          retry_count?: number | null
-          scheduled_at?: string | null
-          sender_participant_id?: string | null
-          status?: string
-          tenant_id?: string
-          updated_at?: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          direction?: string
-          document_id?: string | null
-          document_type_id?: string | null
-          error_details?: Json | null
-          id?: string
-          last_attempt_at?: string | null
-          max_retries?: number | null
-          message_id?: string
-          process_id?: string | null
-          receiver_participant_id?: string | null
-          retry_count?: number | null
-          scheduled_at?: string | null
-          sender_participant_id?: string | null
-          status?: string
-          tenant_id?: string
-          updated_at?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          last_login_at?: string | null
+          manager_id?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "peppol_messages_document_id_fkey"
-            columns: ["document_id"]
+            foreignKeyName: "profiles_manager_id_fkey"
+            columns: ["manager_id"]
             isOneToOne: false
-            referencedRelation: "einvoice_documents"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      policies: {
+      system_health_metrics: {
         Row: {
-          actions: Json
-          conditions: Json
-          created_at: string
           id: string
-          is_active: boolean
-          policy_name: string
-          policy_type: string
-          priority: number
-          updated_at: string
-        }
-        Insert: {
-          actions: Json
-          conditions: Json
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          policy_name: string
-          policy_type: string
-          priority?: number
-          updated_at?: string
-        }
-        Update: {
-          actions?: Json
-          conditions?: Json
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          policy_name?: string
-          policy_type?: string
-          priority?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      queue_jobs: {
-        Row: {
-          attempts: number | null
-          created_at: string
-          error_message: string | null
-          id: string
-          job_data: Json
-          max_attempts: number | null
-          processed_at: string | null
-          queue_name: string
-          scheduled_at: string | null
+          metadata: Json | null
+          metric_name: string
+          metric_unit: string | null
+          metric_value: number | null
+          recorded_at: string | null
           status: string | null
+          threshold_critical: number | null
+          threshold_warning: number | null
         }
         Insert: {
-          attempts?: number | null
-          created_at?: string
-          error_message?: string | null
           id?: string
-          job_data: Json
-          max_attempts?: number | null
-          processed_at?: string | null
-          queue_name: string
-          scheduled_at?: string | null
+          metadata?: Json | null
+          metric_name: string
+          metric_unit?: string | null
+          metric_value?: number | null
+          recorded_at?: string | null
           status?: string | null
+          threshold_critical?: number | null
+          threshold_warning?: number | null
         }
         Update: {
-          attempts?: number | null
-          created_at?: string
-          error_message?: string | null
           id?: string
-          job_data?: Json
-          max_attempts?: number | null
-          processed_at?: string | null
-          queue_name?: string
-          scheduled_at?: string | null
+          metadata?: Json | null
+          metric_name?: string
+          metric_unit?: string | null
+          metric_value?: number | null
+          recorded_at?: string | null
           status?: string | null
+          threshold_critical?: number | null
+          threshold_warning?: number | null
         }
         Relationships: []
-      }
-      review_queue: {
-        Row: {
-          assigned_to: string | null
-          confidence_score: number | null
-          created_at: string
-          flagged_fields: Json | null
-          id: string
-          invoice_id: string
-          priority: number | null
-          reason: string
-          resolution_notes: string | null
-          resolved_at: string | null
-          sla_deadline: string | null
-          support_ticket_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          confidence_score?: number | null
-          created_at?: string
-          flagged_fields?: Json | null
-          id?: string
-          invoice_id: string
-          priority?: number | null
-          reason: string
-          resolution_notes?: string | null
-          resolved_at?: string | null
-          sla_deadline?: string | null
-          support_ticket_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          confidence_score?: number | null
-          created_at?: string
-          flagged_fields?: Json | null
-          id?: string
-          invoice_id?: string
-          priority?: number | null
-          reason?: string
-          resolution_notes?: string | null
-          resolved_at?: string | null
-          sla_deadline?: string | null
-          support_ticket_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "review_queue_invoice_id_fkey"
-            columns: ["invoice_id"]
-            isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "review_queue_support_ticket_id_fkey"
-            columns: ["support_ticket_id"]
-            isOneToOne: false
-            referencedRelation: "support_tickets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      security_events: {
-        Row: {
-          created_at: string
-          details: Json | null
-          event_type: string
-          id: string
-          ip_address: unknown | null
-          severity: string
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          details?: Json | null
-          event_type: string
-          id?: string
-          ip_address?: unknown | null
-          severity?: string
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          details?: Json | null
-          event_type?: string
-          id?: string
-          ip_address?: unknown | null
-          severity?: string
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      support_call_logs: {
-        Row: {
-          agent_email: string | null
-          agent_name: string | null
-          answered_at: string | null
-          created_at: string
-          direction: string
-          duration_seconds: number | null
-          ended_at: string | null
-          external_id: string
-          from_number: string | null
-          id: string
-          raw_data: Json | null
-          started_at: string | null
-          status: string
-          tags: string[] | null
-          to_number: string | null
-        }
-        Insert: {
-          agent_email?: string | null
-          agent_name?: string | null
-          answered_at?: string | null
-          created_at?: string
-          direction: string
-          duration_seconds?: number | null
-          ended_at?: string | null
-          external_id: string
-          from_number?: string | null
-          id?: string
-          raw_data?: Json | null
-          started_at?: string | null
-          status: string
-          tags?: string[] | null
-          to_number?: string | null
-        }
-        Update: {
-          agent_email?: string | null
-          agent_name?: string | null
-          answered_at?: string | null
-          created_at?: string
-          direction?: string
-          duration_seconds?: number | null
-          ended_at?: string | null
-          external_id?: string
-          from_number?: string | null
-          id?: string
-          raw_data?: Json | null
-          started_at?: string | null
-          status?: string
-          tags?: string[] | null
-          to_number?: string | null
-        }
-        Relationships: []
-      }
-      support_playbooks: {
-        Row: {
-          created_at: string
-          description: string | null
-          estimated_duration_minutes: number | null
-          id: string
-          is_active: boolean
-          playbook_name: string
-          playbook_type: string
-          sla_hours: number | null
-          steps: Json
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          estimated_duration_minutes?: number | null
-          id?: string
-          is_active?: boolean
-          playbook_name: string
-          playbook_type: string
-          sla_hours?: number | null
-          steps: Json
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          estimated_duration_minutes?: number | null
-          id?: string
-          is_active?: boolean
-          playbook_name?: string
-          playbook_type?: string
-          sla_hours?: number | null
-          steps?: Json
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      support_qa_scorecards: {
-        Row: {
-          agent_email: string | null
-          aht_minutes: number | null
-          call_log_id: string | null
-          created_at: string
-          empathy_score: number | null
-          fcr_achieved: boolean | null
-          feedback: string | null
-          id: string
-          policy_accuracy_score: number | null
-          reason_score: number | null
-          reviewed_at: string
-          reviewer_id: string | null
-          ticket_id: string | null
-          total_score: number | null
-        }
-        Insert: {
-          agent_email?: string | null
-          aht_minutes?: number | null
-          call_log_id?: string | null
-          created_at?: string
-          empathy_score?: number | null
-          fcr_achieved?: boolean | null
-          feedback?: string | null
-          id?: string
-          policy_accuracy_score?: number | null
-          reason_score?: number | null
-          reviewed_at?: string
-          reviewer_id?: string | null
-          ticket_id?: string | null
-          total_score?: number | null
-        }
-        Update: {
-          agent_email?: string | null
-          aht_minutes?: number | null
-          call_log_id?: string | null
-          created_at?: string
-          empathy_score?: number | null
-          fcr_achieved?: boolean | null
-          feedback?: string | null
-          id?: string
-          policy_accuracy_score?: number | null
-          reason_score?: number | null
-          reviewed_at?: string
-          reviewer_id?: string | null
-          ticket_id?: string | null
-          total_score?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "support_qa_scorecards_call_log_id_fkey"
-            columns: ["call_log_id"]
-            isOneToOne: false
-            referencedRelation: "support_call_logs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "support_qa_scorecards_ticket_id_fkey"
-            columns: ["ticket_id"]
-            isOneToOne: false
-            referencedRelation: "support_tickets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      support_tickets: {
-        Row: {
-          assigned_to: string | null
-          call_log_id: string | null
-          category: string
-          created_at: string
-          customer_id: string | null
-          id: string
-          masked_org_context: Json | null
-          priority: string
-          request_id: string
-          resolution_notes: string | null
-          resolved_at: string | null
-          status: string
-          ticket_number: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          call_log_id?: string | null
-          category: string
-          created_at?: string
-          customer_id?: string | null
-          id?: string
-          masked_org_context?: Json | null
-          priority?: string
-          request_id: string
-          resolution_notes?: string | null
-          resolved_at?: string | null
-          status?: string
-          ticket_number: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_to?: string | null
-          call_log_id?: string | null
-          category?: string
-          created_at?: string
-          customer_id?: string | null
-          id?: string
-          masked_org_context?: Json | null
-          priority?: string
-          request_id?: string
-          resolution_notes?: string | null
-          resolved_at?: string | null
-          status?: string
-          ticket_number?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "support_tickets_call_log_id_fkey"
-            columns: ["call_log_id"]
-            isOneToOne: false
-            referencedRelation: "support_call_logs"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_roles: {
         Row: {
           assigned_at: string | null
           assigned_by: string | null
           id: string
-          role: Database["public"]["Enums"]["user_role"]
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           assigned_at?: string | null
           assigned_by?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           assigned_at?: string | null
           assigned_by?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
       }
-      user_sessions: {
+      validation_rules: {
         Row: {
-          created_at: string
-          expires_at: string
-          id: string
-          ip_address: unknown | null
-          is_active: boolean
-          last_activity: string
-          session_token: string
-          user_agent: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          ip_address?: unknown | null
-          is_active?: boolean
-          last_activity?: string
-          session_token: string
-          user_agent?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          ip_address?: unknown | null
-          is_active?: boolean
-          last_activity?: string
-          session_token?: string
-          user_agent?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      vendors: {
-        Row: {
-          address: Json | null
-          bank_account: string | null
-          contact_info: Json | null
-          created_at: string
-          iban: string | null
+          created_at: string | null
           id: string
           is_active: boolean | null
-          payment_terms: number | null
-          risk_score: number | null
-          swift_code: string | null
-          tax_id: string | null
-          updated_at: string
-          vendor_code: string | null
-          vendor_name: string
-          verification_status: string | null
+          priority: number | null
+          rule_config: Json
+          rule_name: string
+          rule_type: string
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          address?: Json | null
-          bank_account?: string | null
-          contact_info?: Json | null
-          created_at?: string
-          iban?: string | null
+          created_at?: string | null
           id?: string
           is_active?: boolean | null
-          payment_terms?: number | null
-          risk_score?: number | null
-          swift_code?: string | null
-          tax_id?: string | null
-          updated_at?: string
-          vendor_code?: string | null
-          vendor_name: string
-          verification_status?: string | null
+          priority?: number | null
+          rule_config?: Json
+          rule_name: string
+          rule_type: string
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          address?: Json | null
-          bank_account?: string | null
-          contact_info?: Json | null
-          created_at?: string
-          iban?: string | null
+          created_at?: string | null
           id?: string
           is_active?: boolean | null
-          payment_terms?: number | null
-          risk_score?: number | null
-          swift_code?: string | null
-          tax_id?: string | null
-          updated_at?: string
-          vendor_code?: string | null
-          vendor_name?: string
-          verification_status?: string | null
+          priority?: number | null
+          rule_config?: Json
+          rule_name?: string
+          rule_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workflow_instances: {
+        Row: {
+          completed_at: string | null
+          current_step: number | null
+          entity_id: string
+          entity_type: string
+          id: string
+          started_at: string | null
+          status: string | null
+          step_data: Json | null
+          updated_at: string | null
+          user_id: string
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          current_step?: number | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          started_at?: string | null
+          status?: string | null
+          step_data?: Json | null
+          updated_at?: string | null
+          user_id: string
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          current_step?: number | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          started_at?: string | null
+          status?: string | null
+          step_data?: Json | null
+          updated_at?: string | null
+          user_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_instances_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflows: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          steps: Json
+          updated_at: string | null
+          user_id: string
+          workflow_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          steps?: Json
+          updated_at?: string | null
+          user_id: string
+          workflow_type: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          steps?: Json
+          updated_at?: string | null
+          user_id?: string
+          workflow_type?: string
         }
         Relationships: []
       }
     }
     Views: {
-      consent_logs_safe: {
-        Row: {
-          consent_given: boolean | null
-          consent_text: string | null
-          consent_type: Database["public"]["Enums"]["consent_type"] | null
-          created_at: string | null
-          email_masked: string | null
-          id: string | null
-          ip_address: unknown | null
-          phone_masked: string | null
-          user_agent: string | null
-          user_id: string | null
-          withdrawal_date: string | null
-        }
-        Insert: {
-          consent_given?: boolean | null
-          consent_text?: string | null
-          consent_type?: Database["public"]["Enums"]["consent_type"] | null
-          created_at?: string | null
-          email_masked?: never
-          id?: string | null
-          ip_address?: unknown | null
-          phone_masked?: never
-          user_agent?: string | null
-          user_id?: string | null
-          withdrawal_date?: string | null
-        }
-        Update: {
-          consent_given?: boolean | null
-          consent_text?: string | null
-          consent_type?: Database["public"]["Enums"]["consent_type"] | null
-          created_at?: string | null
-          email_masked?: never
-          id?: string | null
-          ip_address?: unknown | null
-          phone_masked?: never
-          user_agent?: string | null
-          user_id?: string | null
-          withdrawal_date?: string | null
-        }
-        Relationships: []
-      }
-      user_sessions_safe: {
-        Row: {
-          created_at: string | null
-          expires_at: string | null
-          id: string | null
-          ip_address: unknown | null
-          is_active: boolean | null
-          last_activity: string | null
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string | null
-          ip_address?: unknown | null
-          is_active?: boolean | null
-          last_activity?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string | null
-          ip_address?: unknown | null
-          is_active?: boolean | null
-          last_activity?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      bootstrap_admin_user: {
-        Args: { admin_email: string; admin_password: string }
-        Returns: string
+      assign_admin_role: { Args: never; Returns: undefined }
+      assign_ceo_admin_role: { Args: never; Returns: undefined }
+      get_current_user_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
       }
-      cleanup_consent_rate_limits: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_expired_data: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_stale_sessions: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      get_consent_pii_secure: {
-        Args: { consent_id: string; justification: string }
-        Returns: Json
-      }
-      get_user_role: {
-        Args: { user_uuid: string }
-        Returns: Database["public"]["Enums"]["user_role"]
-      }
-      log_admin_pii_access: {
-        Args: { record_id: string; table_name: string }
-        Returns: boolean
-      }
-      log_security_violation: {
+      has_role: {
         Args: {
-          severity_level?: string
-          target_user_id?: string
-          violation_details?: Json
-          violation_type: string
-        }
-        Returns: boolean
-      }
-      validate_anonymous_consent: {
-        Args: { p_email: string; p_phone: string }
-        Returns: boolean
-      }
-      validate_anonymous_consent_secure: {
-        Args: {
-          p_email: string
-          p_honeypot?: string
-          p_ip_address: unknown
-          p_phone: string
-        }
-        Returns: boolean
-      }
-      validate_my_session: {
-        Args: { session_id: string }
-        Returns: boolean
-      }
-      validate_session_integrity: {
-        Args: { session_data: Json }
-        Returns: boolean
-      }
-      validate_session_security: {
-        Args: {
-          ip_address?: unknown
-          session_token: string
-          user_agent?: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
     }
     Enums: {
-      approval_status: "pending" | "approved" | "rejected"
-      consent_type: "email" | "sms" | "data_processing" | "marketing"
-      einvoice_format: "bis30" | "xrechnung" | "facturx" | "pint"
-      einvoice_status:
-        | "pending"
-        | "validated"
-        | "sent"
-        | "received"
-        | "failed"
-        | "rejected"
-      exception_type:
-        | "duplicate"
-        | "amount_variance"
-        | "vendor_mismatch"
-        | "missing_po"
-        | "compliance_issue"
-      fraud_flag_type:
-        | "duplicate_bank"
-        | "duplicate_tax_id"
-        | "amount_anomaly"
-        | "frequency_anomaly"
-        | "vendor_mismatch"
-      invoice_status:
-        | "pending"
-        | "approved"
-        | "rejected"
-        | "processing"
-        | "duplicate"
-      risk_level: "low" | "medium" | "high" | "critical"
-      user_role: "admin" | "operator" | "viewer"
-      validation_rule_type:
-        | "en16931"
-        | "bis30"
-        | "xrechnung"
-        | "facturx"
-        | "country_specific"
+      app_role: "admin" | "operator" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1794,47 +768,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      approval_status: ["pending", "approved", "rejected"],
-      consent_type: ["email", "sms", "data_processing", "marketing"],
-      einvoice_format: ["bis30", "xrechnung", "facturx", "pint"],
-      einvoice_status: [
-        "pending",
-        "validated",
-        "sent",
-        "received",
-        "failed",
-        "rejected",
-      ],
-      exception_type: [
-        "duplicate",
-        "amount_variance",
-        "vendor_mismatch",
-        "missing_po",
-        "compliance_issue",
-      ],
-      fraud_flag_type: [
-        "duplicate_bank",
-        "duplicate_tax_id",
-        "amount_anomaly",
-        "frequency_anomaly",
-        "vendor_mismatch",
-      ],
-      invoice_status: [
-        "pending",
-        "approved",
-        "rejected",
-        "processing",
-        "duplicate",
-      ],
-      risk_level: ["low", "medium", "high", "critical"],
-      user_role: ["admin", "operator", "viewer"],
-      validation_rule_type: [
-        "en16931",
-        "bis30",
-        "xrechnung",
-        "facturx",
-        "country_specific",
-      ],
+      app_role: ["admin", "operator", "viewer"],
     },
   },
 } as const

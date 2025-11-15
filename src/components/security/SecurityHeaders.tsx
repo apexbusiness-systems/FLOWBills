@@ -90,7 +90,7 @@ export const SecurityHeaders = () => {
         disposition: event.disposition
       });
 
-      // Send violation report to logging endpoint
+      // Send violation report to Supabase edge function
       if ('sendBeacon' in navigator) {
         const violationData = {
           blocked_uri: event.blockedURI,
@@ -103,7 +103,11 @@ export const SecurityHeaders = () => {
         };
 
         try {
-          navigator.sendBeacon('/api/csp-violation', JSON.stringify(violationData));
+          const blob = new Blob([JSON.stringify(violationData)], { type: 'application/json' });
+          navigator.sendBeacon(
+            'https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/csp-report',
+            blob
+          );
         } catch (error) {
           console.error('Failed to send CSP violation report:', error);
         }

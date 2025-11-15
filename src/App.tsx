@@ -42,6 +42,7 @@ const About = React.lazy(() => import("./pages/About"));
 const Contact = React.lazy(() => import("./pages/Contact"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const SupplierPortal = React.lazy(() => import("./pages/supplier/SupplierPortal"));
+const CSPMonitoring = React.lazy(() => import("./pages/CSPMonitoring"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -205,6 +206,14 @@ const AuthRoutes = () => {
         <Route 
           path="/security" 
           element={<Security />} 
+        />
+        <Route 
+          path="/csp-monitoring" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <CSPMonitoring />
+            </ProtectedRoute>
+          } 
         />
         <Route 
           path="/features" 
