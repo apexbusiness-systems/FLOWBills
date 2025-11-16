@@ -6,7 +6,7 @@ import heroImage from "@/assets/hero-oilgas.jpg";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <main className="min-h-screen">
       {/* Hero Section */}
       <section 
         className="relative min-h-[85vh] flex items-center justify-center"
@@ -15,8 +15,14 @@ const Index = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
+        aria-label="Hero section"
       >
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
+        <img 
+          src={heroImage} 
+          alt="Oil and gas industrial facility with pipelines and equipment" 
+          className="sr-only" 
+        />
         <div className="relative z-10 container mx-auto px-4 text-center text-white">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
             AI-Powered Invoice Processing for<br />
@@ -64,14 +70,14 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-background" aria-labelledby="features-heading">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Enterprise-Grade Features</h2>
+          <header className="text-center mb-16">
+            <h2 id="features-heading" className="text-4xl font-bold mb-4">Enterprise-Grade Features</h2>
             <p className="text-xl text-muted-foreground">
               Everything you need to modernize your accounts payable process
             </p>
-          </div>
+          </header>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="border-border">
@@ -156,9 +162,9 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-secondary/20">
+      <section className="py-20 bg-secondary/20" aria-labelledby="cta-heading">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Ready to Transform Your AP Process?</h2>
+          <h2 id="cta-heading" className="text-4xl font-bold mb-4">Ready to Transform Your AP Process?</h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
             Join leading Canadian energy companies using FlowBills.ca to reduce costs and improve efficiency.
           </p>
@@ -176,7 +182,7 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </div>
+    </main>
   );
 };
 
