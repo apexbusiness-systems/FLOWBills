@@ -12,7 +12,7 @@ export interface Invoice {
   invoice_date: string;
   due_date?: string;
   status: 'pending' | 'approved' | 'rejected' | 'processing';
-  description?: string;
+  notes?: string;
   file_url?: string;
   created_at: string;
   updated_at: string;

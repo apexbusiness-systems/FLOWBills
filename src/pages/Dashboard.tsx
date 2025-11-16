@@ -1,16 +1,24 @@
 import { useState } from 'react';
-import { useInvoices } from '@/hooks/useInvoices';
+import { useInvoices, Invoice } from '@/hooks/useInvoices';
 import InvoiceList from '@/components/invoices/InvoiceList';
 import InvoiceUpload from '@/components/dashboard/InvoiceUpload';
+import { EditInvoiceDialog } from '@/components/invoices/EditInvoiceDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Upload } from 'lucide-react';
 
 export default function Dashboard() {
-  const { invoices, loading, deleteInvoice } = useInvoices();
+  const { invoices, loading, updateInvoice, deleteInvoice } = useInvoices();
   const [activeTab, setActiveTab] = useState('list');
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const handleEdit = () => {
-    // Edit functionality can be expanded later
+  const handleEdit = (invoice: Invoice) => {
+    setEditingInvoice(invoice);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async (id: string, updates: Partial<Invoice>) => {
+    await updateInvoice(id, updates);
   };
 
   const handleCreate = () => {
@@ -47,6 +55,13 @@ export default function Dashboard() {
           <InvoiceUpload />
         </TabsContent>
       </Tabs>
+
+      <EditInvoiceDialog
+        invoice={editingInvoice}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 }
