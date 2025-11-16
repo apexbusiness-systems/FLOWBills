@@ -1,49 +1,179 @@
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { TrackLink } from "@/components/ui/TrackLink";
+import { Zap, Shield, Clock, CheckCircle2, ArrowRight, BarChart3 } from "lucide-react";
+import heroImage from "@/assets/hero-oilgas.jpg";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-5xl font-bold mb-6 text-foreground">
-          Invoice Automation for Energy
-        </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Streamline your AP process with 95% straight-through processing, duplicate prevention, and 24/7 automation
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Button asChild size="lg">
-            <Link to="/contact">Book Demo</Link>
-          </Button>
-          <Button asChild variant="outline" size="lg">
-            <Link to="/pricing">View Pricing</Link>
-          </Button>
+      <section 
+        className="relative min-h-[85vh] flex items-center justify-center"
+        style={{
+          backgroundImage: `url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="relative z-10 container mx-auto px-4 text-center text-white">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            AI-Powered Invoice Processing for<br />
+            <span className="text-amber-400">Canadian Oil & Gas</span>
+          </h1>
+          <p className="text-lg md:text-xl mb-8 max-w-4xl mx-auto text-white/90">
+            Automate your accounts payable with enterprise-grade security, PIPEDA compliance,
+            and intelligent duplicate detection. Built specifically for Canadian energy sector requirements.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <Button asChild size="lg" className="bg-amber-500 hover:bg-amber-600 text-black font-semibold">
+              <TrackLink to="/contact" source="hero">
+                Book Free Demo <ArrowRight className="ml-2 h-4 w-4" />
+              </TrackLink>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="bg-black/30 border-white/20 text-white hover:bg-black/50 backdrop-blur-sm">
+              <TrackLink to="/pricing" source="hero">
+                Calculate ROI <BarChart3 className="ml-2 h-4 w-4" />
+              </TrackLink>
+            </Button>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <Card className="bg-black/40 border-white/10 backdrop-blur-md">
+              <CardHeader>
+                <CardTitle className="text-5xl font-bold text-amber-400">95%</CardTitle>
+                <CardDescription className="text-white text-base">Straight-Through Processing</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="bg-black/40 border-white/10 backdrop-blur-md">
+              <CardHeader>
+                <CardTitle className="text-5xl font-bold text-amber-400">80%</CardTitle>
+                <CardDescription className="text-white text-base">Cost Reduction</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="bg-black/40 border-white/10 backdrop-blur-md">
+              <CardHeader>
+                <CardTitle className="text-5xl font-bold text-amber-400">24/7</CardTitle>
+                <CardDescription className="text-white text-base">Processing Uptime</CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-4xl text-primary">95%+</CardTitle>
-              <CardDescription>Straight-Through Processing</CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-4xl text-primary">80%</CardTitle>
-              <CardDescription>Cost Reduction</CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-4xl text-primary">24/7</CardTitle>
-              <CardDescription>Automated Processing</CardDescription>
-            </CardHeader>
-          </Card>
+      {/* Features Section */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Enterprise-Grade Features</h2>
+            <p className="text-xl text-muted-foreground">
+              Everything you need to modernize your accounts payable process
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="border-border">
+              <CardHeader>
+                <Zap className="h-12 w-12 text-amber-500 mb-4" />
+                <CardTitle className="text-2xl mb-2">AI-Powered Processing</CardTitle>
+                <CardDescription className="text-base mb-6">
+                  Intelligent document extraction with 99% accuracy for invoices, POs, and receipts
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>OCR & Data Extraction</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Smart Field Mapping</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Multi-format Support</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border">
+              <CardHeader>
+                <Shield className="h-12 w-12 text-amber-500 mb-4" />
+                <CardTitle className="text-2xl mb-2">Compliance & Security</CardTitle>
+                <CardDescription className="text-base mb-6">
+                  PIPEDA, CASL, and SOC 2 compliance with enterprise security controls
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>PIPEDA Compliant</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>CASL Email Consent</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>SOC 2 Ready</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border">
+              <CardHeader>
+                <Clock className="h-12 w-12 text-amber-500 mb-4" />
+                <CardTitle className="text-2xl mb-2">Smart Workflows</CardTitle>
+                <CardDescription className="text-base mb-6">
+                  Intelligent routing with human-in-the-loop for exception handling
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Duplicate Detection</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Auto-Approval Rules</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Exception Management</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-secondary/20">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold mb-4">Ready to Transform Your AP Process?</h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            Join leading Canadian energy companies using FlowBills.ca to reduce costs and improve efficiency.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="bg-amber-500 hover:bg-amber-600 text-black font-semibold">
+              <TrackLink to="/contact" source="cta-bottom">
+                Start Free Trial
+              </TrackLink>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <TrackLink to="/contact" source="cta-bottom">
+                Contact Sales
+              </TrackLink>
+            </Button>
+          </div>
         </div>
       </section>
     </div>
