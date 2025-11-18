@@ -5,6 +5,7 @@ import { useValidationRules } from '@/hooks/useValidationRules';
 import ValidationRulesList from '@/components/validation/ValidationRulesList';
 import CreateValidationRuleDialog from '@/components/validation/CreateValidationRuleDialog';
 import { Shield, TrendingUp, CheckCircle, AlertTriangle } from 'lucide-react';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 
 const ValidationRules = () => {
   const { getRuleStats } = useValidationRules();
@@ -16,6 +17,7 @@ const ValidationRules = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
+      <BreadcrumbNav className="mb-2" />
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

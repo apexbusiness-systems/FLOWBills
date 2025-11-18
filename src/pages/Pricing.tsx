@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Footer } from "@/components/ui/footer";
 import { TrackLink } from "@/components/ui/TrackLink";
+import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
 import { 
   PRICING_PLANS, 
   calculateMonthlyBill, 
@@ -24,6 +25,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-12 max-w-7xl">
+        <BreadcrumbNav className="mb-6" />
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">

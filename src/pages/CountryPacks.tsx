@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { AlertTriangle, CheckCircle, Clock, Globe, FileText, Shield } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
 
 interface CountryPack {
   code: string;
@@ -122,6 +123,7 @@ const CountryPacks = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <BreadcrumbNav className="mb-2" />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Country Packs</h1>

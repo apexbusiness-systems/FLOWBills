@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 import { 
   User, 
   Building2, 
@@ -104,6 +105,7 @@ const Profile = () => {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <BreadcrumbNav className="mb-4" />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">User Profile</h1>
         <p className="text-muted-foreground">

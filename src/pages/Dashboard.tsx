@@ -5,6 +5,7 @@ import InvoiceUpload from '@/components/dashboard/InvoiceUpload';
 import { EditInvoiceDialog } from '@/components/invoices/EditInvoiceDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Upload } from 'lucide-react';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 
 export default function Dashboard() {
   const { invoices, loading, updateInvoice, deleteInvoice } = useInvoices();
@@ -27,6 +28,7 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <BreadcrumbNav className="mb-4" />
       <h1 className="text-3xl font-bold mb-6">Invoice Dashboard</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

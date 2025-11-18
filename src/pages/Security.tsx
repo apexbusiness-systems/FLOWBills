@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Lock, Eye, CheckCircle, AlertTriangle, FileText, Server, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 
 const Security = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const Security = () => {
       </header>
 
       <div className="container mx-auto px-4 py-12 max-w-6xl">
+        <BreadcrumbNav className="mb-6" />
         {/* Header Section */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">

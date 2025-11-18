@@ -6,6 +6,7 @@ import WorkflowBuilder from '@/components/workflow/WorkflowBuilder';
 import WorkflowTemplates from '@/components/workflow/WorkflowTemplates';
 import LoadingSkeleton from '@/components/ui/loading-skeleton';
 import { toast } from '@/hooks/use-toast';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 
 type ViewMode = 'list' | 'builder' | 'templates';
 
@@ -107,6 +108,7 @@ const Workflows = () => {
 
   return (
     <div className="container mx-auto p-6">
+      <BreadcrumbNav className="mb-4" />
       <Tabs defaultValue="workflows" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="workflows">My Workflows</TabsTrigger>

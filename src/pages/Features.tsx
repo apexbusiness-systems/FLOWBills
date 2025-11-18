@@ -1,11 +1,13 @@
 import { CheckCircle, Zap, Shield, Clock } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Footer } from '@/components/ui/footer';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 
 export default function Features() {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-12">
+        <BreadcrumbNav className="mb-4" />
         <h1 className="text-4xl font-bold mb-4">Features</h1>
         <p className="text-xl text-muted-foreground mb-12 max-w-3xl">
           Upload → extract → duplicate/fraud check → Human-in-the-Loop review → approve → export to ERP. Canadian data residency.

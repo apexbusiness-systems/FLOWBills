@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
@@ -19,6 +20,7 @@ export default function Contact() {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-12">
+        <BreadcrumbNav className="mb-4" />
         <h1 className="text-4xl font-bold mb-4">Contact</h1>
         <p className="text-xl text-muted-foreground mb-12 max-w-3xl">
           Email <a className="underline hover:text-foreground" href="mailto:hello@flowbills.ca">hello@flowbills.ca</a>. 
