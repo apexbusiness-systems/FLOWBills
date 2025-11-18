@@ -12,4 +12,5 @@ Disallow: /invoices/
 Disallow: /admin/
 
 # FlowBills.ca - Oil & Gas Invoice Management Platform
-# Sitemap: https://flowbills.ca/sitemap.xml
+Sitemap: https://flowbills.ca/sitemap.xml
+Sitemap: https://flowbills.ca/sitemap-news.xml

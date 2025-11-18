@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <!-- 
+    Google News Sitemap for FlowBills.ca
+    Add blog posts and news articles here for enhanced time-sensitive content indexing
+    
+    Template for new entries:
+    <url>
+      <loc>https://flowbills.ca/blog/your-article-slug</loc>
+      <news:news>
+        <news:publication>
+          <news:name>FlowBills</news:name>
+          <news:language>en</news:language>
+        </news:publication>
+        <news:publication_date>2025-11-18T00:00:00Z</news:publication_date>
+        <news:title>Your Article Title Here</news:title>
+      </news:news>
+    </url>
+  -->
+  
+  <!-- Example: Company announcement -->
+  <url>
+    <loc>https://flowbills.ca/blog/announcing-flowbills-ai-powered-invoice-automation</loc>
+    <news:news>
+      <news:publication>
+        <news:name>FlowBills</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-11-18T00:00:00Z</news:publication_date>
+      <news:title>Announcing FlowBills: AI-Powered Invoice Automation for Oil &amp; Gas</news:title>
+      <news:keywords>invoice automation, oil and gas, AI, workflow automation, accounts payable</news:keywords>
+    </news:news>
+  </url>
+
+  <!-- Example: Industry insight -->
+  <url>
+    <loc>https://flowbills.ca/blog/reducing-invoice-processing-time-oil-gas-industry</loc>
+    <news:news>
+      <news:publication>
+        <news:name>FlowBills</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-11-16T00:00:00Z</news:publication_date>
+      <news:title>How to Reduce Invoice Processing Time by 80% in Oil &amp; Gas</news:title>
+      <news:keywords>invoice processing, efficiency, automation, best practices</news:keywords>
+    </news:news>
+  </url>
+
+  <!-- Example: Feature update -->
+  <url>
+    <loc>https://flowbills.ca/blog/new-duplicate-detection-fraud-prevention-features</loc>
+    <news:news>
+      <news:publication>
+        <news:name>FlowBills</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-11-15T00:00:00Z</news:publication_date>
+      <news:title>New Duplicate Detection &amp; Fraud Prevention Features Now Live</news:title>
+      <news:keywords>fraud detection, duplicate invoices, security, features</news:keywords>
+    </news:news>
+  </url>
+</urlset>
