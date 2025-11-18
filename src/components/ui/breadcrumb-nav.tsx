@@ -24,6 +24,7 @@ const routeLabels: Record<string, string> = {
   "/workflows": "Workflows",
   "/validation-rules": "Validation Rules",
   "/country-packs": "Country Packs",
+  "/blog": "Blog",
   "/auth": "Sign In",
   "/privacy": "Privacy Policy",
   "/terms": "Terms of Service",

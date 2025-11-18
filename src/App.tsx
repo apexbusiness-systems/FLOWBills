@@ -34,6 +34,7 @@ const APIDocs = React.lazy(() => import("./pages/APIDocs"));
 const About = React.lazy(() => import("./pages/About"));
 const Contact = React.lazy(() => import("./pages/Contact"));
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const Blog = React.lazy(() => import("./pages/Blog"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const SupplierPortal = React.lazy(() => import("./pages/supplier/SupplierPortal"));
 const CSPMonitoring = React.lazy(() => import("./pages/CSPMonitoring"));
@@ -176,6 +177,10 @@ const AuthRoutes = () => {
         <Route 
           path="/about" 
           element={<About />} 
+        />
+        <Route 
+          path="/blog" 
+          element={<Blog />} 
         />
         <Route 
           path="/contact" 

@@ -65,6 +65,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://flowbills.ca/blog</loc>
+    <lastmod>2025-11-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://flowbills.ca/country-packs</loc>
     <lastmod>2025-11-18</lastmod>
     <changefreq>monthly</changefreq>

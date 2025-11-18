@@ -16,6 +16,7 @@ export const Footer = () => {
               <li><TrackLink to="/features" source="footer" className="text-muted-foreground hover:text-foreground transition-colors">Features</TrackLink></li>
               <li><TrackLink to="/pricing" source="footer" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</TrackLink></li>
               <li><TrackLink to="/api-docs" source="footer" className="text-muted-foreground hover:text-foreground transition-colors">API</TrackLink></li>
+              <li><TrackLink to="/blog" source="footer" className="text-muted-foreground hover:text-foreground transition-colors">Blog</TrackLink></li>
             </ul>
           </div>
           
