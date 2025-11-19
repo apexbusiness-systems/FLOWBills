@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+package-lock.json
+pnpm-lock.yaml
+bun.lockb
+yarn.lock
+
+# Build outputs
+dist
+build
+.next
+out
+.vercel
+.netlify
+
+# Generated files
+coverage
+.nyc_output
+*.log
+*.tsbuildinfo
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Supabase
+supabase/.temp
+supabase/functions/.temp
+
+# Other
+public/sw.js
+public/workbox-*.js

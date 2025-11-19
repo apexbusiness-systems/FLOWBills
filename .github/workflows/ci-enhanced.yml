@@ -18,19 +18,14 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Create artifacts directory
         run: mkdir -p artifacts
 
       - name: Run CI pipeline
-        run: pnpm ci
+        run: npm run ci
         env:
           CI: true
 
@@ -75,16 +70,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run RLS policy tests
-        run: pnpm test -- --grep "RLS"
+        run: npm run test -- --grep "RLS"
         env:
           CI: true
