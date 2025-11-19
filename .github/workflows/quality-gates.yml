@@ -7,6 +7,7 @@ on:
 
 env:
   NODE_VERSION: '18'
+  PNPM_VERSION: '8'
   LIGHTHOUSE_BUDGET_FCP: 1800
   LIGHTHOUSE_BUDGET_TTI: 3800
   LIGHTHOUSE_BUDGET_JS_SIZE: 76800  # 75KB gzip limit
@@ -27,22 +28,27 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: TypeScript type checking
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
 
       - name: ESLint
-        run: npm run lint
+        run: pnpm lint
 
       - name: Unit tests
-        run: npm run test:unit
+        run: pnpm test:unit --reporter=verbose
         env:
           CI: true
 
       - name: Integration tests
-        run: npm run test:integration
+        run: pnpm test:integration --reporter=verbose
         env:
           CI: true
 
@@ -69,10 +75,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Generate SBOM (CycloneDX)
         run: |
@@ -134,7 +144,7 @@ jobs:
   lighthouse-performance:
     name: ⚡ Lighthouse Performance Budget
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -143,13 +153,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build application
-        run: npm run build
+        run: pnpm build
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v11
@@ -176,7 +190,7 @@ jobs:
   bundle-analysis:
     name: 📦 Bundle Size Analysis
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -188,13 +202,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build application
-        run: npm run build
+        run: pnpm build
 
       - name: Analyze bundle size
         id: bundle-analysis
