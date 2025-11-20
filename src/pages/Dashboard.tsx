@@ -1,69 +1,135 @@
 import { useState } from 'react';
-import { useInvoices, Invoice } from '@/hooks/useInvoices';
-import InvoiceList from '@/components/invoices/InvoiceList';
-import InvoiceUpload from '@/components/dashboard/InvoiceUpload';
-import { EditInvoiceDialog } from '@/components/invoices/EditInvoiceDialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Upload } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { GripVertical, Layout } from 'lucide-react';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { Button } from '@/components/ui/button';
+import { useDashboardLayout } from '@/hooks/useDashboardLayout';
+import { DashboardConfigPanel } from '@/components/dashboard/DashboardConfigPanel';
+import { StatsWidget } from '@/components/dashboard/widgets/StatsWidget';
+import { ActivityWidget } from '@/components/dashboard/widgets/ActivityWidget';
+import { UploadWidget } from '@/components/dashboard/widgets/UploadWidget';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
-  const { invoices, loading, updateInvoice, deleteInvoice } = useInvoices();
-  const [activeTab, setActiveTab] = useState('list');
-  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const {
+    widgets,
+    visibleWidgets,
+    isConfigMode,
+    setIsConfigMode,
+    toggleWidget,
+    reorderWidgets,
+    resetLayout,
+  } = useDashboardLayout();
 
-  const handleEdit = (invoice: Invoice) => {
-    setEditingInvoice(invoice);
-    setEditDialogOpen(true);
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const items = Array.from(visibleWidgets);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    reorderWidgets(items);
+    toast.success('Layout updated');
   };
 
-  const handleSaveEdit = async (id: string, updates: Partial<Invoice>) => {
-    await updateInvoice(id, updates);
-  };
-
-  const handleCreate = () => {
-    setActiveTab('upload');
+  const renderWidget = (widget: any) => {
+    switch (widget.type) {
+      case 'stats':
+        return <StatsWidget title={widget.title} size={widget.size} />;
+      case 'activity':
+        return <ActivityWidget size={widget.size} />;
+      case 'upload':
+        return <UploadWidget size={widget.size} />;
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 animate-fade-in">
       <BreadcrumbNav className="mb-4" />
-      <h1 className="text-3xl font-bold mb-6">Invoice Dashboard</h1>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="list" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Invoices
-          </TabsTrigger>
-          <TabsTrigger value="upload" className="flex items-center gap-2">
-            <Upload className="h-4 w-4" />
-            Upload
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="list" className="mt-6">
-          <InvoiceList
-            invoices={invoices}
-            loading={loading}
-            onEdit={handleEdit}
-            onDelete={deleteInvoice}
-            onCreate={handleCreate}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Customize your view by dragging widgets or configuring visibility
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={isConfigMode ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setIsConfigMode(!isConfigMode)}
+            aria-label={isConfigMode ? 'Exit edit mode' : 'Enter edit mode'}
+          >
+            <Layout className="h-4 w-4 mr-2" aria-hidden="true" />
+            {isConfigMode ? 'Done' : 'Edit Layout'}
+          </Button>
+          <DashboardConfigPanel
+            widgets={widgets}
+            onToggleWidget={toggleWidget}
+            onResetLayout={resetLayout}
           />
-        </TabsContent>
-        
-        <TabsContent value="upload" className="mt-6">
-          <InvoiceUpload />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
 
-      <EditInvoiceDialog
-        invoice={editingInvoice}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        onSave={handleSaveEdit}
-      />
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="dashboard-widgets" direction="horizontal">
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            >
+              {visibleWidgets.map((widget, index) => (
+                <Draggable
+                  key={widget.id}
+                  draggableId={widget.id}
+                  index={index}
+                  isDragDisabled={!isConfigMode}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={cn(
+                        'relative transition-all',
+                        snapshot.isDragging && 'z-50 rotate-2 scale-105',
+                        isConfigMode && 'ring-2 ring-primary/20 rounded-lg'
+                      )}
+                    >
+                      {isConfigMode && (
+                        <div
+                          {...provided.dragHandleProps}
+                          className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center h-6 w-16 bg-primary text-primary-foreground rounded-full cursor-grab active:cursor-grabbing shadow-lg"
+                          aria-label="Drag to reorder"
+                        >
+                          <GripVertical className="h-4 w-4" aria-hidden="true" />
+                        </div>
+                      )}
+                      {renderWidget(widget)}
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+
+      {visibleWidgets.length === 0 && (
+        <div className="text-center py-16">
+          <Layout className="h-16 w-16 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
+          <h3 className="text-lg font-semibold mb-2">No Widgets Visible</h3>
+          <p className="text-muted-foreground mb-4">
+            Enable some widgets to customize your dashboard
+          </p>
+          <Button onClick={resetLayout}>Reset to Default Layout</Button>
+        </div>
+      )}
     </div>
   );
 }
