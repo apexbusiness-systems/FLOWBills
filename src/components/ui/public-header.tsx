@@ -19,6 +19,7 @@ export const PublicHeader = () => {
   const navItems = [
     { label: t("nav.features"), to: "/features" },
     { label: t("nav.pricing"), to: "/pricing" },
+    { label: t("nav.help"), to: "/help" },
     { label: t("nav.about"), to: "/about" },
     { label: t("nav.contact"), to: "/contact" },
   ];

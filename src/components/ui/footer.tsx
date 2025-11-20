@@ -25,6 +25,7 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><TrackLink to="/about" source="footer" className="text-muted-foreground hover:text-foreground transition-colors">About</TrackLink></li>
               <li><TrackLink to="/contact" source="footer" className="text-muted-foreground hover:text-foreground transition-colors">Contact</TrackLink></li>
+              <li><TrackLink to="/help" source="footer" className="text-muted-foreground hover:text-foreground transition-colors">Help Center</TrackLink></li>
               <li><TrackLink to="/security" source="footer" className="text-muted-foreground hover:text-foreground transition-colors">Security</TrackLink></li>
             </ul>
           </div>

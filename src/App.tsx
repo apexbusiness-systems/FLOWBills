@@ -42,6 +42,7 @@ const NotFound = React.lazy(() => import("./pages/NotFound"));
 const SupplierPortal = React.lazy(() => import("./pages/supplier/SupplierPortal"));
 const CSPMonitoring = React.lazy(() => import("./pages/CSPMonitoring"));
 const Support = React.lazy(() => import("./pages/Support"));
+const HelpCenter = React.lazy(() => import("./pages/HelpCenter"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -205,6 +206,10 @@ const AuthRoutes = () => {
           element={<Support />} 
         />
         <Route 
+          path="/help" 
+          element={<HelpCenter />} 
+        />
+        <Route
           path="/dashboard" 
           element={
             <ProtectedRoute>
