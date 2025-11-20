@@ -33,6 +33,7 @@ const Index = () => {
           <p className="text-lg md:text-xl mb-8 max-w-4xl mx-auto text-white/90">
             Automate your accounts payable with enterprise-grade security, PIPEDA compliance,
             and intelligent duplicate detection. Built specifically for Canadian energy sector requirements.
+            Reduce invoice processing costs by 80% and achieve 95% straight-through processing with AI-powered automation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Button 

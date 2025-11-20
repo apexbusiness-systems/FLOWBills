@@ -56,7 +56,35 @@
     <meta name="twitter:image" content="https://flowbills.ca/icons/og-image.png" />
     <meta name="twitter:image:alt" content="FlowBills Invoice Management Platform" />
     
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data (JSON-LD) - Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "FlowBills",
+      "legalName": "FLOWBills.ca",
+      "url": "https://flowbills.ca",
+      "logo": "https://flowbills.ca/icons/icon-512x512.png",
+      "description": "Enterprise-grade automated invoice processing platform for Canadian oil and gas companies. Provides AP automation, PIPEDA compliance, duplicate detection, and intelligent routing.",
+      "foundingDate": "2024",
+      "industry": "Financial Technology",
+      "areaServed": {
+        "@type": "Country",
+        "name": "Canada"
+      },
+      "knowsAbout": [
+        "Invoice Automation",
+        "Accounts Payable Processing",
+        "Oil and Gas Industry",
+        "PIPEDA Compliance",
+        "Energy Sector Technology",
+        "Enterprise Resource Planning"
+      ],
+      "slogan": "Automated Invoice Processing for Canadian Oil and Gas"
+    }
+    </script>
+
+    <!-- Structured Data (JSON-LD) - Software Application -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -64,11 +92,18 @@
       "name": "FLOWBills",
       "applicationCategory": "BusinessApplication",
       "applicationSubCategory": "Accounts Payable Automation",
-      "operatingSystem": "Web",
+      "operatingSystem": "Web, iOS, Android",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "127",
+        "bestRating": "5"
+      },
       "offers": {
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "CAD",
+        "priceValidUntil": "2026-12-31",
         "availability": "https://schema.org/InStock"
       },
       "description": "Automated invoice processing for Canadian oil and gas companies. Enterprise-grade AP automation with PIPEDA compliance, intelligent duplicate detection, and automated routing. Reduce accounts payable costs by 80% with 95% straight-through processing.",
@@ -99,10 +134,92 @@
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "4.8",
-        "ratingCount": "127"
+        "ratingCount": "127",
+        "bestRating": "5"
       }
     }
     </script>
+
+    <!-- Structured Data (JSON-LD) - Product/Service -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "FlowBills Invoice Automation Platform",
+      "description": "Automated invoice processing and accounts payable automation for Canadian oil and gas companies. Features include OCR extraction, duplicate detection, PIPEDA compliance, and intelligent workflow routing.",
+      "brand": {
+        "@type": "Brand",
+        "name": "FlowBills"
+      },
+      "category": "Invoice Management Software",
+      "audience": {
+        "@type": "BusinessAudience",
+        "name": "Oil and Gas Companies",
+        "geographicArea": {
+          "@type": "Country",
+          "name": "Canada"
+        }
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "127",
+        "bestRating": "5"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "https://flowbills.ca/pricing",
+        "price": "0",
+        "priceCurrency": "CAD",
+        "availability": "https://schema.org/InStock",
+        "priceValidUntil": "2026-12-31"
+      }
+    }
+    </script>
+
+    <!-- Structured Data (JSON-LD) - HowTo -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "How to Automate Invoice Processing for Oil and Gas Companies",
+      "description": "Step-by-step guide to implementing automated invoice processing for Canadian oil and gas operations",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Upload Invoices",
+          "text": "Upload paper or digital invoices through email, scanner integration, or drag-and-drop interface"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "OCR Extraction",
+          "text": "AI-powered OCR automatically extracts vendor name, amount, date, PO numbers, and line items with 99.5% accuracy"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Validation & Duplicate Detection",
+          "text": "System validates data against purchase orders and checks for duplicates using fuzzy matching on vendor, date, amount, and PO"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 4,
+          "name": "Intelligent Routing",
+          "text": "High-confidence invoices are auto-approved. Low-confidence cases route to human reviewers for verification"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 5,
+          "name": "Integration & Payment",
+          "text": "Approved invoices sync to your ERP system for payment processing with full audit trail"
+        }
+      ],
+      "totalTime": "PT2M"
+    }
+    </script>
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -246,6 +363,20 @@
       ]
     }
     </script>
+    
+    <!-- AI Search Optimization Meta -->
+    <meta name="coverage" content="Worldwide" />
+    <meta name="distribution" content="Global" />
+    <meta name="rating" content="General" />
+    <meta name="target" content="all" />
+    <meta name="audience" content="oil and gas companies, energy sector, accounts payable teams, CFOs, financial controllers" />
+    <meta name="topic" content="Invoice automation, accounts payable, oil and gas technology, enterprise software" />
+    
+    <!-- Business Context for AI -->
+    <meta property="business:contact_data:street_address" content="Calgary, Alberta" />
+    <meta property="business:contact_data:locality" content="Calgary" />
+    <meta property="business:contact_data:region" content="Alberta" />
+    <meta property="business:contact_data:country_name" content="Canada" />
     
     <!-- GTM -->
     <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-XXXX"></script>
