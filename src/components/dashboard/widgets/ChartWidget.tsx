@@ -1,18 +1,38 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { 
   LineChart, Line, BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from "recharts";
+import { DateRange } from "react-day-picker";
+import { isWithinInterval, subDays } from "date-fns";
 
-// Mock data generators
-const generateInvoiceTrends = () => {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-  return months.map(month => ({
-    month,
-    invoices: Math.floor(Math.random() * 100) + 50,
-    amount: Math.floor(Math.random() * 50000) + 20000,
-  }));
+// Mock data generators with dates
+const generateInvoiceTrends = (dateRange?: DateRange) => {
+  const today = new Date();
+  const days = 180; // Generate 6 months of data
+  const data = [];
+  
+  for (let i = days; i >= 0; i--) {
+    const date = subDays(today, i);
+    data.push({
+      date,
+      month: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      invoices: Math.floor(Math.random() * 30) + 20,
+      amount: Math.floor(Math.random() * 15000) + 5000,
+    });
+  }
+  
+  // Filter by date range if provided
+  if (dateRange?.from && dateRange?.to) {
+    return data.filter(item => 
+      isWithinInterval(item.date, { start: dateRange.from!, end: dateRange.to! })
+    );
+  }
+  
+  return data;
 };
 
 const generatePaymentAnalytics = () => {
@@ -24,13 +44,29 @@ const generatePaymentAnalytics = () => {
   ];
 };
 
-const generateProcessingMetrics = () => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  return days.map(day => ({
-    day,
-    automated: Math.floor(Math.random() * 40) + 60,
-    manual: Math.floor(Math.random() * 20) + 10,
-  }));
+const generateProcessingMetrics = (dateRange?: DateRange) => {
+  const today = new Date();
+  const days = 30; // Generate 30 days of data
+  const data = [];
+  
+  for (let i = days; i >= 0; i--) {
+    const date = subDays(today, i);
+    data.push({
+      date,
+      day: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      automated: Math.floor(Math.random() * 40) + 60,
+      manual: Math.floor(Math.random() * 20) + 10,
+    });
+  }
+  
+  // Filter by date range if provided
+  if (dateRange?.from && dateRange?.to) {
+    return data.filter(item => 
+      isWithinInterval(item.date, { start: dateRange.from!, end: dateRange.to! })
+    );
+  }
+  
+  return data;
 };
 
 interface ChartWidgetProps {
@@ -39,17 +75,30 @@ interface ChartWidgetProps {
 }
 
 export const ChartWidget = ({ title, size = 'medium' }: ChartWidgetProps) => {
-  const invoiceData = generateInvoiceTrends();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
+
+  const invoiceData = generateInvoiceTrends(dateRange);
   const paymentData = generatePaymentAnalytics();
-  const processingData = generateProcessingMetrics();
+  const processingData = generateProcessingMetrics(dateRange);
 
   const chartHeight = size === 'small' ? 200 : size === 'large' ? 400 : 300;
 
   return (
     <Card className="card-enterprise h-full">
       <CardHeader>
-        <CardTitle className="text-lg">{title}</CardTitle>
-        <CardDescription>Interactive data visualization</CardDescription>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle className="text-lg">{title}</CardTitle>
+            <CardDescription>Interactive data visualization</CardDescription>
+          </div>
+          <DateRangePicker 
+            date={dateRange} 
+            onDateChange={setDateRange}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="trends" className="w-full">
