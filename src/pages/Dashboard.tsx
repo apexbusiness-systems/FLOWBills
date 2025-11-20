@@ -8,6 +8,7 @@ import { DashboardConfigPanel } from '@/components/dashboard/DashboardConfigPane
 import { StatsWidget } from '@/components/dashboard/widgets/StatsWidget';
 import { ActivityWidget } from '@/components/dashboard/widgets/ActivityWidget';
 import { UploadWidget } from '@/components/dashboard/widgets/UploadWidget';
+import { ChartWidget } from '@/components/dashboard/widgets/ChartWidget';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -41,6 +42,8 @@ export default function Dashboard() {
         return <ActivityWidget size={widget.size} />;
       case 'upload':
         return <UploadWidget size={widget.size} />;
+      case 'chart':
+        return <ChartWidget title={widget.title} size={widget.size} />;
       default:
         return null;
     }

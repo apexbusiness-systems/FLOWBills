@@ -15,8 +15,9 @@ const DEFAULT_WIDGETS: WidgetConfig[] = [
   { id: 'stats-2', type: 'stats', title: 'Active Invoices', visible: true, size: 'small', order: 1 },
   { id: 'stats-3', type: 'stats', title: 'Processing Rate', visible: true, size: 'small', order: 2 },
   { id: 'stats-4', type: 'stats', title: 'Exception Queue', visible: true, size: 'small', order: 3 },
-  { id: 'activity-1', type: 'activity', title: 'Recent Activity', visible: true, size: 'large', order: 4 },
-  { id: 'upload-1', type: 'upload', title: 'Quick Upload', visible: true, size: 'medium', order: 5 },
+  { id: 'chart-1', type: 'chart', title: 'Analytics Dashboard', visible: true, size: 'large', order: 4 },
+  { id: 'activity-1', type: 'activity', title: 'Recent Activity', visible: true, size: 'large', order: 5 },
+  { id: 'upload-1', type: 'upload', title: 'Quick Upload', visible: true, size: 'medium', order: 6 },
 ];
 
 const STORAGE_KEY = 'flowbills_dashboard_layout';
