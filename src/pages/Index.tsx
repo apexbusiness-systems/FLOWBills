@@ -26,8 +26,8 @@ const Index = () => {
         />
         <div className="relative z-10 container mx-auto px-4 text-center text-white">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            AI-Powered Invoice Processing for<br />
-            <span className="text-amber-400">Canadian Oil & Gas</span>
+            Automated Invoice Processing for<br />
+            <span className="text-amber-400">Canadian Oil and Gas</span>
           </h1>
           <p className="text-lg md:text-xl mb-8 max-w-4xl mx-auto text-white/90">
             Automate your accounts payable with enterprise-grade security, PIPEDA compliance,
