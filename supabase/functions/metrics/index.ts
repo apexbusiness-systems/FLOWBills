@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2.58.0";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 import { toMessage } from "../_shared/errors.ts";
 
 const corsHeaders = {

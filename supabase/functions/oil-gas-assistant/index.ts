@@ -1,5 +1,5 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 // CORS headers for web app compatibility
 const corsHeaders = {

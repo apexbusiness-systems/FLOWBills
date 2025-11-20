@@ -1,6 +1,6 @@
 {
   "imports": {
-    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.58.0",
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@2",
     "stripe": "https://esm.sh/stripe@14.21.0?target=deno",
     "zod": "https://deno.land/x/zod@v3.23.8/mod.ts"
   }
