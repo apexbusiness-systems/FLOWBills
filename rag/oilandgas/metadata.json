@@ -1,7 +1,8 @@
 {
   "name": "Oil & Gas Industry Knowledge Base",
-  "version": "1.0.0",
-  "description": "Industry-specific RAG corpus for oil and gas operations, standards, and regulations",
+  "version": "2.0.0",
+  "description": "Industry-specific RAG corpus for oil and gas operations, billing processes, standards, and regulations",
+  "last_updated": "2025-01-20",
   "sources": [
     {
       "name": "OSDU Platform",
@@ -55,18 +56,91 @@
       "url": "https://ppdm.org",
       "scope": "petroleum_data_management",
       "last_updated": "2024-08-20"
+    },
+    {
+      "name": "CAPL Standards",
+      "type": "operating_procedures",
+      "url": "https://landman.ca",
+      "scope": "canadian_petroleum_land_procedures",
+      "regions": ["Alberta", "Saskatchewan", "British Columbia"],
+      "last_updated": "2024-09-01"
+    },
+    {
+      "name": "Joint Interest Billing (JIB)",
+      "type": "accounting_standard",
+      "scope": "multi_party_cost_allocation",
+      "description": "Specialized accounting for shared expenses among working interest owners",
+      "key_concepts": ["working_interest", "AFE_allocation", "partner_distribution", "JOA_compliance"],
+      "last_updated": "2024-10-15"
+    },
+    {
+      "name": "AFE Management",
+      "type": "capital_budgeting",
+      "scope": "authorization_for_expenditure",
+      "description": "Capital project approval and budget tracking workflow",
+      "key_concepts": ["budget_authorization", "variance_tracking", "change_orders", "supplements"],
+      "last_updated": "2024-11-20"
+    },
+    {
+      "name": "Field Ticket Validation",
+      "type": "service_verification",
+      "scope": "oilfield_service_documentation",
+      "description": "GPS-validated service verification and time tracking",
+      "platforms": ["OpenTicket", "FieldVest"],
+      "validation_types": ["time_materials", "equipment_usage", "GPS_location"],
+      "last_updated": "2024-12-05"
+    },
+    {
+      "name": "Three-Way Matching",
+      "type": "invoice_validation",
+      "scope": "purchase_order_field_ticket_invoice_reconciliation",
+      "description": "Automated validation of PO, field ticket, and invoice alignment",
+      "validation_rules": ["quantity_match", "price_match", "service_date_match"],
+      "last_updated": "2024-11-30"
+    },
+    {
+      "name": "Canadian Energy Regulator",
+      "type": "regulatory_compliance",
+      "url": "https://cer-rec.gc.ca",
+      "scope": "interprovincial_pipeline_energy_trade",
+      "reporting_requirements": ["tolls", "tariffs", "accounting"],
+      "last_updated": "2024-12-10"
+    },
+    {
+      "name": "Enverus OpenInvoice",
+      "type": "e_invoicing_platform",
+      "url": "https://enverus.com/products/openinvoice",
+      "scope": "oil_gas_e_invoicing_network",
+      "integration_types": ["EDI", "API", "portal"],
+      "erp_integrations": ["SAP", "Oracle", "Dynamics365", "NetSuite"],
+      "last_updated": "2024-12-01"
     }
   ],
+  "billing_concepts": {
+    "JIB_allocation": "Cost distribution based on working interest ownership percentages",
+    "AFE_budget": "Pre-approved capital expenditure authorization tied to specific projects",
+    "field_ticket": "Service verification document with GPS validation and time tracking",
+    "three_way_match": "PO + Field Ticket + Invoice reconciliation before payment",
+    "MSA_compliance": "Master Service Agreement rate validation against invoices",
+    "price_variance": "Acceptable deviation from contracted rates (typically 5-10%)",
+    "day_rate_vs_footage": "Common drilling pricing structures affecting invoice calculation",
+    "UWI_tracking": "Unique Well Identifier linking costs to specific wells",
+    "HST_GST_handling": "Provincial tax variation requiring accurate classification"
+  },
   "chunking_policy": {
     "chunk_size_tokens": 1500,
     "overlap_tokens": 150,
-    "metadata_fields": ["standard", "section", "version", "entity", "country", "classification"],
+    "metadata_fields": [
+      "standard", "section", "version", "entity", "country", 
+      "classification", "billing_type", "approval_level", "cost_category"
+    ],
     "citation_required": true
   },
   "retrieval_policy": {
     "min_citations": 1,
     "confidence_threshold": 0.7,
-    "max_chunks_per_query": 5,
+    "max_chunks_per_query": 7,
+    "prioritize_billing_context": true,
     "fallback_action": "request_document_upload"
   }
 }
