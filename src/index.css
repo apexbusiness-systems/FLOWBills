@@ -95,6 +95,13 @@
     --sidebar-accent-foreground: 0 0% 0%;
     --sidebar-border: 0 0% 88%;
     --sidebar-ring: 45 100% 51%;
+
+    /* Chart colors for data visualization */
+    --chart-1: 220 70% 50%;  /* Blue */
+    --chart-2: 160 60% 45%;  /* Teal */
+    --chart-3: 30 80% 55%;   /* Orange */
+    --chart-4: 280 65% 60%;  /* Purple */
+    --chart-5: 340 75% 55%;  /* Pink */
   }
 
   .dark {
@@ -140,6 +147,13 @@
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 20%;
     --sidebar-ring: 45 100% 51%;
+
+    /* Chart colors for data visualization - dark mode */
+    --chart-1: 220 70% 60%;  /* Blue - brighter for dark mode */
+    --chart-2: 160 60% 55%;  /* Teal */
+    --chart-3: 30 80% 65%;   /* Orange */
+    --chart-4: 280 65% 70%;  /* Purple */
+    --chart-5: 340 75% 65%;  /* Pink */
   }
 }
 
