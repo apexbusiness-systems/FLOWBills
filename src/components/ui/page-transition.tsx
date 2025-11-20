@@ -1,0 +1,19 @@
+import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+
+interface PageTransitionProps {
+  children: ReactNode;
+  className?: string;
+}
+
+/**
+ * Wrapper for page transitions
+ * Provides consistent animation when navigating between pages
+ */
+export const PageTransition = ({ children, className }: PageTransitionProps) => {
+  return (
+    <div className={cn("animate-fade-in", className)}>
+      {children}
+    </div>
+  );
+};

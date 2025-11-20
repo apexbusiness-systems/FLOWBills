@@ -186,11 +186,22 @@ header, footer, a, button, input, select, textarea, [role="button"], [role="link
 }
 
 @layer components {
-  /* Enterprise button styles */
+  /* Standardized Spacing Scale - 4/8/12/16/24/32/48/64px */
+  .space-xs { @apply space-y-1; } /* 4px */
+  .space-sm { @apply space-y-2; } /* 8px */
+  .space-md { @apply space-y-3; } /* 12px */
+  .space-base { @apply space-y-4; } /* 16px */
+  .space-lg { @apply space-y-6; } /* 24px */
+  .space-xl { @apply space-y-8; } /* 32px */
+  .space-2xl { @apply space-y-12; } /* 48px */
+  .space-3xl { @apply space-y-16; } /* 64px */
+
+  /* Enterprise button styles with consistent hierarchy */
   .btn-enterprise {
     @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200;
     @apply shadow-md hover:shadow-lg active:shadow-sm;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply min-h-[44px]; /* Touch-friendly tap target */
   }
 
   .btn-primary {
@@ -203,10 +214,21 @@ header, footer, a, button, input, select, textarea, [role="button"], [role="link
     @apply hover:bg-secondary/90;
   }
 
-  /* Card styles */
+  /* Unified card styles with consistent shadows */
   .card-enterprise {
-    @apply rounded-lg border bg-card text-card-foreground shadow-md;
-    @apply transition-shadow duration-200 hover:shadow-lg;
+    @apply rounded-lg border bg-card text-card-foreground;
+    @apply shadow-[0_2px_8px_rgba(0,0,0,0.08)];
+    @apply transition-all duration-200 hover:shadow-[0_8px_16px_rgba(0,0,0,0.12)];
+  }
+
+  /* Form field consistency */
+  .form-field {
+    @apply w-full rounded-lg border border-input bg-background px-4 py-3;
+    @apply text-sm text-foreground placeholder:text-muted-foreground;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+    @apply min-h-[44px]; /* Touch-friendly */
   }
 
   /* Story/feature hover effects */

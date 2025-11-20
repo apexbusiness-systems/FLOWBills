@@ -14,6 +14,9 @@ import { Footer } from "@/components/ui/footer";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
 import { CommandPalette } from "@/components/ui/command-palette";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { PublicHeader } from "@/components/ui/public-header";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
 
 // Lazy load all pages for code splitting
 const Auth = React.lazy(() => import("./pages/Auth"));
@@ -72,24 +75,30 @@ const AuthRoutes = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+        <div className="text-center" role="status" aria-live="polite">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" aria-hidden="true"></div>
+          <p className="text-muted-foreground">Loading application...</p>
         </div>
       </div>
     );
   }
 
+  // Determine if current route should show public header
+  const showPublicHeader = !user;
+  const showMobileNav = !!user;
+
   return (
-    <React.Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+    <>
+      {showPublicHeader && <PublicHeader />}
+      <React.Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center" role="status" aria-live="polite">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" aria-hidden="true"></div>
+            <p className="text-muted-foreground">Loading page...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <Routes>
+      }>
+        <Routes>
         <Route 
           path="/auth" 
           element={user ? <Navigate to="/" replace /> : <Auth />} 
@@ -204,8 +213,11 @@ const AuthRoutes = () => {
         />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
-      </Routes>
-    </React.Suspense>
+        </Routes>
+      </React.Suspense>
+      {showMobileNav && <MobileBottomNav />}
+      <ScrollToTop />
+    </>
   );
 };
 
