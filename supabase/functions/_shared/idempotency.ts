@@ -1,5 +1,5 @@
 // P4: Idempotency Middleware for Edge Functions
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.58.0";
 
 export interface IdempotentResponse {
   status: number;
@@ -7,130 +7,172 @@ export interface IdempotentResponse {
   headers?: Record<string, string>;
 }
 
+export interface IdempotencyOptions {
+  scope: string;
+  tenantId?: string;
+  supabaseClient?: SupabaseClient;
+  parseJson?: boolean;
+}
+
+const SYSTEM_TENANT_ID = "00000000-0000-0000-0000-000000000000";
+
+const envAccessor =
+  (globalThis as { Deno?: { env: { get(key: string): string | undefined } } }).Deno?.env;
+
+const getEnv = (key: string): string | undefined => {
+  if (envAccessor?.get) {
+    return envAccessor.get(key);
+  }
+
+  if (typeof process !== "undefined") {
+    return process.env?.[key];
+  }
+
+  return undefined;
+};
+
+async function hashRequestBody(body: string): Promise<string> {
+  const data = new TextEncoder().encode(body);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 /**
  * Wraps an Edge Function handler with idempotency guarantees.
  * Requires 'Idempotency-Key' header in request.
- * 
+ *
  * @param req - The incoming request
  * @param handler - The actual handler function to execute
  * @returns Response with idempotency guarantees
  */
-export async function withIdempotency(
+export async function withIdempotency<T = unknown>(
   req: Request,
-  handler: (req: Request) => Promise<IdempotentResponse>
+  handler: (body: T) => Promise<IdempotentResponse>,
+  options: IdempotencyOptions
 ): Promise<Response> {
-  const idempotencyKey = req.headers.get('idempotency-key');
-  
+  const idempotencyKey = req.headers.get("idempotency-key");
+
   if (!idempotencyKey) {
     return new Response(
-      JSON.stringify({ error: 'Idempotency-Key header required' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: "Idempotency-Key header required" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-  );
+  const supabase =
+    options.supabaseClient ??
+    createClient(
+      getEnv("SUPABASE_URL") ?? "",
+      getEnv("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
-  // Hash request body for conflict detection
-  const body = await req.text();
-  const encoder = new TextEncoder();
-  const data = encoder.encode(body);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const requestHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const rawBody = await req.text();
+  const requestHash = await hashRequestBody(rawBody);
+  const scope = options.scope || "default";
+  const tenantId =
+    options.tenantId ?? req.headers.get("x-tenant-id") ?? SYSTEM_TENANT_ID;
 
-  // Check for existing idempotency key
   const { data: existing } = await supabase
-    .from('idempotency_keys')
-    .select('*')
-    .eq('idempotency_key', idempotencyKey)
-    .single();
+    .from("idempotency_keys")
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .eq("scope", scope)
+    .eq("idempotency_key", idempotencyKey)
+    .maybeSingle();
 
   if (existing) {
-    // Check if request body matches
     if (existing.request_hash !== requestHash) {
       return new Response(
-        JSON.stringify({ error: 'Request body mismatch for idempotency key' }),
-        { status: 409, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Request body mismatch for idempotency key" }),
+        { status: 409, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // If still processing, return 425 Too Early
-    if (existing.status === 'processing') {
+    if (existing.status === "processing") {
       return new Response(
-        JSON.stringify({ error: 'Request still processing' }),
-        { status: 425, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Request still processing" }),
+        { status: 425, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // If completed, return stored response
-    if (existing.status === 'completed') {
-      return new Response(
-        JSON.stringify(existing.response_body),
-        {
-          status: existing.response_status || 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+    if (existing.status === "completed") {
+      return new Response(JSON.stringify(existing.response_body), {
+        status: existing.response_status || 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...(existing.response_headers ?? {}),
+        },
+      });
     }
   }
 
-  // Create new idempotency record with PostgreSQL advisory lock
   const expiresAt = new Date();
-  expiresAt.setHours(expiresAt.getHours() + 24); // 24h expiry
+  expiresAt.setHours(expiresAt.getHours() + 24);
 
-  const { error: insertError } = await supabase
-    .from('idempotency_keys')
-    .insert({
-      idempotency_key: idempotencyKey,
-      request_hash: requestHash,
-      status: 'processing',
-      expires_at: expiresAt.toISOString(),
-    });
+  const { error: insertError } = await supabase.from("idempotency_keys").insert({
+    tenant_id: tenantId,
+    scope,
+    idempotency_key: idempotencyKey,
+    request_hash: requestHash,
+    status: "processing",
+    expires_at: expiresAt.toISOString(),
+  });
 
   if (insertError) {
-    // Race condition: another request inserted first
     return new Response(
-      JSON.stringify({ error: 'Concurrent request detected' }),
-      { status: 425, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: "Concurrent request detected" }),
+      { status: 425, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  try {
-    // Execute the actual handler
-    const result = await handler(new Request(req.url, {
-      method: req.method,
-      headers: req.headers,
-      body: body || undefined,
-    }));
+  const parsedBody: T = (() => {
+    if (options.parseJson === false) {
+      return rawBody as unknown as T;
+    }
 
-    // Store successful response
+    if (!rawBody) {
+      return undefined as unknown as T;
+    }
+
+    try {
+      return JSON.parse(rawBody) as T;
+    } catch (_err) {
+      throw new Error("Invalid JSON payload for idempotent handler");
+    }
+  })();
+
+  try {
+    const result = await handler(parsedBody);
+
     await supabase
-      .from('idempotency_keys')
+      .from("idempotency_keys")
       .update({
-        status: 'completed',
+        status: "completed",
         response_status: result.status,
         response_body: result.body,
+        response_headers: result.headers ?? {},
         completed_at: new Date().toISOString(),
       })
-      .eq('idempotency_key', idempotencyKey);
+      .eq("tenant_id", tenantId)
+      .eq("scope", scope)
+      .eq("idempotency_key", idempotencyKey);
 
     return new Response(JSON.stringify(result.body), {
       status: result.status,
-      headers: { 'Content-Type': 'application/json', ...result.headers },
+      headers: { "Content-Type": "application/json", ...result.headers },
     });
-  } catch (err) {
-    // Mark as failed
+  } catch (err: any) {
     await supabase
-      .from('idempotency_keys')
+      .from("idempotency_keys")
       .update({
-        status: 'failed',
-        response_body: { error: err.message },
+        status: "failed",
+        response_body: { error: err?.message ?? "Unknown error" },
         completed_at: new Date().toISOString(),
       })
-      .eq('idempotency_key', idempotencyKey);
+      .eq("tenant_id", tenantId)
+      .eq("scope", scope)
+      .eq("idempotency_key", idempotencyKey);
 
     throw err;
   }

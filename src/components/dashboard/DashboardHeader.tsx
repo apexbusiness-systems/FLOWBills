@@ -61,19 +61,19 @@ const DashboardHeader = () => {
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
             aria-label="Go to homepage"
           >
-            <img 
-              src={companyLogo} 
-              alt="FLOWBills.ca Logo" 
+            <img
+              src={companyLogo}
+              alt="FLOWBills.ca Logo"
               className="h-8 w-8 object-contain"
             />
           </button>
           <div className="hidden sm:block">
-            <button 
+            <button
               onClick={() => navigate('/')}
               className="text-left hover:opacity-80 transition-opacity"
             >
-              <h1 className="text-lg font-semibold text-foreground">Flow Billing</h1>
-              <p className="text-xs text-muted-foreground">Oil & Gas Payment Platform</p>
+              <p className="text-xs text-muted-foreground">Welcome back, {getDisplayName()}!</p>
+              <h1 className="text-lg font-semibold text-foreground">Oil & Gas Billing Platform</h1>
             </button>
           </div>
         </div>
@@ -136,10 +136,11 @@ const DashboardHeader = () => {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 className="hover-scale flex items-center gap-2 h-9 px-3"
+                aria-label="User menu"
               >
                 <User className="h-4 w-4" />
                 <div className="hidden md:block text-left">
@@ -162,17 +163,17 @@ const DashboardHeader = () => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={() => navigate('/profile')} 
+              <DropdownMenuItem
+                onClick={() => navigate('/profile')}
                 className="cursor-pointer"
               >
                 <Settings className="mr-2 h-4 w-4" />
-                Profile Settings
+                Profile
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
+                Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

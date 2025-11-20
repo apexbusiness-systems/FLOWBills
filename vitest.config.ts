@@ -35,6 +35,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'npm:@supabase/supabase-js@2.58.0': '@supabase/supabase-js',
     },
   },
 });

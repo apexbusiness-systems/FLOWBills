@@ -55,6 +55,7 @@ export interface KeysetPaginationParams {
   limit?: number;
   afterId?: string;
   afterCreatedAt?: string;
+  userId?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -72,18 +73,22 @@ export interface PaginatedResponse<T> {
 export async function fetchInvoicesPaginated(
   params: KeysetPaginationParams = {}
 ): Promise<PaginatedResponse<any>> {
-  const { limit = 50, afterId, afterCreatedAt } = params;
-  
-  return deduper.once(`invoices-${afterId || 'first'}-${limit}`, async () => {
+  const { limit = 50, afterId, afterCreatedAt, userId } = params;
+
+  return deduper.once(`invoices-${userId || 'anon'}-${afterId || 'first'}-${limit}`, async () => {
     const { supabase } = await import('@/integrations/supabase/client');
-    
+
     let query = supabase
       .from('invoices')
       .select('*')
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
       .limit(limit + 1); // Fetch one extra to check hasMore
-    
+
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
     // Apply keyset cursor if provided
     if (afterCreatedAt && afterId) {
       query = query.or(`created_at.lt.${afterCreatedAt},and(created_at.eq.${afterCreatedAt},id.lt.${afterId})`);

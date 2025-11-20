@@ -49,7 +49,9 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    return await withIdempotency(req, async (body: AircallEvent) => {
+    return await withIdempotency(
+      req,
+      async (body: AircallEvent) => {
       console.log('Aircall webhook received:', { event: body.event, resource: body.resource, ivr: body.data.ivr_selection });
 
       const ivrSelection = body.data.ivr_selection || '3'; // Default to platform
@@ -130,17 +132,20 @@ Deno.serve(async (req) => {
         });
 
       return new Response(
-        JSON.stringify({ 
-          success: true, 
+        JSON.stringify({
+          success: true,
           message: isPrivacyCall ? 'Privacy call handled (no recording)' : 'Call logged and ticket created',
           ticket_number: ticketNumber,
-          category 
+          category
         }),
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
+          status: 200
         }
       );
+    }, {
+      scope: 'aircall_webhook',
+      tenantId: '00000000-0000-0000-0000-000000000000'
     });
   } catch (error) {
     console.error('Aircall webhook error:', error);

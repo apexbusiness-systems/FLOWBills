@@ -38,17 +38,18 @@ export const useInvoices = () => {
     const result = await queryOptimizer.supabaseQuery(
       'invoices',
       async (client) => {
-        const q = client
+        let q = client
           .from('invoices')
           .select('*')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .order('id', { ascending: false })
           .limit(50);
-          
+
         if (cursor) {
-          q.lt('created_at', cursor.created_at).or(`created_at.eq.${cursor.created_at},id.lt.${cursor.id}`);
+          q = q.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
         }
-        
+
         return await q;
       },
       cacheKey,
