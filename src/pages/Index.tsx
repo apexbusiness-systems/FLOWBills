@@ -2,6 +2,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { TrackLink } from "@/components/ui/TrackLink";
 import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Zap, Shield, Clock, CheckCircle2, ArrowRight, BarChart3 } from "lucide-react";
 import heroImage from "@/assets/hero-oilgas.jpg";
 
@@ -168,6 +169,76 @@ const Index = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-background" aria-labelledby="faq-heading">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="text-center mb-12">
+            <h2 id="faq-heading" className="text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+            <p className="text-xl text-muted-foreground">
+              Everything you need to know about automated invoice processing
+            </p>
+          </div>
+          <Accordion type="single" collapsible className="space-y-4">
+            <AccordionItem value="item-1" className="card-enterprise px-6">
+              <AccordionTrigger className="text-left font-semibold">
+                What is automated invoice processing for oil and gas?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Automated invoice processing uses AI and machine learning to automatically extract data from oil and gas invoices, validate them against purchase orders, detect duplicates, and route them for approval. FlowBills processes invoices with 95% straight-through processing, reducing manual data entry by 80% and cutting processing costs significantly.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2" className="card-enterprise px-6">
+              <AccordionTrigger className="text-left font-semibold">
+                How does FlowBills ensure PIPEDA compliance?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                FlowBills is built with PIPEDA compliance from the ground up. We implement data encryption at rest and in transit, role-based access controls, audit logging, data retention policies, and privacy-by-design principles. All personal information is handled according to Canadian privacy law requirements, with consent management and data subject rights built into the platform.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3" className="card-enterprise px-6">
+              <AccordionTrigger className="text-left font-semibold">
+                Can FlowBills integrate with our existing accounting system?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Yes, FlowBills integrates with major accounting and ERP systems used in the oil and gas industry including SAP, Oracle, QuickBooks, Sage, and custom systems via API. Our integration supports bi-directional data sync for invoices, vendor information, purchase orders, and payment status.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-4" className="card-enterprise px-6">
+              <AccordionTrigger className="text-left font-semibold">
+                How does duplicate invoice detection work?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                FlowBills uses advanced algorithms to detect duplicate invoices by analyzing multiple data points including vendor name, invoice number, date, amount, and PO number. The system uses fuzzy matching to catch duplicates even when invoice numbers or amounts vary slightly, preventing duplicate payments before they occur.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-5" className="card-enterprise px-6">
+              <AccordionTrigger className="text-left font-semibold">
+                What is the ROI timeline for implementing FlowBills?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Most Canadian oil and gas companies see ROI within 3-6 months. Typical savings include 80% reduction in invoice processing costs, 95% straight-through processing rate, elimination of duplicate payments, faster approval cycles, and reduced audit costs. The platform typically pays for itself through reduced labor costs and prevented duplicate payments alone.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-6" className="card-enterprise px-6">
+              <AccordionTrigger className="text-left font-semibold">
+                Does FlowBills support e-invoicing and Peppol?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                Yes, FlowBills supports e-invoicing standards including Peppol, EN 16931, and country-specific formats. Our platform can receive, validate, and process electronic invoices while maintaining compliance with Canadian and international e-invoicing regulations. This ensures seamless integration with suppliers using various e-invoicing formats.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-7" className="card-enterprise px-6">
+              <AccordionTrigger className="text-left font-semibold">
+                How secure is my invoice data?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                FlowBills implements enterprise-grade security including AES-256 encryption, SOC 2 compliant infrastructure, regular security audits, multi-factor authentication, and role-based access controls. All data is stored in Canadian data centers, and we maintain comprehensive audit logs for compliance purposes. Your invoice data is protected by the same security standards used by major financial institutions.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
 
