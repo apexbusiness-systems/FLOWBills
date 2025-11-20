@@ -340,6 +340,33 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_submissions: {
+        Row: {
+          blocked: boolean | null
+          created_at: string
+          id: string
+          ip_address: unknown
+          submission_count: number
+          window_start: string
+        }
+        Insert: {
+          blocked?: boolean | null
+          created_at?: string
+          id?: string
+          ip_address: unknown
+          submission_count?: number
+          window_start?: string
+        }
+        Update: {
+          blocked?: boolean | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          submission_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           company_name: string | null
@@ -379,6 +406,36 @@ export type Database = {
           message?: string | null
           phone?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          labels: Json | null
+          metric_name: string
+          metric_unit: string | null
+          metric_value: number
+          timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          labels?: Json | null
+          metric_name: string
+          metric_unit?: string | null
+          metric_value: number
+          timestamp?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          labels?: Json | null
+          metric_name?: string
+          metric_unit?: string | null
+          metric_value?: number
+          timestamp?: string
         }
         Relationships: []
       }
@@ -437,6 +494,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: unknown
+          metadata: Json | null
+          request_count: number
+          resource_key: string
+          resource_type: string
+          user_id: string | null
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          request_count?: number
+          resource_key: string
+          resource_type: string
+          user_id?: string | null
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          request_count?: number
+          resource_key?: string
+          resource_type?: string
+          user_id?: string | null
+          window_start?: string
+        }
+        Relationships: []
+      }
+      slo_violations: {
+        Row: {
+          burn_rate: number | null
+          created_at: string
+          details: Json | null
+          error_budget_consumed: number | null
+          id: string
+          resolved_at: string | null
+          severity: string
+          slo_name: string
+          timestamp: string
+          violation_type: string
+          window_duration: string | null
+        }
+        Insert: {
+          burn_rate?: number | null
+          created_at?: string
+          details?: Json | null
+          error_budget_consumed?: number | null
+          id?: string
+          resolved_at?: string | null
+          severity: string
+          slo_name: string
+          timestamp?: string
+          violation_type: string
+          window_duration?: string | null
+        }
+        Update: {
+          burn_rate?: number | null
+          created_at?: string
+          details?: Json | null
+          error_budget_consumed?: number | null
+          id?: string
+          resolved_at?: string | null
+          severity?: string
+          slo_name?: string
+          timestamp?: string
+          violation_type?: string
+          window_duration?: string | null
+        }
+        Relationships: []
       }
       system_health_metrics: {
         Row: {
@@ -625,8 +760,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      anonymize_old_activities: { Args: never; Returns: undefined }
       assign_admin_role: { Args: never; Returns: undefined }
       assign_ceo_admin_role: { Args: never; Returns: undefined }
+      check_lead_rate_limit: { Args: { check_ip: unknown }; Returns: boolean }
+      cleanup_old_audit_logs: { Args: never; Returns: undefined }
       get_current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]

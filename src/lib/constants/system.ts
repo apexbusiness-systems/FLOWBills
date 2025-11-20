@@ -49,15 +49,16 @@ export const SYSTEM_CONFIG = {
   },
 } as const;
 
-// Security Headers
+// Security Headers - Enterprise Production Grade
 export const SECURITY_HEADERS = {
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // TODO: Remove unsafe-inline/eval
-    "connect-src 'self' https://*.supabase.co",
-    "img-src 'self' data: https:",
-    "style-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'nonce-{NONCE}' https://www.googletagmanager.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    "img-src 'self' data: https: blob:",
+    "style-src 'self' 'nonce-{NONCE}'",
     "font-src 'self' data:",
+    "frame-ancestors 'none'",
   ].join('; '),
   'X-Frame-Options': 'DENY',
   'X-Content-Type-Options': 'nosniff',

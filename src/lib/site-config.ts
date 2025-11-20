@@ -48,12 +48,19 @@ export const SiteConfig = {
     strictMode: true,
   },
   analytics: {
-    gtmId: 'GTM-XXXX',
-    enableTracking: true,
+    gtmId: import.meta.env.VITE_GTM_ID || '', // Set via environment variable
+    enableTracking: !import.meta.env.DEV,
+    enableProductionOnly: true,
+  },
+  observability: {
+    enableTracing: !import.meta.env.DEV,
+    enableMetrics: true,
+    enableSLOMonitoring: !import.meta.env.DEV,
   },
   features: {
     allowMarketingIntegrations: false, // Block Klaviyo and similar
     enableThirdPartyScripts: false,
+    enableErrorTracking: !import.meta.env.DEV,
   }
 } as const;
 
