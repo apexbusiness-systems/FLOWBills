@@ -24,6 +24,9 @@ verify_jwt = true
 [functions.ocr-extract]
 verify_jwt = true
 
+[functions.invoice-extract]
+verify_jwt = true
+
 [functions.einvoice_validate]
 verify_jwt = false
 

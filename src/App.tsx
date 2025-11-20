@@ -43,6 +43,7 @@ const SupplierPortal = React.lazy(() => import("./pages/supplier/SupplierPortal"
 const CSPMonitoring = React.lazy(() => import("./pages/CSPMonitoring"));
 const Support = React.lazy(() => import("./pages/Support"));
 const HelpCenter = React.lazy(() => import("./pages/HelpCenter"));
+const AFEManagement = React.lazy(() => import("./pages/AFEManagement"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,6 +123,14 @@ const AuthRoutes = () => {
           element={
             <ProtectedRoute requiredRole="operator">
               <ValidationRules />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/afe-management" 
+          element={
+            <ProtectedRoute>
+              <AFEManagement />
             </ProtectedRoute>
           } 
         />

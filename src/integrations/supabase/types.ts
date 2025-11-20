@@ -53,6 +53,54 @@ export type Database = {
         }
         Relationships: []
       }
+      afes: {
+        Row: {
+          afe_number: string
+          approval_date: string | null
+          budget_amount: number
+          created_at: string
+          description: string | null
+          expiry_date: string | null
+          id: string
+          project_type: string | null
+          spent_amount: number
+          status: string
+          updated_at: string
+          user_id: string
+          well_name: string | null
+        }
+        Insert: {
+          afe_number: string
+          approval_date?: string | null
+          budget_amount: number
+          created_at?: string
+          description?: string | null
+          expiry_date?: string | null
+          id?: string
+          project_type?: string | null
+          spent_amount?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+          well_name?: string | null
+        }
+        Update: {
+          afe_number?: string
+          approval_date?: string | null
+          budget_amount?: number
+          created_at?: string
+          description?: string | null
+          expiry_date?: string | null
+          id?: string
+          project_type?: string | null
+          spent_amount?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+          well_name?: string | null
+        }
+        Relationships: []
+      }
       compliance_records: {
         Row: {
           completed_date: string | null
@@ -203,6 +251,103 @@ export type Database = {
           },
         ]
       }
+      field_tickets: {
+        Row: {
+          afe_id: string | null
+          amount: number
+          created_at: string
+          equipment: string | null
+          gps_coordinates: Json | null
+          hours: number | null
+          id: string
+          invoice_id: string | null
+          location: string | null
+          notes: string | null
+          personnel: string | null
+          rate: number | null
+          service_date: string
+          service_type: string | null
+          ticket_number: string
+          updated_at: string
+          user_id: string
+          uwi_id: string | null
+          vendor_name: string
+          verified: boolean | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          afe_id?: string | null
+          amount: number
+          created_at?: string
+          equipment?: string | null
+          gps_coordinates?: Json | null
+          hours?: number | null
+          id?: string
+          invoice_id?: string | null
+          location?: string | null
+          notes?: string | null
+          personnel?: string | null
+          rate?: number | null
+          service_date: string
+          service_type?: string | null
+          ticket_number: string
+          updated_at?: string
+          user_id: string
+          uwi_id?: string | null
+          vendor_name: string
+          verified?: boolean | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          afe_id?: string | null
+          amount?: number
+          created_at?: string
+          equipment?: string | null
+          gps_coordinates?: Json | null
+          hours?: number | null
+          id?: string
+          invoice_id?: string | null
+          location?: string | null
+          notes?: string | null
+          personnel?: string | null
+          rate?: number | null
+          service_date?: string
+          service_type?: string | null
+          ticket_number?: string
+          updated_at?: string
+          user_id?: string
+          uwi_id?: string | null
+          vendor_name?: string
+          verified?: boolean | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_tickets_afe_id_fkey"
+            columns: ["afe_id"]
+            isOneToOne: false
+            referencedRelation: "afes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_tickets_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_tickets_uwi_id_fkey"
+            columns: ["uwi_id"]
+            isOneToOne: false
+            referencedRelation: "uwis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_status: {
         Row: {
           config: Json | null
@@ -288,6 +433,109 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_extractions: {
+        Row: {
+          afe_id: string | null
+          afe_number: string | null
+          budget_remaining: number | null
+          budget_status: string | null
+          confidence_scores: Json | null
+          created_at: string
+          extracted_at: string | null
+          extracted_data: Json | null
+          extraction_status: string
+          field_ticket_refs: string[] | null
+          id: string
+          invoice_id: string
+          line_items: Json | null
+          po_number: string | null
+          service_period_end: string | null
+          service_period_start: string | null
+          updated_at: string
+          user_id: string
+          uwi: string | null
+          uwi_id: string | null
+          validated_at: string | null
+          validation_errors: string[] | null
+          validation_results: Json | null
+          validation_warnings: string[] | null
+        }
+        Insert: {
+          afe_id?: string | null
+          afe_number?: string | null
+          budget_remaining?: number | null
+          budget_status?: string | null
+          confidence_scores?: Json | null
+          created_at?: string
+          extracted_at?: string | null
+          extracted_data?: Json | null
+          extraction_status?: string
+          field_ticket_refs?: string[] | null
+          id?: string
+          invoice_id: string
+          line_items?: Json | null
+          po_number?: string | null
+          service_period_end?: string | null
+          service_period_start?: string | null
+          updated_at?: string
+          user_id: string
+          uwi?: string | null
+          uwi_id?: string | null
+          validated_at?: string | null
+          validation_errors?: string[] | null
+          validation_results?: Json | null
+          validation_warnings?: string[] | null
+        }
+        Update: {
+          afe_id?: string | null
+          afe_number?: string | null
+          budget_remaining?: number | null
+          budget_status?: string | null
+          confidence_scores?: Json | null
+          created_at?: string
+          extracted_at?: string | null
+          extracted_data?: Json | null
+          extraction_status?: string
+          field_ticket_refs?: string[] | null
+          id?: string
+          invoice_id?: string
+          line_items?: Json | null
+          po_number?: string | null
+          service_period_end?: string | null
+          service_period_start?: string | null
+          updated_at?: string
+          user_id?: string
+          uwi?: string | null
+          uwi_id?: string | null
+          validated_at?: string | null
+          validation_errors?: string[] | null
+          validation_results?: Json | null
+          validation_warnings?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_extractions_afe_id_fkey"
+            columns: ["afe_id"]
+            isOneToOne: false
+            referencedRelation: "afes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_extractions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: true
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_extractions_uwi_id_fkey"
+            columns: ["uwi_id"]
+            isOneToOne: false
+            referencedRelation: "uwis"
             referencedColumns: ["id"]
           },
         ]
@@ -630,6 +878,54 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      uwis: {
+        Row: {
+          completion_date: string | null
+          created_at: string
+          id: string
+          location: string | null
+          metadata: Json | null
+          operator: string | null
+          province: string | null
+          spud_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          uwi: string
+          well_name: string | null
+        }
+        Insert: {
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          operator?: string | null
+          province?: string | null
+          spud_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          uwi: string
+          well_name?: string | null
+        }
+        Update: {
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          operator?: string | null
+          province?: string | null
+          spud_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          uwi?: string
+          well_name?: string | null
         }
         Relationships: []
       }
