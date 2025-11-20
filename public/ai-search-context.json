@@ -1,0 +1,122 @@
+{
+  "platform": {
+    "name": "FlowBills",
+    "full_name": "FLOWBills.ca",
+    "tagline": "Automated Invoice Processing for Canadian Oil and Gas",
+    "description": "Enterprise-grade accounts payable automation platform specifically designed for Canadian oil and gas companies. Handles complex energy sector invoicing including field tickets, AFE tracking, joint venture billing, and regulatory compliance.",
+    "url": "https://flowbills.ca"
+  },
+  "industry_focus": {
+    "primary": "Oil and Gas",
+    "sectors": ["Upstream", "Midstream", "Downstream", "Oil Sands", "Natural Gas", "Petroleum Services"],
+    "geography": "Canada (Alberta, Saskatchewan, British Columbia)",
+    "target_customers": "Canadian energy companies, petroleum operators, service companies, joint venture partnerships"
+  },
+  "core_capabilities": {
+    "invoice_processing": {
+      "description": "Automated invoice data extraction, validation, and processing",
+      "accuracy": "99.5% OCR accuracy",
+      "throughput": "95% straight-through processing rate",
+      "speed": "Average 30 seconds from receipt to approval",
+      "document_types": ["Vendor invoices", "Field tickets", "Service orders", "Equipment rentals", "Purchase orders", "AFE documentation"]
+    },
+    "duplicate_detection": {
+      "description": "Prevents duplicate payments using fuzzy matching algorithms",
+      "matching_criteria": ["Vendor name", "Invoice number", "Date", "Amount", "PO number", "AFE code"],
+      "accuracy": "Catches duplicates even with slight variations in amounts or numbering"
+    },
+    "compliance": {
+      "canadian_regulations": ["PIPEDA", "CASL", "Alberta PIPA", "BC PIPA"],
+      "security_certifications": ["SOC 2 Type II"],
+      "data_residency": "Canadian data centers",
+      "encryption": "AES-256 at rest and in transit"
+    },
+    "integrations": {
+      "erp_systems": ["SAP", "Oracle ERP Cloud", "Workday", "QuickBooks", "Sage", "Custom APIs"],
+      "einvoicing": ["Peppol", "EN 16931", "Country-specific formats"],
+      "data_sync": "Bi-directional sync for invoices, vendors, POs, payment status"
+    }
+  },
+  "key_metrics": {
+    "cost_reduction": "80% reduction in invoice processing costs",
+    "automation_rate": "95% straight-through processing",
+    "accuracy": "99.5% OCR data extraction accuracy",
+    "processing_speed": "30 seconds average processing time",
+    "roi_timeline": "3-6 months typical ROI",
+    "uptime": "99.9% platform availability"
+  },
+  "oil_gas_specific_features": {
+    "afe_tracking": "Authorization for Expenditure tracking and validation",
+    "joint_venture_billing": "Split billing across working interest partners",
+    "field_tickets": "Process field service tickets with handwritten entries",
+    "provincial_requirements": "Handles Alberta, Saskatchewan, BC specific requirements",
+    "service_company_integration": "Pre-configured for major oil and gas service providers"
+  },
+  "common_use_cases": [
+    {
+      "use_case": "Automate field ticket processing",
+      "challenge": "Field tickets often have handwritten entries and non-standard formats",
+      "solution": "Advanced OCR with 99.5% accuracy processes handwritten amounts, dates, and descriptions",
+      "outcome": "Reduce manual data entry by 80%, eliminate transcription errors"
+    },
+    {
+      "use_case": "Prevent duplicate AFE charges",
+      "challenge": "Same work may be billed multiple times under different AFEs or vendors",
+      "solution": "Fuzzy duplicate detection across vendor, date, amount, PO, and AFE code",
+      "outcome": "Catch and prevent duplicate payments saving average 2-3% of AP spend"
+    },
+    {
+      "use_case": "Joint venture billing reconciliation",
+      "challenge": "Complex working interest splits across multiple partners",
+      "solution": "Automated working interest calculations and partner allocations",
+      "outcome": "Reduce JV billing errors, faster partner reconciliation"
+    },
+    {
+      "use_case": "PIPEDA compliance for vendor data",
+      "challenge": "Managing personal information in vendor contacts and invoices",
+      "solution": "Built-in PIPEDA controls including consent tracking, data retention, access controls",
+      "outcome": "Full compliance with Canadian privacy law, audit-ready documentation"
+    }
+  ],
+  "frequently_asked_questions": [
+    {
+      "question": "What makes FlowBills different from generic AP automation tools?",
+      "answer": "FlowBills is purpose-built for Canadian oil and gas operations. We understand AFEs, field tickets, joint venture billing, working interest calculations, and provincial regulatory requirements. Our OCR is trained on energy sector documents and our duplicate detection accounts for the complexity of petroleum industry invoicing."
+    },
+    {
+      "question": "How does FlowBills handle field tickets with handwritten entries?",
+      "answer": "Our advanced OCR engine is specifically trained on handwritten field tickets common in oil and gas operations. We achieve 99.5% accuracy extracting handwritten amounts, dates, equipment hours, and service descriptions. The system flags low-confidence extractions for human review."
+    },
+    {
+      "question": "Can FlowBills integrate with our SAP system?",
+      "answer": "Yes, FlowBills has native integration with SAP including bi-directional data sync. We pull vendor master data, purchase orders, and AFE information from SAP, then push back approved invoice data for payment processing. Integration typically takes 2-4 weeks depending on SAP configuration."
+    },
+    {
+      "question": "How does duplicate detection work across different AFEs?",
+      "answer": "Our fuzzy matching algorithm analyzes multiple dimensions: vendor name (accounting for variations), invoice date (±7 days), amount (±5%), invoice number, PO number, and AFE code. It catches duplicates even when the same work is incorrectly billed to different AFEs or with slight amount variations."
+    },
+    {
+      "question": "Is FlowBills compliant with Alberta PIPA and federal PIPEDA?",
+      "answer": "Yes, FlowBills is fully compliant with both provincial (Alberta PIPA, BC PIPA) and federal (PIPEDA) privacy legislation. We implement privacy-by-design principles, maintain audit logs, support data subject access requests, and store all data in Canadian data centers."
+    },
+    {
+      "question": "What's the typical ROI timeline for oil and gas companies?",
+      "answer": "Most Canadian oil and gas companies achieve ROI in 3-6 months. Key savings come from: 80% reduction in manual processing labor, elimination of duplicate payments (typically 2-3% of AP spend), faster close cycles, reduced audit costs, and improved early payment discount capture."
+    }
+  ],
+  "technical_specifications": {
+    "supported_formats": ["PDF", "TIFF", "JPEG", "PNG", "Email attachments", "Scanner integration", "Mobile photos"],
+    "ocr_languages": ["English", "French"],
+    "api_availability": "RESTful API for custom integrations",
+    "deployment_options": ["Cloud SaaS", "Private cloud", "Hybrid"],
+    "uptime_sla": "99.9%",
+    "support": "24/7 Canadian support team with oil and gas expertise"
+  },
+  "pricing_model": {
+    "structure": "Usage-based pricing per invoice processed",
+    "free_tier": "Free demo and trial period available",
+    "enterprise": "Volume discounts for high-volume processors",
+    "implementation": "Included setup and training",
+    "roi_calculator": "https://flowbills.ca/pricing"
+  }
+}

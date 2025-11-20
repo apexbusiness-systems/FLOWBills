@@ -85,9 +85,10 @@ const Index = () => {
       <section className="py-20 bg-background" aria-labelledby="features-heading">
         <div className="container mx-auto px-4">
           <header className="text-center mb-16">
-            <h2 id="features-heading" className="text-4xl font-bold mb-4">Enterprise-Grade Features</h2>
+            <h2 id="features-heading" className="text-4xl font-bold mb-4">Enterprise-Grade Features for Oil & Gas Invoice Processing</h2>
             <p className="text-xl text-muted-foreground">
-              Everything you need to modernize your accounts payable process
+              Comprehensive automation platform built for Canadian energy sector accounts payable teams. 
+              Process field tickets, vendor invoices, AFE documentation, and joint venture billing with industry-leading accuracy.
             </p>
           </header>
 
@@ -95,9 +96,12 @@ const Index = () => {
             <Card className="card-enterprise hover-lift">
               <CardHeader>
                 <Zap className="h-12 w-12 text-amber-500 mb-4" aria-hidden="true" />
-                <CardTitle className="text-2xl mb-2">AI-Powered Processing</CardTitle>
+                <CardTitle className="text-2xl mb-2">AI-Powered OCR & Data Extraction</CardTitle>
                 <CardDescription className="text-base mb-6">
-                  Intelligent document extraction with 99% accuracy for invoices, POs, and receipts
+                  Advanced optical character recognition (OCR) with 99.5% accuracy extracts vendor information, amounts, dates, 
+                  PO numbers, AFE codes, and line items from any document format including scanned paper invoices, PDFs, 
+                  field tickets, and photos. Supports multi-page documents, handwritten notes, and complex table structures 
+                  commonly found in oil and gas invoicing.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -121,9 +125,13 @@ const Index = () => {
             <Card className="card-enterprise hover-lift">
               <CardHeader>
                 <Shield className="h-12 w-12 text-amber-500 mb-4" aria-hidden="true" />
-                <CardTitle className="text-2xl mb-2">Compliance & Security</CardTitle>
+                <CardTitle className="text-2xl mb-2">Canadian Compliance & Enterprise Security</CardTitle>
                 <CardDescription className="text-base mb-6">
-                  PIPEDA, CASL, and SOC 2 compliance with enterprise security controls
+                  Built-in compliance with PIPEDA (Personal Information Protection and Electronic Documents Act) and 
+                  CASL (Canada's Anti-Spam Legislation). SOC 2 Type II certified infrastructure with AES-256 encryption, 
+                  role-based access control (RBAC), multi-factor authentication (MFA), and comprehensive audit logging. 
+                  Data residency in Canadian data centers ensures compliance with provincial and federal regulations 
+                  including Alberta's PIPA and BC's PIPA.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -147,9 +155,13 @@ const Index = () => {
             <Card className="card-enterprise hover-lift">
               <CardHeader>
                 <Clock className="h-12 w-12 text-amber-500 mb-4" aria-hidden="true" />
-                <CardTitle className="text-2xl mb-2">Smart Workflows</CardTitle>
+                <CardTitle className="text-2xl mb-2">Intelligent Workflow Automation</CardTitle>
                 <CardDescription className="text-base mb-6">
-                  Intelligent routing with human-in-the-loop for exception handling
+                  Smart routing engine automatically processes high-confidence invoices (95% of volume) straight-through 
+                  to approval. Low-confidence cases route to human reviewers with highlighted discrepancies. Configurable 
+                  approval hierarchies support complex organizational structures including joint venture partnerships, 
+                  working interest splits, and AFE authorization workflows. Duplicate detection uses fuzzy matching across 
+                  vendor name, invoice number, date, amount, and PO to prevent duplicate payments before they occur.
                 </CardDescription>
               </CardHeader>
               <CardContent>
