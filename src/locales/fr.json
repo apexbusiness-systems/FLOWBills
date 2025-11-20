@@ -1,0 +1,81 @@
+{
+  "brand": {
+    "name": "FLOWBills.ca",
+    "tagline": "Automatisez les factures. Approuvez plus rapidement. Clôturez en toute confiance.",
+    "description": "Automatisation des factures par IA pour les opérations pétrolières et gazières canadiennes"
+  },
+  "nav": {
+    "features": "Fonctionnalités",
+    "pricing": "Tarification",
+    "about": "À propos",
+    "contact": "Contact",
+    "security": "Sécurité",
+    "signIn": "Connexion",
+    "getStarted": "Commencer"
+  },
+  "hero": {
+    "title": "Automatisez les factures. Approuvez plus vite. Clôturez en confiance.",
+    "subtitle": "Traitement automatisé des factures par IA conçu pour les opérations pétrolières et gazières canadiennes. Du ticket de terrain à la clôture financière en minutes, pas en jours.",
+    "cta": {
+      "primary": "Essai gratuit",
+      "secondary": "Voir la démo"
+    }
+  },
+  "features": {
+    "title": "Conçu pour les opérations pétrolières et gazières",
+    "ocr": {
+      "title": "OCR et extraction de données par IA",
+      "description": "Extrait instantanément les noms de fournisseurs, numéros AFE, références PO, montants, dates de tout format de facture"
+    },
+    "duplicate": {
+      "title": "Détection des doublons et fraudes",
+      "description": "Des algorithmes intelligents détectent les factures en double et les schémas suspects avant qu'ils n'atteignent vos livres"
+    },
+    "hil": {
+      "title": "Révision humaine dans la boucle",
+      "description": "Achemine les extractions à faible confiance vers votre équipe pour validation et approbation rapides"
+    },
+    "compliance": {
+      "title": "Conformité canadienne et sécurité d'entreprise",
+      "description": "Traitement des données conforme à la LPRPDE, gestion du consentement conforme à la LCAP, infrastructure certifiée SOC 2 Type II"
+    },
+    "workflow": {
+      "title": "Automatisation intelligente du flux de travail",
+      "description": "Routage intelligent basé sur les seuils de montant, centres de coûts, codes GL et hiérarchies d'approbation"
+    },
+    "integration": {
+      "title": "Intégration ERP et NOV",
+      "description": "Connecteurs pré-construits pour SAP, Oracle, Sage, P2, Aucerna et autres systèmes pétroliers et gaziers"
+    }
+  },
+  "whyChoose": {
+    "title": "Pourquoi choisir FlowBills?",
+    "canadian": {
+      "title": "Résidence des données au Canada",
+      "description": "Vos données restent au Canada, conformes aux réglementations provinciales et fédérales"
+    },
+    "industry": {
+      "title": "Expertise pétrolière et gazière",
+      "description": "Pré-configuré pour les tickets de terrain, facturation de coentreprise, suivi AFE, partages de revenus et redevances"
+    },
+    "security": {
+      "title": "Sécurité d'entreprise",
+      "description": "Contrôle d'accès basé sur les rôles, journalisation d'audit, conformité SOC 2, données cryptées au repos et en transit"
+    }
+  },
+  "cta": {
+    "title": "Prêt à transformer votre processus AP?",
+    "subtitle": "Rejoignez les principales sociétés énergétiques canadiennes qui économisent déjà des heures chaque semaine",
+    "button": "Commencez votre essai gratuit"
+  },
+  "footer": {
+    "tagline": "Conçu pour les opérations pétrolières et gazières canadiennes",
+    "rights": "Tous droits réservés.",
+    "product": "Produit",
+    "company": "Entreprise",
+    "legal": "Légal",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "apiDocs": "Documentation API"
+  }
+}

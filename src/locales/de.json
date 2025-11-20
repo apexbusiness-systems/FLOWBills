@@ -1,0 +1,81 @@
+{
+  "brand": {
+    "name": "FLOWBills.ca",
+    "tagline": "Rechnungen automatisieren. Schneller genehmigen. Sicher abschließen.",
+    "description": "KI-gestützte Rechnungsautomatisierung für kanadische Öl- und Gasoperationen"
+  },
+  "nav": {
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "security": "Sicherheit",
+    "signIn": "Anmelden",
+    "getStarted": "Jetzt starten"
+  },
+  "hero": {
+    "title": "Rechnungen automatisieren. Schneller genehmigen. Sicher abschließen.",
+    "subtitle": "KI-gestützte Rechnungsverarbeitung für kanadische Öl- und Gasoperationen. Vom Feldticket zum Finanzabschluss in Minuten statt Tagen.",
+    "cta": {
+      "primary": "Kostenlose Testversion",
+      "secondary": "Demo ansehen"
+    }
+  },
+  "features": {
+    "title": "Entwickelt für Öl- und Gasoperationen",
+    "ocr": {
+      "title": "KI-gestützte OCR und Datenextraktion",
+      "description": "Extrahiert sofort Lieferantennamen, AFE-Nummern, PO-Referenzen, Beträge, Daten aus jedem Rechnungsformat"
+    },
+    "duplicate": {
+      "title": "Duplikat- und Betrugserkennung",
+      "description": "Intelligente Algorithmen erkennen doppelte Rechnungen und verdächtige Muster, bevor sie Ihre Bücher erreichen"
+    },
+    "hil": {
+      "title": "Human-in-the-Loop-Prüfung",
+      "description": "Leitet Extraktionen mit niedriger Konfidenz zur schnellen Validierung und Genehmigung an Ihr Team weiter"
+    },
+    "compliance": {
+      "title": "Kanadische Compliance und Unternehmenssicherheit",
+      "description": "PIPEDA-konforme Datenverarbeitung, CASL-bereite Einwilligungsverwaltung, SOC 2 Typ II zertifizierte Infrastruktur"
+    },
+    "workflow": {
+      "title": "Intelligente Workflow-Automatisierung",
+      "description": "Intelligentes Routing basierend auf Betragsschwellen, Kostenstellen, GL-Codes und Genehmigungshierarchien"
+    },
+    "integration": {
+      "title": "ERP- und NOV-Integration",
+      "description": "Vorgefertigte Konnektoren für SAP, Oracle, Sage, P2, Aucerna und andere Öl- und Gassysteme"
+    }
+  },
+  "whyChoose": {
+    "title": "Warum FlowBills wählen?",
+    "canadian": {
+      "title": "Kanadische Datenresidenz",
+      "description": "Ihre Daten bleiben in Kanada, konform mit provinziellen und bundesstaatlichen Vorschriften"
+    },
+    "industry": {
+      "title": "Öl- und Gas-Expertise",
+      "description": "Vorkonfiguriert für Feldtickets, Joint-Venture-Abrechnung, AFE-Tracking, Umsatz- und Royalty-Aufteilungen"
+    },
+    "security": {
+      "title": "Unternehmenssicherheit",
+      "description": "Rollenbasierte Zugriffskontrolle, Audit-Protokollierung, SOC 2-Konformität, verschlüsselte Daten im Ruhezustand und während der Übertragung"
+    }
+  },
+  "cta": {
+    "title": "Bereit, Ihren AP-Prozess zu transformieren?",
+    "subtitle": "Schließen Sie sich führenden kanadischen Energieunternehmen an, die bereits jede Woche Stunden sparen",
+    "button": "Starten Sie Ihre kostenlose Testversion"
+  },
+  "footer": {
+    "tagline": "Entwickelt für kanadische Öl- und Gasoperationen",
+    "rights": "Alle Rechte vorbehalten.",
+    "product": "Produkt",
+    "company": "Unternehmen",
+    "legal": "Rechtliches",
+    "privacy": "Datenschutzrichtlinie",
+    "terms": "Nutzungsbedingungen",
+    "apiDocs": "API-Dokumentation"
+  }
+}

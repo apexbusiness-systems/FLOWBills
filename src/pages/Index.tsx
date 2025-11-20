@@ -5,8 +5,11 @@ import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Zap, Shield, Clock, CheckCircle2, ArrowRight, BarChart3 } from "lucide-react";
 import heroImage from "@/assets/hero-oilgas.jpg";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
+  const { t } = useTranslation();
+  
   return (
     <main className="min-h-screen animate-fade-in">
       {/* Hero Section */}
@@ -27,13 +30,10 @@ const Index = () => {
         />
         <div className="relative z-10 container mx-auto px-4 text-center text-white">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            Automated Invoice Processing for<br />
-            <span className="text-amber-400">Canadian Oil and Gas</span>
+            {t("hero.title")}
           </h1>
           <p className="text-lg md:text-xl mb-8 max-w-4xl mx-auto text-white/90">
-            Automate your accounts payable with enterprise-grade security, PIPEDA compliance,
-            and intelligent duplicate detection. Built specifically for Canadian energy sector requirements.
-            Reduce invoice processing costs by 80% and achieve 95% straight-through processing with AI-powered automation.
+            {t("hero.subtitle")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Button 
@@ -42,7 +42,7 @@ const Index = () => {
               className="bg-amber-500 hover:bg-amber-600 text-black font-semibold transition-all duration-200 hover:scale-105 active:scale-100"
             >
               <TrackLink to="/contact" source="hero" aria-label="Book a free demo">
-                Book Free Demo <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                {t("hero.cta.primary")} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </TrackLink>
             </Button>
             <Button 
@@ -52,7 +52,7 @@ const Index = () => {
               className="bg-black/30 border-white/20 text-white hover:bg-black/50 backdrop-blur-sm transition-all duration-200 hover:scale-105 active:scale-100"
             >
               <TrackLink to="/pricing" source="hero" aria-label="Calculate return on investment">
-                Calculate ROI <BarChart3 className="ml-2 h-4 w-4" aria-hidden="true" />
+                {t("hero.cta.secondary")} <BarChart3 className="ml-2 h-4 w-4" aria-hidden="true" />
               </TrackLink>
             </Button>
           </div>

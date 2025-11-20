@@ -1,0 +1,81 @@
+{
+  "brand": {
+    "name": "FLOWBills.ca",
+    "tagline": "Automate invoices. Approve faster. Close with confidence.",
+    "description": "AI-powered invoice automation for Canadian oil & gas operations"
+  },
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "about": "About",
+    "contact": "Contact",
+    "security": "Security",
+    "signIn": "Sign In",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "title": "Automate Invoices. Approve Faster. Close with Confidence.",
+    "subtitle": "AI-powered invoice processing built for Canadian oil & gas operations. From field tickets to financial close in minutes, not days.",
+    "cta": {
+      "primary": "Start Free Trial",
+      "secondary": "Watch Demo"
+    }
+  },
+  "features": {
+    "title": "Built for Oil & Gas Operations",
+    "ocr": {
+      "title": "AI-Powered OCR & Data Extraction",
+      "description": "Instantly extracts vendor names, AFE numbers, PO references, amounts, dates from any invoice format"
+    },
+    "duplicate": {
+      "title": "Duplicate & Fraud Detection",
+      "description": "Intelligent algorithms catch duplicate invoices and suspicious patterns before they hit your books"
+    },
+    "hil": {
+      "title": "Human-in-the-Loop Review",
+      "description": "Routes low-confidence extractions to your team for quick validation and approval"
+    },
+    "compliance": {
+      "title": "Canadian Compliance & Enterprise Security",
+      "description": "PIPEDA-compliant data handling, CASL-ready consent management, SOC 2 Type II certified infrastructure"
+    },
+    "workflow": {
+      "title": "Intelligent Workflow Automation",
+      "description": "Smart routing based on amount thresholds, cost centers, GL codes, and approval hierarchies"
+    },
+    "integration": {
+      "title": "ERP & NOV Integration",
+      "description": "Pre-built connectors for SAP, Oracle, Sage, P2, Aucerna, and other oil & gas systems"
+    }
+  },
+  "whyChoose": {
+    "title": "Why Choose FlowBills?",
+    "canadian": {
+      "title": "Canadian Data Residency",
+      "description": "Your data stays in Canada, compliant with provincial and federal regulations"
+    },
+    "industry": {
+      "title": "Oil & Gas Expertise",
+      "description": "Pre-configured for field tickets, joint venture billing, AFE tracking, revenue & royalty splits"
+    },
+    "security": {
+      "title": "Enterprise Security",
+      "description": "Role-based access control, audit logging, SOC 2 compliance, encrypted data at rest and in transit"
+    }
+  },
+  "cta": {
+    "title": "Ready to Transform Your AP Process?",
+    "subtitle": "Join leading Canadian energy companies already saving hours every week",
+    "button": "Start Your Free Trial"
+  },
+  "footer": {
+    "tagline": "Built for Canadian oil & gas operations",
+    "rights": "All rights reserved.",
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "apiDocs": "API Documentation"
+  }
+}

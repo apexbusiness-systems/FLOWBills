@@ -5,6 +5,8 @@ import { NavLink } from "@/components/ui/NavLink";
 import { TrackLink } from "@/components/ui/TrackLink";
 import { cn } from "@/lib/utils";
 import companyLogo from "@/assets/company-logo.png";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useTranslation } from "react-i18next";
 
 /**
  * Persistent header for public pages
@@ -12,12 +14,13 @@ import companyLogo from "@/assets/company-logo.png";
  */
 export const PublicHeader = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   const navItems = [
-    { label: "Features", to: "/features" },
-    { label: "Pricing", to: "/pricing" },
-    { label: "About", to: "/about" },
-    { label: "Contact", to: "/contact" },
+    { label: t("nav.features"), to: "/features" },
+    { label: t("nav.pricing"), to: "/pricing" },
+    { label: t("nav.about"), to: "/about" },
+    { label: t("nav.contact"), to: "/contact" },
   ];
 
   return (
@@ -56,15 +59,16 @@ export const PublicHeader = () => {
           </nav>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2">
+            <LanguageSwitcher />
             <Button asChild variant="ghost" size="sm">
               <TrackLink to="/auth" source="header">
-                Sign In
+                {t("nav.signIn")}
               </TrackLink>
             </Button>
             <Button asChild size="sm" className="min-h-[44px]">
               <TrackLink to="/contact" source="header">
-                Book Demo
+                {t("nav.getStarted")}
               </TrackLink>
             </Button>
           </div>

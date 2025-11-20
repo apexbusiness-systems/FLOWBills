@@ -1,0 +1,81 @@
+{
+  "brand": {
+    "name": "FLOWBills.ca",
+    "tagline": "自动化发票。加速审批。自信结算。",
+    "description": "为加拿大石油和天然气运营提供的人工智能发票自动化"
+  },
+  "nav": {
+    "features": "功能",
+    "pricing": "价格",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "security": "安全性",
+    "signIn": "登录",
+    "getStarted": "开始使用"
+  },
+  "hero": {
+    "title": "自动化发票。加速审批。自信结算。",
+    "subtitle": "为加拿大石油和天然气运营构建的人工智能发票处理系统。从现场票据到财务结算，几分钟而非几天。",
+    "cta": {
+      "primary": "开始免费试用",
+      "secondary": "观看演示"
+    }
+  },
+  "features": {
+    "title": "专为石油和天然气运营打造",
+    "ocr": {
+      "title": "人工智能驱动的OCR和数据提取",
+      "description": "即时从任何发票格式中提取供应商名称、AFE号码、PO参考、金额、日期"
+    },
+    "duplicate": {
+      "title": "重复和欺诈检测",
+      "description": "智能算法在重复发票和可疑模式影响账本之前就将其捕获"
+    },
+    "hil": {
+      "title": "人在回路审查",
+      "description": "将低置信度提取内容路由到您的团队进行快速验证和审批"
+    },
+    "compliance": {
+      "title": "加拿大合规和企业安全",
+      "description": "符合PIPEDA的数据处理、符合CASL的同意管理、SOC 2 Type II认证基础设施"
+    },
+    "workflow": {
+      "title": "智能工作流自动化",
+      "description": "基于金额阈值、成本中心、GL代码和审批层级的智能路由"
+    },
+    "integration": {
+      "title": "ERP和NOV集成",
+      "description": "为SAP、Oracle、Sage、P2、Aucerna和其他石油天然气系统预构建的连接器"
+    }
+  },
+  "whyChoose": {
+    "title": "为什么选择FlowBills？",
+    "canadian": {
+      "title": "加拿大数据驻留",
+      "description": "您的数据保留在加拿大，符合省级和联邦法规"
+    },
+    "industry": {
+      "title": "石油和天然气专业知识",
+      "description": "为现场票据、合资计费、AFE跟踪、收入和特许权使用费分摊预配置"
+    },
+    "security": {
+      "title": "企业安全",
+      "description": "基于角色的访问控制、审计日志、SOC 2合规、静态和传输中的加密数据"
+    }
+  },
+  "cta": {
+    "title": "准备好转型您的应付账款流程了吗？",
+    "subtitle": "加入已经每周节省数小时的领先加拿大能源公司",
+    "button": "开始免费试用"
+  },
+  "footer": {
+    "tagline": "专为加拿大石油和天然气运营打造",
+    "rights": "版权所有。",
+    "product": "产品",
+    "company": "公司",
+    "legal": "法律",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "apiDocs": "API文档"
+  }
+}
