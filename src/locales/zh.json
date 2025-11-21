@@ -77,5 +77,30 @@
     "privacy": "隐私政策",
     "terms": "服务条款",
     "apiDocs": "API文档"
+  },
+  "support": {
+    "pageTitle": "24/7 支持门户",
+    "pageDesc": "通过我们的 AI 驱动支持系统获得即时帮助",
+    "aiChat": "AI 聊天支持",
+    "aiChatDesc": "即时回答您的问题",
+    "aiChatInfo": "立即获得产品问题、技术问题、账单查询和入门指导方面的帮助。",
+    "voiceSupport": "语音支持",
+    "voiceSupportDesc": "与我们的 AI 助手交谈",
+    "voiceSupportInfo": "使用语音命令获得免提支持。非常适合您在路上或更喜欢说话时使用。",
+    "availability": "始终可用",
+    "availabilityDesc": "每天 24 小时，每周 7 天",
+    "availabilityInfo": "我们的 AI 支持从不休息。无论何时需要帮助，无论白天还是黑夜，无论世界何处。",
+    "escalation": "人工升级",
+    "escalationDesc": "由专家处理复杂问题",
+    "escalationInfo": "如果我们的 AI 无法解决您的问题，我们会将您与人工专家联系以获得个性化帮助。",
+    "commonTopics": "常见支持主题",
+    "topic1": "发票处理和 OCR 功能",
+    "topic2": "工作流自动化和验证规则",
+    "topic3": "账户设置和用户管理",
+    "topic4": "账单问题和订阅更改",
+    "topic5": "与会计系统集成",
+    "topic6": "合规性和安全问题",
+    "topic7": "技术问题故障排除",
+    "topic8": "培训和入门协助"
   }
 }

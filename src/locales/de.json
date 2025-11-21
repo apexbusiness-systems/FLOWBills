@@ -77,5 +77,30 @@
     "privacy": "Datenschutzrichtlinie",
     "terms": "Nutzungsbedingungen",
     "apiDocs": "API-Dokumentation"
+  },
+  "support": {
+    "pageTitle": "24/7 Support-Portal",
+    "pageDesc": "Erhalten Sie sofortige Hilfe mit unserem KI-gestützten Support-System",
+    "aiChat": "KI-Chat-Support",
+    "aiChatDesc": "Sofortige Antworten auf Ihre Fragen",
+    "aiChatInfo": "Erhalten Sie sofortige Hilfe bei Produktfragen, technischen Problemen, Abrechnungsanfragen und Onboarding-Anleitungen.",
+    "voiceSupport": "Sprach-Support",
+    "voiceSupportDesc": "Sprechen Sie mit unserem KI-Assistenten",
+    "voiceSupportInfo": "Verwenden Sie Sprachbefehle für freihändigen Support. Perfekt, wenn Sie unterwegs sind oder lieber sprechen.",
+    "availability": "Immer verfügbar",
+    "availabilityDesc": "24 Stunden am Tag, 7 Tage die Woche",
+    "availabilityInfo": "Unser KI-Support schläft nie. Erhalten Sie Hilfe, wann immer Sie sie benötigen, Tag und Nacht, überall auf der Welt.",
+    "escalation": "Menschliche Eskalation",
+    "escalationDesc": "Komplexe Probleme von Experten behandelt",
+    "escalationInfo": "Wenn unsere KI Ihr Problem nicht lösen kann, verbinden wir Sie mit einem menschlichen Experten für persönliche Unterstützung.",
+    "commonTopics": "Häufige Support-Themen",
+    "topic1": "Rechnungsverarbeitung und OCR-Funktionen",
+    "topic2": "Workflow-Automatisierung und Validierungsregeln",
+    "topic3": "Kontoeinrichtung und Benutzerverwaltung",
+    "topic4": "Abrechnungsfragen und Abonnementänderungen",
+    "topic5": "Integration mit Buchhaltungssystemen",
+    "topic6": "Compliance- und Sicherheitsfragen",
+    "topic7": "Fehlerbehebung bei technischen Problemen",
+    "topic8": "Schulungs- und Onboarding-Unterstützung"
   }
 }

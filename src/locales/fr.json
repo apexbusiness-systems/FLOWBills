@@ -77,5 +77,30 @@
     "privacy": "Politique de confidentialité",
     "terms": "Conditions d'utilisation",
     "apiDocs": "Documentation API"
+  },
+  "support": {
+    "pageTitle": "Portail d'assistance 24/7",
+    "pageDesc": "Obtenez une aide instantanée avec notre système d'assistance alimenté par l'IA",
+    "aiChat": "Assistance par chat IA",
+    "aiChatDesc": "Réponses instantanées à vos questions",
+    "aiChatInfo": "Obtenez une aide immédiate pour les questions sur les produits, les problèmes techniques, les demandes de facturation et les conseils d'intégration.",
+    "voiceSupport": "Assistance vocale",
+    "voiceSupportDesc": "Parlez à notre assistant IA",
+    "voiceSupportInfo": "Utilisez les commandes vocales pour une assistance mains libres. Parfait lorsque vous êtes en déplacement ou si vous préférez parler.",
+    "availability": "Toujours disponible",
+    "availabilityDesc": "24 heures sur 24, 7 jours sur 7",
+    "availabilityInfo": "Notre assistance IA ne dort jamais. Obtenez de l'aide quand vous en avez besoin, jour et nuit, partout dans le monde.",
+    "escalation": "Escalade humaine",
+    "escalationDesc": "Problèmes complexes traités par des experts",
+    "escalationInfo": "Si notre IA ne peut pas résoudre votre problème, nous vous mettrons en contact avec un expert humain pour une assistance personnalisée.",
+    "commonTopics": "Sujets d'assistance courants",
+    "topic1": "Traitement des factures et fonctionnalités OCR",
+    "topic2": "Automatisation des flux de travail et règles de validation",
+    "topic3": "Configuration du compte et gestion des utilisateurs",
+    "topic4": "Questions de facturation et modifications d'abonnement",
+    "topic5": "Intégration avec les systèmes comptables",
+    "topic6": "Questions de conformité et de sécurité",
+    "topic7": "Dépannage des problèmes techniques",
+    "topic8": "Assistance à la formation et à l'intégration"
   }
 }

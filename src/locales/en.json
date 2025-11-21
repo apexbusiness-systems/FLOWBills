@@ -78,5 +78,30 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "apiDocs": "API Documentation"
+  },
+  "support": {
+    "pageTitle": "24/7 Support Portal",
+    "pageDesc": "Get instant help with our AI-powered support system",
+    "aiChat": "AI Chat Support",
+    "aiChatDesc": "Instant answers to your questions",
+    "aiChatInfo": "Get immediate help with product questions, technical issues, billing inquiries, and onboarding guidance.",
+    "voiceSupport": "Voice Support",
+    "voiceSupportDesc": "Talk to our AI assistant",
+    "voiceSupportInfo": "Use voice commands for hands-free support. Perfect for when you're on the go or prefer speaking.",
+    "availability": "Always Available",
+    "availabilityDesc": "24 hours a day, 7 days a week",
+    "availabilityInfo": "Our AI support never sleeps. Get help whenever you need it, day or night, anywhere in the world.",
+    "escalation": "Human Escalation",
+    "escalationDesc": "Complex issues handled by experts",
+    "escalationInfo": "If our AI can't solve your issue, we'll connect you with a human expert for personalized assistance.",
+    "commonTopics": "Common Support Topics",
+    "topic1": "Invoice processing and OCR features",
+    "topic2": "Workflow automation and validation rules",
+    "topic3": "Account setup and user management",
+    "topic4": "Billing questions and subscription changes",
+    "topic5": "Integration with accounting systems",
+    "topic6": "Compliance and security questions",
+    "topic7": "Troubleshooting technical issues",
+    "topic8": "Training and onboarding assistance"
   }
 }
