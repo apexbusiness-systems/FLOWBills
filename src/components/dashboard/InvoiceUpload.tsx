@@ -1,23 +1,33 @@
 import { useState, useCallback } from "react";
-import { Upload, FileText, X, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, FileText, X, CheckCircle, AlertCircle, Loader2, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useInvoices } from "@/hooks/useInvoices";
+import { useFileUpload } from "@/hooks/useFileUpload";
+import { useInvoiceExtraction } from "@/hooks/useInvoiceExtraction";
+import { ExtractionResultsPanel } from "@/components/invoices/ExtractionResultsPanel";
 
 interface UploadedFile {
   id: string;
   name: string;
   size: number;
-  status: "uploading" | "processing" | "completed" | "error";
+  status: "uploading" | "processing" | "extracting" | "completed" | "error";
   progress: number;
   type: "invoice" | "po" | "edi" | "csv";
+  invoiceId?: string;
+  errorMessage?: string;
 }
 
 const InvoiceUpload = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [selectedInvoiceForResults, setSelectedInvoiceForResults] = useState<string | null>(null);
   const { toast } = useToast();
+  const { createInvoice } = useInvoices();
+  const { uploadFile } = useFileUpload();
+  const { extractInvoiceData } = useInvoiceExtraction();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -29,30 +39,94 @@ const InvoiceUpload = () => {
     setIsDragOver(false);
   }, []);
 
-  const simulateFileProcessing = (fileId: string) => {
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 20;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        setFiles(prev => prev.map(f => 
-          f.id === fileId 
-            ? { ...f, status: "completed", progress: 100 }
-            : f
-        ));
-        toast({
-          title: "File processed successfully",
-          description: "Invoice has been validated and added to the processing queue.",
-        });
-      } else {
-        setFiles(prev => prev.map(f => 
-          f.id === fileId 
-            ? { ...f, progress, status: progress < 50 ? "uploading" : "processing" }
-            : f
-        ));
+  const processFile = async (file: File, fileId: string) => {
+    try {
+      // Step 1: Create invoice record
+      setFiles(prev => prev.map(f => 
+        f.id === fileId ? { ...f, status: "uploading", progress: 20 } : f
+      ));
+
+      const invoiceData = {
+        invoice_number: `INV-${Date.now()}`,
+        vendor_name: "Auto-Generated",
+        amount: 0,
+        invoice_date: new Date().toISOString().split('T')[0],
+        status: 'pending' as const
+      };
+
+      const invoice = await createInvoice(invoiceData);
+      
+      if (!invoice) {
+        throw new Error("Failed to create invoice record");
       }
-    }, 500);
+
+      setFiles(prev => prev.map(f => 
+        f.id === fileId ? { ...f, invoiceId: invoice.id, progress: 40 } : f
+      ));
+
+      // Step 2: Upload file
+      setFiles(prev => prev.map(f => 
+        f.id === fileId ? { ...f, status: "processing", progress: 50 } : f
+      ));
+
+      const document = await uploadFile(file, invoice.id);
+      
+      if (!document) {
+        throw new Error("Failed to upload file");
+      }
+
+      setFiles(prev => prev.map(f => 
+        f.id === fileId ? { ...f, progress: 70 } : f
+      ));
+
+      // Step 3: Read file content for extraction
+      const fileContent = await readFileAsBase64(file);
+
+      // Step 4: Trigger AI extraction
+      setFiles(prev => prev.map(f => 
+        f.id === fileId ? { ...f, status: "extracting", progress: 80 } : f
+      ));
+
+      await extractInvoiceData(invoice.id, fileContent);
+
+      // Step 5: Complete
+      setFiles(prev => prev.map(f => 
+        f.id === fileId ? { ...f, status: "completed", progress: 100 } : f
+      ));
+
+      toast({
+        title: "Invoice processed successfully",
+        description: "AI extraction completed. Click 'View Results' to see extracted data.",
+      });
+
+    } catch (error: any) {
+      console.error('Error processing file:', error);
+      setFiles(prev => prev.map(f => 
+        f.id === fileId 
+          ? { ...f, status: "error", errorMessage: error.message || "Processing failed" } 
+          : f
+      ));
+      
+      toast({
+        title: "Processing failed",
+        description: error.message || "Failed to process invoice",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const readFileAsBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove data URL prefix if present
+        const base64 = result.includes(',') ? result.split(',')[1] : result;
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleFileUpload = (uploadedFiles: FileList) => {
@@ -69,9 +143,9 @@ const InvoiceUpload = () => {
 
     setFiles(prev => [...prev, ...newFiles]);
     
-    // Simulate file processing
-    newFiles.forEach(file => {
-      setTimeout(() => simulateFileProcessing(file.id), 100);
+    // Process each file
+    Array.from(uploadedFiles).forEach((file, index) => {
+      processFile(file, newFiles[index].id);
     });
   };
 
@@ -111,6 +185,13 @@ const InvoiceUpload = () => {
         return <Badge variant="processing">Uploading</Badge>;
       case "processing":
         return <Badge variant="pending">Processing</Badge>;
+      case "extracting":
+        return (
+          <Badge variant="pending" className="gap-1">
+            <Brain className="h-3 w-3" />
+            AI Extracting
+          </Badge>
+        );
       case "completed":
         return <Badge variant="approved">Complete</Badge>;
       case "error":
@@ -202,18 +283,50 @@ const InvoiceUpload = () => {
                   {file.status !== "completed" && file.status !== "error" && (
                     <Progress value={file.progress} className="mt-2 h-2" />
                   )}
+                  {file.errorMessage && (
+                    <p className="text-xs text-destructive mt-1">{file.errorMessage}</p>
+                  )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFile(file.id)}
-                  aria-label={`Remove ${file.name}`}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  {file.status === "completed" && file.invoiceId && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedInvoiceForResults(file.invoiceId!)}
+                    >
+                      View Results
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFile(file.id)}
+                    aria-label={`Remove ${file.name}`}
+                    disabled={file.status === "uploading" || file.status === "processing" || file.status === "extracting"}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Extraction Results Panel */}
+      {selectedInvoiceForResults && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-md font-medium text-foreground">AI Extraction Results</h4>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedInvoiceForResults(null)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <ExtractionResultsPanel invoiceId={selectedInvoiceForResults} />
         </div>
       )}
     </div>
