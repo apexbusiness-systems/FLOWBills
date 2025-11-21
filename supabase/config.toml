@@ -86,3 +86,6 @@ verify_jwt = false
 
 [functions.workflow-execute]
 verify_jwt = true
+
+[functions.budget-alert-check]
+verify_jwt = false

@@ -101,6 +101,102 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_alert_logs: {
+        Row: {
+          afe_id: string
+          alert_message: string
+          alert_rule_id: string
+          budget_utilization: number
+          created_at: string
+          id: string
+          metadata: Json | null
+          severity: string
+          user_id: string
+        }
+        Insert: {
+          afe_id: string
+          alert_message: string
+          alert_rule_id: string
+          budget_utilization: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          severity: string
+          user_id: string
+        }
+        Update: {
+          afe_id?: string
+          alert_message?: string
+          alert_rule_id?: string
+          budget_utilization?: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          severity?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_alert_logs_afe_id_fkey"
+            columns: ["afe_id"]
+            isOneToOne: false
+            referencedRelation: "afes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_alert_logs_alert_rule_id_fkey"
+            columns: ["alert_rule_id"]
+            isOneToOne: false
+            referencedRelation: "budget_alert_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_alert_rules: {
+        Row: {
+          afe_filter: Json | null
+          alert_type: string
+          created_at: string
+          email_recipients: string[]
+          id: string
+          is_active: boolean
+          last_triggered_at: string | null
+          notification_channels: Json
+          rule_name: string
+          threshold_value: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          afe_filter?: Json | null
+          alert_type: string
+          created_at?: string
+          email_recipients?: string[]
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          notification_channels?: Json
+          rule_name: string
+          threshold_value: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          afe_filter?: Json | null
+          alert_type?: string
+          created_at?: string
+          email_recipients?: string[]
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          notification_channels?: Json
+          rule_name?: string
+          threshold_value?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       compliance_records: {
         Row: {
           completed_date: string | null
