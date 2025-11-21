@@ -7,13 +7,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useInvoiceExtraction } from "@/hooks/useInvoiceExtraction";
+import { useWorkflows } from "@/hooks/useWorkflows";
 import { ExtractionResultsPanel } from "@/components/invoices/ExtractionResultsPanel";
 
 interface UploadedFile {
   id: string;
   name: string;
   size: number;
-  status: "uploading" | "processing" | "extracting" | "completed" | "error";
+  status: "uploading" | "processing" | "extracting" | "workflow" | "completed" | "error";
   progress: number;
   type: "invoice" | "po" | "edi" | "csv";
   invoiceId?: string;
@@ -28,6 +29,7 @@ const InvoiceUpload = () => {
   const { createInvoice } = useInvoices();
   const { uploadFile } = useFileUpload();
   const { extractInvoiceData } = useInvoiceExtraction();
+  const { workflows, startWorkflow } = useWorkflows();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -89,14 +91,31 @@ const InvoiceUpload = () => {
 
       await extractInvoiceData(invoice.id, fileContent);
 
-      // Step 5: Complete
+      setFiles(prev => prev.map(f => 
+        f.id === fileId ? { ...f, progress: 90 } : f
+      ));
+
+      // Step 5: Trigger workflow if any active workflows exist
+      const activeWorkflows = workflows.filter(w => w.is_active && w.workflow_type === 'invoice_processing');
+      if (activeWorkflows.length > 0) {
+        setFiles(prev => prev.map(f => 
+          f.id === fileId ? { ...f, status: "workflow", progress: 95 } : f
+        ));
+
+        // Use the first active workflow
+        await startWorkflow(activeWorkflows[0].id, 'invoice', invoice.id);
+      }
+
+      // Step 6: Complete
       setFiles(prev => prev.map(f => 
         f.id === fileId ? { ...f, status: "completed", progress: 100 } : f
       ));
 
       toast({
         title: "Invoice processed successfully",
-        description: "AI extraction completed. Click 'View Results' to see extracted data.",
+        description: activeWorkflows.length > 0 
+          ? "AI extraction completed and workflow started. Click 'View Results' to see details."
+          : "AI extraction completed. Click 'View Results' to see extracted data.",
       });
 
     } catch (error: any) {
@@ -190,6 +209,13 @@ const InvoiceUpload = () => {
           <Badge variant="pending" className="gap-1">
             <Brain className="h-3 w-3" />
             AI Extracting
+          </Badge>
+        );
+      case "workflow":
+        return (
+          <Badge variant="processing" className="gap-1">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Running Workflow
           </Badge>
         );
       case "completed":
@@ -286,6 +312,9 @@ const InvoiceUpload = () => {
                   {file.errorMessage && (
                     <p className="text-xs text-destructive mt-1">{file.errorMessage}</p>
                   )}
+                  {file.status === "workflow" && (
+                    <p className="text-xs text-muted-foreground mt-1">Executing approval workflow...</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   {file.status === "completed" && file.invoiceId && (
@@ -302,7 +331,7 @@ const InvoiceUpload = () => {
                     size="sm"
                     onClick={() => removeFile(file.id)}
                     aria-label={`Remove ${file.name}`}
-                    disabled={file.status === "uploading" || file.status === "processing" || file.status === "extracting"}
+                    disabled={file.status === "uploading" || file.status === "processing" || file.status === "extracting" || file.status === "workflow"}
                   >
                     <X className="h-4 w-4" />
                   </Button>

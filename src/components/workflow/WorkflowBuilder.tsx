@@ -20,6 +20,7 @@ import {
   Database
 } from 'lucide-react';
 import { WorkflowStep, Workflow } from '@/hooks/useWorkflows';
+import ConditionBuilder from './ConditionBuilder';
 
 interface WorkflowBuilderProps {
   workflow?: Workflow;
@@ -28,6 +29,13 @@ interface WorkflowBuilderProps {
 }
 
 const stepTypes = [
+  { 
+    type: 'condition', 
+    name: 'Condition', 
+    icon: AlertTriangle, 
+    color: 'bg-amber-500',
+    description: 'Conditional routing based on data'
+  },
   { 
     type: 'validation', 
     name: 'Validation', 
@@ -305,6 +313,15 @@ const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) =
                 onChange={(e) => updateStep(selectedStepData.id, { name: e.target.value })}
               />
             </div>
+
+            {selectedStepData.type === 'condition' && (
+              <div>
+                <ConditionBuilder
+                  conditions={selectedStepData.conditions || []}
+                  onChange={(conditions) => updateStep(selectedStepData.id, { conditions })}
+                />
+              </div>
+            )}
 
             {selectedStepData.type === 'validation' && (
               <div>

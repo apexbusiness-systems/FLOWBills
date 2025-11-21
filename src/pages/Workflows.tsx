@@ -4,6 +4,7 @@ import { useWorkflows, Workflow } from '@/hooks/useWorkflows';
 import WorkflowList from '@/components/workflow/WorkflowList';
 import WorkflowBuilder from '@/components/workflow/WorkflowBuilder';
 import WorkflowTemplates from '@/components/workflow/WorkflowTemplates';
+import ApprovalWorkflowTemplates from '@/components/workflow/ApprovalWorkflowTemplates';
 import LoadingSkeleton from '@/components/ui/loading-skeleton';
 import { toast } from '@/hooks/use-toast';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
@@ -110,9 +111,10 @@ const Workflows = () => {
     <div className="container mx-auto p-6">
       <BreadcrumbNav className="mb-4" />
       <Tabs defaultValue="workflows" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="workflows">My Workflows</TabsTrigger>
-          <TabsTrigger value="templates" onClick={() => setViewMode('templates')}>Templates</TabsTrigger>
+          <TabsTrigger value="approval-templates">Approval Templates</TabsTrigger>
+          <TabsTrigger value="templates" onClick={() => setViewMode('templates')}>General Templates</TabsTrigger>
           <TabsTrigger value="instances">Running Instances</TabsTrigger>
         </TabsList>
 
@@ -126,6 +128,10 @@ const Workflows = () => {
             onExecute={handleExecuteWorkflow}
             onCreate={handleCreateWorkflow}
           />
+        </TabsContent>
+
+        <TabsContent value="approval-templates" className="space-y-6">
+          <ApprovalWorkflowTemplates onSelectTemplate={handleSelectTemplate} />
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-6">
