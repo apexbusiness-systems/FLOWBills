@@ -48,6 +48,7 @@ const FieldTickets = React.lazy(() => import("./pages/FieldTickets"));
 const UWIRegistry = React.lazy(() => import("./pages/UWIRegistry"));
 const Reports = React.lazy(() => import("./pages/Reports"));
 const ThreeWayMatching = React.lazy(() => import("./pages/ThreeWayMatching"));
+const PerformanceMonitoring = React.lazy(() => import("./pages/PerformanceMonitoring"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -255,7 +256,15 @@ const AuthRoutes = () => {
           element={<HelpCenter />} 
         />
         <Route
-          path="/dashboard" 
+          path="/performance" 
+          element={
+            <ProtectedRoute>
+              <PerformanceMonitoring />
+            </ProtectedRoute>
+          } 
+        />
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
