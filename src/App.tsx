@@ -46,6 +46,7 @@ const HelpCenter = React.lazy(() => import("./pages/HelpCenter"));
 const AFEManagement = React.lazy(() => import("./pages/AFEManagement"));
 const FieldTickets = React.lazy(() => import("./pages/FieldTickets"));
 const UWIRegistry = React.lazy(() => import("./pages/UWIRegistry"));
+const Reports = React.lazy(() => import("./pages/Reports"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -149,6 +150,14 @@ const AuthRoutes = () => {
           element={
             <ProtectedRoute>
               <UWIRegistry />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/reports" 
+          element={
+            <ProtectedRoute>
+              <Reports />
             </ProtectedRoute>
           } 
         />
