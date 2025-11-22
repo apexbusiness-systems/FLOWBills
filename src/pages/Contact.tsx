@@ -1,9 +1,11 @@
-import { Mail, MessageSquare, Phone } from 'lucide-react';
+import { Mail, MessageSquare, Phone, Clock, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Footer } from '@/components/ui/footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
@@ -25,41 +27,205 @@ export default function Contact() {
         <BreadcrumbNav className="mb-4" />
         <h1 className="text-4xl font-bold mb-4">Contact</h1>
         <p className="text-xl text-muted-foreground mb-12 max-w-3xl">
-          Email <a className="underline hover:text-foreground" href="mailto:hello@flowbills.ca">hello@flowbills.ca</a>. 
-          CASL-compliant: we only email with consent.
+          Get instant support through your preferred channel. CASL-compliant: we only contact you with consent.
         </p>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <Mail className="h-12 w-12 text-primary mb-4 mx-auto" />
-              <h3 className="font-semibold mb-2">Email</h3>
-              <a href="mailto:hello@flowbills.ca" className="text-sm text-muted-foreground hover:text-foreground">
-                hello@flowbills.ca
-              </a>
-            </CardContent>
-          </Card>
+        <Card className="mb-12">
+          <CardContent className="pt-6">
+            <Tabs defaultValue="chat" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
+                <TabsTrigger value="chat" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  AI Chat
+                </TabsTrigger>
+                <TabsTrigger value="email" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email
+                </TabsTrigger>
+                <TabsTrigger value="phone" className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Phone
+                </TabsTrigger>
+              </TabsList>
 
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <MessageSquare className="h-12 w-12 text-primary mb-4 mx-auto" />
-              <h3 className="font-semibold mb-2">Support</h3>
-              <a href="mailto:support@flowbills.ca" className="text-sm text-muted-foreground hover:text-foreground">
-                support@flowbills.ca
-              </a>
-            </CardContent>
-          </Card>
+              <TabsContent value="chat" className="space-y-6">
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                    <MessageSquare className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">24/7 AI Support Chat</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Get instant answers to your questions with our AI-powered support assistant
+                  </p>
+                  <div className="flex items-center justify-center gap-4 text-sm">
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Always Available
+                    </Badge>
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Instant Response
+                    </Badge>
+                  </div>
+                </div>
 
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <Phone className="h-12 w-12 text-primary mb-4 mx-auto" />
-              <h3 className="font-semibold mb-2">Sales</h3>
-              <a href="mailto:sales@flowbills.ca" className="text-sm text-muted-foreground hover:text-foreground">
-                sales@flowbills.ca
-              </a>
-            </CardContent>
-          </Card>
-        </div>
+                <div className="bg-muted/50 rounded-lg p-6 space-y-4">
+                  <h4 className="font-semibold">What our AI can help with:</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Product questions and feature guidance</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Technical support and troubleshooting</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Account and billing inquiries</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Onboarding and training assistance</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <Button 
+                  onClick={() => setIsChatMinimized(false)} 
+                  className="w-full"
+                  size="lg"
+                >
+                  Start Chat Now
+                </Button>
+              </TabsContent>
+
+              <TabsContent value="email" className="space-y-6">
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                    <Mail className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Email Support</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Reach out to our team via email for detailed inquiries
+                  </p>
+                  <div className="flex items-center justify-center gap-4 text-sm">
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      1 Business Day Response
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="pt-6 text-center">
+                      <Mail className="h-8 w-8 text-primary mb-3 mx-auto" />
+                      <h4 className="font-semibold mb-2">General Inquiries</h4>
+                      <a 
+                        href="mailto:hello@flowbills.ca" 
+                        className="text-sm text-primary hover:underline"
+                      >
+                        hello@flowbills.ca
+                      </a>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="pt-6 text-center">
+                      <MessageSquare className="h-8 w-8 text-primary mb-3 mx-auto" />
+                      <h4 className="font-semibold mb-2">Technical Support</h4>
+                      <a 
+                        href="mailto:support@flowbills.ca" 
+                        className="text-sm text-primary hover:underline"
+                      >
+                        support@flowbills.ca
+                      </a>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="pt-6 text-center">
+                      <Phone className="h-8 w-8 text-primary mb-3 mx-auto" />
+                      <h4 className="font-semibold mb-2">Sales Team</h4>
+                      <a 
+                        href="mailto:sales@flowbills.ca" 
+                        className="text-sm text-primary hover:underline"
+                      >
+                        sales@flowbills.ca
+                      </a>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+                  <p className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>CASL Compliant:</strong> We only send commercial electronic messages with your explicit consent. 
+                      You can unsubscribe at any time.
+                    </span>
+                  </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="phone" className="space-y-6">
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                    <Phone className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Phone Support</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Speak directly with our support team for urgent matters
+                  </p>
+                  <div className="flex items-center justify-center gap-4 text-sm">
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Mon-Fri: 8am-6pm MT
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-6 text-center space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Call us toll-free</p>
+                    <a 
+                      href="tel:1-800-FLOWBILL" 
+                      className="text-3xl font-bold text-primary hover:underline"
+                    >
+                      1-800-FLOWBILL
+                    </a>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    For after-hours emergencies, our AI chat support is available 24/7
+                  </p>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-6 space-y-4">
+                  <h4 className="font-semibold">When to call:</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Critical system issues requiring immediate attention</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Complex technical problems needing guided support</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Account security concerns or access issues</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Enterprise consultation and custom solutions</span>
+                    </li>
+                  </ul>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
 
         <section className="max-w-2xl mx-auto">
           <Card>
