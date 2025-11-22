@@ -41,7 +41,7 @@ const Blog = React.lazy(() => import("./pages/Blog"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const SupplierPortal = React.lazy(() => import("./pages/supplier/SupplierPortal"));
 const CSPMonitoring = React.lazy(() => import("./pages/CSPMonitoring"));
-const Support = React.lazy(() => import("./pages/Support"));
+
 const HelpCenter = React.lazy(() => import("./pages/HelpCenter"));
 const AFEManagement = React.lazy(() => import("./pages/AFEManagement"));
 const FieldTickets = React.lazy(() => import("./pages/FieldTickets"));
@@ -246,10 +246,6 @@ const AuthRoutes = () => {
         <Route 
           path="/supplier-portal" 
           element={<SupplierPortal />} 
-        />
-        <Route 
-          path="/support" 
-          element={<Support />} 
         />
         <Route 
           path="/help" 

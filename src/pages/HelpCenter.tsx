@@ -441,7 +441,7 @@ export default function HelpCenter() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild>
-              <a href="/support">
+              <a href="/contact">
                 Contact Support
               </a>
             </Button>

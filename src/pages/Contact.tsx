@@ -7,9 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { SupportChat } from '@/components/support/SupportChat';
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +103,10 @@ export default function Contact() {
         </section>
       </main>
       <Footer />
+      <SupportChat 
+        isMinimized={isChatMinimized} 
+        onMinimize={() => setIsChatMinimized(!isChatMinimized)} 
+      />
     </div>
   );
 }
