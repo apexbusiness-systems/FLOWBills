@@ -11,6 +11,8 @@ import { ActivityWidget } from '@/components/dashboard/widgets/ActivityWidget';
 import { UploadWidget } from '@/components/dashboard/widgets/UploadWidget';
 import { ChartWidget } from '@/components/dashboard/widgets/ChartWidget';
 import { SupportChat } from '@/components/support/SupportChat';
+import { TourTrigger } from '@/components/tour/TourTrigger';
+import { InvoiceTour } from '@/components/tour/InvoiceTour';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -56,9 +58,10 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
+      <InvoiceTour />
       <BreadcrumbNav className="mb-4" />
       
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6" data-tour="dashboard-header">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
@@ -66,6 +69,7 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <TourTrigger />
           <Button
             variant={isConfigMode ? 'default' : 'outline'}
             size="sm"
@@ -85,7 +89,11 @@ export default function Dashboard() {
 
       {/* Quick Access Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/afe-management')}>
+        <Card 
+          className="cursor-pointer hover:bg-muted/50 transition-colors" 
+          onClick={() => navigate('/afe-management')}
+          data-tour="afe-card"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">AFE Management</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -95,7 +103,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/field-tickets')}>
+        <Card 
+          className="cursor-pointer hover:bg-muted/50 transition-colors" 
+          onClick={() => navigate('/field-tickets')}
+          data-tour="field-tickets-card"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Field Tickets</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -105,7 +117,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/uwi-registry')}>
+        <Card 
+          className="cursor-pointer hover:bg-muted/50 transition-colors" 
+          onClick={() => navigate('/uwi-registry')}
+          data-tour="uwi-card"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">UWI Registry</CardTitle>
             <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -125,7 +141,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/three-way-matching')}>
+        <Card 
+          className="cursor-pointer hover:bg-muted/50 transition-colors" 
+          onClick={() => navigate('/three-way-matching')}
+          data-tour="matching-card"
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Three-Way Matching</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />

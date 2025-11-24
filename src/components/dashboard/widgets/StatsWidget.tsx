@@ -59,11 +59,14 @@ export const StatsWidget = ({ title, size = 'small' }: StatsWidgetProps) => {
   const Icon = config.icon;
 
   return (
-    <Card className={cn(
-      'card-enterprise p-6 hover-lift cursor-pointer transition-all',
-      size === 'large' && 'col-span-full md:col-span-2',
-      size === 'medium' && 'col-span-full md:col-span-1'
-    )}>
+    <Card 
+      className={cn(
+        'card-enterprise p-6 hover-lift cursor-pointer transition-all',
+        size === 'large' && 'col-span-full md:col-span-2',
+        size === 'medium' && 'col-span-full md:col-span-1'
+      )}
+      data-tour="stats-widget"
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-muted-foreground mb-2">{title}</p>

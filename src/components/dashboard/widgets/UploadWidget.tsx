@@ -10,10 +10,13 @@ interface UploadWidgetProps {
 
 export const UploadWidget = ({ size = 'medium', onUploadClick }: UploadWidgetProps) => {
   return (
-    <Card className={cn(
-      'card-enterprise',
-      size === 'large' && 'col-span-full md:col-span-2'
-    )}>
+    <Card 
+      className={cn(
+        'card-enterprise',
+        size === 'large' && 'col-span-full md:col-span-2'
+      )}
+      data-tour="upload-widget"
+    >
       <CardHeader>
         <CardTitle className="text-lg">Quick Upload</CardTitle>
       </CardHeader>

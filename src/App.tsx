@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { TourProvider } from "@/hooks/useTour";
+import { TourOverlay } from "@/components/tour/TourOverlay";
 import { CSRFProvider } from "@/hooks/useCSRFProtection";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { SecurityHeaders } from "@/components/security/SecurityHeaders";
@@ -299,14 +301,17 @@ function App() {
           <BrowserRouter>
             <CommandPalette />
             <AuthProvider>
-              <CSRFProvider>
-                <div className="min-h-screen flex flex-col">
-                  <div className="flex-1">
-                    <AuthRoutes />
+              <TourProvider>
+                <TourOverlay />
+                <CSRFProvider>
+                  <div className="min-h-screen flex flex-col">
+                    <div className="flex-1">
+                      <AuthRoutes />
+                    </div>
+                    <Footer />
                   </div>
-                  <Footer />
-                </div>
-              </CSRFProvider>
+                </CSRFProvider>
+              </TourProvider>
             </AuthProvider>
           </BrowserRouter>
         </ErrorBoundary>

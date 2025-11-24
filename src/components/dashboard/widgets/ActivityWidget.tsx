@@ -55,10 +55,13 @@ export const ActivityWidget = ({ size = 'medium' }: ActivityWidgetProps) => {
   const itemsToShow = size === 'large' ? 5 : 3;
 
   return (
-    <Card className={cn(
-      'card-enterprise',
-      size === 'large' && 'col-span-full'
-    )}>
+    <Card 
+      className={cn(
+        'card-enterprise',
+        size === 'large' && 'col-span-full'
+      )}
+      data-tour="activity-widget"
+    >
       <CardHeader>
         <CardTitle className="text-lg">Recent Activity</CardTitle>
       </CardHeader>
