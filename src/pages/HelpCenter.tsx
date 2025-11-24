@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, BookOpen, Video, Lightbulb, ChevronRight, ExternalLink } from 'lucide-react';
+import { Search, BookOpen, Video, Lightbulb, ChevronRight, Play, Check, ExternalLink } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { useTour } from '@/hooks/useTour';
 
 interface Article {
   id: string;
@@ -207,9 +208,69 @@ const guides: Guide[] = [
   }
 ];
 
+const productTours = [
+  {
+    id: 'invoice-workflow',
+    title: 'Invoice Processing Workflow',
+    description: 'Complete walkthrough of uploading and processing invoices',
+    duration: '2 min',
+    category: 'Getting Started'
+  },
+  {
+    id: 'afe-management',
+    title: 'AFE Management Tour',
+    description: 'Learn to manage Authorization for Expenditure budgets',
+    duration: '3 min',
+    category: 'Features'
+  },
+  {
+    id: 'field-tickets',
+    title: 'Field Tickets Tour',
+    description: 'Understand field ticket verification and linking',
+    duration: '2 min',
+    category: 'Features'
+  }
+];
+
+const faqItems = [
+  {
+    question: 'How do I upload multiple invoices at once?',
+    answer: 'You can drag and drop multiple files onto the upload widget, or click to select multiple files from your file browser. We support batch uploads of up to 50 invoices at a time.'
+  },
+  {
+    question: 'What file formats are supported?',
+    answer: 'FlowBills supports PDF, PNG, JPG, JPEG, and TIFF formats. For best OCR results, we recommend high-resolution PDFs or images with clear, readable text.'
+  },
+  {
+    question: 'How long does invoice processing take?',
+    answer: 'Most invoices are processed within 30-60 seconds. Complex multi-page documents or images requiring OCR may take up to 2-3 minutes. You\'ll receive real-time status updates.'
+  },
+  {
+    question: 'Can I customize validation rules?',
+    answer: 'Yes! Navigate to Validation Rules from the dashboard to create custom rules based on amount thresholds, vendor matching, PO verification, and more.'
+  },
+  {
+    question: 'How do I integrate with my accounting system?',
+    answer: 'Go to Integrations from the main menu, select your accounting system (QuickBooks, SAP, Sage, etc.), and follow the OAuth or API key setup process. We provide step-by-step guidance.'
+  },
+  {
+    question: 'What is three-way matching?',
+    answer: 'Three-way matching verifies that the invoice, purchase order, and field ticket all align before approval. This ensures accuracy and prevents duplicate or incorrect payments.'
+  },
+  {
+    question: 'How do I set up approval workflows?',
+    answer: 'Access the Workflows section, click "Create New Workflow", and define trigger conditions, approval steps, and notifications. You can create multi-level approval chains based on invoice criteria.'
+  },
+  {
+    question: 'Is my data secure?',
+    answer: 'Yes. FlowBills uses bank-level encryption (TLS 1.3), stores data in Canadian data centers, and complies with PIPEDA privacy regulations. We never share your data with third parties.'
+  }
+];
+
 export default function HelpCenter() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const { startTour, hasCompletedTour } = useTour();
 
   const filteredArticles = useMemo(() => {
     return articles.filter(article => {
@@ -253,7 +314,7 @@ export default function HelpCenter() {
       </div>
 
       {/* Quick Access Cards */}
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
+      <div className="grid md:grid-cols-4 gap-6 mb-12">
         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
           <CardHeader>
             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
@@ -292,22 +353,43 @@ export default function HelpCenter() {
             <p className="text-sm text-muted-foreground">{guides.length} guides available</p>
           </CardContent>
         </Card>
+
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer border-primary/20 bg-primary/5">
+          <CardHeader>
+            <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center mb-4">
+              <Play className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle>Product Tours</CardTitle>
+            <CardDescription>Interactive step-by-step tours</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{productTours.length} tours available</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="articles" className="space-y-8">
-        <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
+        <TabsList className="grid w-full grid-cols-5 max-w-3xl mx-auto">
           <TabsTrigger value="articles" className="gap-2">
             <BookOpen className="h-4 w-4" />
-            Articles
+            <span className="hidden sm:inline">Articles</span>
           </TabsTrigger>
           <TabsTrigger value="videos" className="gap-2">
             <Video className="h-4 w-4" />
-            Videos
+            <span className="hidden sm:inline">Videos</span>
           </TabsTrigger>
           <TabsTrigger value="guides" className="gap-2">
             <Lightbulb className="h-4 w-4" />
-            Guides
+            <span className="hidden sm:inline">Guides</span>
+          </TabsTrigger>
+          <TabsTrigger value="tours" className="gap-2">
+            <Play className="h-4 w-4" />
+            <span className="hidden sm:inline">Tours</span>
+          </TabsTrigger>
+          <TabsTrigger value="faq" className="gap-2">
+            <span className="hidden sm:inline">FAQ</span>
+            <span className="sm:hidden">?</span>
           </TabsTrigger>
         </TabsList>
 
@@ -428,6 +510,104 @@ export default function HelpCenter() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </TabsContent>
+
+        {/* Product Tours Tab */}
+        <TabsContent value="tours" className="space-y-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <Play className="h-5 w-5 text-primary" />
+                Interactive Product Tours
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Experience guided walkthroughs of FlowBills features. Tours highlight key elements on screen and provide step-by-step instructions. You can pause, skip, or restart tours at any time.
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              {productTours.map(tour => (
+                <Card key={tour.id} className="overflow-hidden hover:shadow-lg transition-all">
+                  <CardHeader>
+                    <div className="flex items-start justify-between mb-2">
+                      <Badge variant="secondary">{tour.category}</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {tour.duration}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      {tour.title}
+                      {hasCompletedTour(tour.id) && (
+                        <Check className="h-5 w-5 text-green-600" />
+                      )}
+                    </CardTitle>
+                    <CardDescription>{tour.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => startTour(tour.id)}
+                        className="flex-1"
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        {hasCompletedTour(tour.id) ? 'Restart Tour' : 'Start Tour'}
+                      </Button>
+                      {hasCompletedTour(tour.id) && (
+                        <Badge variant="outline" className="self-center text-green-600 border-green-600">
+                          Completed
+                        </Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card className="mt-6 bg-muted/50">
+              <CardContent className="pt-6">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Pro Tip:</strong> You can access product tours anytime from the dashboard by clicking the "Product Tours" button in the header. Your progress is automatically saved.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* FAQ Tab */}
+        <TabsContent value="faq" className="space-y-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-bold mb-2">Frequently Asked Questions</h2>
+              <p className="text-muted-foreground">
+                Quick answers to common questions about FlowBills
+              </p>
+            </div>
+
+            <Accordion type="single" collapsible className="w-full">
+              {faqItems.map((faq, index) => (
+                <AccordionItem key={index} value={`faq-${index}`}>
+                  <AccordionTrigger className="text-left font-semibold">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="text-muted-foreground">{faq.answer}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+
+            <Card className="mt-8 bg-primary/5 border-primary/20">
+              <CardContent className="pt-6">
+                <h3 className="font-semibold mb-2">Still have questions?</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Our support team is available 24/7 to help you with any questions not covered here.
+                </p>
+                <Button asChild>
+                  <a href="/contact">Contact Support</a>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>
