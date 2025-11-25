@@ -2,6 +2,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import IntegrationManager from '@/components/integrations/IntegrationManager';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { ContextualTooltip } from '@/components/help/ContextualTooltip';
 
 const Integrations = () => {
   return (
@@ -20,7 +21,17 @@ const Integrations = () => {
             </p>
           </div>
           
-          <IntegrationManager />
+          <ContextualTooltip
+            id="integration-manager"
+            title="System Integrations"
+            description="Connect FLOWBills to external systems like NOV, ERPs, and accounting software. Configure API credentials, sync schedules, and monitor integration health."
+            helpArticleId="integrations"
+            placement="bottom"
+          >
+            <div>
+              <IntegrationManager />
+            </div>
+          </ContextualTooltip>
         </main>
       </div>
     </ProtectedRoute>

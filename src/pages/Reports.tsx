@@ -4,6 +4,7 @@ import { AFESpendingReportComponent } from '@/components/reports/AFESpendingRepo
 import { FieldTicketReportComponent } from '@/components/reports/FieldTicketReport';
 import { UWIReportComponent } from '@/components/reports/UWIReport';
 import { BarChart3, FileText, MapPin } from 'lucide-react';
+import { ContextualTooltip } from '@/components/help/ContextualTooltip';
 
 const Reports = () => {
   return (
@@ -19,18 +20,42 @@ const Reports = () => {
 
         <Tabs defaultValue="afe" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="afe" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              AFE Spending
-            </TabsTrigger>
-            <TabsTrigger value="tickets" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Field Tickets
-            </TabsTrigger>
-            <TabsTrigger value="uwi" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              UWI Production
-            </TabsTrigger>
+            <ContextualTooltip
+              id="afe-spending-report"
+              title="AFE Spending Reports"
+              description="Analyze AFE budget utilization, spending trends, and variances. Export detailed reports for financial analysis and audits."
+              helpArticleId="afe-reports"
+              placement="bottom"
+            >
+              <TabsTrigger value="afe" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                AFE Spending
+              </TabsTrigger>
+            </ContextualTooltip>
+            <ContextualTooltip
+              id="field-ticket-report"
+              title="Field Ticket Reports"
+              description="Review field service activity, hours tracked, equipment usage, and service costs across all well sites."
+              helpArticleId="field-ticket-reports"
+              placement="bottom"
+            >
+              <TabsTrigger value="tickets" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Field Tickets
+              </TabsTrigger>
+            </ContextualTooltip>
+            <ContextualTooltip
+              id="uwi-production-report"
+              title="UWI Production Reports"
+              description="Track production data, operational costs, and performance metrics by well. Identify high-performing and underperforming assets."
+              helpArticleId="uwi-reports"
+              placement="bottom"
+            >
+              <TabsTrigger value="uwi" className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                UWI Production
+              </TabsTrigger>
+            </ContextualTooltip>
           </TabsList>
 
           <TabsContent value="afe">

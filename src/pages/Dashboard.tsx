@@ -13,6 +13,7 @@ import { ChartWidget } from '@/components/dashboard/widgets/ChartWidget';
 import { SupportChat } from '@/components/support/SupportChat';
 import { TourTrigger } from '@/components/tour/TourTrigger';
 import { InvoiceTour } from '@/components/tour/InvoiceTour';
+import { ContextualTooltip } from '@/components/help/ContextualTooltip';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -89,49 +90,79 @@ export default function Dashboard() {
 
       {/* Quick Access Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <Card 
-          className="cursor-pointer hover:bg-muted/50 transition-colors" 
-          onClick={() => navigate('/afe-management')}
-          data-tour="afe-card"
+        <ContextualTooltip
+          id="afe-management-card"
+          title="AFE Management"
+          description="Manage Authorization for Expenditure (AFE) budgets and track spending in real-time. Click to view all AFEs and set up budget alerts."
+          helpArticleId="afe-management"
+          tourId="invoice-workflow"
+          placement="bottom"
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">AFE Management</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <CardDescription>Manage AFEs and track budgets</CardDescription>
-          </CardContent>
-        </Card>
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/afe-management')}
+            data-tour="afe-card"
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">AFE Management</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Manage AFEs and track budgets</CardDescription>
+            </CardContent>
+          </Card>
+        </ContextualTooltip>
+
+        <ContextualTooltip
+          id="field-tickets-card"
+          title="Field Ticket Verification"
+          description="Verify field tickets and link them to invoices for accurate service tracking. Essential for validating field operations."
+          helpArticleId="field-tickets"
+          tourId="invoice-workflow"
+          placement="bottom"
+        >
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/field-tickets')}
+            data-tour="field-tickets-card"
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Field Tickets</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Verify and link field tickets</CardDescription>
+            </CardContent>
+          </Card>
+        </ContextualTooltip>
+
+        <ContextualTooltip
+          id="uwi-registry-card"
+          title="UWI Registry"
+          description="Manage Unique Well Identifiers (UWI) to organize invoices by well location. Track production and costs per well."
+          helpArticleId="uwi-management"
+          tourId="invoice-workflow"
+          placement="bottom"
+        >
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/uwi-registry')}
+            data-tour="uwi-card"
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">UWI Registry</CardTitle>
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Manage well identifiers</CardDescription>
+            </CardContent>
+          </Card>
+        </ContextualTooltip>
 
         <Card 
           className="cursor-pointer hover:bg-muted/50 transition-colors" 
-          onClick={() => navigate('/field-tickets')}
-          data-tour="field-tickets-card"
+          onClick={() => navigate('/reports')}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Field Tickets</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <CardDescription>Verify and link field tickets</CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className="cursor-pointer hover:bg-muted/50 transition-colors" 
-          onClick={() => navigate('/uwi-registry')}
-          data-tour="uwi-card"
-        >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">UWI Registry</CardTitle>
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <CardDescription>Manage well identifiers</CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/reports')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Reports & Analytics</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -141,19 +172,28 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card 
-          className="cursor-pointer hover:bg-muted/50 transition-colors" 
-          onClick={() => navigate('/three-way-matching')}
-          data-tour="matching-card"
+        <ContextualTooltip
+          id="three-way-matching-card"
+          title="Automated Three-Way Matching"
+          description="Automatically match invoices against purchase orders and field tickets. Reduces manual verification time by up to 80%."
+          helpArticleId="three-way-matching"
+          tourId="invoice-workflow"
+          placement="bottom"
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Three-Way Matching</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <CardDescription>Automated invoice matching</CardDescription>
-          </CardContent>
-        </Card>
+          <Card
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/three-way-matching')}
+            data-tour="matching-card"
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Three-Way Matching</CardTitle>
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Automated invoice matching</CardDescription>
+            </CardContent>
+          </Card>
+        </ContextualTooltip>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>

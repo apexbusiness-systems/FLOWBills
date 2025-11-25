@@ -8,6 +8,7 @@ import ApprovalWorkflowTemplates from '@/components/workflow/ApprovalWorkflowTem
 import LoadingSkeleton from '@/components/ui/loading-skeleton';
 import { toast } from '@/hooks/use-toast';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { ContextualTooltip } from '@/components/help/ContextualTooltip';
 
 type ViewMode = 'list' | 'builder' | 'templates';
 
@@ -112,10 +113,34 @@ const Workflows = () => {
       <BreadcrumbNav className="mb-4" />
       <Tabs defaultValue="workflows" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="workflows">My Workflows</TabsTrigger>
-          <TabsTrigger value="approval-templates">Approval Templates</TabsTrigger>
+          <ContextualTooltip
+            id="my-workflows-tab"
+            title="My Workflows"
+            description="View and manage your custom workflow automations. Create new workflows, edit existing ones, and monitor their execution status."
+            helpArticleId="workflow-automation"
+            placement="bottom"
+          >
+            <TabsTrigger value="workflows">My Workflows</TabsTrigger>
+          </ContextualTooltip>
+          <ContextualTooltip
+            id="approval-templates-tab"
+            title="Approval Workflow Templates"
+            description="Pre-built approval workflows for invoice processing. Includes sequential, parallel, and conditional approval chains."
+            helpArticleId="approval-workflows"
+            placement="bottom"
+          >
+            <TabsTrigger value="approval-templates">Approval Templates</TabsTrigger>
+          </ContextualTooltip>
           <TabsTrigger value="templates" onClick={() => setViewMode('templates')}>General Templates</TabsTrigger>
-          <TabsTrigger value="instances">Running Instances</TabsTrigger>
+          <ContextualTooltip
+            id="workflow-instances-tab"
+            title="Running Workflow Instances"
+            description="Monitor active workflow executions in real-time. Track progress, view current steps, and review execution history."
+            helpArticleId="workflow-monitoring"
+            placement="bottom"
+          >
+            <TabsTrigger value="instances">Running Instances</TabsTrigger>
+          </ContextualTooltip>
         </TabsList>
 
         <TabsContent value="workflows" className="space-y-6">
