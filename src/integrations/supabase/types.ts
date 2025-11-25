@@ -783,6 +783,93 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_notifications: boolean
+          feature_updates: boolean
+          help_articles: boolean
+          id: string
+          system_notifications: boolean
+          tips: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: boolean
+          feature_updates?: boolean
+          help_articles?: boolean
+          id?: string
+          system_notifications?: boolean
+          tips?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: boolean
+          feature_updates?: boolean
+          help_articles?: boolean
+          id?: string
+          system_notifications?: boolean
+          tips?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          category: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_read: boolean
+          link_text: string | null
+          link_url: string | null
+          message: string
+          metadata: Json | null
+          priority: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          link_text?: string | null
+          link_url?: string | null
+          message: string
+          metadata?: Json | null
+          priority?: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          link_text?: string | null
+          link_url?: string | null
+          message?: string
+          metadata?: Json | null
+          priority?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       performance_metrics: {
         Row: {
           created_at: string

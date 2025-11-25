@@ -14,6 +14,7 @@ import SmartSearch from "@/components/ui/smart-search";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
+import { NotificationBell } from "./NotificationBell";
 
 const DashboardHeader = () => {
   const { user, userRole, signOut } = useAuth();
@@ -121,17 +122,7 @@ const DashboardHeader = () => {
           {/* System Performance Indicator */}
           <PerformanceIndicator />
           
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="relative hover-scale"
-            aria-label="Notifications"
-          >
-            <Bell className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center animate-bounce-subtle">
-              3
-            </span>
-          </Button>
+          <NotificationBell />
 
           {/* User Menu */}
           <DropdownMenu>
