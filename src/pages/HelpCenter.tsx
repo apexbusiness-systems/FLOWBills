@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 import { useTour } from '@/hooks/useTour';
+import { ArticleFeedback } from '@/components/help/ArticleFeedback';
 
 interface Article {
   id: string;
@@ -409,34 +410,41 @@ export default function HelpCenter() {
             ))}
           </div>
 
-          {/* Articles Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredArticles.map(article => (
-              <Card key={article.id} className="hover:shadow-lg transition-all">
-                <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
-                    <Badge variant="secondary">{article.category}</Badge>
-                  </div>
-                  <CardTitle className="text-lg">{article.title}</CardTitle>
-                  <CardDescription>{article.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                    {article.content}
-                  </p>
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {article.tags.map(tag => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <Button variant="link" className="p-0 h-auto">
-                    Read More <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+          {/* Articles List */}
+          <div className="max-w-4xl mx-auto">
+            <Accordion type="single" collapsible className="w-full space-y-4">
+              {filteredArticles.map(article => (
+                <Card key={article.id} className="overflow-hidden">
+                  <AccordionItem value={article.id} className="border-0">
+                    <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                      <div className="flex flex-col items-start text-left w-full">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary">{article.category}</Badge>
+                          <div className="flex flex-wrap gap-1">
+                            {article.tags.map(tag => (
+                              <Badge key={tag} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-semibold">{article.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{article.description}</p>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-4">
+                      <div className="prose prose-sm dark:prose-invert max-w-none mb-4">
+                        <p className="text-muted-foreground whitespace-pre-line">{article.content}</p>
+                      </div>
+                      <ArticleFeedback 
+                        articleId={article.id} 
+                        articleTitle={article.title}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Card>
+              ))}
+            </Accordion>
           </div>
 
           {filteredArticles.length === 0 && (

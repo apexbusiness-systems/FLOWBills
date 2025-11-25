@@ -101,6 +101,36 @@ export type Database = {
         }
         Relationships: []
       }
+      article_feedback: {
+        Row: {
+          article_id: string
+          created_at: string
+          feedback_text: string | null
+          id: string
+          rating: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          feedback_text?: string | null
+          id?: string
+          rating: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          feedback_text?: string | null
+          id?: string
+          rating?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       budget_alert_logs: {
         Row: {
           afe_id: string
