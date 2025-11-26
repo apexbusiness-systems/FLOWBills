@@ -60,15 +60,10 @@ export const PublicHeader = () => {
           </nav>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-3">
             <LanguageSwitcher />
-            <Button asChild variant="ghost" size="sm">
-              <TrackLink to="/auth" source="header">
-                {t("nav.signIn")}
-              </TrackLink>
-            </Button>
             <Button asChild size="sm" className="min-h-[44px]">
-              <TrackLink to="/contact" source="header">
+              <TrackLink to="/auth" source="header">
                 {t("nav.getStarted")}
               </TrackLink>
             </Button>
@@ -112,14 +107,9 @@ export const PublicHeader = () => {
                 </NavLink>
               ))}
               <div className="flex flex-col gap-2 px-4 pt-4 border-t border-border mt-2">
-                <Button asChild variant="outline" className="w-full min-h-[44px]">
-                  <TrackLink to="/auth" source="mobile-header">
-                    Sign In
-                  </TrackLink>
-                </Button>
                 <Button asChild className="w-full min-h-[44px]">
-                  <TrackLink to="/contact" source="mobile-header">
-                    Book Demo
+                  <TrackLink to="/auth" source="mobile-header">
+                    {t("nav.getStarted")}
                   </TrackLink>
                 </Button>
               </div>

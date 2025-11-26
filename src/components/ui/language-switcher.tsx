@@ -9,11 +9,11 @@ import {
 import { Button } from "@/components/ui/button";
 
 const languages = [
-  { code: 'en', name: 'English', flag: '🇨🇦' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'en', name: 'English', shortCode: 'ENG', flag: '🇨🇦' },
+  { code: 'fr', name: 'Français', shortCode: 'FRA', flag: '🇫🇷' },
+  { code: 'de', name: 'Deutsch', shortCode: 'DEU', flag: '🇩🇪' },
+  { code: 'ar', name: 'العربية', shortCode: 'ARA', flag: '🇸🇦' },
+  { code: 'zh', name: '中文', shortCode: 'ZHI', flag: '🇨🇳' },
 ];
 
 export function LanguageSwitcher() {
@@ -28,10 +28,9 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2">
+        <Button variant="ghost" size="sm" className="gap-1.5">
           <Globe className="h-4 w-4" />
-          <span className="hidden sm:inline">{currentLanguage.flag} {currentLanguage.name}</span>
-          <span className="sm:hidden">{currentLanguage.flag}</span>
+          <span className="text-sm font-medium">{currentLanguage.shortCode}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
