@@ -19,6 +19,7 @@ import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { PublicHeader } from "@/components/ui/public-header";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
+import { ThemeProvider } from "next-themes";
 
 // Lazy load all pages for code splitting
 const Auth = React.lazy(() => import("./pages/Auth"));
@@ -291,31 +292,39 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ErrorBoundary>
-          <SecurityHeaders />
-          <Toaster />
-          <Sonner />
-          <OfflineIndicator />
-          <InstallPrompt />
-          <BrowserRouter>
-            <CommandPalette />
-            <AuthProvider>
-              <TourProvider>
-                <TourOverlay />
-                <CSRFProvider>
-                  <div className="min-h-screen flex flex-col">
-                    <div className="flex-1">
-                      <AuthRoutes />
+      <ThemeProvider 
+        attribute="class" 
+        defaultTheme="system" 
+        enableSystem
+        disableTransitionOnChange={false}
+        storageKey="flowbills-theme"
+      >
+        <TooltipProvider>
+          <ErrorBoundary>
+            <SecurityHeaders />
+            <Toaster />
+            <Sonner />
+            <OfflineIndicator />
+            <InstallPrompt />
+            <BrowserRouter>
+              <CommandPalette />
+              <AuthProvider>
+                <TourProvider>
+                  <TourOverlay />
+                  <CSRFProvider>
+                    <div className="min-h-screen flex flex-col">
+                      <div className="flex-1">
+                        <AuthRoutes />
+                      </div>
+                      <Footer />
                     </div>
-                    <Footer />
-                  </div>
-                </CSRFProvider>
-              </TourProvider>
-            </AuthProvider>
-          </BrowserRouter>
-        </ErrorBoundary>
-      </TooltipProvider>
+                  </CSRFProvider>
+                </TourProvider>
+              </AuthProvider>
+            </BrowserRouter>
+          </ErrorBoundary>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

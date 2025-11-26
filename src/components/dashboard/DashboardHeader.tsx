@@ -1,4 +1,4 @@
-import { Building2, Bell, User, LogOut, Shield, Settings, Home, ArrowLeft } from "lucide-react";
+import { Building2, Bell, User, LogOut, Shield, Settings, Home, ArrowLeft, Palette } from "lucide-react";
 import companyLogo from "@/assets/company-logo.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 import { NotificationBell } from "./NotificationBell";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 const DashboardHeader = () => {
   const { user, userRole, signOut } = useAuth();
@@ -176,6 +177,16 @@ const DashboardHeader = () => {
                 <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Settings</span>
               </DropdownMenuItem>
+              
+              <DropdownMenuSeparator className="my-2" />
+              
+              <div className="px-2 py-1.5">
+                <div className="flex items-center gap-2 px-1 mb-2">
+                  <Palette className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Theme</span>
+                </div>
+                <ThemeSwitcher variant="inline" />
+              </div>
               
               <DropdownMenuSeparator className="my-2" />
               
