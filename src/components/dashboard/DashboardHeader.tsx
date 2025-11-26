@@ -130,40 +130,61 @@ const DashboardHeader = () => {
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="hover-scale flex items-center gap-2 h-9 px-3"
+                className="flex items-center gap-2.5 h-10 px-3 hover:bg-muted/80 transition-colors"
+                aria-label="User menu"
               >
-                <User className="h-4 w-4" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-medium">{getDisplayName()}</div>
-                  <div className="text-xs text-muted-foreground">{user?.email}</div>
+                  <div className="text-sm font-semibold leading-none">{getDisplayName()}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{user?.email}</div>
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{getDisplayName()}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+            <DropdownMenuContent align="end" className="w-64 p-2">
+              <div className="flex items-start gap-3 px-2 py-3 mb-1">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20 flex-shrink-0">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold leading-none truncate">{getDisplayName()}</p>
+                  <p className="text-xs text-muted-foreground mt-1.5 truncate">{user?.email}</p>
                   <div className="flex items-center gap-2 mt-2">
-                    <Badge variant={getRoleBadgeVariant(userRole)} className="text-xs">
+                    <Badge variant={getRoleBadgeVariant(userRole)} className="text-xs font-medium">
                       {getRoleIcon(userRole)}
-                      {userRole?.toUpperCase() || 'LOADING...'}
+                      <span className="ml-1">{userRole?.toUpperCase() || 'LOADING...'}</span>
                     </Badge>
                   </div>
                 </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              </div>
+              
+              <DropdownMenuSeparator className="my-2" />
+              
               <DropdownMenuItem 
                 onClick={() => navigate('/profile')} 
-                className="cursor-pointer"
+                className="cursor-pointer rounded-md px-3 py-2.5 hover:bg-muted"
               >
-                <Settings className="mr-2 h-4 w-4" />
-                Profile Settings
+                <User className="mr-3 h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">My Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
+              
+              <DropdownMenuItem 
+                onClick={() => navigate('/profile')} 
+                className="cursor-pointer rounded-md px-3 py-2.5 hover:bg-muted"
+              >
+                <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Settings</span>
+              </DropdownMenuItem>
+              
+              <DropdownMenuSeparator className="my-2" />
+              
+              <DropdownMenuItem 
+                onClick={signOut} 
+                className="cursor-pointer rounded-md px-3 py-2.5 text-destructive hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
+              >
+                <LogOut className="mr-3 h-4 w-4" />
+                <span className="font-medium">Sign Out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
