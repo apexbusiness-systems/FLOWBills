@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo, useRef } from 'react';
 import * as React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { BulkActionsToolbar } from './BulkActionsToolbar';
@@ -32,6 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { VirtualList } from '@/components/ui/virtual-list';
 import { 
   Search, 
   Edit, 
@@ -49,7 +50,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Invoice } from '@/hooks/useInvoices';
 import { format } from 'date-fns';
 
-interface InvoiceListProps {
+interface InvoiceListVirtualizedProps {
   invoices: Invoice[];
   loading: boolean;
   onEdit: (invoice: Invoice) => void;
@@ -57,8 +58,91 @@ interface InvoiceListProps {
   onCreate: () => void;
 }
 
-// Memoized component to prevent unnecessary re-renders
-const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceListProps) => {
+// Memoized Invoice Row Component - prevents re-renders of unchanged rows
+const InvoiceRow = memo(({ 
+  invoice, 
+  isSelected,
+  canEdit,
+  canDelete,
+  onToggleSelect,
+  onEdit,
+  onDelete,
+  documentCount,
+  formatCurrency,
+  formatDate,
+  getStatusBadgeVariant
+}: {
+  invoice: Invoice;
+  isSelected: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  onToggleSelect: (id: string) => void;
+  onEdit: (invoice: Invoice) => void;
+  onDelete: (invoice: Invoice) => void;
+  documentCount: number;
+  formatCurrency: (amount: number) => string;
+  formatDate: (date: string | null) => string;
+  getStatusBadgeVariant: (status: Invoice['status']) => string;
+}) => {
+  const handleToggle = useCallback(() => onToggleSelect(invoice.id), [onToggleSelect, invoice.id]);
+  const handleEdit = useCallback(() => onEdit(invoice), [onEdit, invoice]);
+  const handleDelete = useCallback(() => onDelete(invoice), [onDelete, invoice]);
+
+  return (
+    <TableRow>
+      <TableCell>
+        <Checkbox checked={isSelected} onCheckedChange={handleToggle} />
+      </TableCell>
+      <TableCell>{invoice.invoice_number}</TableCell>
+      <TableCell>{invoice.vendor_name}</TableCell>
+      <TableCell className="font-mono">{formatCurrency(invoice.amount)}</TableCell>
+      <TableCell>{formatDate(invoice.invoice_date)}</TableCell>
+      <TableCell>{formatDate(invoice.due_date)}</TableCell>
+      <TableCell>
+        <Badge variant={getStatusBadgeVariant(invoice.status) as any}>
+          {invoice.status.toUpperCase()}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {documentCount > 0 && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Paperclip className="h-3 w-3" />
+              {documentCount}
+            </div>
+          )}
+        </div>
+      </TableCell>
+      {(canEdit || canDelete) && (
+        <TableCell className="text-right">
+          <div className="flex items-center justify-end gap-2">
+            {canEdit && (
+              <Button size="sm" variant="outline" onClick={handleEdit}>
+                <Edit className="h-3 w-3" />
+              </Button>
+            )}
+            {canDelete && (
+              <Button size="sm" variant="outline" onClick={handleDelete}>
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        </TableCell>
+      )}
+    </TableRow>
+  );
+});
+
+InvoiceRow.displayName = 'InvoiceRow';
+
+// High-performance virtualized invoice list for large datasets (1000+ invoices)
+const InvoiceListVirtualized = memo(({ 
+  invoices, 
+  loading, 
+  onEdit, 
+  onDelete, 
+  onCreate 
+}: InvoiceListVirtualizedProps) => {
   const { hasRole } = useAuth();
   const { getDocuments } = useFileUpload();
   const { toast } = useToast();
@@ -74,12 +158,11 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
   const canDelete = hasRole('operator') || hasRole('admin');
   const canCreate = hasRole('operator') || hasRole('admin');
 
-  // Load document counts for invoices (optimized with batch loading)
+  // Optimized batch document loading with parallel requests
   React.useEffect(() => {
     const loadDocumentCounts = async () => {
       const counts: Record<string, number> = {};
       
-      // Batch load in parallel instead of sequential O(n) - reduces to O(1) time
       const results = await Promise.allSettled(
         invoices.map(async (invoice) => {
           try {
@@ -105,7 +188,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     }
   }, [invoices, getDocuments]);
 
-  // Memoized badge variant calculation - O(1) lookup
+  // Memoized status badge variant lookup
   const getStatusBadgeVariant = useCallback((status: Invoice['status']) => {
     switch (status) {
       case 'pending': return 'pending';
@@ -116,7 +199,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     }
   }, []);
 
-  // Memoized filtered invoices - prevents recalculation on every render
+  // Memoized filtered invoices
   const filteredInvoices = useMemo(() => {
     return invoices.filter(invoice => {
       const matchesSearch = 
@@ -129,7 +212,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     });
   }, [invoices, searchTerm, statusFilter]);
 
-  // Memoized callbacks - stable references prevent child re-renders
+  // Memoized event handlers
   const handleDeleteClick = useCallback((invoice: Invoice) => {
     setInvoiceToDelete(invoice);
     setDeleteDialogOpen(true);
@@ -165,23 +248,17 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
 
   const handleBulkApprove = useCallback(async () => {
     const success = await bulkApprove(Array.from(selectedInvoices));
-    if (success) {
-      setSelectedInvoices(new Set());
-    }
+    if (success) setSelectedInvoices(new Set());
   }, [selectedInvoices, bulkApprove]);
 
   const handleBulkReject = useCallback(async () => {
     const success = await bulkReject(Array.from(selectedInvoices));
-    if (success) {
-      setSelectedInvoices(new Set());
-    }
+    if (success) setSelectedInvoices(new Set());
   }, [selectedInvoices, bulkReject]);
 
   const handleBulkDelete = useCallback(async () => {
     const success = await bulkDelete(Array.from(selectedInvoices));
-    if (success) {
-      setSelectedInvoices(new Set());
-    }
+    if (success) setSelectedInvoices(new Set());
   }, [selectedInvoices, bulkDelete]);
 
   const handleBulkExport = useCallback(() => {
@@ -189,7 +266,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     bulkExport(selected);
   }, [filteredInvoices, selectedInvoices, bulkExport]);
 
-  // Memoized formatters - prevent recreation on every render
+  // Memoized formatters
   const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -207,6 +284,24 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0),
     [filteredInvoices]
   );
+
+  // Virtual list renderer for large datasets
+  const renderInvoiceItem = useCallback((invoice: Invoice, index: number) => (
+    <InvoiceRow
+      key={invoice.id}
+      invoice={invoice}
+      isSelected={selectedInvoices.has(invoice.id)}
+      canEdit={canEdit}
+      canDelete={canDelete}
+      onToggleSelect={toggleInvoiceSelection}
+      onEdit={onEdit}
+      onDelete={handleDeleteClick}
+      documentCount={documentCounts[invoice.id] || 0}
+      formatCurrency={formatCurrency}
+      formatDate={formatDate}
+      getStatusBadgeVariant={getStatusBadgeVariant}
+    />
+  ), [selectedInvoices, canEdit, canDelete, toggleInvoiceSelection, onEdit, handleDeleteClick, documentCounts, formatCurrency, formatDate, getStatusBadgeVariant]);
 
   if (loading) {
     return (
@@ -239,10 +334,10 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
             <div>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Invoice Management
+                Invoice Management (Virtualized)
               </CardTitle>
               <CardDescription>
-                Manage and track invoice records
+                High-performance list for large datasets (1000+ invoices)
               </CardDescription>
             </div>
             {canCreate && (
@@ -309,7 +404,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
             </div>
           </div>
 
-          {/* Invoice Table */}
+          {/* Virtual Invoice Table - O(visible items) rendering */}
           {filteredInvoices.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -339,72 +434,25 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
                       />
                     </TableHead>
                     <TableHead>Invoice #</TableHead>
-                  <TableHead>Vendor</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Due Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Files</TableHead>
+                    <TableHead>Vendor</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Due Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Files</TableHead>
                     {(canEdit || canDelete) && <TableHead className="text-right">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredInvoices.map((invoice) => (
-                    <TableRow key={invoice.id}>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedInvoices.has(invoice.id)}
-                          onCheckedChange={() => toggleInvoiceSelection(invoice.id)}
-                        />
-                      </TableCell>
-                      <TableCell>{invoice.invoice_number}</TableCell>
-                      <TableCell>{invoice.vendor_name}</TableCell>
-                      <TableCell className="font-mono">
-                        {formatCurrency(invoice.amount)}
-                      </TableCell>
-                      <TableCell>{formatDate(invoice.invoice_date)}</TableCell>
-                      <TableCell>{formatDate(invoice.due_date)}</TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(invoice.status)}>
-                          {invoice.status.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {documentCounts[invoice.id] > 0 && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Paperclip className="h-3 w-3" />
-                              {documentCounts[invoice.id]}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      {(canEdit || canDelete) && (
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {canEdit && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => onEdit(invoice)}
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                            )}
-                            {canDelete && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDeleteClick(invoice)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
+                  {/* Virtual List: Only renders visible rows - massive performance gain for 1000+ items */}
+                  <VirtualList
+                    items={filteredInvoices}
+                    itemHeight={60}
+                    containerHeight={600}
+                    renderItem={renderInvoiceItem}
+                    overscan={5}
+                    className="w-full"
+                  />
                 </TableBody>
               </Table>
             </div>
@@ -437,4 +485,6 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
   );
 });
 
-export default InvoiceList;
+InvoiceListVirtualized.displayName = 'InvoiceListVirtualized';
+
+export default InvoiceListVirtualized;

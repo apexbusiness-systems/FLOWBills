@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { GripVertical, Layout, FileText, DollarSign, MapPin, BarChart3, CheckCircle2 } from 'lucide-react';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
@@ -31,7 +31,8 @@ export default function Dashboard() {
     resetLayout,
   } = useDashboardLayout();
 
-  const handleDragEnd = (result: DropResult) => {
+  // Memoized callbacks for stable references
+  const handleDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
 
     const items = Array.from(visibleWidgets);
@@ -40,9 +41,9 @@ export default function Dashboard() {
 
     reorderWidgets(items);
     toast.success('Layout updated');
-  };
+  }, [visibleWidgets, reorderWidgets]);
 
-  const renderWidget = (widget: any) => {
+  const renderWidget = useCallback((widget: any) => {
     switch (widget.type) {
       case 'stats':
         return <StatsWidget title={widget.title} size={widget.size} />;
@@ -55,7 +56,7 @@ export default function Dashboard() {
       default:
         return null;
     }
-  };
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">

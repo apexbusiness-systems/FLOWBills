@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { 
   FileText, 
   CheckCircle, 
@@ -56,8 +57,9 @@ const activities = [
   }
 ];
 
-const RecentActivity = () => {
-  const getStatusBadge = (status: string) => {
+// Memoized component for performance - static data doesn't need re-render
+const RecentActivity = memo(() => {
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case "processing":
         return <Badge className="status-processing">Processing</Badge>;
@@ -68,7 +70,7 @@ const RecentActivity = () => {
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
-  };
+  }, []);
 
   return (
     <div className="card-enterprise">
@@ -124,6 +126,6 @@ const RecentActivity = () => {
       </div>
     </div>
   );
-};
+});
 
 export default RecentActivity;
