@@ -48,8 +48,8 @@ export const SiteConfig = {
     strictMode: true,
   },
   analytics: {
-    gtmId: import.meta.env.VITE_GTM_ID || '', // Set via environment variable
-    enableTracking: !import.meta.env.DEV,
+    gtmId: '', // GTM disabled - not using VITE_ env vars per Lovable requirements
+    enableTracking: false,
     enableProductionOnly: true,
   },
   observability: {
