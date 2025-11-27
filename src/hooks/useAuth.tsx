@@ -43,16 +43,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
+    let timeoutId: NodeJS.Timeout;
 
     const initAuth = async () => {
       try {
-        // First check for existing session
-        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('[FlowBills Auth] Initializing authentication...');
+        
+        // Add timeout protection (5 seconds)
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error('Auth initialization timeout')), 5000);
+        });
+
+        const { data: { session }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]) as any;
+        
+        clearTimeout(timeoutId);
         
         if (!mounted) return;
         
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('[FlowBills Auth] Error getting session:', error);
+        } else {
+          console.log('[FlowBills Auth] Session initialized:', session ? 'Authenticated' : 'Not authenticated');
         }
 
         setSession(session);
@@ -65,9 +80,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           });
         }
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        console.error('[FlowBills Auth] Auth initialization error:', error);
+        // Still set loading to false even on timeout/error
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+        }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          console.log('[FlowBills Auth] Loading complete');
+        }
       }
     };
 
@@ -76,6 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
         if (!mounted) return;
         
+        console.log('[FlowBills Auth] Auth state changed:', event);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -95,6 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       mounted = false;
+      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);
