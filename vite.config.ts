@@ -46,7 +46,7 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/yvyjzlbosmtesldczhnm\.supabase\.co\/.*/i,
+            urlPattern: /^https:\/\/ullqluvzkgnwwqijhvjr\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'supabase-api',
@@ -124,7 +124,7 @@ export default defineConfig(({ mode }) => ({
     reportCompressedSize: false, // Faster builds
   },
   esbuild: {
-    drop: mode === 'production' ? ['console', 'debugger'] : [],
+    drop: mode === 'production' ? ['debugger'] : [], // Keep console logs for production debugging
     legalComments: 'none',
     treeShaking: true,
   },
