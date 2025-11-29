@@ -32,10 +32,10 @@ const Index = () => {
           className="sr-only" 
         />
         <div className="relative z-10 container mx-auto px-4 text-center text-white">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-amber-400">
             {t("hero.title")}
           </h1>
-          <p className="text-lg md:text-xl mb-8 max-w-4xl mx-auto text-white/90">
+          <p className="text-lg md:text-xl mb-8 max-w-4xl mx-auto text-amber-400/90">
             {t("hero.subtitle")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
