@@ -103,24 +103,12 @@ if (!import.meta.env.DEV) {
   startPersistenceCleanup();
 }
 
-// Register service worker for PWA functionality
-if ('serviceWorker' in navigator) {
+// Register service worker with health monitoring
+import('./lib/sw-health-monitor').then(({ swHealthMonitor }) => {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        // Only log in development
-        if (import.meta.env.DEV) {
-          console.log('FlowBills SW registered: ', registration);
-        }
-      })
-      .catch((registrationError) => {
-        // Only log in development
-        if (import.meta.env.DEV) {
-          console.log('FlowBills SW registration failed: ', registrationError);
-        }
-      });
+    swHealthMonitor.register();
   });
-}
+});
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
