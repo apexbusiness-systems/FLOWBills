@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flowbills-v3'; // Bumped version to force refresh
+const CACHE_NAME = 'flowbills-v4'; // Bumped version for health monitoring
 const urlsToCache = [
   '/',
   '/manifest.webmanifest',
