@@ -1,12 +1,11 @@
-const CACHE_NAME = 'flowbills-v2';
+const CACHE_NAME = 'flowbills-v3'; // Bumped version to force refresh
 const urlsToCache = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
   '/manifest.webmanifest',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
-  // Add other static assets as needed
+  '/favicon.png'
+  // Note: Vite JS/CSS bundles have hashed names and are cached dynamically
 ];
 
 // Install Service Worker
