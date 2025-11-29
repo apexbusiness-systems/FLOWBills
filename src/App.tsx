@@ -52,6 +52,7 @@ const UWIRegistry = React.lazy(() => import("./pages/UWIRegistry"));
 const Reports = React.lazy(() => import("./pages/Reports"));
 const ThreeWayMatching = React.lazy(() => import("./pages/ThreeWayMatching"));
 const PerformanceMonitoring = React.lazy(() => import("./pages/PerformanceMonitoring"));
+const Invoices = React.lazy(() => import("./pages/Invoices"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -171,6 +172,14 @@ const AuthRoutes = () => {
           element={
             <ProtectedRoute>
               <ThreeWayMatching />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/invoices" 
+          element={
+            <ProtectedRoute>
+              <Invoices />
             </ProtectedRoute>
           } 
         />

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useNavigate } from "react-router-dom";
 
 const workflowSteps = [
   {
@@ -68,6 +69,8 @@ const workflowSteps = [
 ];
 
 const WorkflowPipeline = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="card-enterprise">
       <div className="mb-6">
@@ -132,8 +135,8 @@ const WorkflowPipeline = () => {
           <div className="text-sm text-muted-foreground">
             Next milestone: <span className="font-medium text-foreground">Monthly JIB reconciliation</span>
           </div>
-          <Button size="sm" className="btn-primary">
-            View Details
+          <Button size="sm" className="btn-primary" onClick={() => navigate('/invoices?tab=workflow')}>
+            View Full Pipeline
           </Button>
         </div>
       </div>

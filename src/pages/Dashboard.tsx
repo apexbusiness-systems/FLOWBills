@@ -11,6 +11,7 @@ import { ActivityWidget } from '@/components/dashboard/widgets/ActivityWidget';
 import { UploadWidget } from '@/components/dashboard/widgets/UploadWidget';
 import { ChartWidget } from '@/components/dashboard/widgets/ChartWidget';
 import { SupportChat } from '@/components/support/SupportChat';
+import WorkflowPipeline from '@/components/dashboard/WorkflowPipeline';
 import { TourTrigger } from '@/components/tour/TourTrigger';
 import { InvoiceTour } from '@/components/tour/InvoiceTour';
 import { ContextualTooltip } from '@/components/help/ContextualTooltip';
@@ -90,7 +91,29 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Access Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+        <ContextualTooltip
+          id="invoice-management-card"
+          title="Invoice Management"
+          description="Upload, process, and manage invoices. Access the complete invoice processing workflow including upload, validation, matching, and approval."
+          helpArticleId="invoice-workflow"
+          tourId="invoice-workflow"
+          placement="bottom"
+        >
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/invoices')}
+            data-tour="invoice-card"
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Invoice Management</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Upload & process invoices</CardDescription>
+            </CardContent>
+          </Card>
+        </ContextualTooltip>
         <ContextualTooltip
           id="afe-management-card"
           title="AFE Management"
@@ -195,6 +218,11 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </ContextualTooltip>
+      </div>
+
+      {/* Workflow Pipeline */}
+      <div className="mb-6">
+        <WorkflowPipeline />
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>

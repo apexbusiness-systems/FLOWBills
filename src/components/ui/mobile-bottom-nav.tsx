@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 export const MobileBottomNav = () => {
   const navItems = [
     { icon: Home, label: "Home", to: "/dashboard", ariaLabel: "Go to dashboard home" },
-    { icon: FileText, label: "Invoices", to: "/dashboard", ariaLabel: "View invoices" },
-    { icon: BarChart3, label: "Reports", to: "/dashboard", ariaLabel: "View reports" },
+    { icon: FileText, label: "Invoices", to: "/invoices", ariaLabel: "View and manage invoices" },
+    { icon: BarChart3, label: "Reports", to: "/reports", ariaLabel: "View reports" },
     { icon: Settings, label: "Settings", to: "/profile", ariaLabel: "Go to settings" },
   ];
 
