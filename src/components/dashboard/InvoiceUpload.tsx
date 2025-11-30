@@ -9,6 +9,7 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import { useInvoiceExtraction } from "@/hooks/useInvoiceExtraction";
 import { useWorkflows } from "@/hooks/useWorkflows";
 import { ExtractionResultsPanel } from "@/components/invoices/ExtractionResultsPanel";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UploadedFile {
   id: string;
@@ -66,7 +67,7 @@ const InvoiceUpload = () => {
         f.id === fileId ? { ...f, invoiceId: invoice.id, progress: 40 } : f
       ));
 
-      // Step 2: Upload file
+      // Step 2: Upload file to Supabase Storage
       setFiles(prev => prev.map(f => 
         f.id === fileId ? { ...f, status: "processing", progress: 50 } : f
       ));
@@ -78,44 +79,61 @@ const InvoiceUpload = () => {
       }
 
       setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, progress: 70 } : f
+        f.id === fileId ? { ...f, progress: 60 } : f
       ));
 
       // Step 3: Read file content for extraction
       const fileContent = await readFileAsBase64(file);
 
-      // Step 4: Trigger AI extraction
+      // Step 4: Trigger complete invoice intake pipeline
       setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, status: "extracting", progress: 80 } : f
+        f.id === fileId ? { ...f, status: "extracting", progress: 70 } : f
       ));
 
-      await extractInvoiceData(invoice.id, fileContent);
+      // Call the invoice-intake orchestration function
+      const { data: intakeResult, error: intakeError } = await supabase.functions.invoke('invoice-intake', {
+        body: {
+          invoice_id: invoice.id,
+          file_content: fileContent
+        }
+      });
+
+      if (intakeError) {
+        throw new Error(`Invoice processing failed: ${intakeError.message}`);
+      }
+
+      if (!intakeResult?.success) {
+        throw new Error(intakeResult?.error || 'Invoice processing failed');
+      }
 
       setFiles(prev => prev.map(f => 
         f.id === fileId ? { ...f, progress: 90 } : f
       ));
 
-      // Step 5: Trigger workflow if any active workflows exist
-      const activeWorkflows = workflows.filter(w => w.is_active && w.workflow_type === 'invoice_processing');
-      if (activeWorkflows.length > 0) {
-        setFiles(prev => prev.map(f => 
-          f.id === fileId ? { ...f, status: "workflow", progress: 95 } : f
-        ));
-
-        // Use the first active workflow
-        await startWorkflow(activeWorkflows[0].id, 'invoice', invoice.id);
-      }
-
-      // Step 6: Complete
+      // Step 5: Complete
       setFiles(prev => prev.map(f => 
         f.id === fileId ? { ...f, status: "completed", progress: 100 } : f
       ));
 
       toast({
         title: "Invoice processed successfully",
-        description: activeWorkflows.length > 0 
-          ? "AI extraction completed and workflow started. Click 'View Results' to see details."
-          : "AI extraction completed. Click 'View Results' to see extracted data.",
+        description: intakeResult.approval?.auto_approved 
+          ? "Invoice auto-approved and ready for payment"
+          : intakeResult.approval?.requires_review 
+            ? `Requires review: ${intakeResult.approval.review_reason}`
+            : `Pending ${intakeResult.approval?.approval_level || 'manual'} approval`,
+      });
+      setFiles(prev => prev.map(f => 
+        f.id === fileId ? { ...f, status: "completed", progress: 100 } : f
+      ));
+
+      toast({
+        title: "Invoice processed successfully",
+        description: intakeResult.approval?.auto_approved 
+          ? "Invoice auto-approved and ready for payment"
+          : intakeResult.approval?.requires_review 
+            ? `Requires review: ${intakeResult.approval.review_reason}`
+            : `Pending ${intakeResult.approval?.approval_level || 'manual'} approval`,
       });
 
     } catch (error: any) {

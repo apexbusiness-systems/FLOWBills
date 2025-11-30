@@ -89,3 +89,6 @@ verify_jwt = true
 
 [functions.budget-alert-check]
 verify_jwt = false
+
+[functions.invoice-intake]
+verify_jwt = true

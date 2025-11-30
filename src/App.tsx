@@ -44,6 +44,7 @@ const Blog = React.lazy(() => import("./pages/Blog"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 const SupplierPortal = React.lazy(() => import("./pages/supplier/SupplierPortal"));
 const CSPMonitoring = React.lazy(() => import("./pages/CSPMonitoring"));
+const ApprovalQueue = React.lazy(() => import("./pages/ApprovalQueue"));
 
 const HelpCenter = React.lazy(() => import("./pages/HelpCenter"));
 const AFEManagement = React.lazy(() => import("./pages/AFEManagement"));
@@ -136,7 +137,15 @@ const AuthRoutes = () => {
           } 
         />
         <Route 
-          path="/afe-management" 
+          path="/approval-queue" 
+          element={
+            <ProtectedRoute>
+              <ApprovalQueue />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/afe-management"
           element={
             <ProtectedRoute>
               <AFEManagement />

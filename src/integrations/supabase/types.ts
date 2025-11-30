@@ -103,10 +103,13 @@ export type Database = {
       }
       approvals: {
         Row: {
+          amount_approved: number | null
           approval_date: string | null
           approval_method: string | null
           approval_status: string
           approved_by: string | null
+          auto_approved: boolean | null
+          comments: string | null
           confidence_score: number | null
           created_at: string
           id: string
@@ -117,10 +120,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          amount_approved?: number | null
           approval_date?: string | null
           approval_method?: string | null
           approval_status?: string
           approved_by?: string | null
+          auto_approved?: boolean | null
+          comments?: string | null
           confidence_score?: number | null
           created_at?: string
           id?: string
@@ -131,10 +137,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          amount_approved?: number | null
           approval_date?: string | null
           approval_method?: string | null
           approval_status?: string
           approved_by?: string | null
+          auto_approved?: boolean | null
+          comments?: string | null
           confidence_score?: number | null
           created_at?: string
           id?: string
@@ -712,6 +721,89 @@ export type Database = {
           },
           {
             foreignKeyName: "invoice_extractions_uwi_id_fkey"
+            columns: ["uwi_id"]
+            isOneToOne: false
+            referencedRelation: "uwis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_line_items: {
+        Row: {
+          afe_id: string | null
+          amount: number
+          created_at: string
+          description: string | null
+          field_ticket_id: string | null
+          id: string
+          invoice_id: string
+          line_number: number
+          metadata: Json | null
+          quantity: number | null
+          service_code: string | null
+          unit_price: number | null
+          updated_at: string
+          user_id: string
+          uwi_id: string | null
+        }
+        Insert: {
+          afe_id?: string | null
+          amount: number
+          created_at?: string
+          description?: string | null
+          field_ticket_id?: string | null
+          id?: string
+          invoice_id: string
+          line_number: number
+          metadata?: Json | null
+          quantity?: number | null
+          service_code?: string | null
+          unit_price?: number | null
+          updated_at?: string
+          user_id: string
+          uwi_id?: string | null
+        }
+        Update: {
+          afe_id?: string | null
+          amount?: number
+          created_at?: string
+          description?: string | null
+          field_ticket_id?: string | null
+          id?: string
+          invoice_id?: string
+          line_number?: number
+          metadata?: Json | null
+          quantity?: number | null
+          service_code?: string | null
+          unit_price?: number | null
+          updated_at?: string
+          user_id?: string
+          uwi_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_line_items_afe_id_fkey"
+            columns: ["afe_id"]
+            isOneToOne: false
+            referencedRelation: "afes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_line_items_field_ticket_id_fkey"
+            columns: ["field_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "field_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_line_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_line_items_uwi_id_fkey"
             columns: ["uwi_id"]
             isOneToOne: false
             referencedRelation: "uwis"
@@ -1444,6 +1536,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      process_invoice_intake: {
+        Args: { p_invoice_id: string; p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {
