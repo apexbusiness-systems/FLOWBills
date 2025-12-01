@@ -44,12 +44,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
+    // Safety timeout - ensure loading never hangs forever
+    const safetyTimeout = setTimeout(() => {
+      if (mounted) {
+        if (import.meta.env.DEV) {
+          console.log('[Auth] Safety timeout triggered - forcing loading to false');
+        }
+        setLoading(false);
+      }
+    }, 5000);
+
     const initAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error && import.meta.env.DEV) {
-          console.error('Error getting session:', error);
+          console.error('[Auth] Error getting session:', error);
         }
 
         if (!mounted) return;
@@ -65,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         if (import.meta.env.DEV) {
-          console.error('Auth initialization error:', error);
+          console.error('[Auth] Initialization error:', error);
         }
         if (mounted) {
           setSession(null);
@@ -78,16 +88,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // CRITICAL: Make callback synchronous to prevent Supabase deadlock
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (!mounted) return;
+        
+        if (import.meta.env.DEV) {
+          console.log('[Auth] State changed:', event, 'User:', session?.user?.email);
+        }
         
         setSession(session);
         setUser(session?.user ?? null);
+        setLoading(false); // Always set loading to false on auth change
         
         if (session?.user) {
-          const role = await fetchUserRole(session.user.id);
-          if (mounted) setUserRole(role);
+          // Defer Supabase calls with setTimeout to prevent deadlock
+          setTimeout(() => {
+            fetchUserRole(session.user.id).then((role) => {
+              if (mounted) setUserRole(role);
+            });
+          }, 0);
         } else {
           setUserRole(null);
         }
@@ -98,6 +118,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
   }, []);
