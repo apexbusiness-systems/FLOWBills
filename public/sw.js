@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flowbills-v5'; // Aggressive cache clearing
+const CACHE_NAME = 'flowbills-v6'; // Fixed service worker
 const urlsToCache = [
   '/',
   '/manifest.webmanifest',
@@ -37,8 +37,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Always fetch HTML from network (never cache)
+  if (request.destination === 'document' || request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   // Network-first for images and static icons/assets
   if (request.destination === 'image' || url.pathname.startsWith('/assets/') || url.pathname.startsWith('/icons/')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Network-first for JavaScript and CSS bundles
+  if (request.destination === 'script' || request.destination === 'style') {
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -69,32 +89,23 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate Service Worker - AGGRESSIVE TAKEOVER
+// Activate Service Worker - Clean up old caches only
 self.addEventListener('activate', (event) => {
-  console.log('FlowBills Service Worker activating - taking over immediately...');
+  console.log('FlowBills Service Worker activating...');
   event.waitUntil(
-    Promise.all([
-      // Delete ALL old caches
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              console.log('Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      }),
-      // Take control of all clients immediately
-      self.clients.claim(),
-      // Force reload all open pages
-      self.clients.matchAll({ type: 'window' }).then((clients) => {
-        clients.forEach((client) => {
-          console.log('Navigating client to force refresh:', client.url);
-          client.navigate(client.url);
-        });
-      })
-    ])
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => {
+      // Take control of clients
+      return self.clients.claim();
+    })
   );
 });
 
