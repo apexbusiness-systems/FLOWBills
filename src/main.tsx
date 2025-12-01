@@ -1,3 +1,14 @@
+// Startup diagnostic - verify module loaded
+console.log('[FlowBills] Module loaded at', new Date().toISOString());
+
+// Declare global flag
+declare global {
+  interface Window {
+    __FLOWBILLS_LOADED__?: boolean;
+  }
+}
+window.__FLOWBILLS_LOADED__ = true;
+
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
@@ -129,6 +140,7 @@ if (!rootElement) {
 }
 
 try {
+  console.log('[FlowBills] React render initiated');
   createRoot(rootElement).render(<App />);
 } catch (error) {
   console.error('============================================');

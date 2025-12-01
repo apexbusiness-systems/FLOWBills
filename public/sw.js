@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flowbills-v6'; // Fixed service worker
+const CACHE_NAME = 'flowbills-v7'; // Fixed blank page loading issue
 const urlsToCache = [
   '/',
   '/manifest.webmanifest',

@@ -26,7 +26,7 @@
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#D4AF37" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="FLOWBills" />
     
@@ -400,30 +400,45 @@
       </div>
     </div>
     <script>
-      // Remove loading indicator once React renders
-      setTimeout(() => {
-        const loading = document.getElementById('app-loading');
-        if (loading && loading.parentElement?.children.length > 1) {
-          loading.remove();
-        } else if (loading) {
-          // App failed to load - show error
-          loading.innerHTML = `
-            <div style="text-align: center; max-width: 500px; padding: 24px;">
-              <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ef4444;">⚠️ Application Loading Error</div>
-              <div style="font-size: 14px; color: #ccc; margin-bottom: 24px; line-height: 1.6;">
-                The application failed to load. This is often caused by browser cache issues.
-              </div>
-              <button onclick="localStorage.clear(); sessionStorage.clear(); caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key)))).then(() => location.reload(true));" 
-                style="background: #D4AF37; color: #000; border: none; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">
-                Clear Cache & Reload
-              </button>
-              <div style="font-size: 12px; color: #666; margin-top: 16px;">
-                If this persists, try opening in an incognito/private window
-              </div>
-            </div>
-          `;
-        }
-      }, 5000);
+      // Remove loading indicator once React renders - improved detection
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const loading = document.getElementById('app-loading');
+          if (loading) {
+            const moduleLoaded = window.__FLOWBILLS_LOADED__;
+            const rootChildren = document.getElementById('root')?.children.length || 0;
+            
+            // Check if React rendered (root should have more than just loading div)
+            if (rootChildren > 1) {
+              loading.remove();
+            } else {
+              // App failed to load - show detailed diagnostic error
+              loading.innerHTML = `
+                <div style="text-align: center; max-width: 500px; padding: 24px;">
+                  <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ef4444;">
+                    ⚠️ Application Loading Error
+                  </div>
+                  <div style="font-size: 14px; color: #ccc; margin-bottom: 16px; line-height: 1.6;">
+                    ${moduleLoaded 
+                      ? 'The application loaded but failed to render.' 
+                      : 'The application bundle failed to load.'}
+                  </div>
+                  <div style="font-size: 12px; color: #888; margin-bottom: 24px; font-family: monospace;">
+                    Diagnostic: Module ${moduleLoaded ? '✓' : '✗'} | Root children: ${rootChildren}
+                  </div>
+                  <button onclick="localStorage.clear(); sessionStorage.clear(); caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key)))).then(() => location.reload(true));" 
+                    style="background: #D4AF37; color: #000; border: none; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">
+                    Clear Cache & Reload
+                  </button>
+                  <div style="font-size: 12px; color: #666; margin-top: 16px;">
+                    If this persists, try opening in an incognito/private window
+                  </div>
+                </div>
+              `;
+            }
+          }
+        }, 3000); // Wait 3 seconds after page load for React to render
+      });
     </script>
     <style>
       @keyframes spin {

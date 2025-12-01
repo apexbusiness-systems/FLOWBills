@@ -209,7 +209,7 @@ export const CSP_POLICY = {
   "script-src": "'self' 'nonce-{NONCE}' https://www.googletagmanager.com https://www.google-analytics.com 'strict-dynamic'",
   "style-src": "'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src": "'self' data: https: blob:",
-  "connect-src": "'self' https://yvyjzlbosmtesldczhnm.supabase.co https://api.openai.com https://www.google-analytics.com https://region1.google-analytics.com wss://yvyjzlbosmtesldczhnm.supabase.co",
+  "connect-src": "'self' https://ullqluvzkgnwwqijhvjr.supabase.co https://api.openai.com https://www.google-analytics.com https://region1.google-analytics.com wss://ullqluvzkgnwwqijhvjr.supabase.co",
   "font-src": "'self' data: https://fonts.gstatic.com",
   "object-src": "'none'",
   "media-src": "'self' blob:",
