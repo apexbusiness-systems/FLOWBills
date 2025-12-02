@@ -400,6 +400,42 @@
       </div>
     </div>
     <script>
+      // Check for previous failure and clear everything BEFORE app loads
+      (function() {
+        const hadPreviousFailure = localStorage.getItem('flowbills_load_failed') === 'true';
+        if (hadPreviousFailure) {
+          console.log('[Recovery] Previous load failure detected - clearing everything...');
+          
+          // Clear storage
+          try {
+            localStorage.clear();
+            sessionStorage.clear();
+          } catch (e) {
+            console.error('[Recovery] Storage clear error:', e);
+          }
+          
+          // Clear all caches
+          if ('caches' in window) {
+            caches.keys().then(names => {
+              names.forEach(name => {
+                console.log('[Recovery] Clearing cache:', name);
+                caches.delete(name);
+              });
+            });
+          }
+          
+          // Unregister all service workers
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+              registrations.forEach(registration => {
+                console.log('[Recovery] Unregistering SW:', registration.scope);
+                registration.unregister();
+              });
+            });
+          }
+        }
+      })();
+      
       // Error detection with automatic recovery
       window.addEventListener('load', () => {
         setTimeout(() => {

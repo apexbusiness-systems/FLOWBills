@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flowbills-v8'; // Fixed SW conflicts - network-only for critical assets
+const CACHE_NAME = 'flowbills-v9'; // Fixed SW conflicts - network-only for critical assets
 const urlsToCache = [
   '/',
   '/manifest.webmanifest',
