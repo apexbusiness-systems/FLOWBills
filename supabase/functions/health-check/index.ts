@@ -12,7 +12,9 @@ Deno.serve(async (req) => {
   }
 
   const url = new URL(req.url);
-  const path = url.pathname;
+  // Extract the sub-path after the function name
+  const fullPath = url.pathname;
+  const path = fullPath.replace(/^\/health-check\/?/, '/') || '/';
 
   try {
     // Default path returns health info with version
