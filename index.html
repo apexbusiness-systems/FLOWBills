@@ -400,45 +400,42 @@
       </div>
     </div>
     <script>
-      // Check for previous failure and clear everything BEFORE app loads
+      // ALWAYS clear service workers on every load to prevent stale cache issues
+      // This is critical for production stability after deployment
       (function() {
+        console.log('[FlowBills] Clearing service workers on load...');
+        
+        // Always unregister ALL service workers - no exceptions
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => {
+              console.log('[Recovery] Unregistering SW:', registration.scope);
+              registration.unregister();
+            });
+          });
+        }
+        
+        // Always clear all caches
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => {
+              console.log('[Recovery] Clearing cache:', name);
+              caches.delete(name);
+            });
+          });
+        }
+        
+        // Only clear storage on previous failure
         const hadPreviousFailure = localStorage.getItem('flowbills_load_failed') === 'true';
         if (hadPreviousFailure) {
-          console.log('[Recovery] Previous load failure detected - clearing everything...');
-          
-          // Clear storage
-          try {
-            localStorage.clear();
-            sessionStorage.clear();
-          } catch (e) {
-            console.error('[Recovery] Storage clear error:', e);
-          }
-          
-          // Clear all caches
-          if ('caches' in window) {
-            caches.keys().then(names => {
-              names.forEach(name => {
-                console.log('[Recovery] Clearing cache:', name);
-                caches.delete(name);
-              });
-            });
-          }
-          
-          // Unregister all service workers
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-              registrations.forEach(registration => {
-                console.log('[Recovery] Unregistering SW:', registration.scope);
-                registration.unregister();
-              });
-            });
-          }
+          console.log('[Recovery] Previous load failure detected');
+          localStorage.removeItem('flowbills_load_failed');
         }
       })();
       
-      // Error detection with automatic recovery - wait longer for slow connections
+      // Error detection - faster timeout since we've already cleared SW
       window.addEventListener('load', () => {
-        // First check at 8 seconds
+        // Single check at 5 seconds (SW already cleared above)
         setTimeout(() => {
           const loading = document.getElementById('app-loading');
           if (!loading) return; // Already removed, app is working
@@ -447,42 +444,17 @@
           const rootChildren = document.getElementById('root')?.children.length || 0;
           
           // Check if React rendered (root should have more than just loading div)
-          if (rootChildren > 1) {
+          if (rootChildren > 1 || moduleLoaded) {
             loading.remove();
             return;
           }
           
-          // Show "still loading" message, don't give up yet
-          loading.querySelector('div:last-child').textContent = 'Taking longer than expected...';
-          
-          // Final check at 15 seconds total
-          setTimeout(() => {
-            const loadingFinal = document.getElementById('app-loading');
-            if (!loadingFinal) return;
+          // App failed - mark for next load recovery and show error
+          console.error('[FlowBills] App failed to load after 5s');
+          localStorage.setItem('flowbills_load_failed', 'true');
             
-            const finalRootChildren = document.getElementById('root')?.children.length || 0;
-            if (finalRootChildren > 1) {
-              loadingFinal.remove();
-              return;
-            }
-            
-            // App truly failed - clear everything and show error
-            console.error('[FlowBills] App failed to load after 15s');
-            localStorage.setItem('flowbills_load_failed', 'true');
-            
-            // Clear service workers (they may be serving stale content)
-            if (navigator.serviceWorker) {
-              navigator.serviceWorker.getRegistrations().then(regs => {
-                regs.forEach(r => r.unregister());
-              });
-            }
-            // Clear caches
-            if (window.caches) {
-              caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-            }
-            
-            // Show error with hard refresh instruction
-            loadingFinal.innerHTML = `
+          // Show error with hard refresh instruction
+          loading.innerHTML = `
               <div style="text-align: center; max-width: 500px; padding: 24px;">
                 <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ef4444;">
                   ⚠️ Application Loading Error
@@ -493,7 +465,7 @@
                     : 'The application bundle failed to load.'}
                 </div>
                 <div style="font-size: 12px; color: #888; margin-bottom: 16px; font-family: monospace;">
-                  Diagnostic: Module ${moduleLoaded ? '✓' : '✗'} | Root children: ${finalRootChildren}
+                  Diagnostic: Module ${moduleLoaded ? '✓' : '✗'} | Root children: ${rootChildren}
                 </div>
                 <div style="font-size: 12px; color: #10b981; margin-bottom: 24px;">
                   ✓ Caches cleared. Try reloading.
@@ -519,8 +491,7 @@
                 </div>
               </div>
             `;
-          }, 7000); // 7 more seconds = 15 total
-        }, 8000); // Initial wait: 8 seconds
+        }, 5000); // Single 5 second timeout
       });
     </script>
     <style>
