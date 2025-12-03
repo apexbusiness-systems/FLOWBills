@@ -1,6 +1,11 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
+// App version and build info for uptime monitoring
+const APP_VERSION = '1.0.0';
+const BUILD_TIMESTAMP = '2024-12-03T00:00:00Z'; // Updated on each deploy
+const SERVICE_NAME = 'flowbills-api';
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -10,10 +15,25 @@ Deno.serve(async (req) => {
   const path = url.pathname;
 
   try {
+    // Default path returns health info with version
+    if (path === '/' || path === '') {
+      return new Response(JSON.stringify({ 
+        status: 'healthy',
+        service: SERVICE_NAME,
+        version: APP_VERSION,
+        build: BUILD_TIMESTAMP,
+        timestamp: new Date().toISOString(),
+        uptime: Deno.osUptime?.() || 'unknown'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     if (path === '/healthz') {
-      // Simple health check
+      // Simple health check (Kubernetes-style)
       return new Response(JSON.stringify({ 
         status: 'ok',
+        version: APP_VERSION,
         timestamp: new Date().toISOString()
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -36,6 +56,7 @@ Deno.serve(async (req) => {
       if (error) {
         return new Response(JSON.stringify({ 
           status: 'error',
+          version: APP_VERSION,
           message: 'Database connection failed',
           timestamp: new Date().toISOString()
         }), {
@@ -46,6 +67,8 @@ Deno.serve(async (req) => {
 
       return new Response(JSON.stringify({ 
         status: 'ready',
+        version: APP_VERSION,
+        build: BUILD_TIMESTAMP,
         database: 'connected',
         timestamp: new Date().toISOString()
       }), {
