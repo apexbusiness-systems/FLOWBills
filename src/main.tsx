@@ -133,12 +133,26 @@ if (!import.meta.env.DEV) {
   startPersistenceCleanup();
 }
 
-// Register service worker with health monitoring
-import('./lib/sw-health-monitor').then(({ swHealthMonitor }) => {
-  window.addEventListener('load', () => {
-    swHealthMonitor.register();
+// TEMPORARILY DISABLED: Service worker registration
+// The SW was causing production issues by serving stale bundles.
+// App will run as plain SPA until SW strategy is refined.
+// See: P0 incident - "Application Loading Error"
+//
+// import('./lib/sw-health-monitor').then(({ swHealthMonitor }) => {
+//   window.addEventListener('load', () => {
+//     swHealthMonitor.register();
+//   });
+// });
+
+// Clear any existing service workers on startup to fix stuck users
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    registrations.forEach(reg => {
+      console.log('[FlowBills] Unregistering stale SW:', reg.scope);
+      reg.unregister();
+    });
   });
-});
+}
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {

@@ -436,79 +436,91 @@
         }
       })();
       
-      // Error detection with automatic recovery
+      // Error detection with automatic recovery - wait longer for slow connections
       window.addEventListener('load', () => {
+        // First check at 8 seconds
         setTimeout(() => {
           const loading = document.getElementById('app-loading');
-          if (loading) {
-            const moduleLoaded = window.__FLOWBILLS_LOADED__;
-            const rootChildren = document.getElementById('root')?.children.length || 0;
-            
-            // Check if React rendered (root should have more than just loading div)
-            if (rootChildren > 1) {
-              loading.remove();
-            } else {
-              // App failed to load - mark failure and auto-clear
-              localStorage.setItem('flowbills_load_failed', 'true');
-              
-              // Automatically clear service workers and caches
-              if (navigator.serviceWorker) {
-                navigator.serviceWorker.getRegistrations().then(regs => {
-                  regs.forEach(r => r.unregister());
-                });
-              }
-              if (window.caches) {
-                caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-              }
-              
-              // Show detailed diagnostic error
-              loading.innerHTML = `
-                <div style="text-align: center; max-width: 500px; padding: 24px;">
-                  <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ef4444;">
-                    ⚠️ Application Loading Error
-                  </div>
-                  <div style="font-size: 14px; color: #ccc; margin-bottom: 16px; line-height: 1.6;">
-                    ${moduleLoaded 
-                      ? 'The application loaded but failed to render.' 
-                      : 'The application bundle failed to load.'}
-                  </div>
-                  <div style="font-size: 12px; color: #888; margin-bottom: 16px; font-family: monospace;">
-                    Diagnostic: Module ${moduleLoaded ? '✓' : '✗'} | Root children: ${rootChildren}
-                  </div>
-                  <div style="font-size: 12px; color: #888; margin-bottom: 24px;">
-                    Clearing caches automatically...
-                  </div>
-                  <button 
-                    onclick="
-                      localStorage.clear();
-                      sessionStorage.clear();
-                      setTimeout(() => window.location.reload(true), 500);
-                    "
-                    style="
-                      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-                      color: white;
-                      border: none;
-                      padding: 12px 24px;
-                      border-radius: 8px;
-                      font-size: 14px;
-                      font-weight: 600;
-                      cursor: pointer;
-                      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-                      transition: all 0.2s ease;
-                    "
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(14, 165, 233, 0.4)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(14, 165, 233, 0.3)';"
-                  >
-                    Reload Application
-                  </button>
-                  <div style="font-size: 11px; color: #666; margin-top: 16px;">
-                    Caches have been cleared. Click reload to try again.
-                  </div>
-                </div>
-              `;
-            }
+          if (!loading) return; // Already removed, app is working
+          
+          const moduleLoaded = window.__FLOWBILLS_LOADED__;
+          const rootChildren = document.getElementById('root')?.children.length || 0;
+          
+          // Check if React rendered (root should have more than just loading div)
+          if (rootChildren > 1) {
+            loading.remove();
+            return;
           }
-        }, 5000); // Wait 5 seconds after page load for more time
+          
+          // Show "still loading" message, don't give up yet
+          loading.querySelector('div:last-child').textContent = 'Taking longer than expected...';
+          
+          // Final check at 15 seconds total
+          setTimeout(() => {
+            const loadingFinal = document.getElementById('app-loading');
+            if (!loadingFinal) return;
+            
+            const finalRootChildren = document.getElementById('root')?.children.length || 0;
+            if (finalRootChildren > 1) {
+              loadingFinal.remove();
+              return;
+            }
+            
+            // App truly failed - clear everything and show error
+            console.error('[FlowBills] App failed to load after 15s');
+            localStorage.setItem('flowbills_load_failed', 'true');
+            
+            // Clear service workers (they may be serving stale content)
+            if (navigator.serviceWorker) {
+              navigator.serviceWorker.getRegistrations().then(regs => {
+                regs.forEach(r => r.unregister());
+              });
+            }
+            // Clear caches
+            if (window.caches) {
+              caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+            }
+            
+            // Show error with hard refresh instruction
+            loadingFinal.innerHTML = `
+              <div style="text-align: center; max-width: 500px; padding: 24px;">
+                <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ef4444;">
+                  ⚠️ Application Loading Error
+                </div>
+                <div style="font-size: 14px; color: #ccc; margin-bottom: 16px; line-height: 1.6;">
+                  ${moduleLoaded 
+                    ? 'The application loaded but failed to render.' 
+                    : 'The application bundle failed to load.'}
+                </div>
+                <div style="font-size: 12px; color: #888; margin-bottom: 16px; font-family: monospace;">
+                  Diagnostic: Module ${moduleLoaded ? '✓' : '✗'} | Root children: ${finalRootChildren}
+                </div>
+                <div style="font-size: 12px; color: #10b981; margin-bottom: 24px;">
+                  ✓ Caches cleared. Try reloading.
+                </div>
+                <button 
+                  onclick="window.location.reload(true);"
+                  style="
+                    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+                  "
+                >
+                  Reload Application
+                </button>
+                <div style="font-size: 11px; color: #666; margin-top: 16px;">
+                  If this persists, try: <strong>Ctrl+Shift+R</strong> (Windows) or <strong>Cmd+Shift+R</strong> (Mac)
+                </div>
+              </div>
+            `;
+          }, 7000); // 7 more seconds = 15 total
+        }, 8000); // Initial wait: 8 seconds
       });
     </script>
     <style>

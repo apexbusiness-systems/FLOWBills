@@ -1,11 +1,8 @@
-const CACHE_NAME = 'flowbills-v9'; // Fixed SW conflicts - network-only for critical assets
+const CACHE_NAME = 'flowbills-v10'; // P0 fix - disable caching entirely until strategy is refined
 const urlsToCache = [
-  '/',
-  '/manifest.webmanifest',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  '/favicon.png'
-  // Note: Vite JS/CSS bundles have hashed names and are cached dynamically
+  // TEMPORARILY EMPTY - do not cache anything
+  // Previous caching was causing "Application Loading Error" in production
+  // by serving stale bundles after deployments
 ];
 
 // Install Service Worker - SKIP WAITING IMMEDIATELY
