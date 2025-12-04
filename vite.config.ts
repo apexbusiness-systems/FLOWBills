@@ -71,35 +71,11 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Core vendor chunk
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-            return 'vendor-react';
-          }
-          // Router chunk
-          if (id.includes('node_modules/react-router')) {
-            return 'vendor-router';
-          }
-          // Supabase chunk
-          if (id.includes('node_modules/@supabase')) {
-            return 'vendor-supabase';
-          }
-          // Query chunk
-          if (id.includes('node_modules/@tanstack')) {
-            return 'vendor-query';
-          }
-          // UI components chunk
-          if (id.includes('node_modules/@radix-ui')) {
-            return 'vendor-ui';
-          }
-          // Charts chunk
-          if (id.includes('node_modules/recharts')) {
-            return 'vendor-charts';
-          }
-          // Other large dependencies
-          if (id.includes('node_modules')) {
-            return 'vendor-misc';
-          }
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react/jsx-runtime'],
+          'vendor-router': ['react-router-dom'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-query': ['@tanstack/react-query'],
         },
         // Optimize asset file names
         assetFileNames: (assetInfo) => {
@@ -114,10 +90,6 @@ export default defineConfig(({ mode }) => ({
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
-      },
-      treeshake: {
-        moduleSideEffects: false,
-        propertyReadSideEffects: false,
       },
     },
     target: 'es2020',
