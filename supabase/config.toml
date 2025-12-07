@@ -78,7 +78,7 @@ verify_jwt = false
 [functions.track-click]
 verify_jwt = false
 
-[functions._control_hello-world]
+[functions.control-hello-world]
 verify_jwt = false
 
 [functions.support-chat]

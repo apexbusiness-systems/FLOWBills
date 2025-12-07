@@ -91,7 +91,7 @@ All 13 phases (P0-P12) of Edge Function standards and guardrails have been imple
 - Minimal control function for infra testing
 
 **Files**:
-- `supabase/functions/_control/hello-world/index.ts`
+- `supabase/functions/control-hello-world/index.ts`
 
 **Purpose**:
 - Isolates infrastructure vs code failures
