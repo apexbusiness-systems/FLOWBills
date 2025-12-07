@@ -107,8 +107,8 @@ async function checkImportMap(): Promise<VerificationResult> {
   }
 }
 
-async function checkControlFunction(): Promise<VerificationResult> {
-  const controlPath = 'supabase/functions/_control/hello-world/index.ts';
+  async function checkControlFunction(): Promise<VerificationResult> {
+    const controlPath = 'supabase/functions/control-hello-world/index.ts';
   
   try {
     await Deno.stat(controlPath);
@@ -124,13 +124,13 @@ async function checkControlFunction(): Promise<VerificationResult> {
       };
     }
   } catch {
-    return {
-      passed: false,
-      message: '✗ Control function not found',
-      remediation: 'Create supabase/functions/_control/hello-world/index.ts'
-    };
+      return {
+        passed: false,
+        message: '✗ Control function not found',
+        remediation: 'Create supabase/functions/control-hello-world/index.ts'
+      };
+    }
   }
-}
 
 async function checkNodeisms(functionName: string): Promise<VerificationResult> {
   const functionPath = `supabase/functions/${functionName}/index.ts`;
