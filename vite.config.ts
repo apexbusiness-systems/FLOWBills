@@ -101,7 +101,7 @@ export default defineConfig(({ mode }) => ({
             return 'vendor-misc';
           }
         },
-        // Optimize asset file names
+        // Optimize asset file names for caching
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.');
           const ext = info?.[info.length - 1];
@@ -122,7 +122,7 @@ export default defineConfig(({ mode }) => ({
     },
     target: 'es2020',
     cssCodeSplit: true,
-    reportCompressedSize: false, // Faster builds
+    reportCompressedSize: false,
   },
   esbuild: {
     drop: mode === 'production' ? ['debugger'] : [], // Keep console logs for production debugging
