@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Clear ESLint cache
+        run: rm -rf node_modules/.cache
+
       - name: TypeScript type checking
         run: npx tsc --noEmit
 
