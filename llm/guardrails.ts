@@ -28,13 +28,15 @@ export function assertLLMLock(): LLMManifest {
     const manifestContent = readFileSync(manifestPath, "utf-8");
     const manifest: LLMManifest = JSON.parse(manifestContent);
 
-    // Verify checksum integrity
+    // Verify checksum integrity (excluding checksum field to avoid self-reference)
+    const { checksum_sha256, ...manifestWithoutChecksum } = manifest;
+    const checksumPayload = JSON.stringify(manifestWithoutChecksum);
     const actualChecksum = createHash("sha256")
-      .update(manifestContent)
+      .update(checksumPayload)
       .digest("hex");
-    
-    if (actualChecksum !== manifest.checksum_sha256) {
-      throw new Error(`SECURITY: LLM manifest checksum mismatch - expected ${manifest.checksum_sha256}, got ${actualChecksum}`);
+
+    if (actualChecksum !== checksum_sha256) {
+      throw new Error(`SECURITY: LLM manifest checksum mismatch - expected ${checksum_sha256}, got ${actualChecksum}`);
     }
 
     // Verify environment variables match manifest

@@ -86,8 +86,10 @@ describe('Application Integration Tests', () => {
   it('should render application without crashing', async () => {
     renderWithProviders(<App />);
     
-    // Should show loading initially
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    // Should show loading initially with proper accessibility role
+    const status = screen.getByRole('status');
+    expect(status).toBeInTheDocument();
+    expect(status).toHaveTextContent(/loading application/i);
     
     // Wait for auth state to resolve and redirect to auth page
     await waitFor(() => {
@@ -106,12 +108,13 @@ describe('Application Integration Tests', () => {
     expect(screen.getByText('Try Again')).toBeInTheDocument();
   });
 
-  it('should initialize health monitoring', () => {
+  it('should initialize health monitoring every 5 minutes', () => {
     const { healthChecker } = require('@/lib/health-check');
     
     renderWithProviders(<App />);
     
-    expect(healthChecker.monitorHealth).toHaveBeenCalledWith(60000);
+    // Health check runs every 5 minutes (300000ms)
+    expect(healthChecker.monitorHealth).toHaveBeenCalledWith(300000);
   });
 
   it('should properly configure query client with error handling', () => {

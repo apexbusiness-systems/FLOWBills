@@ -48,8 +48,8 @@ supabase/functions/
 │   ├── idempotency.ts   # Idempotency middleware
 │   ├── response.ts      # Response helpers
 │   └── validation.ts    # Input validation
-├── _control/
-│   └── hello-world/     # Control function for infra testing
+├── control-hello-world/ # Control function for infra testing
+│   └── index.ts
 └── [functions]/
     └── index.ts         # Function entry point
 ```
@@ -90,7 +90,7 @@ Root `deno.json` provides:
 
 **Purpose**: Isolate infrastructure vs code failures
 
-**Location**: `supabase/functions/_control/hello-world/index.ts`
+**Location**: `supabase/functions/control-hello-world/index.ts`
 
 This function must always deploy successfully if infrastructure is working.
 

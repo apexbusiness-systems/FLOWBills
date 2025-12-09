@@ -357,7 +357,7 @@ idx_consent_rate_limits_blocked
 - ✅ Overload-free design
 
 **Control Function:**
-- ✅ `_control/hello-world` - Infrastructure isolation test
+- ✅ `control-hello-world` - Infrastructure isolation test
 
 ### 🎯 Edge Function Quality Metrics
 | Metric | Target | Current | Status |

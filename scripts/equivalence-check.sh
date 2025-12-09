@@ -14,16 +14,16 @@ FAILED_FUNCTIONS=()
 
 echo -e "${YELLOW}🔍 Testing Local ≡ Deploy Equivalence${NC}\n"
 
-# Find all function directories (exclude _shared and _control)
+# Find all function directories (exclude _shared)
 for function_dir in "$FUNCTIONS_DIR"/*; do
   if [ ! -d "$function_dir" ]; then
     continue
   fi
-  
+
   function_name=$(basename "$function_dir")
-  
+
   # Skip special directories
-  if [[ "$function_name" == "_shared" || "$function_name" == "_control" ]]; then
+  if [[ "$function_name" == "_shared" ]]; then
     continue
   fi
   
