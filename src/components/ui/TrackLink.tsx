@@ -20,8 +20,12 @@ export function TrackLink({ to, children, source = "unknown", onClick, ...rest }
           .invoke("track-click", {
             body: { href, source, ts: Date.now() },
           })
-          .catch(() => {}); // Silent fail
-      } catch {}
+          .catch(() => {
+            // Silent fail - tracking errors should not impact navigation
+          });
+      } catch {
+        // Silent fail - tracking errors should not impact navigation
+      }
 
       if (onClick) onClick(e);
     },

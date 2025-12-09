@@ -1,5 +1,5 @@
 // P13 — DSAR Delete Endpoint (PIPEDA Art. 9 — Right to Erasure)
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -28,9 +28,9 @@ Deno.serve(async (req) => {
     }
 
     const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
+      authHeader.replace('Bearer ', ''),
     );
-    
+
     if (authError || !user) {
       throw new Error('Unauthorized');
     }
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     // Check if user can delete this data
     const { data: userRole } = await supabase.rpc('get_user_role', { user_uuid: user.id });
     const isAdmin = userRole === 'admin';
-    
+
     if (targetUserId !== user.id && !isAdmin) {
       throw new Error('Unauthorized to delete other user data');
     }
@@ -73,14 +73,14 @@ Deno.serve(async (req) => {
     const deletionResults: Record<string, number> = {};
 
     // Delete user sessions
-    const { error: sessionsError, count: sessionsCount } = await supabase
+    const { error: _sessionsError, count: sessionsCount } = await supabase
       .from('user_sessions')
       .delete()
       .eq('user_id', targetUserId);
     deletionResults.sessions = sessionsCount || 0;
 
     // Anonymize consent logs (retain for legal compliance but remove PII)
-    const { error: consentError, count: consentCount } = await supabase
+    const { error: _consentError, count: consentCount } = await supabase
       .from('consent_logs')
       .update({
         email: null,
@@ -91,14 +91,14 @@ Deno.serve(async (req) => {
     deletionResults.consent_logs_anonymized = consentCount || 0;
 
     // Delete invoices (or anonymize depending on legal retention requirements)
-    const { error: invoicesError, count: invoicesCount } = await supabase
+    const { error: _invoicesError, count: invoicesCount } = await supabase
       .from('invoices')
       .delete()
       .eq('user_id', targetUserId);
     deletionResults.invoices = invoicesCount || 0;
 
     // Delete support tickets (or anonymize)
-    const { error: ticketsError, count: ticketsCount } = await supabase
+    const { error: _ticketsError, count: ticketsCount } = await supabase
       .from('support_tickets')
       .update({ customer_id: null })
       .eq('customer_id', targetUserId);
@@ -134,13 +134,13 @@ Deno.serve(async (req) => {
         deletion_log_id: deletionLog?.id,
         timestamp: new Date().toISOString(),
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   } catch (error) {
     console.error('DSAR deletion error:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 },
     );
   }
 });

@@ -17,14 +17,14 @@ Deno.serve(async (req) => {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
+
     // Parse the violation report
     const violation = await req.json();
 
     console.log('CSP Violation received:', {
       blockedURI: violation.blocked_uri,
       violatedDirective: violation.violated_directive,
-      disposition: violation.disposition
+      disposition: violation.disposition,
     });
 
     // Store in database
@@ -40,8 +40,8 @@ Deno.serve(async (req) => {
         timestamp: violation.timestamp || new Date().toISOString(),
         metadata: {
           ...violation,
-          received_at: new Date().toISOString()
-        }
+          received_at: new Date().toISOString(),
+        },
       });
 
     if (error) {
@@ -51,20 +51,19 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true, message: 'Violation report received' }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
     );
-
   } catch (error) {
     console.error('CSP report endpoint error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
     );
   }
 });

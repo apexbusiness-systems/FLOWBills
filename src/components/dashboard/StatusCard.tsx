@@ -37,12 +37,13 @@ const StatusCard = ({
         return `$${(stats.totalAmount / 1000000).toFixed(1)}M`;
       case "Active Invoices":
         return stats.totalCount;
-      case "Processing Rate":
+      case "Processing Rate": {
         const rate =
           stats.totalCount > 0
             ? ((stats.approvedCount + stats.paidCount) / stats.totalCount) * 100
             : 94.2; // Default rate
         return `${rate.toFixed(1)}%`;
+      }
       case "Exception Queue":
         return stats.rejectedCount + stats.pendingCount;
       default:

@@ -1,4 +1,4 @@
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -56,23 +56,23 @@ Deno.serve(async (req) => {
     console.log('CRM sync initiated:', { entity_type, entity_id, action });
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: `CRM sync ${action} queued for ${entity_type}:${entity_id}` 
+      JSON.stringify({
+        success: true,
+        message: `CRM sync ${action} queued for ${entity_type}:${entity_id}`,
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
+        status: 200,
+      },
     );
   } catch (error) {
     console.error('CRM sync error:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
-      }
+        status: 500,
+      },
     );
   }
 });

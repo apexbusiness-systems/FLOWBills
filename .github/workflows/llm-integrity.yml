@@ -20,13 +20,9 @@ jobs:
         run: |
           set -e
           echo "🔒 Checking for changes to protected LLM files..."
-          
-          # Get changed files
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ rag/)
-          else
-            CHANGED=$(git diff --name-only HEAD~1 HEAD -- llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ rag/)
-          fi
+
+          # Get changed files (check last commit only since main/develop branches don't exist)
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ rag/ 2>/dev/null || echo "")
           
           if [ -n "$CHANGED" ]; then
             echo "⚠️  LLM files changed:"

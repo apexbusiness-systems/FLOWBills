@@ -1,5 +1,5 @@
-import { createClient } from "jsr:@supabase/supabase-js@2";
-import { toMessage } from "../_shared/errors.ts";
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { toMessage } from '../_shared/errors.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +12,7 @@ interface MetricsData {
   invoice_manual_review_total: number;
   stp_rate: number;
 
-  // OCR metrics  
+  // OCR metrics
   ocr_extractions_total: number;
   ocr_failures_total: number;
   ocr_average_confidence: number;
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     // Calculate time range
     const now = new Date();
     let startTime: Date;
-    
+
     switch (timeRange) {
       case '1h':
         startTime = new Date(now.getTime() - 60 * 60 * 1000);
@@ -79,26 +79,31 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({
-      success: true,
-      timestamp: now.toISOString(),
-      time_range: timeRange,
-      metrics,
-      nav_clicks: navClicks
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
+    return new Response(
+      JSON.stringify({
+        success: true,
+        timestamp: now.toISOString(),
+        time_range: timeRange,
+        metrics,
+        nav_clicks: navClicks,
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    );
   } catch (err: unknown) {
     console.error('Metrics collection error:', err);
-    
-    return new Response(JSON.stringify({
-      success: false,
-      error: toMessage(err)
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: toMessage(err),
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    );
   }
 });
 
@@ -112,12 +117,12 @@ async function collectMetrics(supabase: any, startTime: Date, endTime: Date): Pr
         .eq('status', 'approved')
         .gte('created_at', startTime.toISOString())
         .lte('created_at', endTime.toISOString()),
-      
+
       supabase
         .from('review_queue')
         .select('id', { count: 'exact' })
         .gte('created_at', startTime.toISOString())
-        .lte('created_at', endTime.toISOString())
+        .lte('created_at', endTime.toISOString()),
     ]);
 
     const totalInvoices = (autoApproved.count || 0) + (manualReview.count || 0);
@@ -184,13 +189,13 @@ async function collectMetrics(supabase: any, startTime: Date, endTime: Date): Pr
         .from('review_queue')
         .select('id', { count: 'exact' })
         .is('resolved_at', null),
-      
+
       supabase
         .from('review_queue')
         .select('created_at, resolved_at')
         .not('resolved_at', 'is', null)
         .gte('resolved_at', startTime.toISOString())
-        .lte('resolved_at', endTime.toISOString())
+        .lte('resolved_at', endTime.toISOString()),
     ]);
 
     let averageResolutionTime = 0;
@@ -207,32 +212,35 @@ async function collectMetrics(supabase: any, startTime: Date, endTime: Date): Pr
       invoice_autoapproved_total: autoApproved.count || 0,
       invoice_manual_review_total: manualReview.count || 0,
       stp_rate: stpRate,
-      
+
       ocr_extractions_total: ocrExtractions.count || 0,
       ocr_failures_total: ocrFailures,
       ocr_average_confidence: confidenceCount > 0 ? totalConfidence / confidenceCount : 0,
-      
+
       fraud_flags_total: fraudFlags.count || 0,
       fraud_flags_by_type: fraudFlagsByType,
-      
+
       policy_evaluations_total: policyEvaluations.count || 0,
       policy_triggers_total: policyTriggers,
-      policy_pass_rate: policyEvaluations.count > 0 ? 1 - (policyTriggers / policyEvaluations.count) : 1,
-      
+      policy_pass_rate: policyEvaluations.count > 0
+        ? 1 - (policyTriggers / policyEvaluations.count)
+        : 1,
+
       hil_queue_size: queueSize.count || 0,
       hil_average_resolution_time: averageResolutionTime,
-      
+
       http_request_duration_avg: 150, // Mock data
       invoice_processing_duration_avg: 2500, // Mock data in ms
     };
-
   } catch (err: unknown) {
     console.error('Error collecting metrics:', err);
     throw err;
   }
 }
 
-async function getNavClickMetrics(supabase: any): Promise<{ total: number; by_href: Record<string, number> }> {
+async function getNavClickMetrics(
+  supabase: any,
+): Promise<{ total: number; by_href: Record<string, number> }> {
   try {
     const { data, error } = await supabase
       .from('audit_logs')
@@ -254,34 +262,37 @@ async function getNavClickMetrics(supabase: any): Promise<{ total: number; by_hr
   }
 }
 
-function formatPrometheusMetrics(metrics: MetricsData, navClicks?: { total: number; by_href: Record<string, number> }): string {
+function formatPrometheusMetrics(
+  metrics: MetricsData,
+  navClicks?: { total: number; by_href: Record<string, number> },
+): string {
   const body = [
-    "# HELP einvoice_validated_total Validated e-invoices",
-    "# TYPE einvoice_validated_total counter",
+    '# HELP einvoice_validated_total Validated e-invoices',
+    '# TYPE einvoice_validated_total counter',
     `einvoice_validated_total ${metrics.invoice_autoapproved_total}`,
-    "# HELP peppol_send_fail_total Failed Peppol sends",
-    "# TYPE peppol_send_fail_total counter",
+    '# HELP peppol_send_fail_total Failed Peppol sends',
+    '# TYPE peppol_send_fail_total counter',
     `peppol_send_fail_total ${metrics.ocr_failures_total}`,
-    "# HELP policy_eval_total Policy evaluations",
-    "# TYPE policy_eval_total counter",
+    '# HELP policy_eval_total Policy evaluations',
+    '# TYPE policy_eval_total counter',
     `policy_eval_total ${metrics.policy_evaluations_total}`,
-    "# HELP fraud_flags_total Fraud flags emitted",
-    "# TYPE fraud_flags_total counter",
+    '# HELP fraud_flags_total Fraud flags emitted',
+    '# TYPE fraud_flags_total counter',
     `fraud_flags_total ${metrics.fraud_flags_total}`,
-    "# HELP ocr_errors_total OCR pipeline errors",
-    "# TYPE ocr_errors_total counter",
+    '# HELP ocr_errors_total OCR pipeline errors',
+    '# TYPE ocr_errors_total counter',
     `ocr_errors_total ${metrics.ocr_failures_total}`,
-    "# HELP nav_link_clicks_total Total navigation link clicks",
-    "# TYPE nav_link_clicks_total counter",
+    '# HELP nav_link_clicks_total Total navigation link clicks',
+    '# TYPE nav_link_clicks_total counter',
     `nav_link_clicks_total ${navClicks?.total || 0}`,
   ];
-  
+
   // Add per-href metrics
   if (navClicks?.by_href) {
     for (const [href, count] of Object.entries(navClicks.by_href)) {
       body.push(`nav_link_clicks_total{href="${href}"} ${count}`);
     }
   }
-  
-  return body.join("\n") + "\n";
+
+  return body.join('\n') + '\n';
 }

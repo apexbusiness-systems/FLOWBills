@@ -111,7 +111,9 @@ class PerformanceMonitor {
           "/api/metrics",
           new Blob([JSON.stringify({ events: queue.splice(0) })], { type: "application/json" })
         );
-      } catch {}
+      } catch {
+        // Silently ignore beacon failures
+      }
     });
   }
 

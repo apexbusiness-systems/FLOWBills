@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,7 +8,15 @@ const corsHeaders = {
 
 interface WorkflowCondition {
   field: string;
-  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'greater_or_equal' | 'less_or_equal' | 'contains' | 'in';
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'greater_than'
+    | 'less_than'
+    | 'greater_or_equal'
+    | 'less_or_equal'
+    | 'contains'
+    | 'in';
   value: any;
 }
 
@@ -33,7 +41,7 @@ serve(async (req) => {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      { global: { headers: { Authorization: req.headers.get('Authorization')! } } },
     );
 
     const { data: { user } } = await supabaseClient.auth.getUser();
@@ -100,39 +108,50 @@ serve(async (req) => {
 
       try {
         switch (currentStep.type) {
-          case 'condition':
+          case 'condition': {
             // Evaluate conditions
             const conditionResult = evaluateConditions(currentStep.conditions || [], entityData);
             stepResults[currentStep.id] = { passed: conditionResult };
 
             // Determine next step based on condition
-            const nextStepId = conditionResult ? currentStep.true_connection : currentStep.false_connection;
+            const nextStepId = conditionResult
+              ? currentStep.true_connection
+              : currentStep.false_connection;
             if (nextStepId) {
-              const nextStepIndex = steps.findIndex(s => s.id === nextStepId);
+              const nextStepIndex = steps.findIndex((s) => s.id === nextStepId);
               currentStepIndex = nextStepIndex >= 0 ? nextStepIndex : -1;
             } else {
               currentStepIndex = -1;
             }
             break;
+          }
 
-          case 'validation':
+          case 'validation': {
             // Run validation rules
-            const validationResult = await runValidation(currentStep.config, entityData, supabaseClient);
+            const validationResult = runValidation(
+              currentStep.config,
+              entityData,
+              supabaseClient,
+            );
             stepResults[currentStep.id] = validationResult;
 
             // Move to next step
             if (currentStep.connections && currentStep.connections.length > 0) {
-              const nextStepIndex = steps.findIndex(s => s.id === currentStep.connections[0]);
+              const nextStepIndex = steps.findIndex((s) => s.id === currentStep.connections[0]);
               currentStepIndex = nextStepIndex >= 0 ? nextStepIndex : -1;
             } else {
               currentStepIndex = -1;
             }
             break;
+          }
 
-          case 'approval':
+          case 'approval': {
             // Create approval task
-            stepResults[currentStep.id] = { approval_required: true, approver_role: currentStep.config.approver_role };
-            
+            stepResults[currentStep.id] = {
+              approval_required: true,
+              approver_role: currentStep.config.approver_role,
+            };
+
             // Update invoice status to pending approval
             if (entity_type === 'invoice') {
               await supabaseClient
@@ -143,38 +162,41 @@ serve(async (req) => {
 
             // Move to next step
             if (currentStep.connections && currentStep.connections.length > 0) {
-              const nextStepIndex = steps.findIndex(s => s.id === currentStep.connections[0]);
+              const nextStepIndex = steps.findIndex((s) => s.id === currentStep.connections[0]);
               currentStepIndex = nextStepIndex >= 0 ? nextStepIndex : -1;
             } else {
               currentStepIndex = -1;
             }
             break;
+          }
 
-          case 'notification':
+          case 'notification': {
             // Send notification (stub for now)
             stepResults[currentStep.id] = { notified: true, template: currentStep.config.template };
-            
+
             // Move to next step
             if (currentStep.connections && currentStep.connections.length > 0) {
-              const nextStepIndex = steps.findIndex(s => s.id === currentStep.connections[0]);
+              const nextStepIndex = steps.findIndex((s) => s.id === currentStep.connections[0]);
               currentStepIndex = nextStepIndex >= 0 ? nextStepIndex : -1;
             } else {
               currentStepIndex = -1;
             }
             break;
+          }
 
-          case 'integration':
+          case 'integration': {
             // External integration (stub for now)
             stepResults[currentStep.id] = { integrated: true };
-            
+
             // Move to next step
             if (currentStep.connections && currentStep.connections.length > 0) {
-              const nextStepIndex = steps.findIndex(s => s.id === currentStep.connections[0]);
+              const nextStepIndex = steps.findIndex((s) => s.id === currentStep.connections[0]);
               currentStepIndex = nextStepIndex >= 0 ? nextStepIndex : -1;
             } else {
               currentStepIndex = -1;
             }
             break;
+          }
 
           default:
             console.warn(`Unknown step type: ${currentStep.type}`);
@@ -189,11 +211,10 @@ serve(async (req) => {
             step_data: stepResults,
           })
           .eq('id', instance.id);
-
       } catch (stepError: any) {
         console.error(`Error executing step ${currentStep.name}:`, stepError);
         stepResults[currentStep.id] = { error: stepError.message };
-        
+
         // Mark instance as failed
         await supabaseClient
           .from('workflow_instances')
@@ -226,14 +247,13 @@ serve(async (req) => {
         instance_id: instance.id,
         results: stepResults,
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
-
   } catch (error: any) {
     console.error('Workflow execution error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }
 });
@@ -242,9 +262,9 @@ serve(async (req) => {
 function evaluateConditions(conditions: WorkflowCondition[], data: any): boolean {
   if (!conditions || conditions.length === 0) return true;
 
-  return conditions.every(condition => {
+  return conditions.every((condition) => {
     const fieldValue = getNestedValue(data, condition.field);
-    
+
     switch (condition.operator) {
       case 'equals':
         return fieldValue == condition.value;
@@ -274,7 +294,7 @@ function getNestedValue(obj: any, path: string): any {
 }
 
 // Run validation rules
-async function runValidation(config: any, data: any, supabaseClient: any): Promise<any> {
+function runValidation(config: any, data: any, _supabaseClient: any): any {
   const results: any = { valid: true, errors: [] };
 
   // Example validations

@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
 
   try {
     const { href, source, ts } = await req.json();
-    
+
     // Log for metrics (in production, write to audit_logs or separate clicks table)
     console.log(JSON.stringify({
       event: 'nav_click',
@@ -33,13 +33,13 @@ Deno.serve(async (req) => {
       created_at: new Date().toISOString(),
     });
 
-    return new Response(null, { 
+    return new Response(null, {
       status: 204,
       headers: corsHeaders,
     });
   } catch (error) {
     console.error('Track click error:', error);
-    return new Response(null, { 
+    return new Response(null, {
       status: 204, // Silent fail
       headers: corsHeaders,
     });

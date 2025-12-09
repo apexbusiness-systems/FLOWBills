@@ -1,4 +1,4 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import 'https://deno.land/x/xhr@0.1.0/mod.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       .insert({
         invoice_id,
         user_id: user.id,
-        extraction_status: 'processing'
+        extraction_status: 'processing',
       })
       .select()
       .single();
@@ -79,79 +79,81 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert at extracting oil & gas billing information from invoices. Extract all relevant data with high accuracy.`
+            content:
+              `You are an expert at extracting oil & gas billing information from invoices. Extract all relevant data with high accuracy.`,
           },
           {
             role: 'user',
-            content: `Extract the following information from this invoice content:\n\n${file_content}\n\nProvide structured extraction.`
-          }
+            content:
+              `Extract the following information from this invoice content:\n\n${file_content}\n\nProvide structured extraction.`,
+          },
         ],
         tools: [
           {
-            type: "function",
+            type: 'function',
             function: {
-              name: "extract_invoice_data",
-              description: "Extract structured oil & gas billing data from invoice",
+              name: 'extract_invoice_data',
+              description: 'Extract structured oil & gas billing data from invoice',
               parameters: {
-                type: "object",
+                type: 'object',
                 properties: {
                   afe_number: {
-                    type: "string",
-                    description: "Authorization for Expenditure number (e.g., AFE-2024-001)"
+                    type: 'string',
+                    description: 'Authorization for Expenditure number (e.g., AFE-2024-001)',
                   },
                   uwi: {
-                    type: "string",
-                    description: "Unique Well Identifier (14-digit format)"
+                    type: 'string',
+                    description: 'Unique Well Identifier (14-digit format)',
                   },
                   field_ticket_numbers: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Field ticket reference numbers"
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Field ticket reference numbers',
                   },
                   po_number: {
-                    type: "string",
-                    description: "Purchase order number"
+                    type: 'string',
+                    description: 'Purchase order number',
                   },
                   service_period_start: {
-                    type: "string",
-                    description: "Service period start date (YYYY-MM-DD)"
+                    type: 'string',
+                    description: 'Service period start date (YYYY-MM-DD)',
                   },
                   service_period_end: {
-                    type: "string",
-                    description: "Service period end date (YYYY-MM-DD)"
+                    type: 'string',
+                    description: 'Service period end date (YYYY-MM-DD)',
                   },
                   line_items: {
-                    type: "array",
+                    type: 'array',
                     items: {
-                      type: "object",
+                      type: 'object',
                       properties: {
-                        description: { type: "string" },
-                        quantity: { type: "number" },
-                        unit_price: { type: "number" },
-                        amount: { type: "number" },
-                        service_code: { type: "string" }
-                      }
+                        description: { type: 'string' },
+                        quantity: { type: 'number' },
+                        unit_price: { type: 'number' },
+                        amount: { type: 'number' },
+                        service_code: { type: 'string' },
+                      },
                     },
-                    description: "Line item details"
+                    description: 'Line item details',
                   },
                   confidence_scores: {
-                    type: "object",
+                    type: 'object',
                     properties: {
-                      afe_number: { type: "number", minimum: 0, maximum: 1 },
-                      uwi: { type: "number", minimum: 0, maximum: 1 },
-                      field_tickets: { type: "number", minimum: 0, maximum: 1 },
-                      line_items: { type: "number", minimum: 0, maximum: 1 }
+                      afe_number: { type: 'number', minimum: 0, maximum: 1 },
+                      uwi: { type: 'number', minimum: 0, maximum: 1 },
+                      field_tickets: { type: 'number', minimum: 0, maximum: 1 },
+                      line_items: { type: 'number', minimum: 0, maximum: 1 },
                     },
-                    description: "Confidence scores for each extraction"
-                  }
+                    description: 'Confidence scores for each extraction',
+                  },
                 },
-                required: ["confidence_scores"],
-                additionalProperties: false
-              }
-            }
-          }
+                required: ['confidence_scores'],
+                additionalProperties: false,
+              },
+            },
+          },
         ],
-        tool_choice: { type: "function", function: { name: "extract_invoice_data" } }
+        tool_choice: { type: 'function', function: { name: 'extract_invoice_data' } },
       }),
     });
 
@@ -197,12 +199,20 @@ Deno.serve(async (req) => {
             budgetStatus = 'within_budget';
           } else {
             budgetStatus = 'over_budget';
-            validationErrors.push(`Invoice amount $${invoice.amount} exceeds AFE budget. Over by $${Math.abs(budgetRemaining)}`);
+            validationErrors.push(
+              `Invoice amount $${invoice.amount} exceeds AFE budget. Over by $${
+                Math.abs(budgetRemaining)
+              }`,
+            );
           }
 
           // Check if approaching budget limit (90%)
           if (budgetRemaining < parseFloat(afe.budget_amount) * 0.1) {
-            validationWarnings.push(`AFE ${afe.afe_number} is at ${((newSpent / parseFloat(afe.budget_amount)) * 100).toFixed(1)}% of budget`);
+            validationWarnings.push(
+              `AFE ${afe.afe_number} is at ${
+                ((newSpent / parseFloat(afe.budget_amount)) * 100).toFixed(1)
+              }% of budget`,
+            );
           }
         }
       } else {
@@ -220,7 +230,7 @@ Deno.serve(async (req) => {
         .eq('user_id', user.id)
         .eq('uwi', extractedData.uwi)
         .single();
-      
+
       if (uwi) {
         uwiId = uwi.id;
       } else {
@@ -249,7 +259,7 @@ Deno.serve(async (req) => {
         validation_errors: validationErrors,
         validation_warnings: validationWarnings,
         extracted_at: new Date().toISOString(),
-        validated_at: new Date().toISOString()
+        validated_at: new Date().toISOString(),
       })
       .eq('id', extraction.id);
 
@@ -272,25 +282,30 @@ Deno.serve(async (req) => {
       .update({ status: invoiceStatus })
       .eq('id', invoice_id);
 
-    return new Response(JSON.stringify({
-      success: true,
-      extraction_id: extraction.id,
-      extracted_data: extractedData,
-      budget_status: budgetStatus,
-      budget_remaining: budgetRemaining,
-      validation_errors: validationErrors,
-      validation_warnings: validationWarnings
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
+    return new Response(
+      JSON.stringify({
+        success: true,
+        extraction_id: extraction.id,
+        extracted_data: extractedData,
+        budget_status: budgetStatus,
+        budget_remaining: budgetRemaining,
+        validation_errors: validationErrors,
+        validation_warnings: validationWarnings,
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    );
   } catch (error) {
     console.error('Error in invoice-extract function:', error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'Internal server error' 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'Internal server error',
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    );
   }
 });

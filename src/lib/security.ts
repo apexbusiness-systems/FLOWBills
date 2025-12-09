@@ -12,6 +12,7 @@ export const sanitizeInput = (input: string): string => {
     .replace(/on\w+=/gi, "") // Remove event handlers
     .replace(/data:/gi, "") // Remove data URIs
     .replace(/\0/g, "") // Remove null bytes
+    // eslint-disable-next-line no-control-regex -- Required for security: removes ASCII control chars (0x00-0x1F) and DEL (0x7F)
     .replace(/[\x00-\x1F\x7F]/g, "") // Remove control characters
     .trim();
 };
@@ -42,7 +43,7 @@ export const validateInputAdvanced = (
 
   // Type validation
   switch (type) {
-    case "string":
+    case "string": {
       if (typeof input !== "string") {
         return { valid: false, error: "Must be a string" };
       }
@@ -59,15 +60,17 @@ export const validateInputAdvanced = (
       }
 
       return { valid: true, sanitized };
+    }
 
-    case "number":
+    case "number": {
       const num = Number(input);
       if (isNaN(num)) {
         return { valid: false, error: "Must be a valid number" };
       }
       return { valid: true, sanitized: num };
+    }
 
-    case "email":
+    case "email": {
       if (typeof input !== "string") {
         return { valid: false, error: "Email must be a string" };
       }
@@ -77,8 +80,9 @@ export const validateInputAdvanced = (
         return { valid: false, error: "Invalid email format" };
       }
       return { valid: true, sanitized: sanitizedEmail };
+    }
 
-    case "uuid":
+    case "uuid": {
       if (typeof input !== "string") {
         return { valid: false, error: "UUID must be a string" };
       }
@@ -89,6 +93,7 @@ export const validateInputAdvanced = (
         return { valid: false, error: "Invalid UUID format" };
       }
       return { valid: true, sanitized: sanitizedUuid };
+    }
 
     default:
       return { valid: false, error: "Unknown validation type" };

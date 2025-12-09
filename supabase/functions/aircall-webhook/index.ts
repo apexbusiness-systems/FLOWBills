@@ -1,9 +1,10 @@
-import { createClient } from "jsr:@supabase/supabase-js@2";
-import { withIdempotency } from "../_shared/idempotency.ts";
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { withIdempotency } from '../_shared/idempotency.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, idempotency-key',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type, idempotency-key',
 };
 
 interface AircallEvent {
@@ -50,7 +51,11 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     return await withIdempotency(req, async (body: AircallEvent) => {
-      console.log('Aircall webhook received:', { event: body.event, resource: body.resource, ivr: body.data.ivr_selection });
+      console.log('Aircall webhook received:', {
+        event: body.event,
+        resource: body.resource,
+        ivr: body.data.ivr_selection,
+      });
 
       const ivrSelection = body.data.ivr_selection || '3'; // Default to platform
       const category = IVR_CATEGORIES[ivrSelection] || 'platform_ocr';
@@ -125,31 +130,34 @@ Deno.serve(async (req) => {
             status: body.data.status,
             agent: body.data.user?.email,
             ticket_number: ticketNumber,
-            pipeda_consent: 'PIPEDA notice: Call may be recorded for quality assurance. Press 0 for privacy (no recording).',
+            pipeda_consent:
+              'PIPEDA notice: Call may be recorded for quality assurance. Press 0 for privacy (no recording).',
           },
         });
 
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: isPrivacyCall ? 'Privacy call handled (no recording)' : 'Call logged and ticket created',
+        JSON.stringify({
+          success: true,
+          message: isPrivacyCall
+            ? 'Privacy call handled (no recording)'
+            : 'Call logged and ticket created',
           ticket_number: ticketNumber,
-          category 
+          category,
         }),
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
-        }
+          status: 200,
+        },
       );
     });
   } catch (error) {
     console.error('Aircall webhook error:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
-      }
+        status: 500,
+      },
     );
   }
 });

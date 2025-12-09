@@ -39,24 +39,28 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 
 // Mock performance monitoring
-vi.mock("@/lib/health-check", () => ({
-  healthChecker: {
-    monitorHealth: vi.fn(),
-    performHealthCheck: vi.fn(() =>
-      Promise.resolve({
-        status: "healthy",
-        checks: {
-          database: true,
-          auth: true,
-          storage: true,
-          api: false,
-        },
-        timestamp: new Date(),
-        responseTime: 150,
-      })
-    ),
-  },
-}));
+vi.mock("@/lib/health-check", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/health-check")>("@/lib/health-check");
+  return {
+    ...actual,
+    healthChecker: {
+      monitorHealth: vi.fn(),
+      performHealthCheck: vi.fn(() =>
+        Promise.resolve({
+          status: "healthy",
+          checks: {
+            database: true,
+            auth: true,
+            storage: true,
+            api: false,
+          },
+          timestamp: new Date(),
+          responseTime: 150,
+        })
+      ),
+    },
+  };
+});
 
 // Test utilities
 const renderWithProviders = (component: React.ReactElement) => {
@@ -110,8 +114,8 @@ describe("Application Integration Tests", () => {
     expect(screen.getByText("Try Again")).toBeInTheDocument();
   });
 
-  it("should initialize health monitoring every 5 minutes", () => {
-    const { healthChecker } = require("@/lib/health-check");
+  it("should initialize health monitoring every 5 minutes", async () => {
+    const { healthChecker } = await import("@/lib/health-check");
 
     renderWithProviders(<App />);
 

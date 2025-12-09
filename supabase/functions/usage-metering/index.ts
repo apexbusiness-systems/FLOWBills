@@ -1,6 +1,6 @@
 // P3: Usage Metering Job - Nightly MTD Reporting (America/Edmonton timezone)
-import { createClient } from "jsr:@supabase/supabase-js@2";
-import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -30,8 +30,8 @@ Deno.serve(async (req) => {
       month: '2-digit',
       day: '2-digit',
     });
-    
-    const [month, day, year] = formatter.format(now).split('/');
+
+    const [month, _day, year] = formatter.format(now).split('/');
     const periodStart = new Date(`${year}-${month}-01T00:00:00-06:00`); // MST offset
     const periodEnd = new Date(periodStart);
     periodEnd.setMonth(periodEnd.getMonth() + 1);
@@ -87,9 +87,11 @@ Deno.serve(async (req) => {
 
       // Report to Stripe with 'set' action (idempotent)
       try {
-        const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+        const stripeSubscription = await stripe.subscriptions.retrieve(
+          subscription.stripe_subscription_id,
+        );
         const usageItem = stripeSubscription.items.data.find(
-          item => item.price.recurring?.usage_type === 'metered'
+          (item) => item.price.recurring?.usage_type === 'metered',
         );
 
         if (usageItem) {
@@ -122,16 +124,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({
-      success: true,
-      period_start: periodStart.toISOString(),
-      period_end: periodEnd.toISOString(),
-      processed: results.length,
-      results,
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        period_start: periodStart.toISOString(),
+        period_end: periodEnd.toISOString(),
+        processed: results.length,
+        results,
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      },
+    );
   } catch (err) {
     console.error('Usage metering error:', err);
     return new Response(JSON.stringify({ error: err.message }), {

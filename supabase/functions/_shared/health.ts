@@ -8,17 +8,18 @@ const corsHeaders = {
 // Standard health check responses
 export const healthResponses = {
   // Basic liveness check - always returns ok
-  healthz: () => new Response(
-    JSON.stringify({ 
-      status: 'ok', 
-      timestamp: new Date().toISOString(),
-      service: 'flowai-edge-function'
-    }),
-    { 
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200 
-    }
-  ),
+  healthz: () =>
+    new Response(
+      JSON.stringify({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        service: 'flowai-edge-function',
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      },
+    ),
 
   // Readiness check with database connectivity
   readyz: async () => {
@@ -28,7 +29,7 @@ export const healthResponses = {
 
     try {
       // Test database connectivity
-      const { data, error } = await supabase
+      const { data: _data, error } = await supabase
         .from('invoices')
         .select('count(*)')
         .limit(1);
@@ -36,41 +37,41 @@ export const healthResponses = {
       if (error) {
         console.error('Database health check failed:', error);
         return new Response(
-          JSON.stringify({ 
-            status: 'not ready', 
+          JSON.stringify({
+            status: 'not ready',
             error: 'Database connection failed',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           }),
-          { 
+          {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 503 
-          }
+            status: 503,
+          },
         );
       }
 
       return new Response(
-        JSON.stringify({ 
-          status: 'ready', 
+        JSON.stringify({
+          status: 'ready',
           timestamp: new Date().toISOString(),
-          database: 'connected'
+          database: 'connected',
         }),
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
-        }
+          status: 200,
+        },
       );
     } catch (error) {
       console.error('Health check error:', error);
       return new Response(
-        JSON.stringify({ 
-          status: 'not ready', 
+        JSON.stringify({
+          status: 'not ready',
           error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }),
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 503 
-        }
+          status: 503,
+        },
       );
     }
   },
@@ -85,8 +86,11 @@ export const healthResponses = {
       // Collect basic metrics
       const [invoicesResult, duplicatesResult, reviewQueueResult] = await Promise.all([
         supabase.from('invoices').select('count(*)', { count: 'exact' }),
-        supabase.from('exceptions').select('count(*)', { count: 'exact' }).eq('exception_type', 'duplicate'),
-        supabase.from('review_queue').select('count(*)', { count: 'exact' })
+        supabase.from('exceptions').select('count(*)', { count: 'exact' }).eq(
+          'exception_type',
+          'duplicate',
+        ),
+        supabase.from('review_queue').select('count(*)', { count: 'exact' }),
       ]);
 
       const metrics = `# HELP flowai_invoices_total Total number of invoices processed
@@ -112,10 +116,10 @@ flowai_function_up 1
 
       return new Response(
         metrics,
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'text/plain; version=0.0.4' },
-          status: 200 
-        }
+          status: 200,
+        },
       );
     } catch (error) {
       console.error('Metrics collection error:', error);
@@ -124,13 +128,13 @@ flowai_function_up 1
 # TYPE flowai_function_up gauge
 flowai_function_up 0
 `,
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'text/plain; version=0.0.4' },
-          status: 500 
-        }
+          status: 500,
+        },
       );
     }
-  }
+  },
 };
 
 // Handle CORS preflight requests
@@ -155,10 +159,10 @@ export const routeHealthCheck = async (req: Request): Promise<Response> => {
     default:
       return new Response(
         JSON.stringify({ error: 'Not found' }),
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 404 
-        }
+          status: 404,
+        },
       );
   }
 };

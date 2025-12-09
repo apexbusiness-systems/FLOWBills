@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +13,7 @@ serve(async (req) => {
   try {
     const { invoiceData, type = 'analyze' } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    
+
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
@@ -27,10 +27,12 @@ serve(async (req) => {
 5. Payment terms optimization
 
 Return JSON with: { glCode, confidence, duplicateRisk, anomalies[], routing, paymentOptimization }`,
-      
-      vendor_match: `Match this invoice to existing vendor records. Return confidence score and suggested vendor ID.`,
-      
-      fraud_check: `Analyze for fraud indicators: unusual amounts, suspicious vendor names, date anomalies. Return risk score 0-100 and specific flags.`
+
+      vendor_match:
+        `Match this invoice to existing vendor records. Return confidence score and suggested vendor ID.`,
+
+      fraud_check:
+        `Analyze for fraud indicators: unusual amounts, suspicious vendor names, date anomalies. Return risk score 0-100 and specific flags.`,
     };
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -42,11 +44,14 @@ Return JSON with: { glCode, confidence, duplicateRisk, anomalies[], routing, pay
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: [
-          { role: 'system', content: systemPrompts[type as keyof typeof systemPrompts] || systemPrompts.analyze },
-          { role: 'user', content: JSON.stringify(invoiceData) }
+          {
+            role: 'system',
+            content: systemPrompts[type as keyof typeof systemPrompts] || systemPrompts.analyze,
+          },
+          { role: 'user', content: JSON.stringify(invoiceData) },
         ],
         temperature: 0.3,
-        response_format: { type: 'json_object' }
+        response_format: { type: 'json_object' },
       }),
     });
 
@@ -54,13 +59,13 @@ Return JSON with: { glCode, confidence, duplicateRisk, anomalies[], routing, pay
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
       if (response.status === 402) {
         return new Response(
           JSON.stringify({ error: 'AI credits depleted. Please add credits to your workspace.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
       throw new Error(`AI API error: ${response.status}`);
@@ -70,23 +75,22 @@ Return JSON with: { glCode, confidence, duplicateRisk, anomalies[], routing, pay
     const suggestions = JSON.parse(data.choices[0].message.content);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         suggestions,
         model: 'google/gemini-2.5-flash',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
-
   } catch (error) {
     console.error('AI suggestions error:', error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: error instanceof Error ? error.message : 'Unknown error',
-        success: false 
+        success: false,
       }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }
 });

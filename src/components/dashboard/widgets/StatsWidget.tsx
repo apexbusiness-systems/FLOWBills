@@ -28,7 +28,7 @@ const getStatConfig = (
         icon: FileText,
         change: `${stats.pendingCount} pending`,
       };
-    case "Processing Rate":
+    case "Processing Rate": {
       const rate =
         stats.totalCount > 0
           ? ((stats.approvedCount + stats.paidCount) / stats.totalCount) * 100
@@ -39,6 +39,7 @@ const getStatConfig = (
         icon: TrendingUp,
         change: `${stats.approvedCount} approved`,
       };
+    }
     case "Exception Queue":
       return {
         value: stats.rejectedCount + stats.pendingCount,

@@ -1,4 +1,4 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import 'https://deno.land/x/xhr@0.1.0/mod.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -8,7 +8,7 @@ const corsHeaders = {
 
 /**
  * Invoice Intake Orchestration Function
- * 
+ *
  * This function orchestrates the complete invoice processing pipeline:
  * 1. Extract invoice data using AI
  * 2. Run duplicate detection
@@ -58,11 +58,14 @@ Deno.serve(async (req) => {
     // STEP 1: Extract invoice data using AI
     // ==================================================================
     console.log('Step 1: Extracting invoice data...');
-    
-    const { data: extractResult, error: extractError } = await supabase.functions.invoke('invoice-extract', {
-      body: { invoice_id, file_content },
-      headers: { Authorization: `Bearer ${authToken}` }
-    });
+
+    const { data: extractResult, error: extractError } = await supabase.functions.invoke(
+      'invoice-extract',
+      {
+        body: { invoice_id, file_content },
+        headers: { Authorization: `Bearer ${authToken}` },
+      },
+    );
 
     if (extractError) {
       console.error('Extraction error:', extractError);
@@ -79,7 +82,7 @@ Deno.serve(async (req) => {
     // STEP 2: Run duplicate detection
     // ==================================================================
     console.log('Step 2: Running duplicate detection...');
-    
+
     // Fetch invoice details for duplicate check
     const { data: invoice } = await supabase
       .from('invoices')
@@ -92,15 +95,18 @@ Deno.serve(async (req) => {
     }
 
     // Run duplicate check
-    const { data: dupResult, error: dupError } = await supabase.functions.invoke('duplicate-check', {
-      body: {
-        invoice_number: invoice.invoice_number,
-        vendor_id: invoice.vendor_name, // Using vendor_name as ID for now
-        amount_cents: Math.round(invoice.amount * 100),
-        invoice_date: invoice.invoice_date,
-        po_number: extractResult.extracted_data?.po_number || null,
-      }
-    });
+    const { data: dupResult, error: dupError } = await supabase.functions.invoke(
+      'duplicate-check',
+      {
+        body: {
+          invoice_number: invoice.invoice_number,
+          vendor_id: invoice.vendor_name, // Using vendor_name as ID for now
+          amount_cents: Math.round(invoice.amount * 100),
+          invoice_date: invoice.invoice_date,
+          po_number: extractResult.extracted_data?.po_number || null,
+        },
+      },
+    );
 
     if (dupError) {
       console.error('Duplicate check error:', dupError);
@@ -113,11 +119,11 @@ Deno.serve(async (req) => {
     // STEP 3: Determine routing based on business rules
     // ==================================================================
     console.log('Step 3: Determining approval routing...');
-    
+
     let finalStatus = 'validated';
     let requiresReview = false;
     let reviewReason = '';
-    
+
     // Check for duplicates
     if (dupResult?.is_exact_duplicate) {
       finalStatus = 'duplicate_suspected';
@@ -127,14 +133,14 @@ Deno.serve(async (req) => {
       requiresReview = true;
       reviewReason = 'Potential duplicate matches found';
     }
-    
+
     // Check for validation errors
     if (extractResult.validation_errors?.length > 0) {
       finalStatus = 'validation_failed';
       requiresReview = true;
       reviewReason = reviewReason || extractResult.validation_errors.join('; ');
     }
-    
+
     // Check for budget issues
     if (extractResult.budget_status === 'over_budget') {
       requiresReview = true;
@@ -145,15 +151,15 @@ Deno.serve(async (req) => {
     // STEP 4: Create approval records based on amount thresholds
     // ==================================================================
     console.log('Step 4: Creating approval records...');
-    
+
     const THRESHOLD_AUTO_APPROVE = 5000;
     const THRESHOLD_MANAGER = 25000;
-    
+
     if (!requiresReview) {
       if (invoice.amount < THRESHOLD_AUTO_APPROVE) {
         // Auto-approve
         finalStatus = 'approved_auto';
-        
+
         await supabase.from('approvals').insert({
           invoice_id,
           user_id: user.id,
@@ -163,11 +169,10 @@ Deno.serve(async (req) => {
           comments: 'Auto-approved: amount under $5,000 threshold',
           auto_approved: true,
         });
-        
       } else if (invoice.amount < THRESHOLD_MANAGER) {
         // Manager approval required
         finalStatus = 'pending_approval';
-        
+
         await supabase.from('approvals').insert({
           invoice_id,
           user_id: user.id,
@@ -175,11 +180,10 @@ Deno.serve(async (req) => {
           approval_method: 'manager_approval',
           notes: 'Requires manager approval: $5K-$25K range',
         });
-        
       } else {
         // CFO approval required
         finalStatus = 'pending_approval';
-        
+
         await supabase.from('approvals').insert({
           invoice_id,
           user_id: user.id,
@@ -195,11 +199,15 @@ Deno.serve(async (req) => {
     // ==================================================================
     if (requiresReview) {
       console.log('Step 5: Adding to review queue...');
-      
-      const priority = dupResult?.is_exact_duplicate ? 1 : 
-                      extractResult.budget_status === 'over_budget' ? 1 : 
-                      invoice.amount > THRESHOLD_MANAGER ? 1 : 2;
-      
+
+      const priority = dupResult?.is_exact_duplicate
+        ? 1
+        : extractResult.budget_status === 'over_budget'
+        ? 1
+        : invoice.amount > THRESHOLD_MANAGER
+        ? 1
+        : 2;
+
       await supabase.from('review_queue').insert({
         invoice_id,
         user_id: user.id,
@@ -213,7 +221,7 @@ Deno.serve(async (req) => {
     // STEP 6: Update final invoice status
     // ==================================================================
     console.log('Step 6: Updating invoice status to:', finalStatus);
-    
+
     await supabase
       .from('invoices')
       .update({ status: finalStatus })
@@ -242,9 +250,12 @@ Deno.serve(async (req) => {
         requires_review: requiresReview,
         review_reason: reviewReason,
         auto_approved: finalStatus === 'approved_auto',
-        approval_level: invoice.amount < THRESHOLD_AUTO_APPROVE ? 'auto' :
-                       invoice.amount < THRESHOLD_MANAGER ? 'manager' : 'cfo'
-      }
+        approval_level: invoice.amount < THRESHOLD_AUTO_APPROVE
+          ? 'auto'
+          : invoice.amount < THRESHOLD_MANAGER
+          ? 'manager'
+          : 'cfo',
+      },
     };
 
     console.log('Invoice intake complete:', result);
@@ -252,15 +263,17 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
   } catch (error) {
     console.error('Invoice intake error:', error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'Internal server error',
-      success: false 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'Internal server error',
+        success: false,
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    );
   }
 });

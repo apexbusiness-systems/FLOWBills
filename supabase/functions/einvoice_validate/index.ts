@@ -1,115 +1,129 @@
-import { createClient } from "jsr:@supabase/supabase-js@2"
-import { corsHeaders } from '../_shared/cors.ts'
-import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { corsHeaders } from '../_shared/cors.ts';
+import { z } from 'https://deno.land/x/zod@v3.23.8/mod.ts';
 
 // Input validation schema
 const ValidateRequestSchema = z.object({
-  document_id: z.string().min(1, "Document ID is required"),
-  xml_content: z.string().min(1, "XML content is required"),
+  document_id: z.string().min(1, 'Document ID is required'),
+  xml_content: z.string().min(1, 'XML content is required'),
   format: z.enum(['bis30', 'xrechnung', 'facturx', 'pint']),
-  country_code: z.string().length(2, "Country code must be 2 characters").optional(),
+  country_code: z.string().length(2, 'Country code must be 2 characters').optional(),
 });
 
 // E-Invoice validation functions
-function validateEN16931(xmlContent: string): { valid: boolean; errors: string[]; warnings: string[] } {
+function validateEN16931(
+  xmlContent: string,
+): { valid: boolean; errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  
+
   // Basic EN 16931 semantic validation
   if (!xmlContent.includes('cbc:ID')) {
     errors.push('Missing required element: cbc:ID (Invoice identifier)');
   }
-  
+
   if (!xmlContent.includes('cbc:IssueDate')) {
     errors.push('Missing required element: cbc:IssueDate (Invoice issue date)');
   }
-  
+
   if (!xmlContent.includes('cac:AccountingSupplierParty')) {
     errors.push('Missing required element: cac:AccountingSupplierParty (Seller information)');
   }
-  
+
   if (!xmlContent.includes('cac:AccountingCustomerParty')) {
     errors.push('Missing required element: cac:AccountingCustomerParty (Buyer information)');
   }
-  
+
   if (!xmlContent.includes('cbc:DocumentCurrencyCode')) {
     warnings.push('Missing recommended element: cbc:DocumentCurrencyCode');
   }
-  
+
   return {
     valid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
-function validateBIS30(xmlContent: string): { valid: boolean; errors: string[]; warnings: string[] } {
+function validateBIS30(
+  xmlContent: string,
+): { valid: boolean; errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  
+
   // Peppol BIS Billing 3.0 CIUS constraints
   const en16931Result = validateEN16931(xmlContent);
   errors.push(...en16931Result.errors);
   warnings.push(...en16931Result.warnings);
-  
+
   // BIS 3.0 specific validations
-  if (!xmlContent.includes('cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0')) {
+  if (
+    !xmlContent.includes(
+      'cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0',
+    )
+  ) {
     errors.push('Invalid CustomizationID for Peppol BIS Billing 3.0');
   }
-  
+
   if (!xmlContent.includes('cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0')) {
     errors.push('Invalid ProfileID for Peppol BIS Billing 3.0');
   }
-  
+
   return {
     valid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
-function validateXRechnung(xmlContent: string): { valid: boolean; errors: string[]; warnings: string[] } {
+function validateXRechnung(
+  xmlContent: string,
+): { valid: boolean; errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  
+
   // XRechnung (Germany) specific validation
   if (!xmlContent.includes('CrossIndustryInvoice')) {
     errors.push('Missing root element: CrossIndustryInvoice (required for XRechnung)');
   }
-  
+
   if (!xmlContent.includes('ram:ID')) {
     errors.push('Missing required element: ram:ID (XRechnung identifier)');
   }
-  
+
   // Check for XRechnung profile
-  if (!xmlContent.includes('urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung')) {
+  if (
+    !xmlContent.includes('urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung')
+  ) {
     errors.push('Missing XRechnung CustomizationID');
   }
-  
+
   return {
     valid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
-function validateFacturX(xmlContent: string): { valid: boolean; errors: string[]; warnings: string[] } {
+function validateFacturX(
+  xmlContent: string,
+): { valid: boolean; errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  
+
   // Factur-X (France/Germany) specific validation
   if (!xmlContent.includes('CrossIndustryDocument')) {
     errors.push('Missing root element: CrossIndustryDocument (required for Factur-X)');
   }
-  
+
   if (!xmlContent.includes('ram:ID')) {
     errors.push('Missing required element: ram:ID (Factur-X identifier)');
   }
-  
+
   return {
     valid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
@@ -121,23 +135,23 @@ Deno.serve(async (req) => {
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
     // Parse and validate request
     const body = await req.json();
     const parsed = ValidateRequestSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: 'Validation failed',
-          details: parsed.error.issues 
+          details: parsed.error.issues,
         }),
-        { 
+        {
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
@@ -146,7 +160,7 @@ Deno.serve(async (req) => {
     // Perform validation based on format
     let validationResult;
     let ruleType: string;
-    
+
     switch (format) {
       case 'bis30':
         validationResult = validateBIS30(xml_content);
@@ -162,7 +176,11 @@ Deno.serve(async (req) => {
         break;
       case 'pint':
         // PINT validation stub (future implementation)
-        validationResult = { valid: true, errors: [], warnings: ['PINT validation not yet implemented'] };
+        validationResult = {
+          valid: true,
+          errors: [],
+          warnings: ['PINT validation not yet implemented'],
+        };
         ruleType = 'en16931';
         break;
       default:
@@ -171,9 +189,11 @@ Deno.serve(async (req) => {
     }
 
     // Calculate confidence score
-    const confidenceScore = validationResult.valid ? 95 : 
-                           (validationResult.errors.length === 0 ? 80 : 
-                            Math.max(20, 80 - (validationResult.errors.length * 10)));
+    const confidenceScore = validationResult.valid
+      ? 95
+      : (validationResult.errors.length === 0
+        ? 80
+        : Math.max(20, 80 - (validationResult.errors.length * 10)));
 
     // Update document status
     const { error: updateError } = await supabase
@@ -186,10 +206,10 @@ Deno.serve(async (req) => {
           validation_passed: validationResult.valid,
           errors: validationResult.errors,
           warnings: validationResult.warnings,
-          validated_at: new Date().toISOString()
+          validated_at: new Date().toISOString(),
         },
         confidence_score: confidenceScore,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('document_id', document_id)
       .eq('tenant_id', body.tenant_id || 'system');
@@ -211,9 +231,9 @@ Deno.serve(async (req) => {
         validation_metadata: {
           format,
           confidence_score: confidenceScore,
-          validation_timestamp: new Date().toISOString()
+          validation_timestamp: new Date().toISOString(),
         },
-        tenant_id: body.tenant_id || 'system'
+        tenant_id: body.tenant_id || 'system',
       });
 
     if (validationError) {
@@ -230,8 +250,8 @@ Deno.serve(async (req) => {
         format,
         rule_type: ruleType,
         country_code,
-        validation_result: validationResult.valid ? 'success' : 'failed'
-      }
+        validation_result: validationResult.valid ? 'success' : 'failed',
+      },
     });
 
     const response = {
@@ -243,21 +263,23 @@ Deno.serve(async (req) => {
       errors: validationResult.errors,
       warnings: validationResult.warnings,
       country_code,
-      validated_at: new Date().toISOString()
+      validated_at: new Date().toISOString(),
     };
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
   } catch (error) {
     console.error('E-Invoice validation error:', error);
-    return new Response(JSON.stringify({ 
-      error: 'Validation processing failed',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        error: 'Validation processing failed',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    );
   }
 });
