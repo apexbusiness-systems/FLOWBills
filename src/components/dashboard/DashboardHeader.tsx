@@ -67,6 +67,15 @@ const DashboardHeader = () => {
     return user?.email?.split("@")[0] || "User";
   };
 
+  const getInitials = () => {
+    const name = getDisplayName();
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
   return (
     <header className="border-b bg-card shadow-sm sticky top-0 z-40 backdrop-blur-sm">
       <div className="flex h-16 items-center gap-4 px-6">
@@ -146,8 +155,8 @@ const DashboardHeader = () => {
                 className="flex items-center gap-2.5 h-10 px-3 hover:bg-muted/80 transition-colors"
                 aria-label="User menu"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20">
-                  <User className="h-4 w-4 text-primary" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm">
+                  {getInitials()}
                 </div>
                 <div className="hidden md:block text-left">
                   <div className="text-sm font-semibold leading-none">{getDisplayName()}</div>
@@ -157,8 +166,8 @@ const DashboardHeader = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64 p-2">
               <div className="flex items-start gap-3 px-2 py-3 mb-1">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20 flex-shrink-0">
-                  <User className="h-5 w-5 text-primary" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm flex-shrink-0">
+                  {getInitials()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold leading-none truncate">{getDisplayName()}</p>
