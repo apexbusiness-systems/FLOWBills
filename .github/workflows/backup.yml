@@ -296,7 +296,7 @@ jobs:
     
     steps:
       - name: Send notification
-        if: ${{ secrets.SLACK_WEBHOOK != '' }}
+        continue-on-error: true
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
@@ -309,4 +309,4 @@ jobs:
             Backup File: ${{ needs.database-backup.outputs.backup-file }}
             Backup Size: ${{ needs.database-backup.outputs.backup-size }} bytes
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
