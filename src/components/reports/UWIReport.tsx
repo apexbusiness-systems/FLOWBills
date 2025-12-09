@@ -91,12 +91,12 @@ export const UWIReportComponent = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Label htmlFor="province-filter">Province</Label>
-            <Select value={province} onValueChange={setProvince}>
+            <Select value={province || "all"} onValueChange={(val) => setProvince(val === "all" ? "" : val)}>
               <SelectTrigger id="province-filter">
                 <SelectValue placeholder="All Provinces" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Provinces</SelectItem>
+                <SelectItem value="all">All Provinces</SelectItem>
                 <SelectItem value="AB">Alberta</SelectItem>
                 <SelectItem value="BC">British Columbia</SelectItem>
                 <SelectItem value="SK">Saskatchewan</SelectItem>
@@ -105,12 +105,12 @@ export const UWIReportComponent = () => {
           </div>
           <div>
             <Label htmlFor="status-filter">Status</Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status || "all"} onValueChange={(val) => setStatus(val === "all" ? "" : val)}>
               <SelectTrigger id="status-filter">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="drilling">Drilling</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
