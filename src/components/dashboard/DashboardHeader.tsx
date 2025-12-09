@@ -1,13 +1,20 @@
 import {
-  Building2,
-  Bell,
   User,
   LogOut,
   Shield,
   Settings,
-  Home,
-  ArrowLeft,
   Palette,
+  Menu,
+  FileText,
+  DollarSign,
+  MapPin,
+  BarChart3,
+  CheckCircle2,
+  Ticket,
+  Plug,
+  Activity,
+  Home,
+  HelpCircle,
 } from "lucide-react";
 import companyLogo from "@/assets/company-logo.png";
 import { Button } from "@/components/ui/button";
@@ -20,20 +27,39 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import SmartSearch from "@/components/ui/smart-search";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 import { NotificationBell } from "./NotificationBell";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+import { useState } from "react";
+
+const navigationItems = [
+  { name: "Dashboard", href: "/dashboard", icon: Home },
+  { name: "Invoices", href: "/invoices", icon: FileText },
+  { name: "AFE Management", href: "/afe-management", icon: DollarSign },
+  { name: "Field Tickets", href: "/field-tickets", icon: Ticket },
+  { name: "UWI Registry", href: "/uwi-registry", icon: MapPin },
+  { name: "Three-Way Matching", href: "/three-way-matching", icon: CheckCircle2 },
+  { name: "Reports", href: "/reports", icon: BarChart3 },
+  { name: "Integrations", href: "/integrations", icon: Plug },
+  { name: "Performance", href: "/performance-monitoring", icon: Activity },
+  { name: "Help Center", href: "/help-center", icon: HelpCircle },
+];
 
 const DashboardHeader = () => {
   const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Check if we're on the homepage
-  const isHomePage = location.pathname === "/";
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const handleSearch = (query: string) => {
     if (import.meta.env.DEV) {
@@ -99,34 +125,47 @@ const DashboardHeader = () => {
           </div>
         </div>
 
-        {/* Navigation Controls */}
-        <div className="flex items-center gap-2 ml-4">
-          {!isHomePage && (
+        {/* Navigation Menu */}
+        <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
+          <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate("/")}
-              className="gap-2 hover:bg-primary/10"
-              aria-label="Back to dashboard"
+              className="gap-2 hover:bg-muted ml-2"
+              aria-label="Open navigation menu"
             >
-              <Home className="h-4 w-4" />
-              <span className="hidden md:inline">Dashboard</span>
+              <Menu className="h-5 w-5" />
+              <span className="hidden md:inline">Menu</span>
             </Button>
-          )}
-
-          {!isHomePage && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.history.back()}
-              className="gap-2 hover:bg-muted"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden md:inline">Back</span>
-            </Button>
-          )}
-        </div>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[280px] sm:w-[320px]">
+            <SheetHeader>
+              <SheetTitle className="flex items-center gap-2">
+                <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-6 w-6 object-contain" />
+                Navigation
+              </SheetTitle>
+            </SheetHeader>
+            <nav className="mt-6 flex flex-col gap-1">
+              {navigationItems.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <Button
+                    key={item.href}
+                    variant={isActive ? "secondary" : "ghost"}
+                    className="justify-start gap-3 h-11"
+                    onClick={() => {
+                      navigate(item.href);
+                      setIsNavOpen(false);
+                    }}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.name}
+                  </Button>
+                );
+              })}
+            </nav>
+          </SheetContent>
+        </Sheet>
 
         {/* Smart Search */}
         <div className="mx-4 flex-1 max-w-md">
