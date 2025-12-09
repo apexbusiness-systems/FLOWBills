@@ -9,15 +9,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  FileText, 
-  Send, 
-  CheckCircle, 
-  AlertTriangle, 
+import {
+  FileText,
+  Send,
+  CheckCircle,
+  AlertTriangle,
   Loader2,
   Globe,
   Shield,
-  TestTube
+  TestTube,
 } from "lucide-react";
 
 interface CountryAdapter {
@@ -29,25 +29,23 @@ interface CountryAdapter {
 }
 
 const adapters: CountryAdapter[] = [
-  { code: 'PL', name: 'Poland KSeF', adapter: 'pl-ksef', enabled: false, testing: false },
-  { code: 'ES', name: 'Spain Veri*factu', adapter: 'es-verifactu', enabled: false, testing: false },
-  { code: 'PINT', name: 'PINT OpenPeppol', adapter: 'pint', enabled: false, testing: false }
+  { code: "PL", name: "Poland KSeF", adapter: "pl-ksef", enabled: false, testing: false },
+  { code: "ES", name: "Spain Veri*factu", adapter: "es-verifactu", enabled: false, testing: false },
+  { code: "PINT", name: "PINT OpenPeppol", adapter: "pint", enabled: false, testing: false },
 ];
 
 const CountryPacksManager = () => {
   const [selectedAdapter, setSelectedAdapter] = useState<CountryAdapter | null>(null);
-  const [xmlInput, setXmlInput] = useState('');
+  const [xmlInput, setXmlInput] = useState("");
   const [testResults, setTestResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeAdapters, setActiveAdapters] = useState(adapters);
   const { toast } = useToast();
 
   const handleToggleAdapter = (code: string) => {
-    setActiveAdapters(prev => 
-      prev.map(adapter => 
-        adapter.code === code 
-          ? { ...adapter, enabled: !adapter.enabled }
-          : adapter
+    setActiveAdapters((prev) =>
+      prev.map((adapter) =>
+        adapter.code === code ? { ...adapter, enabled: !adapter.enabled } : adapter
       )
     );
   };
@@ -57,19 +55,22 @@ const CountryPacksManager = () => {
       toast({
         title: "Input Required",
         description: "Please select an adapter and provide XML input",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke(`adapters/${selectedAdapter.adapter}`, {
-        body: {
-          invoiceXml: xmlInput,
-          operation: operation
+      const { data, error } = await supabase.functions.invoke(
+        `adapters/${selectedAdapter.adapter}`,
+        {
+          body: {
+            invoiceXml: xmlInput,
+            operation: operation,
+          },
         }
-      });
+      );
 
       if (error) throw error;
 
@@ -79,13 +80,16 @@ const CountryPacksManager = () => {
         description: `${operation} operation completed successfully`,
       });
     } catch (error) {
-      console.error('Adapter test error:', error);
+      console.error("Adapter test error:", error);
       toast({
         title: "Test Failed",
         description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
+        variant: "destructive",
       });
-      setTestResults({ success: false, errors: [error instanceof Error ? error.message : "Unknown error"] });
+      setTestResults({
+        success: false,
+        errors: [error instanceof Error ? error.message : "Unknown error"],
+      });
     } finally {
       setIsLoading(false);
     }
@@ -96,12 +100,14 @@ const CountryPacksManager = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Country Packs Manager</h2>
-          <p className="text-muted-foreground">Configure and test country-specific e-invoicing adapters</p>
+          <p className="text-muted-foreground">
+            Configure and test country-specific e-invoicing adapters
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Globe className="h-5 w-5 text-primary" />
           <span className="text-sm text-muted-foreground">
-            {activeAdapters.filter(a => a.enabled).length} active
+            {activeAdapters.filter((a) => a.enabled).length} active
           </span>
         </div>
       </div>
@@ -109,8 +115,8 @@ const CountryPacksManager = () => {
       <Alert>
         <Shield className="h-4 w-4" />
         <AlertDescription>
-          Test adapters in sandbox mode before enabling for production use. 
-          All adapters currently operate in mock mode without requiring API tokens.
+          Test adapters in sandbox mode before enabling for production use. All adapters currently
+          operate in mock mode without requiring API tokens.
         </AlertDescription>
       </Alert>
 
@@ -141,12 +147,10 @@ const CountryPacksManager = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="text-sm text-muted-foreground">
-                    Adapter: {adapter.adapter}
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <div className="text-sm text-muted-foreground">Adapter: {adapter.adapter}</div>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full"
                     onClick={() => setSelectedAdapter(adapter)}
                   >
@@ -199,35 +203,51 @@ const CountryPacksManager = () => {
 
                 <div className="grid gap-2 md:grid-cols-2">
                   <Button
-                    onClick={() => handleTestAdapter('serialize')}
+                    onClick={() => handleTestAdapter("serialize")}
                     disabled={isLoading || !selectedAdapter}
                     variant="outline"
                   >
-                    {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <FileText className="h-4 w-4 mr-2" />
+                    )}
                     Serialize
                   </Button>
                   <Button
-                    onClick={() => handleTestAdapter('validate')}
+                    onClick={() => handleTestAdapter("validate")}
                     disabled={isLoading || !selectedAdapter}
                     variant="outline"
                   >
-                    {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-2" />}
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                    )}
                     Validate
                   </Button>
                   <Button
-                    onClick={() => handleTestAdapter('send')}
+                    onClick={() => handleTestAdapter("send")}
                     disabled={isLoading || !selectedAdapter}
                     variant="outline"
                   >
-                    {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4 mr-2" />
+                    )}
                     Send
                   </Button>
                   <Button
-                    onClick={() => handleTestAdapter('status')}
+                    onClick={() => handleTestAdapter("status")}
                     disabled={isLoading || !selectedAdapter}
                     variant="outline"
                   >
-                    {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <AlertTriangle className="h-4 w-4 mr-2" />}
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                    )}
                     Status
                   </Button>
                 </div>
@@ -305,29 +325,31 @@ const CountryPacksManager = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {activeAdapters.filter(a => a.enabled).map((adapter) => (
-                  <div key={adapter.code} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold">{adapter.name}</h3>
-                      <Badge variant="default">Active</Badge>
+                {activeAdapters
+                  .filter((a) => a.enabled)
+                  .map((adapter) => (
+                    <div key={adapter.code} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold">{adapter.name}</h3>
+                        <Badge variant="default">Active</Badge>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">0</div>
+                          <div className="text-sm text-muted-foreground">Successful</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-red-600">0</div>
+                          <div className="text-sm text-muted-foreground">Failed</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">0</div>
+                          <div className="text-sm text-muted-foreground">Pending</div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-3">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">0</div>
-                        <div className="text-sm text-muted-foreground">Successful</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-red-600">0</div>
-                        <div className="text-sm text-muted-foreground">Failed</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">0</div>
-                        <div className="text-sm text-muted-foreground">Pending</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {activeAdapters.filter(a => a.enabled).length === 0 && (
+                  ))}
+                {activeAdapters.filter((a) => a.enabled).length === 0 && (
                   <p className="text-muted-foreground text-center py-8">
                     No active adapters to monitor. Enable adapters in the Configure tab.
                   </p>

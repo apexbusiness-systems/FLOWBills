@@ -1,14 +1,6 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  CheckCircle, 
-  XCircle, 
-  Trash2, 
-  Download, 
-  Send,
-  MoreHorizontal,
-  X
-} from "lucide-react";
+import { CheckCircle, XCircle, Trash2, Download, Send, MoreHorizontal, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,7 +30,7 @@ export function BulkActionsToolbar({
   onExport,
   onSend,
   onClearSelection,
-  disabled = false
+  disabled = false,
 }: BulkActionsToolbarProps) {
   if (selectedCount === 0) return null;
 
@@ -94,11 +86,7 @@ export function BulkActionsToolbar({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={disabled}
-                >
+                <Button size="sm" variant="outline" disabled={disabled}>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -108,10 +96,7 @@ export function BulkActionsToolbar({
                   Send to Vendor
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={onDelete}
-                  className="text-destructive"
-                >
+                <DropdownMenuItem onClick={onDelete} className="text-destructive">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Selected
                 </DropdownMenuItem>
@@ -119,12 +104,7 @@ export function BulkActionsToolbar({
             </DropdownMenu>
 
             <div className="border-l pl-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={onClearSelection}
-                disabled={disabled}
-              >
+              <Button size="sm" variant="ghost" onClick={onClearSelection} disabled={disabled}>
                 <X className="h-4 w-4" />
               </Button>
             </div>

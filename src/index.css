@@ -12,39 +12,39 @@
     /* Core palette - WCAG AA compliant contrast */
     --background: 0 0% 100%;
     --foreground: 0 0% 0%;
-    
+
     --card: 0 0% 100%;
     --card-foreground: 0 0% 0%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 0%;
-    
-    --primary: 45 100% 51%;      /* Golden yellow (#FDB813) */
+
+    --primary: 45 100% 51%; /* Golden yellow (#FDB813) */
     --primary-variant: 45 100% 45%;
     --primary-foreground: 0 0% 0%;
     --primary-light: 45 100% 55%;
     --primary-dark: 45 100% 40%;
-    
-    --secondary: 45 100% 51%;     /* Golden yellow (#FDB813) */
+
+    --secondary: 45 100% 51%; /* Golden yellow (#FDB813) */
     --secondary-foreground: 0 0% 0%;
     --secondary-light: 45 100% 55%;
     --secondary-muted: 45 100% 45%;
-    
+
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 40%;
-    
+
     --accent: 45 100% 95%;
     --accent-foreground: 45 100% 25%;
-    
+
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    
+
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    
+
     --warning: 45 100% 51%;
     --warning-foreground: 0 0% 0%;
-    
+
     --info: 45 100% 51%;
     --info-foreground: 0 0% 0%;
 
@@ -63,10 +63,10 @@
     --border: 0 0% 88%;
     --input: 0 0% 88%;
     --ring: 45 100% 51%;
-    
+
     /* Radius system */
     --radius: 0.5rem;
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 100% 45%));
     --gradient-secondary: linear-gradient(135deg, hsl(45 100% 51%), hsl(45 100% 55%));
@@ -97,43 +97,43 @@
     --sidebar-ring: 45 100% 51%;
 
     /* Chart colors for data visualization */
-    --chart-1: 220 70% 50%;  /* Blue */
-    --chart-2: 160 60% 45%;  /* Teal */
-    --chart-3: 30 80% 55%;   /* Orange */
-    --chart-4: 280 65% 60%;  /* Purple */
-    --chart-5: 340 75% 55%;  /* Pink */
+    --chart-1: 220 70% 50%; /* Blue */
+    --chart-2: 160 60% 45%; /* Teal */
+    --chart-3: 30 80% 55%; /* Orange */
+    --chart-4: 280 65% 60%; /* Purple */
+    --chart-5: 340 75% 55%; /* Pink */
   }
 
   .dark {
     /* Dark mode - maintains WCAG AA compliance */
     --background: 0 0% 8%;
     --foreground: 0 0% 95%;
-    
+
     --card: 0 0% 11%;
     --card-foreground: 0 0% 95%;
-    
+
     --popover: 0 0% 11%;
     --popover-foreground: 0 0% 95%;
-    
+
     --primary: 45 100% 51%;
     --primary-variant: 45 100% 55%;
     --primary-foreground: 0 0% 8%;
-    
+
     --secondary: 45 100% 51%;
     --secondary-foreground: 0 0% 8%;
-    
+
     --muted: 0 0% 18%;
     --muted-foreground: 0 0% 65%;
-    
+
     --accent: 45 100% 18%;
     --accent-foreground: 45 100% 80%;
-    
+
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    
+
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    
+
     --border: 0 0% 20%;
     --input: 0 0% 20%;
     --ring: 45 100% 51%;
@@ -149,11 +149,11 @@
     --sidebar-ring: 45 100% 51%;
 
     /* Chart colors for data visualization - dark mode */
-    --chart-1: 220 70% 60%;  /* Blue - brighter for dark mode */
-    --chart-2: 160 60% 55%;  /* Teal */
-    --chart-3: 30 80% 65%;   /* Orange */
-    --chart-4: 280 65% 70%;  /* Purple */
-    --chart-5: 340 75% 65%;  /* Pink */
+    --chart-1: 220 70% 60%; /* Blue - brighter for dark mode */
+    --chart-2: 160 60% 55%; /* Teal */
+    --chart-3: 30 80% 65%; /* Orange */
+    --chart-4: 280 65% 70%; /* Purple */
+    --chart-5: 340 75% 65%; /* Pink */
   }
 }
 
@@ -161,7 +161,7 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground;
   }
@@ -191,24 +191,54 @@
 }
 
 /* Decorative overlays should never intercept clicks */
-html, body { height: 100%; }
-[data-decorative="true"], .decorative, .bg-overlay, .gradient-overlay { 
-  pointer-events: none !important; 
+html,
+body {
+  height: 100%;
 }
-header, footer, a, button, input, select, textarea, [role="button"], [role="link"] { 
-  pointer-events: auto; 
+[data-decorative="true"],
+.decorative,
+.bg-overlay,
+.gradient-overlay {
+  pointer-events: none !important;
+}
+header,
+footer,
+a,
+button,
+input,
+select,
+textarea,
+[role="button"],
+[role="link"] {
+  pointer-events: auto;
 }
 
 @layer components {
   /* Standardized Spacing Scale - 4/8/12/16/24/32/48/64px */
-  .space-xs { @apply space-y-1; } /* 4px */
-  .space-sm { @apply space-y-2; } /* 8px */
-  .space-md { @apply space-y-3; } /* 12px */
-  .space-base { @apply space-y-4; } /* 16px */
-  .space-lg { @apply space-y-6; } /* 24px */
-  .space-xl { @apply space-y-8; } /* 32px */
-  .space-2xl { @apply space-y-12; } /* 48px */
-  .space-3xl { @apply space-y-16; } /* 64px */
+  .space-xs {
+    @apply space-y-1;
+  } /* 4px */
+  .space-sm {
+    @apply space-y-2;
+  } /* 8px */
+  .space-md {
+    @apply space-y-3;
+  } /* 12px */
+  .space-base {
+    @apply space-y-4;
+  } /* 16px */
+  .space-lg {
+    @apply space-y-6;
+  } /* 24px */
+  .space-xl {
+    @apply space-y-8;
+  } /* 32px */
+  .space-2xl {
+    @apply space-y-12;
+  } /* 48px */
+  .space-3xl {
+    @apply space-y-16;
+  } /* 64px */
 
   /* Enterprise button styles with consistent hierarchy */
   .btn-enterprise {
@@ -276,8 +306,12 @@ header, footer, a, button, input, select, textarea, [role="button"], [role="link
   }
 
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 
   /* Status indicators */
@@ -311,7 +345,7 @@ header, footer, a, button, input, select, textarea, [role="button"], [role="link
 
   .metric-card::before {
     @apply absolute top-0 right-0 w-20 h-20 rounded-full -translate-y-10 translate-x-10;
-    content: '';
+    content: "";
     background: linear-gradient(135deg, hsl(var(--primary) / 0.15), transparent);
   }
 }

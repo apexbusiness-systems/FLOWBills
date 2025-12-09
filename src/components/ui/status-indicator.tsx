@@ -7,16 +7,16 @@ interface StatusIndicatorProps {
   className?: string;
 }
 
-const StatusIndicator = ({ 
-  status, 
-  size = "md", 
+const StatusIndicator = ({
+  status,
+  size = "md",
   animated = true,
-  className 
+  className,
 }: StatusIndicatorProps) => {
   const sizeClasses = {
     sm: "h-2 w-2",
     md: "h-3 w-3",
-    lg: "h-4 w-4"
+    lg: "h-4 w-4",
   };
 
   const statusClasses = {
@@ -24,16 +24,15 @@ const StatusIndicator = ({
     warning: "bg-status-pending",
     error: "bg-destructive",
     processing: "bg-status-processing",
-    offline: "bg-muted-foreground"
+    offline: "bg-muted-foreground",
   };
 
-  const pulseClass = animated && (status === "processing" || status === "error") 
-    ? "animate-pulse" 
-    : "";
+  const pulseClass =
+    animated && (status === "processing" || status === "error") ? "animate-pulse" : "";
 
   return (
     <div className="flex items-center gap-2">
-      <div 
+      <div
         className={cn(
           "rounded-full",
           sizeClasses[size],

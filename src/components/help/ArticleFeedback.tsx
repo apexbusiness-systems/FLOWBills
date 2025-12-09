@@ -62,7 +62,7 @@ export const ArticleFeedback = ({ articleId, articleTitle }: ArticleFeedbackProp
   return (
     <div className="flex items-center gap-2 pt-4 border-t border-border">
       <span className="text-sm text-muted-foreground mr-2">Was this helpful?</span>
-      
+
       <Button
         variant="outline"
         size="sm"
@@ -110,7 +110,7 @@ export const ArticleFeedback = ({ articleId, articleTitle }: ArticleFeedbackProp
               Help us improve "{articleTitle}" by sharing your thoughts or suggestions.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 pt-4">
             <div className="flex gap-2">
               <Button

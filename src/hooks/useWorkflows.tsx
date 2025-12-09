@@ -1,17 +1,25 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import { toast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./useAuth";
+import { toast } from "@/hooks/use-toast";
 
 export interface WorkflowCondition {
   field: string;
-  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'greater_or_equal' | 'less_or_equal' | 'contains' | 'in';
+  operator:
+    | "equals"
+    | "not_equals"
+    | "greater_than"
+    | "less_than"
+    | "greater_or_equal"
+    | "less_or_equal"
+    | "contains"
+    | "in";
   value: any;
 }
 
 export interface WorkflowStep {
   id: string;
-  type: 'validation' | 'approval' | 'notification' | 'integration' | 'condition';
+  type: "validation" | "approval" | "notification" | "integration" | "condition";
   name: string;
   config: Record<string, any>;
   conditions?: WorkflowCondition[];
@@ -37,7 +45,7 @@ export interface WorkflowInstance {
   workflow_id: string;
   entity_type: string;
   entity_id: string;
-  status: 'running' | 'completed' | 'failed' | 'paused';
+  status: "running" | "completed" | "failed" | "paused";
   current_step: number;
   step_data: Record<string, any>;
   started_at: string;
@@ -56,15 +64,15 @@ export const useWorkflows = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('workflows')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .from("workflows")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setWorkflows((data || []) as unknown as Workflow[]);
     } catch (error: any) {
-      console.error('Error fetching workflows:', error);
+      console.error("Error fetching workflows:", error);
       toast({
         title: "Error",
         description: "Failed to fetch workflows",
@@ -81,27 +89,29 @@ export const useWorkflows = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('workflow_instances')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('started_at', { ascending: false })
+        .from("workflow_instances")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("started_at", { ascending: false })
         .limit(50);
 
       if (error) throw error;
       setInstances((data || []) as unknown as WorkflowInstance[]);
     } catch (error: any) {
-      console.error('Error fetching instances:', error);
+      console.error("Error fetching instances:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const createWorkflow = async (workflowData: Omit<Workflow, 'id' | 'created_at' | 'updated_at'>) => {
+  const createWorkflow = async (
+    workflowData: Omit<Workflow, "id" | "created_at" | "updated_at">
+  ) => {
     if (!user) return null;
 
     try {
       const { data, error } = await supabase
-        .from('workflows')
+        .from("workflows")
         .insert({
           user_id: user.id,
           name: workflowData.name,
@@ -123,7 +133,7 @@ export const useWorkflows = () => {
       await fetchWorkflows();
       return data;
     } catch (error: any) {
-      console.error('Error creating workflow:', error);
+      console.error("Error creating workflow:", error);
       toast({
         title: "Error",
         description: "Failed to create workflow",
@@ -150,10 +160,10 @@ export const useWorkflows = () => {
 
     try {
       const { error } = await supabase
-        .from('workflows')
+        .from("workflows")
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq("id", id)
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
@@ -165,7 +175,7 @@ export const useWorkflows = () => {
       await fetchWorkflows();
       return true;
     } catch (error: any) {
-      console.error('Error deleting workflow:', error);
+      console.error("Error deleting workflow:", error);
       toast({
         title: "Error",
         description: "Failed to delete workflow",
@@ -179,12 +189,12 @@ export const useWorkflows = () => {
     if (!user) return null;
 
     try {
-      const { data, error } = await supabase.functions.invoke('workflow-execute', {
+      const { data, error } = await supabase.functions.invoke("workflow-execute", {
         body: {
           workflow_id: workflowId,
           entity_type: entityType,
           entity_id: entityId,
-        }
+        },
       });
 
       if (error) throw error;
@@ -197,7 +207,7 @@ export const useWorkflows = () => {
       await fetchInstances();
       return data;
     } catch (error: any) {
-      console.error('Error starting workflow:', error);
+      console.error("Error starting workflow:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to start workflow",
@@ -250,59 +260,59 @@ export const useWorkflows = () => {
     // Return predefined workflow templates
     return [
       {
-        name: 'Invoice Processing',
-        description: 'Standard invoice validation and approval workflow',
-        workflow_type: 'invoice_processing',
+        name: "Invoice Processing",
+        description: "Standard invoice validation and approval workflow",
+        workflow_type: "invoice_processing",
         steps: [
           {
-            id: 'validate',
-            type: 'validation' as const,
-            name: 'Validate Invoice',
-            config: { rules: ['amount_check', 'vendor_check'] },
+            id: "validate",
+            type: "validation" as const,
+            name: "Validate Invoice",
+            config: { rules: ["amount_check", "vendor_check"] },
             position: { x: 100, y: 100 },
-            connections: ['approve']
+            connections: ["approve"],
           },
           {
-            id: 'approve',
-            type: 'approval' as const,
-            name: 'Approval Required',
+            id: "approve",
+            type: "approval" as const,
+            name: "Approval Required",
             config: { threshold: 1000 },
             position: { x: 300, y: 100 },
-            connections: ['notify']
+            connections: ["notify"],
           },
           {
-            id: 'notify',
-            type: 'notification' as const,
-            name: 'Send Notification',
-            config: { recipients: ['finance@company.com'] },
+            id: "notify",
+            type: "notification" as const,
+            name: "Send Notification",
+            config: { recipients: ["finance@company.com"] },
             position: { x: 500, y: 100 },
-            connections: []
-          }
-        ]
+            connections: [],
+          },
+        ],
       },
       {
-        name: 'Compliance Check',
-        description: 'Regulatory compliance verification workflow',
-        workflow_type: 'compliance',
+        name: "Compliance Check",
+        description: "Regulatory compliance verification workflow",
+        workflow_type: "compliance",
         steps: [
           {
-            id: 'check_compliance',
-            type: 'validation' as const,
-            name: 'Compliance Check',
-            config: { regulations: ['SOX', 'GDPR'] },
+            id: "check_compliance",
+            type: "validation" as const,
+            name: "Compliance Check",
+            config: { regulations: ["SOX", "GDPR"] },
             position: { x: 100, y: 100 },
-            connections: ['audit']
+            connections: ["audit"],
           },
           {
-            id: 'audit',
-            type: 'approval' as const,
-            name: 'Audit Review',
-            config: { department: 'compliance' },
+            id: "audit",
+            type: "approval" as const,
+            name: "Audit Review",
+            config: { department: "compliance" },
             position: { x: 300, y: 100 },
-            connections: []
-          }
-        ]
-      }
+            connections: [],
+          },
+        ],
+      },
     ];
   };
 
@@ -327,6 +337,6 @@ export const useWorkflows = () => {
     pauseWorkflow,
     resumeWorkflow,
     cancelWorkflow,
-    getWorkflowTemplates
+    getWorkflowTemplates,
   };
 };

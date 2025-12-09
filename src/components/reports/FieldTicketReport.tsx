@@ -1,18 +1,34 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download, Filter } from 'lucide-react';
-import { useReports, FieldTicketSummary } from '@/hooks/useReports';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Download, Filter } from "lucide-react";
+import { useReports, FieldTicketSummary } from "@/hooks/useReports";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 export const FieldTicketReportComponent = () => {
   const [data, setData] = useState<FieldTicketSummary[]>([]);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const { loading, getFieldTicketSummary, exportToCSV } = useReports();
 
   const loadReport = async () => {
@@ -28,15 +44,18 @@ export const FieldTicketReportComponent = () => {
   }, []);
 
   const handleExport = () => {
-    exportToCSV(data, 'field_ticket_summary');
+    exportToCSV(data, "field_ticket_summary");
   };
 
-  const chartData = data.slice(0, 30).reverse().map(day => ({
-    date: new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    total: day.total_tickets,
-    verified: day.verified_tickets,
-    unverified: day.unverified_tickets,
-  }));
+  const chartData = data
+    .slice(0, 30)
+    .reverse()
+    .map((day) => ({
+      date: new Date(day.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      total: day.total_tickets,
+      verified: day.verified_tickets,
+      unverified: day.unverified_tickets,
+    }));
 
   const chartConfig = {
     total: {
@@ -53,12 +72,15 @@ export const FieldTicketReportComponent = () => {
     },
   };
 
-  const totals = data.reduce((acc, day) => ({
-    total_tickets: acc.total_tickets + day.total_tickets,
-    verified_tickets: acc.verified_tickets + day.verified_tickets,
-    unverified_tickets: acc.unverified_tickets + day.unverified_tickets,
-    total_amount: acc.total_amount + day.total_amount,
-  }), { total_tickets: 0, verified_tickets: 0, unverified_tickets: 0, total_amount: 0 });
+  const totals = data.reduce(
+    (acc, day) => ({
+      total_tickets: acc.total_tickets + day.total_tickets,
+      verified_tickets: acc.verified_tickets + day.verified_tickets,
+      unverified_tickets: acc.unverified_tickets + day.unverified_tickets,
+      total_amount: acc.total_amount + day.total_amount,
+    }),
+    { total_tickets: 0, verified_tickets: 0, unverified_tickets: 0, total_amount: 0 }
+  );
 
   return (
     <Card>
@@ -143,9 +165,24 @@ export const FieldTicketReportComponent = () => {
                     <YAxis />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
-                    <Line type="monotone" dataKey="total" stroke="var(--color-total)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="verified" stroke="var(--color-verified)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="unverified" stroke="var(--color-unverified)" strokeWidth={2} />
+                    <Line
+                      type="monotone"
+                      dataKey="total"
+                      stroke="var(--color-total)"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="verified"
+                      stroke="var(--color-verified)"
+                      strokeWidth={2}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="unverified"
+                      stroke="var(--color-unverified)"
+                      strokeWidth={2}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -167,17 +204,25 @@ export const FieldTicketReportComponent = () => {
                   {data.map((day) => (
                     <TableRow key={day.date}>
                       <TableCell className="font-medium">
-                        {new Date(day.date).toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'short', 
-                          day: 'numeric' 
+                        {new Date(day.date).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
                         })}
                       </TableCell>
                       <TableCell className="text-right">{day.total_tickets}</TableCell>
-                      <TableCell className="text-right text-success">{day.verified_tickets}</TableCell>
-                      <TableCell className="text-right text-warning">{day.unverified_tickets}</TableCell>
-                      <TableCell className="text-right">${day.total_amount.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">${day.average_amount.toLocaleString()}</TableCell>
+                      <TableCell className="text-right text-success">
+                        {day.verified_tickets}
+                      </TableCell>
+                      <TableCell className="text-right text-warning">
+                        {day.unverified_tickets}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ${day.total_amount.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ${day.average_amount.toLocaleString()}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

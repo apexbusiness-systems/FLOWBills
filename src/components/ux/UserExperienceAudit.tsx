@@ -1,16 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Smartphone, Monitor, Shield, BookOpen, CheckCircle, AlertTriangle, Info } from 'lucide-react';
-import { mobileAuditor, MobileAuditResult } from '@/lib/mobile-audit';
-import { accessibilityChecker, AccessibilityAuditResult } from '@/lib/accessibility-checker';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Smartphone,
+  Monitor,
+  Shield,
+  BookOpen,
+  CheckCircle,
+  AlertTriangle,
+  Info,
+} from "lucide-react";
+import { mobileAuditor, MobileAuditResult } from "@/lib/mobile-audit";
+import { accessibilityChecker, AccessibilityAuditResult } from "@/lib/accessibility-checker";
 
 const UserExperienceAudit: React.FC = () => {
   const [mobileResults, setMobileResults] = useState<MobileAuditResult | null>(null);
-  const [accessibilityResults, setAccessibilityResults] = useState<AccessibilityAuditResult | null>(null);
+  const [accessibilityResults, setAccessibilityResults] = useState<AccessibilityAuditResult | null>(
+    null
+  );
   const [isRunning, setIsRunning] = useState(false);
 
   const runCompleteAudit = async () => {
@@ -18,12 +28,12 @@ const UserExperienceAudit: React.FC = () => {
     try {
       const [mobile, accessibility] = await Promise.all([
         mobileAuditor.runAudit(),
-        accessibilityChecker.runCompleteAudit()
+        accessibilityChecker.runCompleteAudit(),
       ]);
       setMobileResults(mobile);
       setAccessibilityResults(accessibility);
     } catch (error) {
-      console.error('Audit failed:', error);
+      console.error("Audit failed:", error);
     } finally {
       setIsRunning(false);
     }
@@ -34,9 +44,9 @@ const UserExperienceAudit: React.FC = () => {
   }, []);
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-600';
-    if (score >= 70) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 90) return "text-green-600";
+    if (score >= 70) return "text-yellow-600";
+    return "text-red-600";
   };
 
   return (
@@ -44,7 +54,8 @@ const UserExperienceAudit: React.FC = () => {
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-4">User Experience Audit</h1>
         <p className="text-lg text-muted-foreground">
-          Comprehensive audit of mobile responsiveness, accessibility compliance, and user experience
+          Comprehensive audit of mobile responsiveness, accessibility compliance, and user
+          experience
         </p>
       </div>
 
@@ -69,22 +80,34 @@ const UserExperienceAudit: React.FC = () => {
                 <Progress value={mobileResults.score} className="h-3" />
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div className="text-center">
-                    <div className={`font-semibold ${mobileResults.deviceCompatibility.mobile ? 'text-green-600' : 'text-red-600'}`}>
+                    <div
+                      className={`font-semibold ${mobileResults.deviceCompatibility.mobile ? "text-green-600" : "text-red-600"}`}
+                    >
                       Mobile
                     </div>
-                    <CheckCircle className={`h-4 w-4 mx-auto ${mobileResults.deviceCompatibility.mobile ? 'text-green-600' : 'text-red-600'}`} />
+                    <CheckCircle
+                      className={`h-4 w-4 mx-auto ${mobileResults.deviceCompatibility.mobile ? "text-green-600" : "text-red-600"}`}
+                    />
                   </div>
                   <div className="text-center">
-                    <div className={`font-semibold ${mobileResults.deviceCompatibility.tablet ? 'text-green-600' : 'text-red-600'}`}>
+                    <div
+                      className={`font-semibold ${mobileResults.deviceCompatibility.tablet ? "text-green-600" : "text-red-600"}`}
+                    >
                       Tablet
                     </div>
-                    <CheckCircle className={`h-4 w-4 mx-auto ${mobileResults.deviceCompatibility.tablet ? 'text-green-600' : 'text-red-600'}`} />
+                    <CheckCircle
+                      className={`h-4 w-4 mx-auto ${mobileResults.deviceCompatibility.tablet ? "text-green-600" : "text-red-600"}`}
+                    />
                   </div>
                   <div className="text-center">
-                    <div className={`font-semibold ${mobileResults.deviceCompatibility.desktop ? 'text-green-600' : 'text-red-600'}`}>
+                    <div
+                      className={`font-semibold ${mobileResults.deviceCompatibility.desktop ? "text-green-600" : "text-red-600"}`}
+                    >
                       Desktop
                     </div>
-                    <CheckCircle className={`h-4 w-4 mx-auto ${mobileResults.deviceCompatibility.desktop ? 'text-green-600' : 'text-red-600'}`} />
+                    <CheckCircle
+                      className={`h-4 w-4 mx-auto ${mobileResults.deviceCompatibility.desktop ? "text-green-600" : "text-red-600"}`}
+                    />
                   </div>
                 </div>
               </div>
@@ -110,14 +133,23 @@ const UserExperienceAudit: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold">Score:</span>
-                  <span className={`text-3xl font-bold ${getScoreColor(accessibilityResults.score)}`}>
+                  <span
+                    className={`text-3xl font-bold ${getScoreColor(accessibilityResults.score)}`}
+                  >
                     {accessibilityResults.score}/100
                   </span>
                 </div>
                 <Progress value={accessibilityResults.score} className="h-3" />
                 <div className="flex items-center justify-between">
                   <span>WCAG Level:</span>
-                  <Badge variant={accessibilityResults.wcagLevel === 'AA' || accessibilityResults.wcagLevel === 'AAA' ? 'default' : 'destructive'}>
+                  <Badge
+                    variant={
+                      accessibilityResults.wcagLevel === "AA" ||
+                      accessibilityResults.wcagLevel === "AAA"
+                        ? "default"
+                        : "destructive"
+                    }
+                  >
                     {accessibilityResults.wcagLevel}
                   </Badge>
                 </div>
@@ -126,7 +158,9 @@ const UserExperienceAudit: React.FC = () => {
                     <span className="text-green-600">{accessibilityResults.passes} Passes</span>
                   </div>
                   <div>
-                    <span className="text-red-600">{accessibilityResults.violations.length} Issues</span>
+                    <span className="text-red-600">
+                      {accessibilityResults.violations.length} Issues
+                    </span>
                   </div>
                 </div>
               </div>
@@ -155,9 +189,9 @@ const UserExperienceAudit: React.FC = () => {
                 <Card key={index}>
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-3">
-                      {issue.type === 'critical' ? (
+                      {issue.type === "critical" ? (
                         <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
-                      ) : issue.type === 'warning' ? (
+                      ) : issue.type === "warning" ? (
                         <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
                       ) : (
                         <Info className="h-5 w-5 text-blue-600 mt-0.5" />
@@ -165,16 +199,23 @@ const UserExperienceAudit: React.FC = () => {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           <h4 className="font-semibold">{issue.description}</h4>
-                          <Badge variant="outline" className={
-                            issue.type === 'critical' ? 'border-red-200 text-red-800' :
-                            issue.type === 'warning' ? 'border-yellow-200 text-yellow-800' :
-                            'border-blue-200 text-blue-800'
-                          }>
+                          <Badge
+                            variant="outline"
+                            className={
+                              issue.type === "critical"
+                                ? "border-red-200 text-red-800"
+                                : issue.type === "warning"
+                                  ? "border-yellow-200 text-yellow-800"
+                                  : "border-blue-200 text-blue-800"
+                            }
+                          >
                             {issue.type}
                           </Badge>
                         </div>
                         {issue.element && (
-                          <p className="text-sm text-muted-foreground mb-2">Element: {issue.element}</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Element: {issue.element}
+                          </p>
                         )}
                         {issue.fix && (
                           <p className="text-sm bg-muted/50 p-2 rounded">{issue.fix}</p>
@@ -195,12 +236,17 @@ const UserExperienceAudit: React.FC = () => {
                 <Card key={index}>
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-3">
-                      <AlertTriangle className={`h-5 w-5 mt-0.5 ${
-                        violation.impact === 'critical' ? 'text-red-600' :
-                        violation.impact === 'serious' ? 'text-orange-600' :
-                        violation.impact === 'moderate' ? 'text-yellow-600' :
-                        'text-blue-600'
-                      }`} />
+                      <AlertTriangle
+                        className={`h-5 w-5 mt-0.5 ${
+                          violation.impact === "critical"
+                            ? "text-red-600"
+                            : violation.impact === "serious"
+                              ? "text-orange-600"
+                              : violation.impact === "moderate"
+                                ? "text-yellow-600"
+                                : "text-blue-600"
+                        }`}
+                      />
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           <h4 className="font-semibold">{violation.description}</h4>
@@ -211,7 +257,9 @@ const UserExperienceAudit: React.FC = () => {
                           Guideline: {violation.guideline}
                         </p>
                         {violation.element && (
-                          <p className="text-sm text-muted-foreground mb-2">Element: {violation.element}</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Element: {violation.element}
+                          </p>
                         )}
                         <p className="text-sm bg-muted/50 p-2 rounded">{violation.fix}</p>
                       </div>
@@ -265,29 +313,41 @@ const UserExperienceAudit: React.FC = () => {
 
         <TabsContent value="actions" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-24 flex flex-col items-center justify-center space-y-2">
+            <Button
+              variant="outline"
+              className="h-24 flex flex-col items-center justify-center space-y-2"
+            >
               <Smartphone className="h-6 w-6" />
               <span>Test Mobile View</span>
             </Button>
-            <Button variant="outline" className="h-24 flex flex-col items-center justify-center space-y-2">
+            <Button
+              variant="outline"
+              className="h-24 flex flex-col items-center justify-center space-y-2"
+            >
               <Monitor className="h-6 w-6" />
               <span>Test Desktop View</span>
             </Button>
-            <Button variant="outline" className="h-24 flex flex-col items-center justify-center space-y-2">
+            <Button
+              variant="outline"
+              className="h-24 flex flex-col items-center justify-center space-y-2"
+            >
               <Shield className="h-6 w-6" />
               <span>Run Accessibility Test</span>
             </Button>
-            <Button variant="outline" className="h-24 flex flex-col items-center justify-center space-y-2">
+            <Button
+              variant="outline"
+              className="h-24 flex flex-col items-center justify-center space-y-2"
+            >
               <BookOpen className="h-6 w-6" />
               <span>View Documentation</span>
             </Button>
-            <Button 
+            <Button
               onClick={runCompleteAudit}
               disabled={isRunning}
               className="h-24 flex flex-col items-center justify-center space-y-2"
             >
               <CheckCircle className="h-6 w-6" />
-              <span>{isRunning ? 'Running...' : 'Rerun Audit'}</span>
+              <span>{isRunning ? "Running..." : "Rerun Audit"}</span>
             </Button>
           </div>
         </TabsContent>

@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useIntegrations, Integration } from '@/hooks/useIntegrations';
-import IntegrationList from './IntegrationList';
-import CreateIntegrationDialog from './CreateIntegrationDialog';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { useState } from "react";
+import { useIntegrations, Integration } from "@/hooks/useIntegrations";
+import IntegrationList from "./IntegrationList";
+import CreateIntegrationDialog from "./CreateIntegrationDialog";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const IntegrationManager = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  
+
   const {
     integrations,
     loading,
@@ -38,7 +38,7 @@ const IntegrationManager = () => {
   };
 
   const handleToggleStatus = async (integration: Integration) => {
-    const newStatus = integration.status === 'connected' ? 'disconnected' : 'connected';
+    const newStatus = integration.status === "connected" ? "disconnected" : "connected";
     await updateIntegration(integration.id, { status: newStatus });
   };
 
@@ -51,15 +51,10 @@ const IntegrationManager = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Integration Management</h2>
-          <p className="text-muted-foreground">
-            Manage NOV and third-party system integrations
-          </p>
+          <p className="text-muted-foreground">Manage NOV and third-party system integrations</p>
         </div>
-        
-        <Button 
-          onClick={() => setCreateDialogOpen(true)}
-          className="gap-2"
-        >
+
+        <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
           Add Integration
         </Button>

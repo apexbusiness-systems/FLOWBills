@@ -6,11 +6,7 @@ import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface DateRangePickerProps {
   date?: DateRange;
@@ -49,11 +45,7 @@ const presets = [
   },
 ];
 
-export function DateRangePicker({
-  date,
-  onDateChange,
-  className,
-}: DateRangePickerProps) {
+export function DateRangePicker({ date, onDateChange, className }: DateRangePickerProps) {
   const [internalDate, setInternalDate] = React.useState<DateRange | undefined>(date);
 
   const handleDateChange = (newDate: DateRange | undefined) => {
@@ -77,8 +69,7 @@ export function DateRangePicker({
             {internalDate?.from ? (
               internalDate.to ? (
                 <>
-                  {format(internalDate.from, "LLL dd, y")} -{" "}
-                  {format(internalDate.to, "LLL dd, y")}
+                  {format(internalDate.from, "LLL dd, y")} - {format(internalDate.to, "LLL dd, y")}
                 </>
               ) : (
                 format(internalDate.from, "LLL dd, y")
@@ -91,9 +82,7 @@ export function DateRangePicker({
         <PopoverContent className="w-auto p-0" align="start">
           <div className="flex">
             <div className="border-r border-border p-3 space-y-1">
-              <div className="text-xs font-semibold text-muted-foreground mb-2">
-                Presets
-              </div>
+              <div className="text-xs font-semibold text-muted-foreground mb-2">Presets</div>
               {presets.map((preset) => (
                 <Button
                   key={preset.label}

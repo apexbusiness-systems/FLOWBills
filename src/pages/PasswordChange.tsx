@@ -20,9 +20,7 @@ const PasswordChange = () => {
         <Card className="border-border shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Password Management</CardTitle>
-            <CardDescription>
-              Change your account password securely
-            </CardDescription>
+            <CardDescription>Change your account password securely</CardDescription>
           </CardHeader>
           <CardContent>
             <PasswordChangeDialog />

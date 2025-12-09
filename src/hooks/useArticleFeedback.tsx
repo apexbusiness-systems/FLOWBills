@@ -24,7 +24,9 @@ export const useArticleFeedback = () => {
     try {
       setIsSubmitting(true);
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Authentication required",
@@ -100,7 +102,9 @@ export const useArticleFeedback = () => {
 
   const getUserFeedback = async (articleId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data, error } = await supabase

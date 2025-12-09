@@ -20,20 +20,20 @@ interface Invoice {
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'approved':
-    case 'approved_auto':
-    case 'paid':
+    case "approved":
+    case "approved_auto":
+    case "paid":
       return <CheckCircle className="h-4 w-4 text-status-approved" />;
-    case 'pending':
-    case 'processing':
-    case 'extracted':
+    case "pending":
+    case "processing":
+    case "extracted":
       return <Clock className="h-4 w-4 text-status-processing" />;
-    case 'pending_approval':
-    case 'matched':
+    case "pending_approval":
+    case "matched":
       return <AlertTriangle className="h-4 w-4 text-amber-500" />;
-    case 'rejected':
-    case 'exception':
-    case 'duplicate_suspected':
+    case "rejected":
+    case "exception":
+    case "duplicate_suspected":
       return <XCircle className="h-4 w-4 text-destructive" />;
     default:
       return <FileText className="h-4 w-4 text-muted-foreground" />;
@@ -42,21 +42,21 @@ const getStatusIcon = (status: string) => {
 
 const getStatusBadge = (status: string) => {
   const statusMap: Record<string, { variant: any; label: string }> = {
-    'pending': { variant: 'processing', label: 'Pending' },
-    'processing': { variant: 'processing', label: 'Processing' },
-    'extracted': { variant: 'pending', label: 'Extracted' },
-    'validated': { variant: 'pending', label: 'Validated' },
-    'matched': { variant: 'pending', label: 'Matched' },
-    'pending_approval': { variant: 'pending', label: 'Awaiting Approval' },
-    'approved': { variant: 'approved', label: 'Approved' },
-    'approved_auto': { variant: 'approved', label: 'Auto-Approved' },
-    'paid': { variant: 'approved', label: 'Paid' },
-    'rejected': { variant: 'rejected', label: 'Rejected' },
-    'exception': { variant: 'rejected', label: 'Exception' },
-    'duplicate_suspected': { variant: 'rejected', label: 'Duplicate' }
+    pending: { variant: "processing", label: "Pending" },
+    processing: { variant: "processing", label: "Processing" },
+    extracted: { variant: "pending", label: "Extracted" },
+    validated: { variant: "pending", label: "Validated" },
+    matched: { variant: "pending", label: "Matched" },
+    pending_approval: { variant: "pending", label: "Awaiting Approval" },
+    approved: { variant: "approved", label: "Approved" },
+    approved_auto: { variant: "approved", label: "Auto-Approved" },
+    paid: { variant: "approved", label: "Paid" },
+    rejected: { variant: "rejected", label: "Rejected" },
+    exception: { variant: "rejected", label: "Exception" },
+    duplicate_suspected: { variant: "rejected", label: "Duplicate" },
   };
-  
-  const { variant, label } = statusMap[status] || { variant: 'outline', label: status };
+
+  const { variant, label } = statusMap[status] || { variant: "outline", label: status };
   return <Badge variant={variant}>{label}</Badge>;
 };
 
@@ -72,16 +72,16 @@ export const InvoiceStatusTracker = () => {
     const fetchRecentInvoices = async () => {
       try {
         const { data, error } = await supabase
-          .from('invoices')
-          .select('id, invoice_number, vendor_name, amount, status, created_at, invoice_date')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
+          .from("invoices")
+          .select("id, invoice_number, vendor_name, amount, status, created_at, invoice_date")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
           .limit(10);
 
         if (error) throw error;
         setRecentInvoices(data || []);
       } catch (error) {
-        console.error('Error fetching recent invoices:', error);
+        console.error("Error fetching recent invoices:", error);
       } finally {
         setLoading(false);
       }
@@ -91,15 +91,19 @@ export const InvoiceStatusTracker = () => {
 
     // Subscribe to real-time updates
     const channel = supabase
-      .channel('recent-invoices')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'invoices',
-        filter: `user_id=eq.${user.id}`
-      }, () => {
-        fetchRecentInvoices();
-      })
+      .channel("recent-invoices")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "invoices",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchRecentInvoices();
+        }
+      )
       .subscribe();
 
     return () => {
@@ -132,9 +136,7 @@ export const InvoiceStatusTracker = () => {
           <div className="text-center py-8">
             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground mb-4">No invoices yet</p>
-            <Button onClick={() => navigate('/invoices')}>
-              Upload Your First Invoice
-            </Button>
+            <Button onClick={() => navigate("/invoices")}>Upload Your First Invoice</Button>
           </div>
         </CardContent>
       </Card>
@@ -145,7 +147,7 @@ export const InvoiceStatusTracker = () => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Recent Invoice Activity</CardTitle>
-        <Button variant="outline" size="sm" onClick={() => navigate('/invoices')}>
+        <Button variant="outline" size="sm" onClick={() => navigate("/invoices")}>
           View All
         </Button>
       </CardHeader>
@@ -168,7 +170,7 @@ export const InvoiceStatusTracker = () => {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="truncate">{invoice.vendor_name}</span>
                   <span>${invoice.amount.toLocaleString()}</span>
-                  <span>{format(new Date(invoice.created_at), 'MMM d, yyyy')}</span>
+                  <span>{format(new Date(invoice.created_at), "MMM d, yyyy")}</span>
                 </div>
               </div>
             </div>

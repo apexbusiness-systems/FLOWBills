@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -16,13 +16,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { useFieldTickets } from '@/hooks/useFieldTickets';
-import { Loader2, CheckCircle2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useFieldTickets } from "@/hooks/useFieldTickets";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 const formSchema = z.object({
   notes: z.string().optional(),
@@ -47,7 +47,7 @@ export const VerifyFieldTicketDialog = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      notes: '',
+      notes: "",
     },
   });
 
@@ -55,7 +55,7 @@ export const VerifyFieldTicketDialog = ({
     setIsSubmitting(true);
     const result = await verifyFieldTicket(ticketId, values.notes);
     setIsSubmitting(false);
-    
+
     if (result) {
       form.reset();
       onOpenChange(false);
@@ -69,18 +69,14 @@ export const VerifyFieldTicketDialog = ({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Verify Field Ticket</DialogTitle>
-          <DialogDescription>
-            Review and verify the field ticket details
-          </DialogDescription>
+          <DialogDescription>Review and verify the field ticket details</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="bg-muted/50 p-4 rounded-lg space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-lg">{ticket.ticket_number}</h3>
-              {ticket.gps_coordinates && (
-                <Badge variant="outline">GPS Validated</Badge>
-              )}
+              {ticket.gps_coordinates && <Badge variant="outline">GPS Validated</Badge>}
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -91,7 +87,7 @@ export const VerifyFieldTicketDialog = ({
               <div>
                 <span className="text-muted-foreground">Service Date:</span>
                 <p className="font-medium">
-                  {format(new Date(ticket.service_date), 'MMM dd, yyyy')}
+                  {format(new Date(ticket.service_date), "MMM dd, yyyy")}
                 </p>
               </div>
               <div>
@@ -176,11 +172,7 @@ export const VerifyFieldTicketDialog = ({
               />
 
               <div className="flex justify-end gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>

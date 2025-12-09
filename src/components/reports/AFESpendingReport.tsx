@@ -1,20 +1,42 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download, Filter } from 'lucide-react';
-import { useReports, AFESpendingReport } from '@/hooks/useReports';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Download, Filter } from "lucide-react";
+import { useReports, AFESpendingReport } from "@/hooks/useReports";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 export const AFESpendingReportComponent = () => {
   const [data, setData] = useState<AFESpendingReport[]>([]);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [status, setStatus] = useState<string>('');
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [status, setStatus] = useState<string>("");
   const { loading, getAFESpendingReport, exportToCSV } = useReports();
 
   const loadReport = async () => {
@@ -31,10 +53,10 @@ export const AFESpendingReportComponent = () => {
   }, []);
 
   const handleExport = () => {
-    exportToCSV(data, 'afe_spending_report');
+    exportToCSV(data, "afe_spending_report");
   };
 
-  const chartData = data.slice(0, 10).map(afe => ({
+  const chartData = data.slice(0, 10).map((afe) => ({
     name: afe.afe_number,
     budget: afe.budget_amount,
     spent: afe.spent_amount,
@@ -143,25 +165,35 @@ export const AFESpendingReportComponent = () => {
                   {data.map((afe) => (
                     <TableRow key={afe.afe_number}>
                       <TableCell className="font-medium">{afe.afe_number}</TableCell>
-                      <TableCell>{afe.well_name || '-'}</TableCell>
+                      <TableCell>{afe.well_name || "-"}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          afe.status === 'active' ? 'bg-success/20 text-success' :
-                          afe.status === 'completed' ? 'bg-muted text-muted-foreground' :
-                          'bg-destructive/20 text-destructive'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            afe.status === "active"
+                              ? "bg-success/20 text-success"
+                              : afe.status === "completed"
+                                ? "bg-muted text-muted-foreground"
+                                : "bg-destructive/20 text-destructive"
+                          }`}
+                        >
                           {afe.status}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right">${afe.budget_amount.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">${afe.spent_amount.toLocaleString()}</TableCell>
                       <TableCell className="text-right">
-                        <span className={afe.remaining < 0 ? 'text-destructive font-semibold' : ''}>
+                        ${afe.budget_amount.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ${afe.spent_amount.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className={afe.remaining < 0 ? "text-destructive font-semibold" : ""}>
                           ${afe.remaining.toLocaleString()}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <span className={afe.utilization > 100 ? 'text-destructive font-semibold' : ''}>
+                        <span
+                          className={afe.utilization > 100 ? "text-destructive font-semibold" : ""}
+                        >
                           {afe.utilization.toFixed(1)}%
                         </span>
                       </TableCell>

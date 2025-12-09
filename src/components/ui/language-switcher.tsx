@@ -9,11 +9,11 @@ import {
 import { Button } from "@/components/ui/button";
 
 const languages = [
-  { code: 'en', name: 'English', shortCode: 'ENG', flag: '🇨🇦' },
-  { code: 'fr', name: 'Français', shortCode: 'FRA', flag: '🇫🇷' },
-  { code: 'de', name: 'Deutsch', shortCode: 'DEU', flag: '🇩🇪' },
-  { code: 'ar', name: 'العربية', shortCode: 'ARA', flag: '🇸🇦' },
-  { code: 'zh', name: '中文', shortCode: 'ZHI', flag: '🇨🇳' },
+  { code: "en", name: "English", shortCode: "ENG", flag: "🇨🇦" },
+  { code: "fr", name: "Français", shortCode: "FRA", flag: "🇫🇷" },
+  { code: "de", name: "Deutsch", shortCode: "DEU", flag: "🇩🇪" },
+  { code: "ar", name: "العربية", shortCode: "ARA", flag: "🇸🇦" },
+  { code: "zh", name: "中文", shortCode: "ZHI", flag: "🇨🇳" },
 ];
 
 export function LanguageSwitcher() {
@@ -23,7 +23,7 @@ export function LanguageSwitcher() {
     i18n.changeLanguage(lng);
   };
 
-  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+  const currentLanguage = languages.find((lang) => lang.code === i18n.language) || languages[0];
 
   return (
     <DropdownMenu>

@@ -1,36 +1,38 @@
-import { useState } from 'react';
-import { useFieldTickets } from '@/hooks/useFieldTickets';
-import { useAFEs } from '@/hooks/useAFEs';
-import { useInvoices } from '@/hooks/useInvoices';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search, MapPin, CheckCircle2, Clock, FileText } from 'lucide-react';
-import { CreateFieldTicketDialog } from './CreateFieldTicketDialog';
-import { VerifyFieldTicketDialog } from './VerifyFieldTicketDialog';
-import { format } from 'date-fns';
+import { useState } from "react";
+import { useFieldTickets } from "@/hooks/useFieldTickets";
+import { useAFEs } from "@/hooks/useAFEs";
+import { useInvoices } from "@/hooks/useInvoices";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Search, MapPin, CheckCircle2, Clock, FileText } from "lucide-react";
+import { CreateFieldTicketDialog } from "./CreateFieldTicketDialog";
+import { VerifyFieldTicketDialog } from "./VerifyFieldTicketDialog";
+import { format } from "date-fns";
 
 export const FieldTicketManager = () => {
   const { fieldTickets, loading, getUnverifiedCount } = useFieldTickets();
   const { afes } = useAFEs();
   const { invoices } = useInvoices();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'verified' | 'unverified'>('all');
+  const [statusFilter, setStatusFilter] = useState<"all" | "verified" | "unverified">("all");
 
-  const filteredTickets = fieldTickets.filter(ticket => {
-    const matchesSearch = searchQuery === '' || 
+  const filteredTickets = fieldTickets.filter((ticket) => {
+    const matchesSearch =
+      searchQuery === "" ||
       ticket.ticket_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ticket.vendor_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ticket.location?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' ||
-      (statusFilter === 'verified' && ticket.verified) ||
-      (statusFilter === 'unverified' && !ticket.verified);
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "verified" && ticket.verified) ||
+      (statusFilter === "unverified" && !ticket.verified);
 
     return matchesSearch && matchesStatus;
   });
@@ -41,15 +43,15 @@ export const FieldTicketManager = () => {
   };
 
   const getAFENumber = (afeId: string | null) => {
-    if (!afeId) return 'N/A';
-    const afe = afes.find(a => a.id === afeId);
-    return afe?.afe_number || 'Unknown';
+    if (!afeId) return "N/A";
+    const afe = afes.find((a) => a.id === afeId);
+    return afe?.afe_number || "Unknown";
   };
 
   const getInvoiceNumber = (invoiceId: string | null) => {
-    if (!invoiceId) return 'Not Linked';
-    const invoice = invoices.find(i => i.id === invoiceId);
-    return invoice?.invoice_number || 'Unknown';
+    if (!invoiceId) return "Not Linked";
+    const invoice = invoices.find((i) => i.id === invoiceId);
+    return invoice?.invoice_number || "Unknown";
   };
 
   return (
@@ -85,7 +87,7 @@ export const FieldTicketManager = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {fieldTickets.filter(t => t.verified).length}
+              {fieldTickets.filter((t) => t.verified).length}
             </div>
           </CardContent>
         </Card>
@@ -104,9 +106,7 @@ export const FieldTicketManager = () => {
       <Card>
         <CardHeader>
           <CardTitle>Field Tickets</CardTitle>
-          <CardDescription>
-            Create, verify, and link field tickets to invoices
-          </CardDescription>
+          <CardDescription>Create, verify, and link field tickets to invoices</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
@@ -161,7 +161,7 @@ export const FieldTicketManager = () => {
                             </Badge>
                           )}
                         </div>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <span className="text-muted-foreground">Vendor:</span>
@@ -169,7 +169,9 @@ export const FieldTicketManager = () => {
                           </div>
                           <div>
                             <span className="text-muted-foreground">Service Date:</span>
-                            <p className="font-medium">{format(new Date(ticket.service_date), 'MMM dd, yyyy')}</p>
+                            <p className="font-medium">
+                              {format(new Date(ticket.service_date), "MMM dd, yyyy")}
+                            </p>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Amount:</span>
@@ -203,10 +205,7 @@ export const FieldTicketManager = () => {
 
                       <div className="flex gap-2">
                         {!ticket.verified && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleVerifyClick(ticket.id)}
-                          >
+                          <Button size="sm" onClick={() => handleVerifyClick(ticket.id)}>
                             Verify
                           </Button>
                         )}
@@ -220,10 +219,7 @@ export const FieldTicketManager = () => {
         </CardContent>
       </Card>
 
-      <CreateFieldTicketDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-      />
+      <CreateFieldTicketDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
 
       {selectedTicketId && (
         <VerifyFieldTicketDialog

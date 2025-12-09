@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { AlertCircle, Shield, TrendingUp } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { AlertCircle, Shield, TrendingUp } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface CSPViolation {
   id: string;
@@ -25,17 +25,21 @@ export const CSPDashboard = () => {
 
   useEffect(() => {
     fetchViolations();
-    
+
     // Subscribe to real-time updates
     const channel = supabase
-      .channel('csp_violations')
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'csp_violations' 
-      }, () => {
-        fetchViolations();
-      })
+      .channel("csp_violations")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "csp_violations",
+        },
+        () => {
+          fetchViolations();
+        }
+      )
       .subscribe();
 
     return () => {
@@ -46,34 +50,34 @@ export const CSPDashboard = () => {
   const fetchViolations = async () => {
     try {
       const { data, error } = await supabase
-        .from('csp_violations')
-        .select('*')
-        .order('timestamp', { ascending: false })
+        .from("csp_violations")
+        .select("*")
+        .order("timestamp", { ascending: false })
         .limit(100);
 
       if (error) throw error;
 
       setViolations(data || []);
-      
+
       // Calculate stats
       const total = data?.length || 0;
-      const uniqueDirectives = new Set(data?.map(v => v.violated_directive)).size;
-      const last24h = data?.filter(v => 
-        new Date(v.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)
-      ).length || 0;
+      const uniqueDirectives = new Set(data?.map((v) => v.violated_directive)).size;
+      const last24h =
+        data?.filter((v) => new Date(v.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000))
+          .length || 0;
 
       setStats({ total, unique: uniqueDirectives, recent: last24h });
     } catch (error) {
-      console.error('Error fetching CSP violations:', error);
+      console.error("Error fetching CSP violations:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const getSeverityColor = (directive: string) => {
-    if (directive.includes('script-src')) return 'destructive';
-    if (directive.includes('style-src')) return 'default';
-    return 'secondary';
+    if (directive.includes("script-src")) return "destructive";
+    if (directive.includes("style-src")) return "default";
+    return "secondary";
   };
 
   return (
@@ -147,7 +151,10 @@ export const CSPDashboard = () => {
                           <Badge variant="outline">{violation.disposition}</Badge>
                         </div>
                         <div className="text-sm font-medium break-all">
-                          Blocked: <code className="text-xs bg-muted px-1 py-0.5 rounded">{violation.blocked_uri}</code>
+                          Blocked:{" "}
+                          <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                            {violation.blocked_uri}
+                          </code>
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Page: {violation.document_uri}

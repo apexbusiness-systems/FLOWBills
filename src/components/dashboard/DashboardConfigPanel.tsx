@@ -1,10 +1,10 @@
-import { Settings, X, RotateCcw, Eye, EyeOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { WidgetConfig } from '@/hooks/useDashboardLayout';
+import { Settings, X, RotateCcw, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { WidgetConfig } from "@/hooks/useDashboardLayout";
 
 interface DashboardConfigPanelProps {
   widgets: WidgetConfig[];
@@ -46,7 +46,10 @@ export const DashboardConfigPanel = ({
                       <EyeOff className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     )}
                     <div>
-                      <Label htmlFor={`widget-${widget.id}`} className="text-sm font-medium cursor-pointer">
+                      <Label
+                        htmlFor={`widget-${widget.id}`}
+                        className="text-sm font-medium cursor-pointer"
+                      >
                         {widget.title}
                       </Label>
                       <p className="text-xs text-muted-foreground capitalize">

@@ -1,7 +1,7 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Shield, Mail, Phone, FileText, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Shield, Mail, Phone, FileText, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Privacy = () => {
   const navigate = useNavigate();
@@ -16,12 +16,10 @@ const Privacy = () => {
             <span className="text-2xl font-bold text-foreground">FlowBills.ca</span>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate('/')}>
+            <Button variant="ghost" onClick={() => navigate("/")}>
               Home
             </Button>
-            <Button onClick={() => navigate('/auth')}>
-              Sign In
-            </Button>
+            <Button onClick={() => navigate("/auth")}>Sign In</Button>
           </div>
         </div>
       </header>
@@ -34,8 +32,8 @@ const Privacy = () => {
           </div>
           <h1 className="text-4xl font-bold text-foreground mb-4">Privacy Policy</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            FlowBills.ca is committed to protecting your privacy in accordance with Canadian privacy laws, 
-            including PIPEDA (Personal Information Protection and Electronic Documents Act).
+            FlowBills.ca is committed to protecting your privacy in accordance with Canadian privacy
+            laws, including PIPEDA (Personal Information Protection and Electronic Documents Act).
           </p>
           <div className="mt-4 text-sm text-muted-foreground">
             Last updated: September 25, 2025 | Effective: September 25, 2025
@@ -52,9 +50,10 @@ const Privacy = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              This privacy policy complies with the Personal Information Protection and Electronic Documents Act (PIPEDA) 
-              and its ten fair information principles. We collect, use, and disclose personal information only for purposes 
-              that a reasonable person would consider appropriate in the circumstances.
+              This privacy policy complies with the Personal Information Protection and Electronic
+              Documents Act (PIPEDA) and its ten fair information principles. We collect, use, and
+              disclose personal information only for purposes that a reasonable person would
+              consider appropriate in the circumstances.
             </p>
           </CardContent>
         </Card>
@@ -69,15 +68,60 @@ const Privacy = () => {
               </CardHeader>
               <CardContent>
                 <nav className="space-y-2">
-                  <a href="#collection" className="block text-sm text-muted-foreground hover:text-primary">1. Information Collection</a>
-                  <a href="#purpose" className="block text-sm text-muted-foreground hover:text-primary">2. Purpose & Use</a>
-                  <a href="#consent" className="block text-sm text-muted-foreground hover:text-primary">3. Consent & CASL</a>
-                  <a href="#limiting" className="block text-sm text-muted-foreground hover:text-primary">4. Limiting Collection</a>
-                  <a href="#retention" className="block text-sm text-muted-foreground hover:text-primary">5. Data Retention</a>
-                  <a href="#safeguards" className="block text-sm text-muted-foreground hover:text-primary">6. Safeguards</a>
-                  <a href="#access" className="block text-sm text-muted-foreground hover:text-primary">7. Access Rights</a>
-                  <a href="#accountability" className="block text-sm text-muted-foreground hover:text-primary">8. Accountability</a>
-                  <a href="#contact" className="block text-sm text-muted-foreground hover:text-primary">9. Contact Us</a>
+                  <a
+                    href="#collection"
+                    className="block text-sm text-muted-foreground hover:text-primary"
+                  >
+                    1. Information Collection
+                  </a>
+                  <a
+                    href="#purpose"
+                    className="block text-sm text-muted-foreground hover:text-primary"
+                  >
+                    2. Purpose & Use
+                  </a>
+                  <a
+                    href="#consent"
+                    className="block text-sm text-muted-foreground hover:text-primary"
+                  >
+                    3. Consent & CASL
+                  </a>
+                  <a
+                    href="#limiting"
+                    className="block text-sm text-muted-foreground hover:text-primary"
+                  >
+                    4. Limiting Collection
+                  </a>
+                  <a
+                    href="#retention"
+                    className="block text-sm text-muted-foreground hover:text-primary"
+                  >
+                    5. Data Retention
+                  </a>
+                  <a
+                    href="#safeguards"
+                    className="block text-sm text-muted-foreground hover:text-primary"
+                  >
+                    6. Safeguards
+                  </a>
+                  <a
+                    href="#access"
+                    className="block text-sm text-muted-foreground hover:text-primary"
+                  >
+                    7. Access Rights
+                  </a>
+                  <a
+                    href="#accountability"
+                    className="block text-sm text-muted-foreground hover:text-primary"
+                  >
+                    8. Accountability
+                  </a>
+                  <a
+                    href="#contact"
+                    className="block text-sm text-muted-foreground hover:text-primary"
+                  >
+                    9. Contact Us
+                  </a>
                 </nav>
               </CardContent>
             </Card>
@@ -90,7 +134,9 @@ const Privacy = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>1. Information We Collect</CardTitle>
-                  <CardDescription>Personal information collected through our services</CardDescription>
+                  <CardDescription>
+                    Personal information collected through our services
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -168,7 +214,9 @@ const Privacy = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>3. Consent and CASL Compliance</CardTitle>
-                  <CardDescription>Your consent rights under Canadian anti-spam law</CardDescription>
+                  <CardDescription>
+                    Your consent rights under Canadian anti-spam law
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -201,7 +249,7 @@ const Privacy = () => {
                       Unsubscribe Rights
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      You can withdraw consent at any time by clicking "unsubscribe" in any email, 
+                      You can withdraw consent at any time by clicking "unsubscribe" in any email,
                       contacting us directly, or updating your preferences in your account settings.
                     </p>
                   </div>
@@ -218,7 +266,8 @@ const Privacy = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    FlowBills.ca adheres to the principle of data minimization. We collect personal information only when:
+                    FlowBills.ca adheres to the principle of data minimization. We collect personal
+                    information only when:
                   </p>
                   <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
                     <li>It is necessary for our stated business purposes</li>
@@ -241,18 +290,29 @@ const Privacy = () => {
                   <div>
                     <h4 className="font-semibold mb-2">Retention Periods</h4>
                     <div className="space-y-2 text-sm text-muted-foreground">
-                      <div><strong>Account Data:</strong> Retained while account is active + 7 years</div>
-                      <div><strong>Invoice Data:</strong> 7 years (Canadian tax requirements)</div>
-                      <div><strong>Audit Logs:</strong> 7 years (regulatory compliance)</div>
-                      <div><strong>Marketing Data:</strong> Until consent withdrawn + 2 years</div>
-                      <div><strong>Security Logs:</strong> 2 years minimum</div>
+                      <div>
+                        <strong>Account Data:</strong> Retained while account is active + 7 years
+                      </div>
+                      <div>
+                        <strong>Invoice Data:</strong> 7 years (Canadian tax requirements)
+                      </div>
+                      <div>
+                        <strong>Audit Logs:</strong> 7 years (regulatory compliance)
+                      </div>
+                      <div>
+                        <strong>Marketing Data:</strong> Until consent withdrawn + 2 years
+                      </div>
+                      <div>
+                        <strong>Security Logs:</strong> 2 years minimum
+                      </div>
                     </div>
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Secure Disposal</h4>
                     <p className="text-sm text-muted-foreground">
-                      When retention periods expire, we securely delete or anonymize personal information 
-                      using industry-standard methods including cryptographic erasure and secure overwriting.
+                      When retention periods expire, we securely delete or anonymize personal
+                      information using industry-standard methods including cryptographic erasure
+                      and secure overwriting.
                     </p>
                   </div>
                 </CardContent>
@@ -309,7 +369,8 @@ const Privacy = () => {
                   <div>
                     <h4 className="font-semibold mb-2">Right to Access</h4>
                     <p className="text-sm text-muted-foreground mb-2">
-                      You have the right to request access to your personal information. We will provide:
+                      You have the right to request access to your personal information. We will
+                      provide:
                     </p>
                     <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
                       <li>A list of personal information we hold about you</li>
@@ -321,15 +382,16 @@ const Privacy = () => {
                   <div>
                     <h4 className="font-semibold mb-2">Right to Correction</h4>
                     <p className="text-sm text-muted-foreground">
-                      If you find inaccuracies in your personal information, we will correct them promptly 
-                      and notify any third parties who received the incorrect information.
+                      If you find inaccuracies in your personal information, we will correct them
+                      promptly and notify any third parties who received the incorrect information.
                     </p>
                   </div>
                   <div className="bg-muted/50 p-4 rounded-lg">
                     <h4 className="font-semibold mb-2">Request Process</h4>
                     <p className="text-sm text-muted-foreground">
-                      Access requests must be made in writing to our Privacy Officer. We will respond within 
-                      30 days and may charge reasonable fees for extensive requests as permitted under PIPEDA.
+                      Access requests must be made in writing to our Privacy Officer. We will
+                      respond within 30 days and may charge reasonable fees for extensive requests
+                      as permitted under PIPEDA.
                     </p>
                   </div>
                 </CardContent>
@@ -347,23 +409,23 @@ const Privacy = () => {
                   <div>
                     <h4 className="font-semibold mb-2">Privacy Officer</h4>
                     <p className="text-sm text-muted-foreground">
-                      Our designated Privacy Officer is responsible for ensuring compliance with this policy 
-                      and applicable privacy laws. They oversee privacy impact assessments, staff training, 
-                      and complaint handling.
+                      Our designated Privacy Officer is responsible for ensuring compliance with
+                      this policy and applicable privacy laws. They oversee privacy impact
+                      assessments, staff training, and complaint handling.
                     </p>
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Regular Reviews</h4>
                     <p className="text-sm text-muted-foreground">
-                      We conduct annual reviews of our privacy practices and update this policy as needed 
-                      to reflect changes in our services, technology, or applicable laws.
+                      We conduct annual reviews of our privacy practices and update this policy as
+                      needed to reflect changes in our services, technology, or applicable laws.
                     </p>
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Third-Party Processors</h4>
                     <p className="text-sm text-muted-foreground">
-                      We ensure all third-party service providers meet equivalent privacy protection standards 
-                      through contractual agreements and regular assessments.
+                      We ensure all third-party service providers meet equivalent privacy protection
+                      standards through contractual agreements and regular assessments.
                     </p>
                   </div>
                 </CardContent>
@@ -398,24 +460,30 @@ const Privacy = () => {
                     <div>
                       <div className="font-semibold mb-2">Mailing Address</div>
                       <div className="text-sm text-muted-foreground">
-                        FlowBills.ca<br />
-                        Attn: Privacy Officer<br />
-                        Edmonton, AB<br />
+                        FlowBills.ca
+                        <br />
+                        Attn: Privacy Officer
+                        <br />
+                        Edmonton, AB
+                        <br />
                         Canada
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-muted/50 p-4 rounded-lg">
                     <h4 className="font-semibold mb-2">Privacy Complaints</h4>
                     <p className="text-sm text-muted-foreground mb-2">
-                      If you have concerns about our privacy practices, please contact us first. 
-                      If not satisfied with our response, you may file a complaint with:
+                      If you have concerns about our privacy practices, please contact us first. If
+                      not satisfied with our response, you may file a complaint with:
                     </p>
                     <div className="text-sm text-muted-foreground">
-                      <strong>Office of the Privacy Commissioner of Canada</strong><br />
-                      30 Victoria Street, Gatineau, QC K1A 1H3<br />
-                      Phone: 1-800-282-1376<br />
+                      <strong>Office of the Privacy Commissioner of Canada</strong>
+                      <br />
+                      30 Victoria Street, Gatineau, QC K1A 1H3
+                      <br />
+                      Phone: 1-800-282-1376
+                      <br />
                       Website: priv.gc.ca
                     </div>
                   </div>

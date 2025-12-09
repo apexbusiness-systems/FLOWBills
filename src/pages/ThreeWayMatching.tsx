@@ -1,6 +1,6 @@
-import { ThreeWayMatchingInterface } from '@/components/matching/ThreeWayMatchingInterface';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import { ContextualTooltip } from '@/components/help/ContextualTooltip';
+import { ThreeWayMatchingInterface } from "@/components/matching/ThreeWayMatchingInterface";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { ContextualTooltip } from "@/components/help/ContextualTooltip";
 
 const ThreeWayMatching = () => {
   return (

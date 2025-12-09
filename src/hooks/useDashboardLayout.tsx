@@ -1,26 +1,68 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export interface WidgetConfig {
   id: string;
-  type: 'stats' | 'chart' | 'activity' | 'quickActions' | 'upload';
+  type: "stats" | "chart" | "activity" | "quickActions" | "upload";
   title: string;
   visible: boolean;
-  size: 'small' | 'medium' | 'large';
+  size: "small" | "medium" | "large";
   order: number;
 }
 
 const DEFAULT_WIDGETS: WidgetConfig[] = [
-  { id: 'stats-1', type: 'stats', title: 'Monthly Volume', visible: true, size: 'small', order: 0 },
-  { id: 'stats-2', type: 'stats', title: 'Active Invoices', visible: true, size: 'small', order: 1 },
-  { id: 'stats-3', type: 'stats', title: 'Processing Rate', visible: true, size: 'small', order: 2 },
-  { id: 'stats-4', type: 'stats', title: 'Exception Queue', visible: true, size: 'small', order: 3 },
-  { id: 'chart-1', type: 'chart', title: 'Analytics Dashboard', visible: true, size: 'large', order: 4 },
-  { id: 'activity-1', type: 'activity', title: 'Recent Activity', visible: true, size: 'large', order: 5 },
-  { id: 'upload-1', type: 'upload', title: 'Quick Upload', visible: true, size: 'medium', order: 6 },
+  { id: "stats-1", type: "stats", title: "Monthly Volume", visible: true, size: "small", order: 0 },
+  {
+    id: "stats-2",
+    type: "stats",
+    title: "Active Invoices",
+    visible: true,
+    size: "small",
+    order: 1,
+  },
+  {
+    id: "stats-3",
+    type: "stats",
+    title: "Processing Rate",
+    visible: true,
+    size: "small",
+    order: 2,
+  },
+  {
+    id: "stats-4",
+    type: "stats",
+    title: "Exception Queue",
+    visible: true,
+    size: "small",
+    order: 3,
+  },
+  {
+    id: "chart-1",
+    type: "chart",
+    title: "Analytics Dashboard",
+    visible: true,
+    size: "large",
+    order: 4,
+  },
+  {
+    id: "activity-1",
+    type: "activity",
+    title: "Recent Activity",
+    visible: true,
+    size: "large",
+    order: 5,
+  },
+  {
+    id: "upload-1",
+    type: "upload",
+    title: "Quick Upload",
+    visible: true,
+    size: "medium",
+    order: 6,
+  },
 ];
 
-const STORAGE_KEY = 'flowbills_dashboard_layout';
+const STORAGE_KEY = "flowbills_dashboard_layout";
 
 export const useDashboardLayout = () => {
   const [widgets, setWidgets] = useState<WidgetConfig[]>(() => {
@@ -35,12 +77,12 @@ export const useDashboardLayout = () => {
   }, [widgets]);
 
   const updateWidget = (id: string, updates: Partial<WidgetConfig>) => {
-    setWidgets(prev => prev.map(w => w.id === id ? { ...w, ...updates } : w));
-    toast.success('Widget updated');
+    setWidgets((prev) => prev.map((w) => (w.id === id ? { ...w, ...updates } : w)));
+    toast.success("Widget updated");
   };
 
   const toggleWidget = (id: string) => {
-    setWidgets(prev => prev.map(w => w.id === id ? { ...w, visible: !w.visible } : w));
+    setWidgets((prev) => prev.map((w) => (w.id === id ? { ...w, visible: !w.visible } : w)));
   };
 
   const reorderWidgets = (newOrder: WidgetConfig[]) => {
@@ -49,12 +91,10 @@ export const useDashboardLayout = () => {
 
   const resetLayout = () => {
     setWidgets(DEFAULT_WIDGETS);
-    toast.success('Layout reset to default');
+    toast.success("Layout reset to default");
   };
 
-  const visibleWidgets = widgets
-    .filter(w => w.visible)
-    .sort((a, b) => a.order - b.order);
+  const visibleWidgets = widgets.filter((w) => w.visible).sort((a, b) => a.order - b.order);
 
   return {
     widgets,

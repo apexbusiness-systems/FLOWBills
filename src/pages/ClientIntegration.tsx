@@ -3,19 +3,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Download, 
-  Upload, 
-  Database, 
-  Settings, 
-  CheckCircle, 
+import {
+  Download,
+  Upload,
+  Database,
+  Settings,
+  CheckCircle,
   AlertTriangle,
   Code,
   FileSpreadsheet,
   Globe,
   Shield,
   Users,
-  Workflow
+  Workflow,
 } from "lucide-react";
 
 const ClientIntegration = () => {
@@ -60,7 +60,9 @@ const ClientIntegration = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Manual file uploads via web interface</p>
+                      <p className="text-sm text-muted-foreground">
+                        Manual file uploads via web interface
+                      </p>
                       <Badge variant="secondary">Easiest</Badge>
                       <ul className="text-sm space-y-1 mt-2">
                         <li>• PDF, Excel, CSV support</li>
@@ -78,7 +80,9 @@ const ClientIntegration = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Automated data exchange via REST API</p>
+                      <p className="text-sm text-muted-foreground">
+                        Automated data exchange via REST API
+                      </p>
                       <Badge variant="default">Recommended</Badge>
                       <ul className="text-sm space-y-1 mt-2">
                         <li>• Real-time sync</li>
@@ -96,7 +100,9 @@ const ClientIntegration = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Enterprise database connections</p>
+                      <p className="text-sm text-muted-foreground">
+                        Enterprise database connections
+                      </p>
                       <Badge variant="outline">Enterprise</Badge>
                       <ul className="text-sm space-y-1 mt-2">
                         <li>• ODBC/JDBC support</li>
@@ -157,10 +163,14 @@ const ClientIntegration = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">1</div>
+                    <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                      1
+                    </div>
                     <div className="flex-1">
                       <h4 className="font-semibold">Account Provisioning</h4>
-                      <p className="text-sm text-muted-foreground">Flow Bills team creates your organization account</p>
+                      <p className="text-sm text-muted-foreground">
+                        Flow Bills team creates your organization account
+                      </p>
                       <ul className="text-sm mt-2 space-y-1 text-muted-foreground">
                         <li>• Custom subdomain setup (yourcompany.flowbills.ca)</li>
                         <li>• Initial admin user creation</li>
@@ -170,41 +180,71 @@ const ClientIntegration = () => {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">2</div>
+                    <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                      2
+                    </div>
                     <div className="flex-1">
                       <h4 className="font-semibold">User Management Setup</h4>
-                      <p className="text-sm text-muted-foreground">Configure your team access and roles</p>
+                      <p className="text-sm text-muted-foreground">
+                        Configure your team access and roles
+                      </p>
                       <div className="mt-2 p-3 bg-muted rounded-lg">
                         <p className="text-sm font-medium mb-2">Available Roles:</p>
                         <ul className="text-sm space-y-1">
-                          <li>• <Badge variant="secondary" className="mr-2">Admin</Badge>Full platform access, user management</li>
-                          <li>• <Badge variant="outline" className="mr-2">Operator</Badge>Invoice processing, workflow management</li>
-                          <li>• <Badge variant="outline" className="mr-2">Viewer</Badge>Read-only access to reports and data</li>
+                          <li>
+                            •{" "}
+                            <Badge variant="secondary" className="mr-2">
+                              Admin
+                            </Badge>
+                            Full platform access, user management
+                          </li>
+                          <li>
+                            •{" "}
+                            <Badge variant="outline" className="mr-2">
+                              Operator
+                            </Badge>
+                            Invoice processing, workflow management
+                          </li>
+                          <li>
+                            •{" "}
+                            <Badge variant="outline" className="mr-2">
+                              Viewer
+                            </Badge>
+                            Read-only access to reports and data
+                          </li>
                         </ul>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">3</div>
+                    <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                      3
+                    </div>
                     <div className="flex-1">
                       <h4 className="font-semibold">System Integration Planning</h4>
-                      <p className="text-sm text-muted-foreground">Map your existing systems to Flow Bills</p>
+                      <p className="text-sm text-muted-foreground">
+                        Map your existing systems to Flow Bills
+                      </p>
                       <Alert className="mt-2">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertDescription>
-                          <strong>Pre-requisites:</strong> Inventory your current invoice management systems, 
-                          data formats, and integration points before proceeding.
+                          <strong>Pre-requisites:</strong> Inventory your current invoice management
+                          systems, data formats, and integration points before proceeding.
                         </AlertDescription>
                       </Alert>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">4</div>
+                    <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                      4
+                    </div>
                     <div className="flex-1">
                       <h4 className="font-semibold">Security Configuration</h4>
-                      <p className="text-sm text-muted-foreground">Set up secure access credentials</p>
+                      <p className="text-sm text-muted-foreground">
+                        Set up secure access credentials
+                      </p>
                       <ul className="text-sm mt-2 space-y-1 text-muted-foreground">
                         <li>• API key generation</li>
                         <li>• IP whitelisting (if required)</li>
@@ -235,10 +275,22 @@ const ClientIntegration = () => {
                   <div>
                     <h4 className="font-semibold mb-3">Data Format Support</h4>
                     <ul className="text-sm space-y-2">
-                      <li>• <FileSpreadsheet className="inline h-4 w-4 mr-1" />PDF invoices with OCR</li>
-                      <li>• <FileSpreadsheet className="inline h-4 w-4 mr-1" />Excel files (.xlsx, .xls)</li>
-                      <li>• <FileSpreadsheet className="inline h-4 w-4 mr-1" />CSV with custom delimiters</li>
-                      <li>• <FileSpreadsheet className="inline h-4 w-4 mr-1" />XML/JSON via API</li>
+                      <li>
+                        • <FileSpreadsheet className="inline h-4 w-4 mr-1" />
+                        PDF invoices with OCR
+                      </li>
+                      <li>
+                        • <FileSpreadsheet className="inline h-4 w-4 mr-1" />
+                        Excel files (.xlsx, .xls)
+                      </li>
+                      <li>
+                        • <FileSpreadsheet className="inline h-4 w-4 mr-1" />
+                        CSV with custom delimiters
+                      </li>
+                      <li>
+                        • <FileSpreadsheet className="inline h-4 w-4 mr-1" />
+                        XML/JSON via API
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -270,7 +322,8 @@ const ClientIntegration = () => {
                       <Alert>
                         <CheckCircle className="h-4 w-4" />
                         <AlertDescription>
-                          <strong>Recommended for:</strong> Initial data migration, one-time imports, small to medium datasets (&lt;10,000 records)
+                          <strong>Recommended for:</strong> Initial data migration, one-time
+                          imports, small to medium datasets (&lt;10,000 records)
                         </AlertDescription>
                       </Alert>
 
@@ -288,8 +341,13 @@ const ClientIntegration = () => {
                               Download Template
                             </Button>
                             <div className="mt-3 text-xs text-muted-foreground">
-                              <p><strong>Required fields:</strong> Invoice Number, Vendor, Amount, Date</p>
-                              <p><strong>Optional fields:</strong> PO Number, Description, GL Codes</p>
+                              <p>
+                                <strong>Required fields:</strong> Invoice Number, Vendor, Amount,
+                                Date
+                              </p>
+                              <p>
+                                <strong>Optional fields:</strong> PO Number, Description, GL Codes
+                              </p>
                             </div>
                           </CardContent>
                         </Card>
@@ -303,8 +361,10 @@ const ClientIntegration = () => {
                               Export from your existing system in CSV format
                             </p>
                             <div className="bg-muted p-3 rounded text-xs font-mono">
-                              invoice_num,vendor_name,amount,date,status<br/>
-                              INV-001,"ABC Oil Services",1250.00,"2024-01-15","pending"<br/>
+                              invoice_num,vendor_name,amount,date,status
+                              <br />
+                              INV-001,"ABC Oil Services",1250.00,"2024-01-15","pending"
+                              <br />
                               INV-002,"XYZ Equipment",875.50,"2024-01-16","approved"
                             </div>
                             <p className="text-xs text-muted-foreground mt-2">
@@ -321,23 +381,33 @@ const ClientIntegration = () => {
                         <CardContent>
                           <div className="space-y-3">
                             <div className="flex items-center gap-2 text-sm">
-                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">1</div>
+                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                1
+                              </div>
                               <span>Prepare your data using the template or CSV format</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
-                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">2</div>
+                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                2
+                              </div>
                               <span>Navigate to Invoices → Import → Bulk Upload</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
-                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">3</div>
+                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                3
+                              </div>
                               <span>Drag and drop your file or click to browse</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
-                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">4</div>
+                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                4
+                              </div>
                               <span>Review validation results and fix any errors</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
-                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">5</div>
+                              <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                5
+                              </div>
                               <span>Confirm import and monitor processing status</span>
                             </div>
                           </div>
@@ -351,7 +421,8 @@ const ClientIntegration = () => {
                       <Alert>
                         <CheckCircle className="h-4 w-4" />
                         <AlertDescription>
-                          <strong>Recommended for:</strong> Large datasets, real-time integration, automated processes
+                          <strong>Recommended for:</strong> Large datasets, real-time integration,
+                          automated processes
                         </AlertDescription>
                       </Alert>
 
@@ -371,7 +442,9 @@ const ClientIntegration = () => {
                                 <Badge variant="default">POST</Badge>
                                 <code className="text-sm">/invoices/bulk</code>
                               </div>
-                              <p className="text-sm text-muted-foreground">Bulk import invoices (up to 1000 per request)</p>
+                              <p className="text-sm text-muted-foreground">
+                                Bulk import invoices (up to 1000 per request)
+                              </p>
                             </div>
 
                             <div className="border rounded-lg p-3">
@@ -387,7 +460,9 @@ const ClientIntegration = () => {
                                 <Badge variant="secondary">PUT</Badge>
                                 <code className="text-sm">/invoices/{"{id}"}</code>
                               </div>
-                              <p className="text-sm text-muted-foreground">Update existing invoice</p>
+                              <p className="text-sm text-muted-foreground">
+                                Update existing invoice
+                              </p>
                             </div>
 
                             <div className="border rounded-lg p-3">
@@ -395,7 +470,9 @@ const ClientIntegration = () => {
                                 <Badge variant="secondary">GET</Badge>
                                 <code className="text-sm">/invoices/import-status/{"{id}"}</code>
                               </div>
-                              <p className="text-sm text-muted-foreground">Check import job status</p>
+                              <p className="text-sm text-muted-foreground">
+                                Check import job status
+                              </p>
                             </div>
                           </div>
                         </CardContent>
@@ -433,7 +510,8 @@ const ClientIntegration = () => {
                       <Alert>
                         <CheckCircle className="h-4 w-4" />
                         <AlertDescription>
-                          <strong>Recommended for:</strong> Ongoing synchronization, ERP integration, automated workflows
+                          <strong>Recommended for:</strong> Ongoing synchronization, ERP
+                          integration, automated workflows
                         </AlertDescription>
                       </Alert>
 
@@ -468,7 +546,9 @@ const ClientIntegration = () => {
                           <Alert>
                             <AlertTriangle className="h-4 w-4" />
                             <AlertDescription>
-                              <strong>Enterprise Feature:</strong> Scheduled sync requires Enterprise plan and involves custom configuration by our integration team.
+                              <strong>Enterprise Feature:</strong> Scheduled sync requires
+                              Enterprise plan and involves custom configuration by our integration
+                              team.
                             </AlertDescription>
                           </Alert>
                         </CardContent>
@@ -487,9 +567,7 @@ const ClientIntegration = () => {
                   <Code className="h-5 w-5" />
                   API Integration Guide
                 </CardTitle>
-                <CardDescription>
-                  Complete API documentation and code examples
-                </CardDescription>
+                <CardDescription>Complete API documentation and code examples</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
@@ -516,7 +594,8 @@ const ClientIntegration = () => {
                       <Alert>
                         <Shield className="h-4 w-4" />
                         <AlertDescription className="text-xs">
-                          API keys provide full access to your account. Store them securely and rotate regularly.
+                          API keys provide full access to your account. Store them securely and
+                          rotate regularly.
                         </AlertDescription>
                       </Alert>
                     </CardContent>
@@ -618,7 +697,9 @@ const ClientIntegration = () => {
                           <div className="bg-muted p-4 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
                               <Badge variant="outline">GET</Badge>
-                              <code className="text-sm">/api/v1/invoices?status=pending&limit=50</code>
+                              <code className="text-sm">
+                                /api/v1/invoices?status=pending&limit=50
+                              </code>
                             </div>
                           </div>
                           <div>
@@ -652,7 +733,8 @@ const ClientIntegration = () => {
                           <Alert>
                             <AlertTriangle className="h-4 w-4" />
                             <AlertDescription>
-                              Webhooks allow real-time notifications when invoice status changes or new invoices are processed.
+                              Webhooks allow real-time notifications when invoice status changes or
+                              new invoices are processed.
                             </AlertDescription>
                           </Alert>
 
@@ -660,11 +742,21 @@ const ClientIntegration = () => {
                             <div>
                               <h4 className="font-semibold mb-2">Supported Events</h4>
                               <ul className="text-sm space-y-1">
-                                <li>• <code>invoice.created</code></li>
-                                <li>• <code>invoice.updated</code></li>
-                                <li>• <code>invoice.approved</code></li>
-                                <li>• <code>invoice.paid</code></li>
-                                <li>• <code>invoice.rejected</code></li>
+                                <li>
+                                  • <code>invoice.created</code>
+                                </li>
+                                <li>
+                                  • <code>invoice.updated</code>
+                                </li>
+                                <li>
+                                  • <code>invoice.approved</code>
+                                </li>
+                                <li>
+                                  • <code>invoice.paid</code>
+                                </li>
+                                <li>
+                                  • <code>invoice.rejected</code>
+                                </li>
                               </ul>
                             </div>
                             <div>
@@ -701,8 +793,8 @@ const ClientIntegration = () => {
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>Important:</strong> All testing should be performed in the sandbox environment. 
-                    Contact support to request sandbox access.
+                    <strong>Important:</strong> All testing should be performed in the sandbox
+                    environment. Contact support to request sandbox access.
                   </AlertDescription>
                 </Alert>
 
@@ -766,11 +858,11 @@ const ClientIntegration = () => {
                           {[
                             "User authentication and roles",
                             "Invoice upload (PDF, Excel, CSV)",
-                            "Data validation and error handling", 
+                            "Data validation and error handling",
                             "Approval workflow processes",
                             "Search and filtering functions",
                             "Report generation",
-                            "Export functionality"
+                            "Export functionality",
                           ].map((item, idx) => (
                             <div key={idx} className="flex items-center gap-2 text-sm">
                               <input type="checkbox" className="rounded" />
@@ -789,7 +881,7 @@ const ClientIntegration = () => {
                             "Webhook notifications",
                             "Error handling and retries",
                             "Rate limit behavior",
-                            "Data integrity validation"
+                            "Data integrity validation",
                           ].map((item, idx) => (
                             <div key={idx} className="flex items-center gap-2 text-sm">
                               <input type="checkbox" className="rounded" />
@@ -857,7 +949,8 @@ const ClientIntegration = () => {
                 <Alert>
                   <CheckCircle className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>Pre-requisite:</strong> Complete all testing phases and receive sign-off from your project team before proceeding with go-live.
+                    <strong>Pre-requisite:</strong> Complete all testing phases and receive sign-off
+                    from your project team before proceeding with go-live.
                   </AlertDescription>
                 </Alert>
 
@@ -866,7 +959,9 @@ const ClientIntegration = () => {
                     <h3 className="font-semibold text-lg mb-2">Phase 1: Pre-Production Setup</h3>
                     <div className="space-y-3">
                       <div className="flex items-start gap-3">
-                        <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">1</div>
+                        <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                          1
+                        </div>
                         <div>
                           <h4 className="font-semibold">Production Environment Preparation</h4>
                           <ul className="text-sm text-muted-foreground mt-1 space-y-1">
@@ -879,7 +974,9 @@ const ClientIntegration = () => {
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">2</div>
+                        <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                          2
+                        </div>
                         <div>
                           <h4 className="font-semibold">Data Migration</h4>
                           <ul className="text-sm text-muted-foreground mt-1 space-y-1">
@@ -892,7 +989,9 @@ const ClientIntegration = () => {
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">3</div>
+                        <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                          3
+                        </div>
                         <div>
                           <h4 className="font-semibold">Security Validation</h4>
                           <ul className="text-sm text-muted-foreground mt-1 space-y-1">
@@ -910,7 +1009,9 @@ const ClientIntegration = () => {
                     <h3 className="font-semibold text-lg mb-2">Phase 2: Soft Launch</h3>
                     <div className="space-y-3">
                       <div className="flex items-start gap-3">
-                        <div className="bg-secondary text-secondary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">1</div>
+                        <div className="bg-secondary text-secondary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                          1
+                        </div>
                         <div>
                           <h4 className="font-semibold">Limited User Rollout</h4>
                           <ul className="text-sm text-muted-foreground mt-1 space-y-1">
@@ -923,7 +1024,9 @@ const ClientIntegration = () => {
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="bg-secondary text-secondary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">2</div>
+                        <div className="bg-secondary text-secondary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                          2
+                        </div>
                         <div>
                           <h4 className="font-semibold">Monitoring & Support</h4>
                           <ul className="text-sm text-muted-foreground mt-1 space-y-1">
@@ -941,7 +1044,9 @@ const ClientIntegration = () => {
                     <h3 className="font-semibold text-lg mb-2">Phase 3: Full Production</h3>
                     <div className="space-y-3">
                       <div className="flex items-start gap-3">
-                        <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">1</div>
+                        <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                          1
+                        </div>
                         <div>
                           <h4 className="font-semibold">Complete User Rollout</h4>
                           <ul className="text-sm text-muted-foreground mt-1 space-y-1">
@@ -954,7 +1059,9 @@ const ClientIntegration = () => {
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">2</div>
+                        <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
+                          2
+                        </div>
                         <div>
                           <h4 className="font-semibold">Ongoing Operations</h4>
                           <ul className="text-sm text-muted-foreground mt-1 space-y-1">

@@ -1,9 +1,9 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Shield, Lock, Eye, CheckCircle, AlertTriangle, FileText, Server, Key } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Shield, Lock, Eye, CheckCircle, AlertTriangle, FileText, Server, Key } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
 
 const Security = () => {
   const navigate = useNavigate();
@@ -18,12 +18,10 @@ const Security = () => {
             <span className="text-2xl font-bold text-foreground">FlowBills.ca</span>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate('/')}>
+            <Button variant="ghost" onClick={() => navigate("/")}>
               Home
             </Button>
-            <Button onClick={() => navigate('/auth')}>
-              Sign In
-            </Button>
+            <Button onClick={() => navigate("/auth")}>Sign In</Button>
           </div>
         </div>
       </header>
@@ -37,9 +35,10 @@ const Security = () => {
           </div>
           <h1 className="text-4xl font-bold text-foreground mb-4">Security & Compliance</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Enterprise-grade security designed for Canadian oil & gas companies handling sensitive financial data.
+            Enterprise-grade security designed for Canadian oil & gas companies handling sensitive
+            financial data.
           </p>
-          
+
           {/* Compliance Badges */}
           <div className="flex flex-wrap justify-center gap-4 mt-8">
             <Badge variant="outline" className="px-4 py-2">
@@ -273,9 +272,7 @@ const Security = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl">Business Continuity & Disaster Recovery</CardTitle>
-                <CardDescription>
-                  Ensuring service availability and data protection
-                </CardDescription>
+                <CardDescription>Ensuring service availability and data protection</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -321,9 +318,15 @@ const Security = () => {
                   <div>
                     <h4 className="font-semibold mb-3">Security Team</h4>
                     <div className="space-y-2 text-sm text-muted-foreground">
-                      <div><strong>Email:</strong> security@flowbills.ca</div>
-                      <div><strong>Phone:</strong> 1-844-FLOWBILL</div>
-                      <div><strong>Response Time:</strong> Within 24 hours</div>
+                      <div>
+                        <strong>Email:</strong> security@flowbills.ca
+                      </div>
+                      <div>
+                        <strong>Phone:</strong> 1-844-FLOWBILL
+                      </div>
+                      <div>
+                        <strong>Response Time:</strong> Within 24 hours
+                      </div>
                     </div>
                   </div>
                   <div>
@@ -335,7 +338,7 @@ const Security = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-muted/50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2">Security Documentation</h4>
                   <p className="text-sm text-muted-foreground mb-3">
@@ -355,17 +358,19 @@ const Security = () => {
 
         {/* CTA Section */}
         <div className="text-center mt-16">
-          <h2 className="text-2xl font-bold text-foreground mb-4">
-            Questions About Our Security?
-          </h2>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Questions About Our Security?</h2>
           <p className="text-muted-foreground mb-6">
             Our security team is available to discuss your specific requirements
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={() => navigate('/auth')}>
+            <Button size="lg" onClick={() => navigate("/auth")}>
               Start Free Trial
             </Button>
-            <Button size="lg" variant="outline" onClick={() => window.location.href = 'mailto:security@flowbills.ca'}>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => (window.location.href = "mailto:security@flowbills.ca")}
+            >
               Contact Security Team
             </Button>
           </div>

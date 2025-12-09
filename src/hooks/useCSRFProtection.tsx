@@ -1,7 +1,7 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import { generateSecureToken } from '@/lib/security';
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./useAuth";
+import { generateSecureToken } from "@/lib/security";
 
 interface CSRFContextType {
   csrfToken: string | null;
@@ -19,13 +19,13 @@ export const CSRFProvider = ({ children }: { children: ReactNode }) => {
     // Generate client-side token for now
     // In production, this would be generated server-side
     const token = generateSecureToken();
-    
+
     // Store in session storage for validation
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('csrf_token', token);
-      sessionStorage.setItem('csrf_token_time', Date.now().toString());
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("csrf_token", token);
+      sessionStorage.setItem("csrf_token_time", Date.now().toString());
     }
-    
+
     return token;
   };
 
@@ -38,14 +38,14 @@ export const CSRFProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return null;
 
     // Check if current token is still valid (30 minutes)
-    if (typeof window !== 'undefined') {
-      const storedToken = sessionStorage.getItem('csrf_token');
-      const tokenTime = sessionStorage.getItem('csrf_token_time');
-      
+    if (typeof window !== "undefined") {
+      const storedToken = sessionStorage.getItem("csrf_token");
+      const tokenTime = sessionStorage.getItem("csrf_token_time");
+
       if (storedToken && tokenTime) {
         const tokenAge = Date.now() - parseInt(tokenTime);
         const maxAge = 30 * 60 * 1000; // 30 minutes
-        
+
         if (tokenAge < maxAge && storedToken === csrfToken) {
           return csrfToken;
         }
@@ -68,19 +68,24 @@ export const CSRFProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!user) return;
 
-    const interval = setInterval(() => {
-      refreshToken();
-    }, 20 * 60 * 1000); // 20 minutes
+    const interval = setInterval(
+      () => {
+        refreshToken();
+      },
+      20 * 60 * 1000
+    ); // 20 minutes
 
     return () => clearInterval(interval);
   }, [user]);
 
   return (
-    <CSRFContext.Provider value={{
-      csrfToken,
-      refreshToken,
-      validateAndRefreshToken
-    }}>
+    <CSRFContext.Provider
+      value={{
+        csrfToken,
+        refreshToken,
+        validateAndRefreshToken,
+      }}
+    >
       {children}
     </CSRFContext.Provider>
   );
@@ -89,7 +94,7 @@ export const CSRFProvider = ({ children }: { children: ReactNode }) => {
 export const useCSRF = () => {
   const context = useContext(CSRFContext);
   if (context === undefined) {
-    throw new Error('useCSRF must be used within a CSRFProvider');
+    throw new Error("useCSRF must be used within a CSRFProvider");
   }
   return context;
 };
@@ -101,36 +106,36 @@ export const secureRequest = async (
   csrfToken?: string
 ): Promise<Response> => {
   const headers = new Headers(options.headers);
-  
+
   // Add CSRF token for state-changing operations
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method?.toUpperCase() || 'GET')) {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(options.method?.toUpperCase() || "GET")) {
     if (!csrfToken) {
-      throw new Error('CSRF token required for state-changing operations');
+      throw new Error("CSRF token required for state-changing operations");
     }
-    headers.set('X-CSRF-Token', csrfToken);
+    headers.set("X-CSRF-Token", csrfToken);
   }
 
   // Add comprehensive security headers
-  headers.set('X-Requested-With', 'XMLHttpRequest');
-  headers.set('X-Content-Type-Options', 'nosniff');
-  headers.set('X-Frame-Options', 'DENY');
-  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
+  headers.set("X-Requested-With", "XMLHttpRequest");
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+
   // Validate URL to prevent SSRF attacks
   try {
     const parsedUrl = new URL(url, window.location.origin);
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-      throw new Error('Invalid URL protocol');
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      throw new Error("Invalid URL protocol");
     }
   } catch (error) {
-    throw new Error('Invalid URL format');
+    throw new Error("Invalid URL format");
   }
-  
+
   return fetch(url, {
     ...options,
     headers,
-    credentials: 'same-origin', // Important for CSRF protection
+    credentials: "same-origin", // Important for CSRF protection
     // Add timeout to prevent hanging requests
-    signal: AbortSignal.timeout(30000)
+    signal: AbortSignal.timeout(30000),
   });
 };

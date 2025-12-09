@@ -1,10 +1,10 @@
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AFESpendingReportComponent } from '@/components/reports/AFESpendingReport';
-import { FieldTicketReportComponent } from '@/components/reports/FieldTicketReport';
-import { UWIReportComponent } from '@/components/reports/UWIReport';
-import { BarChart3, FileText, MapPin } from 'lucide-react';
-import { ContextualTooltip } from '@/components/help/ContextualTooltip';
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AFESpendingReportComponent } from "@/components/reports/AFESpendingReport";
+import { FieldTicketReportComponent } from "@/components/reports/FieldTicketReport";
+import { UWIReportComponent } from "@/components/reports/UWIReport";
+import { BarChart3, FileText, MapPin } from "lucide-react";
+import { ContextualTooltip } from "@/components/help/ContextualTooltip";
 
 const Reports = () => {
   return (

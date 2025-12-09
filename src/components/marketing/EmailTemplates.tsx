@@ -1,6 +1,6 @@
 export const ProspectiveClientEmail = {
   subject: "Your invoice processing is costing you more than you think",
-  
+
   body: `Hi {{firstName}},
 
 I noticed your company processes hundreds of invoices monthly, and I'm guessing you're dealing with the same headaches every oil & gas operation faces:
@@ -38,12 +38,12 @@ P.S. - If invoice processing isn't on your radar right now, just reply "Not now"
 
   variables: {
     firstName: "First name of prospect",
-    companyName: "Company name", 
+    companyName: "Company name",
     estimatedInvoices: "Estimated monthly invoice volume",
     timeWasted: "Calculated time waste per month",
     costCalculation: "Annual cost calculation",
-    senderName: "Sender's name"
-  }
+    senderName: "Sender's name",
+  },
 };
 
 export const FollowUpEmails = {
@@ -63,7 +63,7 @@ If you want to see how we've solved this for operations like yours, I'm happy to
 
 Reply with "SHOW ME" and I'll send you a calendar link.
 
-{{senderName}}`
+{{senderName}}`,
   },
 
   finalFollowUp: {
@@ -83,8 +83,8 @@ But if there's even a 10% chance you'd want to see how this works, click here: [
 Either way, thanks for your time.
 
 {{senderName}}
-P.S. - Even if FlowBills isn't right for you, I can probably point you toward 2-3 quick wins for your current process. No strings attached.`
-  }
+P.S. - Even if FlowBills isn't right for you, I can probably point you toward 2-3 quick wins for your current process. No strings attached.`,
+  },
 };
 
 export const WelcomeSequence = {
@@ -105,7 +105,7 @@ I'll follow up in a couple days to see if you have any questions.
 Best,
 {{senderName}}
 
-P.S. - The calculator is conservative. Most clients save 20-30% more than the initial projection.`
+P.S. - The calculator is conservative. Most clients save 20-30% more than the initial projection.`,
   },
 
   dayThree: {
@@ -120,6 +120,6 @@ If not, no worries at all. Sometimes the timing just isn't right.
 
 Either way, let me know?
 
-{{senderName}}`
-  }
+{{senderName}}`,
+  },
 };

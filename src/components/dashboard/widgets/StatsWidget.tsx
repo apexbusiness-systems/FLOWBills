@@ -1,41 +1,45 @@
-import { LucideIcon, DollarSign, FileText, TrendingUp, AlertCircle } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { useInvoices } from '@/hooks/useInvoices';
-import AnimatedCounter from '@/components/ui/animated-counter';
-import { cn } from '@/lib/utils';
+import { LucideIcon, DollarSign, FileText, TrendingUp, AlertCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { useInvoices } from "@/hooks/useInvoices";
+import AnimatedCounter from "@/components/ui/animated-counter";
+import { cn } from "@/lib/utils";
 
 interface StatsWidgetProps {
   title: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
 }
 
-const getStatConfig = (title: string, stats: any): { value: number; label: string; icon: LucideIcon; change: string } => {
+const getStatConfig = (
+  title: string,
+  stats: any
+): { value: number; label: string; icon: LucideIcon; change: string } => {
   switch (title) {
-    case 'Monthly Volume':
+    case "Monthly Volume":
       return {
         value: stats.totalAmount,
         label: `$${(stats.totalAmount / 1000000).toFixed(1)}M`,
         icon: DollarSign,
         change: `${stats.totalCount} invoices`,
       };
-    case 'Active Invoices':
+    case "Active Invoices":
       return {
         value: stats.totalCount,
         label: stats.totalCount.toString(),
         icon: FileText,
         change: `${stats.pendingCount} pending`,
       };
-    case 'Processing Rate':
-      const rate = stats.totalCount > 0 
-        ? ((stats.approvedCount + stats.paidCount) / stats.totalCount) * 100
-        : 94.2;
+    case "Processing Rate":
+      const rate =
+        stats.totalCount > 0
+          ? ((stats.approvedCount + stats.paidCount) / stats.totalCount) * 100
+          : 94.2;
       return {
         value: rate,
         label: `${rate.toFixed(1)}%`,
         icon: TrendingUp,
         change: `${stats.approvedCount} approved`,
       };
-    case 'Exception Queue':
+    case "Exception Queue":
       return {
         value: stats.rejectedCount + stats.pendingCount,
         label: (stats.rejectedCount + stats.pendingCount).toString(),
@@ -45,25 +49,25 @@ const getStatConfig = (title: string, stats: any): { value: number; label: strin
     default:
       return {
         value: 0,
-        label: '0',
+        label: "0",
         icon: FileText,
-        change: '',
+        change: "",
       };
   }
 };
 
-export const StatsWidget = ({ title, size = 'small' }: StatsWidgetProps) => {
+export const StatsWidget = ({ title, size = "small" }: StatsWidgetProps) => {
   const { getInvoicesStats } = useInvoices();
   const stats = getInvoicesStats;
   const config = getStatConfig(title, stats);
   const Icon = config.icon;
 
   return (
-    <Card 
+    <Card
       className={cn(
-        'card-enterprise p-6 hover-lift cursor-pointer transition-all',
-        size === 'large' && 'col-span-full md:col-span-2',
-        size === 'medium' && 'col-span-full md:col-span-1'
+        "card-enterprise p-6 hover-lift cursor-pointer transition-all",
+        size === "large" && "col-span-full md:col-span-2",
+        size === "medium" && "col-span-full md:col-span-1"
       )}
       data-tour="stats-widget"
     >
@@ -74,9 +78,10 @@ export const StatsWidget = ({ title, size = 'small' }: StatsWidgetProps) => {
             <AnimatedCounter
               value={config.value}
               className="text-3xl font-bold text-foreground"
-              formatter={(val) => config.label.includes('$') || config.label.includes('%') 
-                ? config.label 
-                : Math.round(val).toString()
+              formatter={(val) =>
+                config.label.includes("$") || config.label.includes("%")
+                  ? config.label
+                  : Math.round(val).toString()
               }
             />
           </div>

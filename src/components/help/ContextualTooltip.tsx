@@ -1,10 +1,10 @@
-import { ReactNode, useEffect } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
-import { HelpCircle, BookOpen, Play, X } from 'lucide-react';
-import { useFirstUseTooltip } from '@/hooks/useFirstUseTooltip';
-import { useTour } from '@/hooks/useTour';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode, useEffect } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { HelpCircle, BookOpen, Play, X } from "lucide-react";
+import { useFirstUseTooltip } from "@/hooks/useFirstUseTooltip";
+import { useTour } from "@/hooks/useTour";
+import { useNavigate } from "react-router-dom";
 
 interface ContextualTooltipProps {
   id: string;
@@ -13,7 +13,7 @@ interface ContextualTooltipProps {
   description: string;
   helpArticleId?: string;
   tourId?: string;
-  placement?: 'top' | 'right' | 'bottom' | 'left';
+  placement?: "top" | "right" | "bottom" | "left";
 }
 
 export const ContextualTooltip = ({
@@ -23,7 +23,7 @@ export const ContextualTooltip = ({
   description,
   helpArticleId,
   tourId,
-  placement = 'right',
+  placement = "right",
 }: ContextualTooltipProps) => {
   const { shouldShow, isOpen, setIsOpen, markAsShown } = useFirstUseTooltip(id);
   const { startTour } = useTour();
@@ -84,9 +84,9 @@ export const ContextualTooltip = ({
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            
+
             <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
-            
+
             <div className="flex flex-wrap gap-2 pt-1">
               {helpArticleId && (
                 <Button

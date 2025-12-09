@@ -1,5 +1,5 @@
-import { HelpCircle, Play } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { HelpCircle, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,8 +7,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useTour } from '@/hooks/useTour';
+} from "@/components/ui/dropdown-menu";
+import { useTour } from "@/hooks/useTour";
 
 interface TourOption {
   id: string;
@@ -18,19 +18,19 @@ interface TourOption {
 
 const AVAILABLE_TOURS: TourOption[] = [
   {
-    id: 'invoice-workflow',
-    name: 'Invoice Processing',
-    description: 'Learn the complete invoice workflow',
+    id: "invoice-workflow",
+    name: "Invoice Processing",
+    description: "Learn the complete invoice workflow",
   },
   {
-    id: 'afe-management',
-    name: 'AFE Management',
-    description: 'Master budget tracking and AFE features',
+    id: "afe-management",
+    name: "AFE Management",
+    description: "Master budget tracking and AFE features",
   },
   {
-    id: 'field-tickets',
-    name: 'Field Tickets',
-    description: 'Understand field ticket verification',
+    id: "field-tickets",
+    name: "Field Tickets",
+    description: "Understand field ticket verification",
   },
 ];
 
@@ -62,9 +62,7 @@ export const TourTrigger = () => {
                   <span className="text-xs text-green-600">✓ Completed</span>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {tour.description}
-              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">{tour.description}</p>
             </div>
           </DropdownMenuItem>
         ))}

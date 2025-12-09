@@ -1,7 +1,7 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 
 export interface HealthCheckResult {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   checks: {
     database: boolean;
     auth: boolean;
@@ -24,21 +24,18 @@ export class HealthChecker {
 
   async performHealthCheck(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     const checks = {
       database: false,
       auth: false,
       storage: false,
-      api: false
+      api: false,
     };
 
     // Database health check - use existing invoices table for connectivity test
     try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('count')
-        .limit(1);
-      
+      const { data, error } = await supabase.from("invoices").select("count").limit(1);
+
       checks.database = !error;
     } catch {
       checks.database = false;
@@ -62,7 +59,7 @@ export class HealthChecker {
 
     // API health check
     try {
-      const response = await fetch('/api/health', { method: 'HEAD' });
+      const response = await fetch("/api/health", { method: "HEAD" });
       checks.api = response.ok;
     } catch {
       checks.api = false; // API might not exist, that's ok
@@ -71,11 +68,11 @@ export class HealthChecker {
     const healthyCount = Object.values(checks).filter(Boolean).length;
     const totalChecks = Object.keys(checks).length;
 
-    let status: HealthCheckResult['status'] = 'healthy';
+    let status: HealthCheckResult["status"] = "healthy";
     if (healthyCount === 0) {
-      status = 'unhealthy';
+      status = "unhealthy";
     } else if (healthyCount < totalChecks) {
-      status = 'degraded';
+      status = "degraded";
     }
 
     const responseTime = Date.now() - startTime;
@@ -84,7 +81,7 @@ export class HealthChecker {
       status,
       checks,
       timestamp: new Date(),
-      responseTime
+      responseTime,
     };
   }
 
@@ -92,17 +89,19 @@ export class HealthChecker {
     const checkHealth = async () => {
       try {
         const result = await this.performHealthCheck();
-        
-        // Emit health check event
-        window.dispatchEvent(new CustomEvent('health-check', { 
-          detail: result 
-        }));
 
-        if (result.status === 'unhealthy') {
-          console.warn('System health check failed:', result);
+        // Emit health check event
+        window.dispatchEvent(
+          new CustomEvent("health-check", {
+            detail: result,
+          })
+        );
+
+        if (result.status === "unhealthy") {
+          console.warn("System health check failed:", result);
         }
       } catch (error) {
-        console.error('Health check monitoring error:', error);
+        console.error("Health check monitoring error:", error);
       }
     };
 
@@ -116,10 +115,7 @@ export class HealthChecker {
   // Utility method to check specific service health
   async checkDatabaseConnection(): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('invoices')
-        .select('count')
-        .limit(1);
+      const { error } = await supabase.from("invoices").select("count").limit(1);
       return !error;
     } catch {
       return false;

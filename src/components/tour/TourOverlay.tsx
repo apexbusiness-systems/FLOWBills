@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowLeft, ArrowRight, SkipForward } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useTour } from '@/hooks/useTour';
-import { cn } from '@/lib/utils';
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, ArrowLeft, ArrowRight, SkipForward } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useTour } from "@/hooks/useTour";
+import { cn } from "@/lib/utils";
 
 export const TourOverlay = () => {
   const { isActive, currentStep, steps, nextStep, prevStep, skipTour, endTour } = useTour();
@@ -25,7 +25,7 @@ export const TourOverlay = () => {
         setTargetRect(rect);
 
         // Calculate card position based on placement
-        const placement = currentStepData.placement || 'bottom';
+        const placement = currentStepData.placement || "bottom";
         const cardWidth = 400;
         const cardHeight = 200;
         const gap = 20;
@@ -34,19 +34,19 @@ export const TourOverlay = () => {
         let left = 0;
 
         switch (placement) {
-          case 'top':
+          case "top":
             top = rect.top - cardHeight - gap;
             left = rect.left + rect.width / 2 - cardWidth / 2;
             break;
-          case 'bottom':
+          case "bottom":
             top = rect.bottom + gap;
             left = rect.left + rect.width / 2 - cardWidth / 2;
             break;
-          case 'left':
+          case "left":
             top = rect.top + rect.height / 2 - cardHeight / 2;
             left = rect.left - cardWidth - gap;
             break;
-          case 'right':
+          case "right":
             top = rect.top + rect.height / 2 - cardHeight / 2;
             left = rect.right + gap;
             break;
@@ -60,17 +60,17 @@ export const TourOverlay = () => {
         setCardPosition({ top, left });
 
         // Scroll target into view
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     };
 
     updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition);
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition);
 
     return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition);
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition);
     };
   }, [isActive, currentStep, currentStepData]);
 
@@ -84,7 +84,7 @@ export const TourOverlay = () => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50"
-        style={{ pointerEvents: 'none' }}
+        style={{ pointerEvents: "none" }}
       >
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/50" />
@@ -101,7 +101,7 @@ export const TourOverlay = () => {
               left: targetRect.left - 4,
               width: targetRect.width + 8,
               height: targetRect.height + 8,
-              pointerEvents: 'none',
+              pointerEvents: "none",
             }}
           />
         )}
@@ -115,8 +115,8 @@ export const TourOverlay = () => {
               left: targetRect.left - 8,
               width: targetRect.width + 16,
               height: targetRect.height + 16,
-              borderRadius: '12px',
-              pointerEvents: 'none',
+              borderRadius: "12px",
+              pointerEvents: "none",
             }}
           />
         )}
@@ -127,10 +127,10 @@ export const TourOverlay = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.3 }}
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: cardPosition.top,
             left: cardPosition.left,
-            pointerEvents: 'auto',
+            pointerEvents: "auto",
           }}
         >
           <Card className="w-[400px] shadow-2xl border-2 border-primary/20">
@@ -144,12 +144,7 @@ export const TourOverlay = () => {
                   </div>
                   <CardTitle className="text-xl">{currentStepData.title}</CardTitle>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={skipTour}
-                  className="h-8 w-8"
-                >
+                <Button variant="ghost" size="icon" onClick={skipTour} className="h-8 w-8">
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -175,32 +170,24 @@ export const TourOverlay = () => {
                     <div
                       key={index}
                       className={cn(
-                        'h-1.5 rounded-full transition-all',
+                        "h-1.5 rounded-full transition-all",
                         index === currentStep
-                          ? 'w-6 bg-primary'
+                          ? "w-6 bg-primary"
                           : index < currentStep
-                          ? 'w-1.5 bg-primary/50'
-                          : 'w-1.5 bg-muted'
+                            ? "w-1.5 bg-primary/50"
+                            : "w-1.5 bg-muted"
                       )}
                     />
                   ))}
                 </div>
 
                 {currentStep < steps.length - 1 ? (
-                  <Button
-                    size="sm"
-                    onClick={nextStep}
-                    className="flex items-center gap-1"
-                  >
+                  <Button size="sm" onClick={nextStep} className="flex items-center gap-1">
                     Next
                     <ArrowRight className="h-3 w-3" />
                   </Button>
                 ) : (
-                  <Button
-                    size="sm"
-                    onClick={endTour}
-                    className="flex items-center gap-1"
-                  >
+                  <Button size="sm" onClick={endTour} className="flex items-center gap-1">
                     Finish
                     <SkipForward className="h-3 w-3" />
                   </Button>

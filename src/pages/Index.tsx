@@ -3,7 +3,12 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { TrackLink } from "@/components/ui/TrackLink";
 import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Zap, Shield, Clock, CheckCircle2, ArrowRight, BarChart3 } from "lucide-react";
 import heroImage from "@/assets/hero-oilgas.jpg";
 import { SupportChat } from "@/components/support/SupportChat";
@@ -12,24 +17,24 @@ import { useTranslation } from "react-i18next";
 const Index = () => {
   const { t } = useTranslation();
   const [isSupportMinimized, setIsSupportMinimized] = useState(true);
-  
+
   return (
     <main className="min-h-screen animate-fade-in">
       {/* Hero Section */}
-      <section 
+      <section
         className="relative min-h-[85vh] flex items-center justify-center"
         style={{
           backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
         aria-label="Hero section"
       >
         <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
-        <img 
-          src={heroImage} 
-          alt="Oil and gas industrial facility with pipelines and equipment" 
-          className="sr-only" 
+        <img
+          src={heroImage}
+          alt="Oil and gas industrial facility with pipelines and equipment"
+          className="sr-only"
         />
         <div className="relative z-10 container mx-auto px-4 text-center text-white">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-amber-400">
@@ -39,19 +44,19 @@ const Index = () => {
             {t("hero.subtitle")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button 
-              asChild 
-              size="lg" 
+            <Button
+              asChild
+              size="lg"
               className="bg-amber-500 hover:bg-amber-600 text-black font-semibold transition-all duration-200 hover:scale-105 active:scale-100"
             >
               <TrackLink to="/contact" source="hero" aria-label="Book a free demo">
                 {t("hero.cta.primary")} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </TrackLink>
             </Button>
-            <Button 
-              asChild 
-              size="lg" 
-              variant="outline" 
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
               className="bg-black/30 border-white/20 text-white hover:bg-black/50 backdrop-blur-sm transition-all duration-200 hover:scale-105 active:scale-100"
             >
               <TrackLink to="/pricing" source="hero" aria-label="Calculate return on investment">
@@ -61,23 +66,40 @@ const Index = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto" role="region" aria-label="Key statistics">
+          <div
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto"
+            role="region"
+            aria-label="Key statistics"
+          >
             <Card className="bg-black/40 border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-black/50 hover:-translate-y-1">
               <CardHeader>
-                <CardTitle className="text-5xl font-bold text-amber-400" aria-label="95 percent">95%</CardTitle>
-                <CardDescription className="text-white text-base">Straight-Through Processing</CardDescription>
+                <CardTitle className="text-5xl font-bold text-amber-400" aria-label="95 percent">
+                  95%
+                </CardTitle>
+                <CardDescription className="text-white text-base">
+                  Straight-Through Processing
+                </CardDescription>
               </CardHeader>
             </Card>
             <Card className="bg-black/40 border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-black/50 hover:-translate-y-1">
               <CardHeader>
-                <CardTitle className="text-5xl font-bold text-amber-400" aria-label="80 percent">80%</CardTitle>
+                <CardTitle className="text-5xl font-bold text-amber-400" aria-label="80 percent">
+                  80%
+                </CardTitle>
                 <CardDescription className="text-white text-base">Cost Reduction</CardDescription>
               </CardHeader>
             </Card>
             <Card className="bg-black/40 border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-black/50 hover:-translate-y-1">
               <CardHeader>
-                <CardTitle className="text-5xl font-bold text-amber-400" aria-label="24 hours, 7 days">24/7</CardTitle>
-                <CardDescription className="text-white text-base">Processing Uptime</CardDescription>
+                <CardTitle
+                  className="text-5xl font-bold text-amber-400"
+                  aria-label="24 hours, 7 days"
+                >
+                  24/7
+                </CardTitle>
+                <CardDescription className="text-white text-base">
+                  Processing Uptime
+                </CardDescription>
               </CardHeader>
             </Card>
           </div>
@@ -88,10 +110,13 @@ const Index = () => {
       <section className="py-20 bg-background" aria-labelledby="features-heading">
         <div className="container mx-auto px-4">
           <header className="text-center mb-16">
-            <h2 id="features-heading" className="text-4xl font-bold mb-4">Enterprise-Grade Features for Oil & Gas Invoice Processing</h2>
+            <h2 id="features-heading" className="text-4xl font-bold mb-4">
+              Enterprise-Grade Features for Oil & Gas Invoice Processing
+            </h2>
             <p className="text-xl text-muted-foreground">
-              Comprehensive automation platform built for Canadian energy sector accounts payable teams. 
-              Process field tickets, vendor invoices, AFE documentation, and joint venture billing with industry-leading accuracy.
+              Comprehensive automation platform built for Canadian energy sector accounts payable
+              teams. Process field tickets, vendor invoices, AFE documentation, and joint venture
+              billing with industry-leading accuracy.
             </p>
           </header>
 
@@ -101,9 +126,10 @@ const Index = () => {
                 <Zap className="h-12 w-12 text-amber-500 mb-4" aria-hidden="true" />
                 <CardTitle className="text-2xl mb-2">AI-Powered OCR & Data Extraction</CardTitle>
                 <CardDescription className="text-base mb-6">
-                  Advanced optical character recognition (OCR) with 99.5% accuracy extracts vendor information, amounts, dates, 
-                  PO numbers, AFE codes, and line items from any document format including scanned paper invoices, PDFs, 
-                  field tickets, and photos. Supports multi-page documents, handwritten notes, and complex table structures 
+                  Advanced optical character recognition (OCR) with 99.5% accuracy extracts vendor
+                  information, amounts, dates, PO numbers, AFE codes, and line items from any
+                  document format including scanned paper invoices, PDFs, field tickets, and photos.
+                  Supports multi-page documents, handwritten notes, and complex table structures
                   commonly found in oil and gas invoicing.
                 </CardDescription>
               </CardHeader>
@@ -128,13 +154,16 @@ const Index = () => {
             <Card className="card-enterprise hover-lift">
               <CardHeader>
                 <Shield className="h-12 w-12 text-amber-500 mb-4" aria-hidden="true" />
-                <CardTitle className="text-2xl mb-2">Canadian Compliance & Enterprise Security</CardTitle>
+                <CardTitle className="text-2xl mb-2">
+                  Canadian Compliance & Enterprise Security
+                </CardTitle>
                 <CardDescription className="text-base mb-6">
-                  Built-in compliance with PIPEDA (Personal Information Protection and Electronic Documents Act) and 
-                  CASL (Canada's Anti-Spam Legislation). SOC 2 Type II certified infrastructure with AES-256 encryption, 
-                  role-based access control (RBAC), multi-factor authentication (MFA), and comprehensive audit logging. 
-                  Data residency in Canadian data centers ensures compliance with provincial and federal regulations 
-                  including Alberta's PIPA and BC's PIPA.
+                  Built-in compliance with PIPEDA (Personal Information Protection and Electronic
+                  Documents Act) and CASL (Canada's Anti-Spam Legislation). SOC 2 Type II certified
+                  infrastructure with AES-256 encryption, role-based access control (RBAC),
+                  multi-factor authentication (MFA), and comprehensive audit logging. Data residency
+                  in Canadian data centers ensures compliance with provincial and federal
+                  regulations including Alberta's PIPA and BC's PIPA.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -160,11 +189,13 @@ const Index = () => {
                 <Clock className="h-12 w-12 text-amber-500 mb-4" aria-hidden="true" />
                 <CardTitle className="text-2xl mb-2">Intelligent Workflow Automation</CardTitle>
                 <CardDescription className="text-base mb-6">
-                  Smart routing engine automatically processes high-confidence invoices (95% of volume) straight-through 
-                  to approval. Low-confidence cases route to human reviewers with highlighted discrepancies. Configurable 
-                  approval hierarchies support complex organizational structures including joint venture partnerships, 
-                  working interest splits, and AFE authorization workflows. Duplicate detection uses fuzzy matching across 
-                  vendor name, invoice number, date, amount, and PO to prevent duplicate payments before they occur.
+                  Smart routing engine automatically processes high-confidence invoices (95% of
+                  volume) straight-through to approval. Low-confidence cases route to human
+                  reviewers with highlighted discrepancies. Configurable approval hierarchies
+                  support complex organizational structures including joint venture partnerships,
+                  working interest splits, and AFE authorization workflows. Duplicate detection uses
+                  fuzzy matching across vendor name, invoice number, date, amount, and PO to prevent
+                  duplicate payments before they occur.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -192,7 +223,9 @@ const Index = () => {
       <section className="py-20 bg-background" aria-labelledby="faq-heading">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-12">
-            <h2 id="faq-heading" className="text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+            <h2 id="faq-heading" className="text-4xl font-bold mb-4">
+              Frequently Asked Questions
+            </h2>
             <p className="text-xl text-muted-foreground">
               Everything you need to know about automated invoice processing
             </p>
@@ -203,7 +236,11 @@ const Index = () => {
                 What is automated invoice processing for oil and gas?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
-                Automated invoice processing uses AI and machine learning to automatically extract data from oil and gas invoices, validate them against purchase orders, detect duplicates, and route them for approval. FlowBills processes invoices with 95% straight-through processing, reducing manual data entry by 80% and cutting processing costs significantly.
+                Automated invoice processing uses AI and machine learning to automatically extract
+                data from oil and gas invoices, validate them against purchase orders, detect
+                duplicates, and route them for approval. FlowBills processes invoices with 95%
+                straight-through processing, reducing manual data entry by 80% and cutting
+                processing costs significantly.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2" className="card-enterprise px-6">
@@ -211,7 +248,11 @@ const Index = () => {
                 How does FlowBills ensure PIPEDA compliance?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
-                FlowBills is built with PIPEDA compliance from the ground up. We implement data encryption at rest and in transit, role-based access controls, audit logging, data retention policies, and privacy-by-design principles. All personal information is handled according to Canadian privacy law requirements, with consent management and data subject rights built into the platform.
+                FlowBills is built with PIPEDA compliance from the ground up. We implement data
+                encryption at rest and in transit, role-based access controls, audit logging, data
+                retention policies, and privacy-by-design principles. All personal information is
+                handled according to Canadian privacy law requirements, with consent management and
+                data subject rights built into the platform.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3" className="card-enterprise px-6">
@@ -219,7 +260,10 @@ const Index = () => {
                 Can FlowBills integrate with our existing accounting system?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
-                Yes, FlowBills integrates with major accounting and ERP systems used in the oil and gas industry including SAP, Oracle, QuickBooks, Sage, and custom systems via API. Our integration supports bi-directional data sync for invoices, vendor information, purchase orders, and payment status.
+                Yes, FlowBills integrates with major accounting and ERP systems used in the oil and
+                gas industry including SAP, Oracle, QuickBooks, Sage, and custom systems via API.
+                Our integration supports bi-directional data sync for invoices, vendor information,
+                purchase orders, and payment status.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-4" className="card-enterprise px-6">
@@ -227,7 +271,10 @@ const Index = () => {
                 How does duplicate invoice detection work?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
-                FlowBills uses advanced algorithms to detect duplicate invoices by analyzing multiple data points including vendor name, invoice number, date, amount, and PO number. The system uses fuzzy matching to catch duplicates even when invoice numbers or amounts vary slightly, preventing duplicate payments before they occur.
+                FlowBills uses advanced algorithms to detect duplicate invoices by analyzing
+                multiple data points including vendor name, invoice number, date, amount, and PO
+                number. The system uses fuzzy matching to catch duplicates even when invoice numbers
+                or amounts vary slightly, preventing duplicate payments before they occur.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-5" className="card-enterprise px-6">
@@ -235,7 +282,11 @@ const Index = () => {
                 What is the ROI timeline for implementing FlowBills?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
-                Most Canadian oil and gas companies see ROI within 3-6 months. Typical savings include 80% reduction in invoice processing costs, 95% straight-through processing rate, elimination of duplicate payments, faster approval cycles, and reduced audit costs. The platform typically pays for itself through reduced labor costs and prevented duplicate payments alone.
+                Most Canadian oil and gas companies see ROI within 3-6 months. Typical savings
+                include 80% reduction in invoice processing costs, 95% straight-through processing
+                rate, elimination of duplicate payments, faster approval cycles, and reduced audit
+                costs. The platform typically pays for itself through reduced labor costs and
+                prevented duplicate payments alone.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-6" className="card-enterprise px-6">
@@ -243,7 +294,11 @@ const Index = () => {
                 Does FlowBills support e-invoicing and Peppol?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
-                Yes, FlowBills supports e-invoicing standards including Peppol, EN 16931, and country-specific formats. Our platform can receive, validate, and process electronic invoices while maintaining compliance with Canadian and international e-invoicing regulations. This ensures seamless integration with suppliers using various e-invoicing formats.
+                Yes, FlowBills supports e-invoicing standards including Peppol, EN 16931, and
+                country-specific formats. Our platform can receive, validate, and process electronic
+                invoices while maintaining compliance with Canadian and international e-invoicing
+                regulations. This ensures seamless integration with suppliers using various
+                e-invoicing formats.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-7" className="card-enterprise px-6">
@@ -251,7 +306,11 @@ const Index = () => {
                 How secure is my invoice data?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
-                FlowBills implements enterprise-grade security including AES-256 encryption, SOC 2 compliant infrastructure, regular security audits, multi-factor authentication, and role-based access controls. All data is stored in Canadian data centers, and we maintain comprehensive audit logs for compliance purposes. Your invoice data is protected by the same security standards used by major financial institutions.
+                FlowBills implements enterprise-grade security including AES-256 encryption, SOC 2
+                compliant infrastructure, regular security audits, multi-factor authentication, and
+                role-based access controls. All data is stored in Canadian data centers, and we
+                maintain comprehensive audit logs for compliance purposes. Your invoice data is
+                protected by the same security standards used by major financial institutions.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -259,14 +318,24 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-secondary/10" aria-labelledby="cta-heading">
+      <section
+        className="py-20 bg-gradient-to-br from-primary/10 to-secondary/10"
+        aria-labelledby="cta-heading"
+      >
         <div className="container mx-auto px-4 text-center max-w-4xl space-2xl">
-          <h2 id="cta-heading" className="text-4xl font-bold mb-6">Ready to Transform Your AP Process?</h2>
+          <h2 id="cta-heading" className="text-4xl font-bold mb-6">
+            Ready to Transform Your AP Process?
+          </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Join leading Canadian energy companies using FlowBills.ca to reduce costs and improve efficiency.
+            Join leading Canadian energy companies using FlowBills.ca to reduce costs and improve
+            efficiency.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-amber-500 hover:bg-amber-600 text-black font-semibold transition-all duration-200 hover:scale-105 active:scale-100 min-h-[44px]">
+            <Button
+              asChild
+              size="lg"
+              className="bg-amber-500 hover:bg-amber-600 text-black font-semibold transition-all duration-200 hover:scale-105 active:scale-100 min-h-[44px]"
+            >
               <TrackLink to="/contact" source="cta-bottom" aria-label="Start your free trial">
                 Start Free Trial <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </TrackLink>
@@ -280,9 +349,9 @@ const Index = () => {
         </div>
       </section>
 
-      <SupportChat 
-        isMinimized={isSupportMinimized} 
-        onMinimize={() => setIsSupportMinimized(!isSupportMinimized)} 
+      <SupportChat
+        isMinimized={isSupportMinimized}
+        onMinimize={() => setIsSupportMinimized(!isSupportMinimized)}
       />
     </main>
   );

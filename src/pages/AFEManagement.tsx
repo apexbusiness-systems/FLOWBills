@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { AFEManager } from '@/components/afe/AFEManager';
-import { BudgetAlertRulesManager } from '@/components/afe/BudgetAlertRulesManager';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ContextualTooltip } from '@/components/help/ContextualTooltip';
+import { useState } from "react";
+import { AFEManager } from "@/components/afe/AFEManager";
+import { BudgetAlertRulesManager } from "@/components/afe/BudgetAlertRulesManager";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ContextualTooltip } from "@/components/help/ContextualTooltip";
 
 const AFEManagement = () => {
   return (

@@ -1,5 +1,5 @@
 // P9: Duplicate Detection & OCR Caching with SHA256
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 export interface DuplicateCheckResult {
   is_duplicate: boolean;
@@ -18,8 +18,8 @@ export function generateInvoiceHash(
   amount: number,
   poNumber?: string
 ): string {
-  const data = `${vendorId}|${invoiceNumber}|${date}|${amount}|${poNumber || ''}`;
-  return createHash('sha256').update(data).digest('hex');
+  const data = `${vendorId}|${invoiceNumber}|${date}|${amount}|${poNumber || ""}`;
+  return createHash("sha256").update(data).digest("hex");
 }
 
 /**
@@ -101,20 +101,20 @@ export const ocrGate = new OCRStreamGate();
  */
 export async function generateFileHash(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /**
  * Fuzzy matching for duplicate detection
  */
 export function fuzzyMatch(str1: string, str2: string): number {
-  const s1 = str1.toLowerCase().replace(/\s+/g, '');
-  const s2 = str2.toLowerCase().replace(/\s+/g, '');
-  
+  const s1 = str1.toLowerCase().replace(/\s+/g, "");
+  const s2 = str2.toLowerCase().replace(/\s+/g, "");
+
   if (s1 === s2) return 1.0;
-  
+
   // Levenshtein distance
   const matrix: number[][] = [];
   for (let i = 0; i <= s1.length; i++) {
@@ -123,7 +123,7 @@ export function fuzzyMatch(str1: string, str2: string): number {
   for (let j = 0; j <= s2.length; j++) {
     matrix[0][j] = j;
   }
-  
+
   for (let i = 1; i <= s1.length; i++) {
     for (let j = 1; j <= s2.length; j++) {
       const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
@@ -134,7 +134,7 @@ export function fuzzyMatch(str1: string, str2: string): number {
       );
     }
   }
-  
+
   const maxLen = Math.max(s1.length, s2.length);
-  return 1 - (matrix[s1.length][s2.length] / maxLen);
+  return 1 - matrix[s1.length][s2.length] / maxLen;
 }

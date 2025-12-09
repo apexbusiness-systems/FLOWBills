@@ -1,7 +1,7 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { FormPersistence } from '@/lib/persistence';
-import { useAuth } from './useAuth';
-import { useToast } from './use-toast';
+import { useEffect, useRef, useCallback } from "react";
+import { FormPersistence } from "@/lib/persistence";
+import { useAuth } from "./useAuth";
+import { useToast } from "./use-toast";
 
 interface UseFormPersistenceOptions {
   formId: string;
@@ -18,7 +18,7 @@ export function useFormPersistence<T extends Record<string, any>>(
   const { user } = useAuth();
   const { toast } = useToast();
   const autosaveTimerRef = useRef<NodeJS.Timeout>();
-  const lastSavedRef = useRef<string>('');
+  const lastSavedRef = useRef<string>("");
   const hasLoadedRef = useRef(false);
 
   // Load draft on mount
@@ -29,10 +29,10 @@ export function useFormPersistence<T extends Record<string, any>>(
     if (draft) {
       setFormData(draft);
       hasLoadedRef.current = true;
-      
+
       toast({
-        title: 'Draft Restored',
-        description: 'Your previous work has been restored.',
+        title: "Draft Restored",
+        description: "Your previous work has been restored.",
       });
     }
   }, [formId, user?.id, enabled, setFormData, toast]);
@@ -42,7 +42,7 @@ export function useFormPersistence<T extends Record<string, any>>(
     if (!enabled) return;
 
     const currentData = JSON.stringify(formData);
-    
+
     // Skip if no changes
     if (currentData === lastSavedRef.current) return;
 
@@ -66,16 +66,16 @@ export function useFormPersistence<T extends Record<string, any>>(
 
   const clearDraft = useCallback(() => {
     FormPersistence.clearDraft(formId);
-    lastSavedRef.current = '';
+    lastSavedRef.current = "";
   }, [formId]);
 
   const saveDraftNow = useCallback(() => {
     if (!enabled) return;
-    
+
     if (autosaveTimerRef.current) {
       clearTimeout(autosaveTimerRef.current);
     }
-    
+
     FormPersistence.saveDraft(formId, formData, user?.id);
     lastSavedRef.current = JSON.stringify(formData);
   }, [formData, formId, user?.id, enabled]);

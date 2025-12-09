@@ -61,21 +61,21 @@ const queryClient = new QueryClient({
       staleTime: 1000 * 60 * 5, // 5 minutes
       gcTime: 1000 * 60 * 10, // 10 minutes cache retention
       refetchOnWindowFocus: false,
-      refetchOnReconnect: 'always',
+      refetchOnReconnect: "always",
       retry: (failureCount, error: any) => {
         if (error?.status === 404) return false;
         return failureCount < 3;
       },
       structuralSharing: true, // Optimize re-renders
-      networkMode: 'offlineFirst', // Support offline-first strategy
+      networkMode: "offlineFirst", // Support offline-first strategy
     },
     mutations: {
       retry: 1,
       retryDelay: 1000,
-      networkMode: 'offlineFirst',
+      networkMode: "offlineFirst",
       onError: (error: any) => {
         if (import.meta.env.DEV) {
-          console.error('Mutation error:', error);
+          console.error("Mutation error:", error);
         }
       },
     },
@@ -89,7 +89,10 @@ const AuthRoutes = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center" role="status" aria-live="polite">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" aria-hidden="true"></div>
+          <div
+            className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"
+            aria-hidden="true"
+          ></div>
           <p className="text-muted-foreground">Loading application...</p>
         </div>
       </div>
@@ -103,197 +106,157 @@ const AuthRoutes = () => {
   return (
     <>
       {showPublicHeader && <PublicHeader />}
-      <React.Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center" role="status" aria-live="polite">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" aria-hidden="true"></div>
-            <p className="text-muted-foreground">Loading page...</p>
+      <React.Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="text-center" role="status" aria-live="polite">
+              <div
+                className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"
+                aria-hidden="true"
+              ></div>
+              <p className="text-muted-foreground">Loading page...</p>
+            </div>
           </div>
-        </div>
-      }>
+        }
+      >
         <Routes>
-        <Route 
-          path="/auth" 
-          element={user ? <Navigate to="/" replace /> : <Auth />} 
-        />
-        <Route 
-          path="/change-password" 
-          element={<PasswordChange />} 
-        />
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/validation-rules" 
-          element={
-            <ProtectedRoute requiredRole="operator">
-              <ValidationRules />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/approval-queue" 
-          element={
-            <ProtectedRoute>
-              <ApprovalQueue />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/afe-management"
-          element={
-            <ProtectedRoute>
-              <AFEManagement />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/field-tickets" 
-          element={
-            <ProtectedRoute>
-              <FieldTickets />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/uwi-registry" 
-          element={
-            <ProtectedRoute>
-              <UWIRegistry />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/reports" 
-          element={
-            <ProtectedRoute>
-              <Reports />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/three-way-matching" 
-          element={
-            <ProtectedRoute>
-              <ThreeWayMatching />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/invoices" 
-          element={
-            <ProtectedRoute>
-              <Invoices />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/integrations"
-          element={
-            <ProtectedRoute requiredRole="operator">
-              <Integrations />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/workflows" 
-          element={
-            <ProtectedRoute requiredRole="operator">
-              <Workflows />
-            </ProtectedRoute>
-          } 
-        />
-        <Route
-          path="/country-packs" 
-          element={
-            <ProtectedRoute requiredRole="operator">
-              <CountryPacks />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/client-integration" 
-          element={<ClientIntegration />} 
-        />
-        <Route 
-          path="/privacy"
-          element={<Privacy />} 
-        />
-        <Route 
-          path="/terms" 
-          element={<Terms />} 
-        />
-        <Route 
-          path="/security" 
-          element={<Security />} 
-        />
-        <Route 
-          path="/csp-monitoring" 
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <CSPMonitoring />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/features" 
-          element={<Features />} 
-        />
-        <Route 
-          path="/pricing" 
-          element={<Pricing />} 
-        />
-        <Route 
-          path="/api-docs" 
-          element={<APIDocs />} 
-        />
-        <Route 
-          path="/about" 
-          element={<About />} 
-        />
-        <Route 
-          path="/blog" 
-          element={<Blog />} 
-        />
-        <Route 
-          path="/contact" 
-          element={<Contact />} 
-        />
-        <Route 
-          path="/supplier-portal" 
-          element={<SupplierPortal />} 
-        />
-        <Route 
-          path="/help" 
-          element={<HelpCenter />} 
-        />
-        <Route
-          path="/performance" 
-          element={
-            <ProtectedRoute>
-              <PerformanceMonitoring />
-            </ProtectedRoute>
-          } 
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/" 
-          element={<IndexPage />}
-        />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
+          <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
+          <Route path="/change-password" element={<PasswordChange />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/validation-rules"
+            element={
+              <ProtectedRoute requiredRole="operator">
+                <ValidationRules />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/approval-queue"
+            element={
+              <ProtectedRoute>
+                <ApprovalQueue />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/afe-management"
+            element={
+              <ProtectedRoute>
+                <AFEManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/field-tickets"
+            element={
+              <ProtectedRoute>
+                <FieldTickets />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/uwi-registry"
+            element={
+              <ProtectedRoute>
+                <UWIRegistry />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/three-way-matching"
+            element={
+              <ProtectedRoute>
+                <ThreeWayMatching />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoices"
+            element={
+              <ProtectedRoute>
+                <Invoices />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/integrations"
+            element={
+              <ProtectedRoute requiredRole="operator">
+                <Integrations />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workflows"
+            element={
+              <ProtectedRoute requiredRole="operator">
+                <Workflows />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/country-packs"
+            element={
+              <ProtectedRoute requiredRole="operator">
+                <CountryPacks />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/client-integration" element={<ClientIntegration />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/security" element={<Security />} />
+          <Route
+            path="/csp-monitoring"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <CSPMonitoring />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/features" element={<Features />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/api-docs" element={<APIDocs />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/supplier-portal" element={<SupplierPortal />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route
+            path="/performance"
+            element={
+              <ProtectedRoute>
+                <PerformanceMonitoring />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<IndexPage />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </React.Suspense>
       {showMobileNav && <MobileBottomNav />}
@@ -310,9 +273,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider 
-        attribute="class" 
-        defaultTheme="light" 
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
         enableSystem
         disableTransitionOnChange={false}
         storageKey="flowbills-theme"

@@ -11,51 +11,115 @@ const SecurityDashboard = () => {
       status: "secured",
       items: [
         { name: "XSS Prevention", status: "active", description: "Input sanitization implemented" },
-        { name: "File Upload Validation", status: "active", description: "File type and size validation" },
-        { name: "SQL Injection Protection", status: "backend_required", description: "Requires backend implementation" },
-        { name: "CSRF Protection", status: "frontend_implemented", description: "Token-based protection ready" }
-      ]
+        {
+          name: "File Upload Validation",
+          status: "active",
+          description: "File type and size validation",
+        },
+        {
+          name: "SQL Injection Protection",
+          status: "backend_required",
+          description: "Requires backend implementation",
+        },
+        {
+          name: "CSRF Protection",
+          status: "frontend_implemented",
+          description: "Token-based protection ready",
+        },
+      ],
     },
     {
       category: "Authentication & Authorization",
-      status: "backend_required", 
+      status: "backend_required",
       items: [
-        { name: "User Authentication", status: "backend_required", description: "Requires Supabase integration" },
-        { name: "Role-Based Access", status: "backend_required", description: "Requires Supabase RLS policies" },
-        { name: "Session Management", status: "backend_required", description: "Requires backend session handling" },
-        { name: "Password Security", status: "backend_required", description: "Requires Supabase Auth" }
-      ]
+        {
+          name: "User Authentication",
+          status: "backend_required",
+          description: "Requires Supabase integration",
+        },
+        {
+          name: "Role-Based Access",
+          status: "backend_required",
+          description: "Requires Supabase RLS policies",
+        },
+        {
+          name: "Session Management",
+          status: "backend_required",
+          description: "Requires backend session handling",
+        },
+        {
+          name: "Password Security",
+          status: "backend_required",
+          description: "Requires Supabase Auth",
+        },
+      ],
     },
     {
       category: "Data Protection",
       status: "partial",
       items: [
-        { name: "Client-side Encryption", status: "implemented", description: "File hashing and validation" },
-        { name: "Secure Data Storage", status: "backend_required", description: "Requires database encryption" },
+        {
+          name: "Client-side Encryption",
+          status: "implemented",
+          description: "File hashing and validation",
+        },
+        {
+          name: "Secure Data Storage",
+          status: "backend_required",
+          description: "Requires database encryption",
+        },
         { name: "Data Transmission", status: "https_only", description: "HTTPS enforced" },
-        { name: "PII Protection", status: "partial", description: "Input sanitization active" }
-      ]
+        { name: "PII Protection", status: "partial", description: "Input sanitization active" },
+      ],
     },
     {
       category: "Rate Limiting & DoS Protection",
       status: "frontend_only",
       items: [
         { name: "Client Rate Limiting", status: "active", description: "10 uploads/minute limit" },
-        { name: "Server Rate Limiting", status: "backend_required", description: "Requires backend implementation" },
-        { name: "DDoS Protection", status: "infrastructure", description: "Requires CDN/proxy configuration" },
-        { name: "Request Throttling", status: "basic", description: "Basic client-side throttling" }
-      ]
+        {
+          name: "Server Rate Limiting",
+          status: "backend_required",
+          description: "Requires backend implementation",
+        },
+        {
+          name: "DDoS Protection",
+          status: "infrastructure",
+          description: "Requires CDN/proxy configuration",
+        },
+        {
+          name: "Request Throttling",
+          status: "basic",
+          description: "Basic client-side throttling",
+        },
+      ],
     },
     {
       category: "Error Handling & Logging",
       status: "implemented",
       items: [
-        { name: "Secure Error Messages", status: "active", description: "User-friendly error messages" },
-        { name: "Security Event Logging", status: "active", description: "Client-side security logging" },
-        { name: "Error Monitoring", status: "ready", description: "Ready for production monitoring" },
-        { name: "Audit Trail", status: "backend_required", description: "Requires backend audit logging" }
-      ]
-    }
+        {
+          name: "Secure Error Messages",
+          status: "active",
+          description: "User-friendly error messages",
+        },
+        {
+          name: "Security Event Logging",
+          status: "active",
+          description: "Client-side security logging",
+        },
+        {
+          name: "Error Monitoring",
+          status: "ready",
+          description: "Ready for production monitoring",
+        },
+        {
+          name: "Audit Trail",
+          status: "backend_required",
+          description: "Requires backend audit logging",
+        },
+      ],
+    },
   ];
 
   const getStatusBadge = (status: string) => {
@@ -96,10 +160,12 @@ const SecurityDashboard = () => {
 
   const calculateOverallSecurity = () => {
     const totalItems = securityMetrics.reduce((sum, category) => sum + category.items.length, 0);
-    const securedItems = securityMetrics.reduce((sum, category) => 
-      sum + category.items.filter(item => 
-        item.status === "active" || item.status === "implemented"
-      ).length, 0
+    const securedItems = securityMetrics.reduce(
+      (sum, category) =>
+        sum +
+        category.items.filter((item) => item.status === "active" || item.status === "implemented")
+          .length,
+      0
     );
     return Math.round((securedItems / totalItems) * 100);
   };
@@ -114,7 +180,15 @@ const SecurityDashboard = () => {
             <Shield className="h-5 w-5" />
             Security Hardening Status
           </h3>
-          <Badge className={overallScore >= 80 ? "status-approved" : overallScore >= 60 ? "status-pending" : "status-rejected"}>
+          <Badge
+            className={
+              overallScore >= 80
+                ? "status-approved"
+                : overallScore >= 60
+                  ? "status-pending"
+                  : "status-rejected"
+            }
+          >
             {overallScore}% Secured
           </Badge>
         </div>
@@ -134,10 +208,13 @@ const SecurityDashboard = () => {
               </h4>
               {getStatusBadge(category.status)}
             </div>
-            
+
             <div className="space-y-2">
               {category.items.map((item, itemIndex) => (
-                <div key={itemIndex} className="flex items-center justify-between p-2 rounded bg-muted/30">
+                <div
+                  key={itemIndex}
+                  className="flex items-center justify-between p-2 rounded bg-muted/30"
+                >
                   <div className="flex items-center gap-3">
                     {getStatusIcon(item.status)}
                     <div>
@@ -157,32 +234,48 @@ const SecurityDashboard = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
             <div className="text-lg font-semibold text-status-approved">
-              {securityMetrics.reduce((sum, cat) => 
-                sum + cat.items.filter(i => i.status === "active" || i.status === "implemented").length, 0
+              {securityMetrics.reduce(
+                (sum, cat) =>
+                  sum +
+                  cat.items.filter((i) => i.status === "active" || i.status === "implemented")
+                    .length,
+                0
               )}
             </div>
             <div className="text-xs text-muted-foreground">Fully Secured</div>
           </div>
           <div>
             <div className="text-lg font-semibold text-status-pending">
-              {securityMetrics.reduce((sum, cat) => 
-                sum + cat.items.filter(i => i.status === "partial" || i.status === "ready").length, 0
+              {securityMetrics.reduce(
+                (sum, cat) =>
+                  sum +
+                  cat.items.filter((i) => i.status === "partial" || i.status === "ready").length,
+                0
               )}
             </div>
             <div className="text-xs text-muted-foreground">Partially Secured</div>
           </div>
           <div>
             <div className="text-lg font-semibold text-status-processing">
-              {securityMetrics.reduce((sum, cat) => 
-                sum + cat.items.filter(i => i.status === "backend_required").length, 0
+              {securityMetrics.reduce(
+                (sum, cat) => sum + cat.items.filter((i) => i.status === "backend_required").length,
+                0
               )}
             </div>
             <div className="text-xs text-muted-foreground">Backend Required</div>
           </div>
           <div>
             <div className="text-lg font-semibold text-destructive">
-              {securityMetrics.reduce((sum, cat) => 
-                sum + cat.items.filter(i => !["active", "implemented", "partial", "ready", "backend_required"].includes(i.status)).length, 0
+              {securityMetrics.reduce(
+                (sum, cat) =>
+                  sum +
+                  cat.items.filter(
+                    (i) =>
+                      !["active", "implemented", "partial", "ready", "backend_required"].includes(
+                        i.status
+                      )
+                  ).length,
+                0
               )}
             </div>
             <div className="text-xs text-muted-foreground">Critical Issues</div>
@@ -214,8 +307,13 @@ const SecurityDashboard = () => {
       </div>
 
       <div className="mt-4 text-xs text-muted-foreground">
-        Last security scan: {new Date().toLocaleString()} • 
-        <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={() => window.location.reload()}>
+        Last security scan: {new Date().toLocaleString()} •
+        <Button
+          variant="link"
+          size="sm"
+          className="p-0 h-auto text-xs"
+          onClick={() => window.location.reload()}
+        >
           Refresh Scan
         </Button>
       </div>

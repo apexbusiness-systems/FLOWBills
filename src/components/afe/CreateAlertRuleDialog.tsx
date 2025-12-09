@@ -1,12 +1,18 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useAlertRules } from '@/hooks/useAlertRules';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useAlertRules } from "@/hooks/useAlertRules";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
 interface CreateAlertRuleDialogProps {
   open: boolean;
@@ -16,16 +22,16 @@ interface CreateAlertRuleDialogProps {
 export const CreateAlertRuleDialog = ({ open, onOpenChange }: CreateAlertRuleDialogProps) => {
   const { createRule } = useAlertRules();
   const [formData, setFormData] = useState({
-    rule_name: '',
-    alert_type: 'percentage' as 'threshold' | 'percentage',
-    threshold_value: '',
+    rule_name: "",
+    alert_type: "percentage" as "threshold" | "percentage",
+    threshold_value: "",
     email_recipients: [] as string[],
-    email_input: '',
+    email_input: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.email_recipients.length === 0) {
       return;
     }
@@ -39,11 +45,11 @@ export const CreateAlertRuleDialog = ({ open, onOpenChange }: CreateAlertRuleDia
 
     if (result) {
       setFormData({
-        rule_name: '',
-        alert_type: 'percentage',
-        threshold_value: '',
+        rule_name: "",
+        alert_type: "percentage",
+        threshold_value: "",
         email_recipients: [],
-        email_input: '',
+        email_input: "",
       });
       onOpenChange(false);
     }
@@ -55,7 +61,7 @@ export const CreateAlertRuleDialog = ({ open, onOpenChange }: CreateAlertRuleDia
       setFormData({
         ...formData,
         email_recipients: [...formData.email_recipients, email],
-        email_input: '',
+        email_input: "",
       });
     }
   };
@@ -63,7 +69,7 @@ export const CreateAlertRuleDialog = ({ open, onOpenChange }: CreateAlertRuleDia
   const removeEmail = (email: string) => {
     setFormData({
       ...formData,
-      email_recipients: formData.email_recipients.filter(e => e !== email),
+      email_recipients: formData.email_recipients.filter((e) => e !== email),
     });
   };
 
@@ -93,7 +99,7 @@ export const CreateAlertRuleDialog = ({ open, onOpenChange }: CreateAlertRuleDia
             <Label>Alert Type</Label>
             <RadioGroup
               value={formData.alert_type}
-              onValueChange={(value: 'threshold' | 'percentage') => 
+              onValueChange={(value: "threshold" | "percentage") =>
                 setFormData({ ...formData, alert_type: value })
               }
             >
@@ -114,28 +120,31 @@ export const CreateAlertRuleDialog = ({ open, onOpenChange }: CreateAlertRuleDia
 
           <div className="space-y-2">
             <Label htmlFor="threshold_value">
-              {formData.alert_type === 'percentage' ? 'Percentage Threshold' : 'Dollar Threshold'}
+              {formData.alert_type === "percentage" ? "Percentage Threshold" : "Dollar Threshold"}
             </Label>
             <div className="flex items-center gap-2">
-              {formData.alert_type === 'threshold' && <span className="text-muted-foreground">$</span>}
+              {formData.alert_type === "threshold" && (
+                <span className="text-muted-foreground">$</span>
+              )}
               <Input
                 id="threshold_value"
                 type="number"
-                step={formData.alert_type === 'percentage' ? '1' : '0.01'}
+                step={formData.alert_type === "percentage" ? "1" : "0.01"}
                 min="0"
-                max={formData.alert_type === 'percentage' ? '100' : undefined}
-                placeholder={formData.alert_type === 'percentage' ? '80' : '10000'}
+                max={formData.alert_type === "percentage" ? "100" : undefined}
+                placeholder={formData.alert_type === "percentage" ? "80" : "10000"}
                 value={formData.threshold_value}
                 onChange={(e) => setFormData({ ...formData, threshold_value: e.target.value })}
                 required
               />
-              {formData.alert_type === 'percentage' && <span className="text-muted-foreground">%</span>}
+              {formData.alert_type === "percentage" && (
+                <span className="text-muted-foreground">%</span>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {formData.alert_type === 'percentage' 
-                ? 'Alert will trigger when budget utilization reaches this percentage'
-                : 'Alert will trigger when remaining budget falls below this amount'
-              }
+              {formData.alert_type === "percentage"
+                ? "Alert will trigger when budget utilization reaches this percentage"
+                : "Alert will trigger when remaining budget falls below this amount"}
             </p>
           </div>
 
@@ -149,7 +158,7 @@ export const CreateAlertRuleDialog = ({ open, onOpenChange }: CreateAlertRuleDia
                 value={formData.email_input}
                 onChange={(e) => setFormData({ ...formData, email_input: e.target.value })}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     e.preventDefault();
                     addEmail();
                   }

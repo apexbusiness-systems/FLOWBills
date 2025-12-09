@@ -45,105 +45,105 @@ const InvoiceUpload = () => {
   const processFile = async (file: File, fileId: string) => {
     try {
       // Step 1: Create invoice record
-      setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, status: "uploading", progress: 20 } : f
-      ));
+      setFiles((prev) =>
+        prev.map((f) => (f.id === fileId ? { ...f, status: "uploading", progress: 20 } : f))
+      );
 
       const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
         vendor_name: "Auto-Generated",
         amount: 0,
-        invoice_date: new Date().toISOString().split('T')[0],
-        status: 'pending' as const
+        invoice_date: new Date().toISOString().split("T")[0],
+        status: "pending" as const,
       };
 
       const invoice = await createInvoice(invoiceData);
-      
+
       if (!invoice) {
         throw new Error("Failed to create invoice record");
       }
 
-      setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, invoiceId: invoice.id, progress: 40 } : f
-      ));
+      setFiles((prev) =>
+        prev.map((f) => (f.id === fileId ? { ...f, invoiceId: invoice.id, progress: 40 } : f))
+      );
 
       // Step 2: Upload file to Supabase Storage
-      setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, status: "processing", progress: 50 } : f
-      ));
+      setFiles((prev) =>
+        prev.map((f) => (f.id === fileId ? { ...f, status: "processing", progress: 50 } : f))
+      );
 
       const document = await uploadFile(file, invoice.id);
-      
+
       if (!document) {
         throw new Error("Failed to upload file");
       }
 
-      setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, progress: 60 } : f
-      ));
+      setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, progress: 60 } : f)));
 
       // Step 3: Read file content for extraction
       const fileContent = await readFileAsBase64(file);
 
       // Step 4: Trigger complete invoice intake pipeline
-      setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, status: "extracting", progress: 70 } : f
-      ));
+      setFiles((prev) =>
+        prev.map((f) => (f.id === fileId ? { ...f, status: "extracting", progress: 70 } : f))
+      );
 
       // Call the invoice-intake orchestration function
-      const { data: intakeResult, error: intakeError } = await supabase.functions.invoke('invoice-intake', {
-        body: {
-          invoice_id: invoice.id,
-          file_content: fileContent
+      const { data: intakeResult, error: intakeError } = await supabase.functions.invoke(
+        "invoice-intake",
+        {
+          body: {
+            invoice_id: invoice.id,
+            file_content: fileContent,
+          },
         }
-      });
+      );
 
       if (intakeError) {
         throw new Error(`Invoice processing failed: ${intakeError.message}`);
       }
 
       if (!intakeResult?.success) {
-        throw new Error(intakeResult?.error || 'Invoice processing failed');
+        throw new Error(intakeResult?.error || "Invoice processing failed");
       }
 
-      setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, progress: 90 } : f
-      ));
+      setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, progress: 90 } : f)));
 
       // Step 5: Complete
-      setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, status: "completed", progress: 100 } : f
-      ));
+      setFiles((prev) =>
+        prev.map((f) => (f.id === fileId ? { ...f, status: "completed", progress: 100 } : f))
+      );
 
       toast({
         title: "Invoice processed successfully",
-        description: intakeResult.approval?.auto_approved 
+        description: intakeResult.approval?.auto_approved
           ? "Invoice auto-approved and ready for payment"
-          : intakeResult.approval?.requires_review 
+          : intakeResult.approval?.requires_review
             ? `Requires review: ${intakeResult.approval.review_reason}`
-            : `Pending ${intakeResult.approval?.approval_level || 'manual'} approval`,
+            : `Pending ${intakeResult.approval?.approval_level || "manual"} approval`,
       });
-      setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, status: "completed", progress: 100 } : f
-      ));
+      setFiles((prev) =>
+        prev.map((f) => (f.id === fileId ? { ...f, status: "completed", progress: 100 } : f))
+      );
 
       toast({
         title: "Invoice processed successfully",
-        description: intakeResult.approval?.auto_approved 
+        description: intakeResult.approval?.auto_approved
           ? "Invoice auto-approved and ready for payment"
-          : intakeResult.approval?.requires_review 
+          : intakeResult.approval?.requires_review
             ? `Requires review: ${intakeResult.approval.review_reason}`
-            : `Pending ${intakeResult.approval?.approval_level || 'manual'} approval`,
+            : `Pending ${intakeResult.approval?.approval_level || "manual"} approval`,
       });
-
     } catch (error: any) {
-      console.error('Error processing file:', error);
-      setFiles(prev => prev.map(f => 
-        f.id === fileId 
-          ? { ...f, status: "error", errorMessage: error.message || "Processing failed" } 
-          : f
-      ));
-      
+      console.error("Error processing file:", error);
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileId
+            ? { ...f, status: "error", errorMessage: error.message || "Processing failed" }
+            : f
+        )
+      );
+
       toast({
         title: "Processing failed",
         description: error.message || "Failed to process invoice",
@@ -158,7 +158,7 @@ const InvoiceUpload = () => {
       reader.onload = () => {
         const result = reader.result as string;
         // Remove data URL prefix if present
-        const base64 = result.includes(',') ? result.split(',')[1] : result;
+        const base64 = result.includes(",") ? result.split(",")[1] : result;
         resolve(base64);
       };
       reader.onerror = reject;
@@ -167,19 +167,23 @@ const InvoiceUpload = () => {
   };
 
   const handleFileUpload = (uploadedFiles: FileList) => {
-    const newFiles: UploadedFile[] = Array.from(uploadedFiles).map(file => ({
+    const newFiles: UploadedFile[] = Array.from(uploadedFiles).map((file) => ({
       id: Math.random().toString(36).substr(2, 9),
       name: file.name,
       size: file.size,
       status: "uploading",
       progress: 0,
-      type: file.name.includes('.xml') ? 'edi' : 
-            file.name.includes('.csv') ? 'csv' :
-            file.name.includes('PO') ? 'po' : 'invoice'
+      type: file.name.includes(".xml")
+        ? "edi"
+        : file.name.includes(".csv")
+          ? "csv"
+          : file.name.includes("PO")
+            ? "po"
+            : "invoice",
     }));
 
-    setFiles(prev => [...prev, ...newFiles]);
-    
+    setFiles((prev) => [...prev, ...newFiles]);
+
     // Process each file
     Array.from(uploadedFiles).forEach((file, index) => {
       processFile(file, newFiles[index].id);
@@ -202,7 +206,7 @@ const InvoiceUpload = () => {
   };
 
   const removeFile = (fileId: string) => {
-    setFiles(prev => prev.filter(f => f.id !== fileId));
+    setFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
   const getStatusIcon = (status: string) => {
@@ -246,34 +250,28 @@ const InvoiceUpload = () => {
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   return (
     <div className="card-enterprise">
-      <h3 className="text-lg font-semibold text-foreground mb-4">
-        Invoice Upload & Processing
-      </h3>
-      
+      <h3 className="text-lg font-semibold text-foreground mb-4">Invoice Upload & Processing</h3>
+
       {/* Upload Zone */}
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          isDragOver 
-            ? "border-primary bg-primary/5" 
-            : "border-border hover:border-primary/50"
+          isDragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h4 className="text-lg font-medium text-foreground mb-2">
-          Upload Invoices & Documents
-        </h4>
+        <h4 className="text-lg font-medium text-foreground mb-2">Upload Invoices & Documents</h4>
         <p className="text-muted-foreground mb-4">
           Drag and drop files here, or click to select files
         </p>
@@ -311,18 +309,14 @@ const InvoiceUpload = () => {
                 {getStatusIcon(file.status)}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h5 className="text-sm font-medium text-foreground truncate">
-                      {file.name}
-                    </h5>
+                    <h5 className="text-sm font-medium text-foreground truncate">{file.name}</h5>
                     {getStatusBadge(file.status)}
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-xs text-muted-foreground">
                       {formatFileSize(file.size)}
                     </span>
-                    <span className="text-xs text-muted-foreground capitalize">
-                      {file.type}
-                    </span>
+                    <span className="text-xs text-muted-foreground capitalize">{file.type}</span>
                   </div>
                   {file.status !== "completed" && file.status !== "error" && (
                     <Progress value={file.progress} className="mt-2 h-2" />
@@ -331,7 +325,9 @@ const InvoiceUpload = () => {
                     <p className="text-xs text-destructive mt-1">{file.errorMessage}</p>
                   )}
                   {file.status === "workflow" && (
-                    <p className="text-xs text-muted-foreground mt-1">Executing approval workflow...</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Executing approval workflow...
+                    </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -349,7 +345,12 @@ const InvoiceUpload = () => {
                     size="sm"
                     onClick={() => removeFile(file.id)}
                     aria-label={`Remove ${file.name}`}
-                    disabled={file.status === "uploading" || file.status === "processing" || file.status === "extracting" || file.status === "workflow"}
+                    disabled={
+                      file.status === "uploading" ||
+                      file.status === "processing" ||
+                      file.status === "extracting" ||
+                      file.status === "workflow"
+                    }
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -365,11 +366,7 @@ const InvoiceUpload = () => {
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-md font-medium text-foreground">AI Extraction Results</h4>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedInvoiceForResults(null)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setSelectedInvoiceForResults(null)}>
               <X className="h-4 w-4" />
             </Button>
           </div>

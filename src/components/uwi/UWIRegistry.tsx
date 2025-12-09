@@ -1,53 +1,54 @@
-import { useState } from 'react';
-import { useUWIs } from '@/hooks/useUWIs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { useUWIs } from "@/hooks/useUWIs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Plus, Search, MapPin, Calendar, Building2, FileText } from 'lucide-react';
-import { CreateUWIDialog } from './CreateUWIDialog';
-import { UWIDetailsDialog } from './UWIDetailsDialog';
-import { format } from 'date-fns';
+} from "@/components/ui/select";
+import { Plus, Search, MapPin, Calendar, Building2, FileText } from "lucide-react";
+import { CreateUWIDialog } from "./CreateUWIDialog";
+import { UWIDetailsDialog } from "./UWIDetailsDialog";
+import { format } from "date-fns";
 
 const STATUS_COLORS = {
-  active: 'bg-green-500',
-  drilling: 'bg-blue-500',
-  completed: 'bg-gray-500',
-  suspended: 'bg-orange-500',
-  abandoned: 'bg-red-500',
+  active: "bg-green-500",
+  drilling: "bg-blue-500",
+  completed: "bg-gray-500",
+  suspended: "bg-orange-500",
+  abandoned: "bg-red-500",
 };
 
 export const UWIRegistry = () => {
   const { uwis, loading, getUWIStats } = useUWIs();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [provinceFilter, setProvinceFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [provinceFilter, setProvinceFilter] = useState<string>("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedUWIId, setSelectedUWIId] = useState<string | null>(null);
 
   const stats = getUWIStats();
 
-  const filteredUWIs = uwis.filter(uwi => {
-    const matchesSearch = searchQuery === '' || 
+  const filteredUWIs = uwis.filter((uwi) => {
+    const matchesSearch =
+      searchQuery === "" ||
       uwi.uwi.toLowerCase().includes(searchQuery.toLowerCase()) ||
       uwi.well_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       uwi.operator?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' || uwi.status === statusFilter;
-    const matchesProvince = provinceFilter === 'all' || uwi.province === provinceFilter;
+    const matchesStatus = statusFilter === "all" || uwi.status === statusFilter;
+    const matchesProvince = provinceFilter === "all" || uwi.province === provinceFilter;
 
     return matchesSearch && matchesStatus && matchesProvince;
   });
 
-  const provinces = Array.from(new Set(uwis.map(u => u.province).filter(Boolean)));
+  const provinces = Array.from(new Set(uwis.map((u) => u.province).filter(Boolean)));
 
   const handleViewDetails = (uwiId: string) => {
     setSelectedUWIId(uwiId);
@@ -114,9 +115,7 @@ export const UWIRegistry = () => {
       <Card>
         <CardHeader>
           <CardTitle>Well Identifiers</CardTitle>
-          <CardDescription>
-            Browse and manage your UWI registry
-          </CardDescription>
+          <CardDescription>Browse and manage your UWI registry</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -168,23 +167,28 @@ export const UWIRegistry = () => {
           ) : (
             <div className="space-y-3">
               {filteredUWIs.map((uwi) => (
-                <Card key={uwi.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleViewDetails(uwi.id)}>
+                <Card
+                  key={uwi.id}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => handleViewDetails(uwi.id)}
+                >
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">
                       <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-3">
                           <h3 className="font-semibold text-lg">{uwi.uwi}</h3>
-                          <Badge 
-                            variant="secondary" 
-                            className={STATUS_COLORS[uwi.status as keyof typeof STATUS_COLORS] || 'bg-gray-500'}
+                          <Badge
+                            variant="secondary"
+                            className={
+                              STATUS_COLORS[uwi.status as keyof typeof STATUS_COLORS] ||
+                              "bg-gray-500"
+                            }
                           >
                             {uwi.status}
                           </Badge>
                         </div>
-                        
-                        {uwi.well_name && (
-                          <p className="text-muted-foreground">{uwi.well_name}</p>
-                        )}
+
+                        {uwi.well_name && <p className="text-muted-foreground">{uwi.well_name}</p>}
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           {uwi.operator && (
@@ -200,15 +204,13 @@ export const UWIRegistry = () => {
                             </div>
                           )}
                           {uwi.location && (
-                            <div className="text-muted-foreground">
-                              {uwi.location}
-                            </div>
+                            <div className="text-muted-foreground">{uwi.location}</div>
                           )}
                           {uwi.spud_date && (
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-muted-foreground" />
                               <span className="text-muted-foreground">
-                                Spud: {format(new Date(uwi.spud_date), 'MMM yyyy')}
+                                Spud: {format(new Date(uwi.spud_date), "MMM yyyy")}
                               </span>
                             </div>
                           )}
@@ -227,10 +229,7 @@ export const UWIRegistry = () => {
         </CardContent>
       </Card>
 
-      <CreateUWIDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-      />
+      <CreateUWIDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
 
       {selectedUWIId && (
         <UWIDetailsDialog

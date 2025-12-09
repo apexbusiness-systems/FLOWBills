@@ -1,11 +1,17 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 interface CreateIntegrationDialogProps {
   open: boolean;
@@ -18,27 +24,27 @@ interface CreateIntegrationDialogProps {
 }
 
 const integrationTypes = [
-  { value: 'Portal Access', label: 'Portal Access' },
-  { value: 'ERP Integration', label: 'ERP Integration' },
-  { value: 'Electronic Data Interchange', label: 'Electronic Data Interchange' },
-  { value: 'Invoice Automation', label: 'Invoice Automation' },
-  { value: 'API Integration', label: 'API Integration' },
+  { value: "Portal Access", label: "Portal Access" },
+  { value: "ERP Integration", label: "ERP Integration" },
+  { value: "Electronic Data Interchange", label: "Electronic Data Interchange" },
+  { value: "Invoice Automation", label: "Invoice Automation" },
+  { value: "API Integration", label: "API Integration" },
 ];
 
 const CreateIntegrationDialog = ({
   open,
   onOpenChange,
-  onSubmit
+  onSubmit,
 }: CreateIntegrationDialogProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    integration_name: '',
-    integration_type: '',
-    description: '',
-    endpoint_url: '',
-    api_key: '',
-    username: '',
-    password: ''
+    integration_name: "",
+    integration_type: "",
+    description: "",
+    endpoint_url: "",
+    api_key: "",
+    username: "",
+    password: "",
   });
   const { toast } = useToast();
 
@@ -61,24 +67,24 @@ const CreateIntegrationDialog = ({
         endpoint_url: formData.endpoint_url,
         api_key: formData.api_key,
         username: formData.username,
-        password: formData.password
+        password: formData.password,
       };
 
       await onSubmit({
         integration_name: formData.integration_name,
         integration_type: formData.integration_type,
-        config
+        config,
       });
 
       // Reset form
       setFormData({
-        integration_name: '',
-        integration_type: '',
-        description: '',
-        endpoint_url: '',
-        api_key: '',
-        username: '',
-        password: ''
+        integration_name: "",
+        integration_type: "",
+        description: "",
+        endpoint_url: "",
+        api_key: "",
+        username: "",
+        password: "",
       });
     } finally {
       setLoading(false);
@@ -91,14 +97,16 @@ const CreateIntegrationDialog = ({
         <DialogHeader>
           <DialogTitle>Add New Integration</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="integration_name">Integration Name *</Label>
             <Input
               id="integration_name"
               value={formData.integration_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, integration_name: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, integration_name: e.target.value }))
+              }
               placeholder="e.g., NOV AccessNOV Portal"
               required
             />
@@ -106,9 +114,11 @@ const CreateIntegrationDialog = ({
 
           <div className="space-y-2">
             <Label htmlFor="integration_type">Integration Type *</Label>
-            <Select 
-              value={formData.integration_type} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, integration_type: value }))}
+            <Select
+              value={formData.integration_type}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, integration_type: value }))
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select integration type" />
@@ -128,7 +138,7 @@ const CreateIntegrationDialog = ({
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="Brief description of this integration..."
               rows={3}
             />
@@ -140,7 +150,7 @@ const CreateIntegrationDialog = ({
               id="endpoint_url"
               type="url"
               value={formData.endpoint_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, endpoint_url: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, endpoint_url: e.target.value }))}
               placeholder="https://api.example.com"
             />
           </div>
@@ -151,7 +161,7 @@ const CreateIntegrationDialog = ({
               <Input
                 id="username"
                 value={formData.username}
-                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
                 placeholder="Username"
               />
             </div>
@@ -161,7 +171,7 @@ const CreateIntegrationDialog = ({
                 id="password"
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                 placeholder="Password"
               />
             </div>
@@ -173,22 +183,22 @@ const CreateIntegrationDialog = ({
               id="api_key"
               type="password"
               value={formData.api_key}
-              onChange={(e) => setFormData(prev => ({ ...prev, api_key: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, api_key: e.target.value }))}
               placeholder="API Key (if applicable)"
             />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Integration'}
+              {loading ? "Creating..." : "Create Integration"}
             </Button>
           </div>
         </form>

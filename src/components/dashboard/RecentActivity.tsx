@@ -1,11 +1,5 @@
-import { memo, useCallback } from 'react';
-import { 
-  FileText, 
-  CheckCircle, 
-  AlertTriangle, 
-  DollarSign,
-  Clock
-} from "lucide-react";
+import { memo, useCallback } from "react";
+import { FileText, CheckCircle, AlertTriangle, DollarSign, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -17,16 +11,16 @@ const activities = [
     description: "Husky Energy - $45,250.00",
     timestamp: "2 minutes ago",
     status: "processing",
-    icon: FileText
+    icon: FileText,
   },
   {
     id: 2,
     type: "payment_approved",
     title: "Payment batch PB-240315 approved",
     description: "15 invoices - $127,830.45 total",
-    timestamp: "1 hour ago", 
+    timestamp: "1 hour ago",
     status: "approved",
-    icon: CheckCircle
+    icon: CheckCircle,
   },
   {
     id: 3,
@@ -34,8 +28,8 @@ const activities = [
     title: "PO matching failed",
     description: "Invoice INV-2024-0845 - No matching PO found",
     timestamp: "3 hours ago",
-    status: "rejected", 
-    icon: AlertTriangle
+    status: "rejected",
+    icon: AlertTriangle,
   },
   {
     id: 4,
@@ -44,7 +38,7 @@ const activities = [
     description: "Suncor Energy - 8 invoices remitted",
     timestamp: "4 hours ago",
     status: "approved",
-    icon: DollarSign
+    icon: DollarSign,
   },
   {
     id: 5,
@@ -53,8 +47,8 @@ const activities = [
     description: "Well ABC-123 - March 2024 allocation",
     timestamp: "6 hours ago",
     status: "approved",
-    icon: FileText
-  }
+    icon: FileText,
+  },
 ];
 
 // Memoized component for performance - static data doesn't need re-render
@@ -85,8 +79,8 @@ const RecentActivity = memo(() => {
         {activities.map((activity) => {
           const Icon = activity.icon;
           return (
-            <div 
-              key={activity.id} 
+            <div
+              key={activity.id}
               className="flex items-start gap-3 p-3 rounded-lg border border-border hover:border-primary/50 transition-colors group cursor-pointer"
               role="button"
               tabIndex={0}
@@ -95,17 +89,13 @@ const RecentActivity = memo(() => {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                 <Icon className="h-4 w-4" />
               </div>
-              
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-sm font-medium text-foreground truncate">
-                    {activity.title}
-                  </h4>
+                  <h4 className="text-sm font-medium text-foreground truncate">{activity.title}</h4>
                   {getStatusBadge(activity.status)}
                 </div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {activity.description}
-                </p>
+                <p className="text-sm text-muted-foreground mb-2">{activity.description}</p>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   {activity.timestamp}
@@ -118,7 +108,7 @@ const RecentActivity = memo(() => {
 
       <div className="mt-4 pt-4 border-t border-border">
         <p className="text-xs text-muted-foreground text-center">
-          Showing last 5 activities • 
+          Showing last 5 activities •
           <Button variant="link" size="sm" className="p-0 h-auto text-xs">
             View audit log
           </Button>

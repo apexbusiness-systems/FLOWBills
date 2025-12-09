@@ -1,19 +1,26 @@
-import React from 'react';
-import { render, mockSupabase, generateMockInvoice, setupTestEnvironment, screen, waitFor } from '@/lib/test-utils';
-import InvoiceList from '@/components/invoices/InvoiceList';
-import { vi, describe, it, beforeEach, expect } from 'vitest';
+import React from "react";
+import {
+  render,
+  mockSupabase,
+  generateMockInvoice,
+  setupTestEnvironment,
+  screen,
+  waitFor,
+} from "@/lib/test-utils";
+import InvoiceList from "@/components/invoices/InvoiceList";
+import { vi, describe, it, beforeEach, expect } from "vitest";
 
 // Mock the Supabase client
-vi.mock('@/integrations/supabase/client', () => ({
+vi.mock("@/integrations/supabase/client", () => ({
   supabase: mockSupabase,
 }));
 
 // Mock the useInvoices hook
-vi.mock('@/hooks/useInvoices', () => ({
+vi.mock("@/hooks/useInvoices", () => ({
   useInvoices: () => ({
     invoices: [
-      generateMockInvoice({ id: '1', vendor_name: 'Vendor A', amount: 1000 }),
-      generateMockInvoice({ id: '2', vendor_name: 'Vendor B', amount: 2000 }),
+      generateMockInvoice({ id: "1", vendor_name: "Vendor A", amount: 1000 }),
+      generateMockInvoice({ id: "2", vendor_name: "Vendor B", amount: 2000 }),
     ],
     loading: false,
     error: null,
@@ -28,8 +35,8 @@ setupTestEnvironment();
 
 const mockInvoiceListProps = {
   invoices: [
-    generateMockInvoice({ id: '1', vendor_name: 'Vendor A', amount: 1000 }),
-    generateMockInvoice({ id: '2', vendor_name: 'Vendor B', amount: 2000 }),
+    generateMockInvoice({ id: "1", vendor_name: "Vendor A", amount: 1000 }),
+    generateMockInvoice({ id: "2", vendor_name: "Vendor B", amount: 2000 }),
   ],
   loading: false,
   onEdit: vi.fn(),
@@ -37,40 +44,40 @@ const mockInvoiceListProps = {
   onCreate: vi.fn(),
 };
 
-describe('InvoiceList', () => {
+describe("InvoiceList", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders list of invoices', async () => {
+  it("renders list of invoices", async () => {
     render(<InvoiceList {...mockInvoiceListProps} />);
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Vendor A')).toBeInTheDocument();
-      expect(screen.getByText('Vendor B')).toBeInTheDocument();
+      expect(screen.getByText("Vendor A")).toBeInTheDocument();
+      expect(screen.getByText("Vendor B")).toBeInTheDocument();
     });
   });
 
-  it('displays invoice amounts correctly', async () => {
+  it("displays invoice amounts correctly", async () => {
     render(<InvoiceList {...mockInvoiceListProps} />);
-    
+
     await waitFor(() => {
-      expect(screen.getByText('$1,000.00')).toBeInTheDocument();
-      expect(screen.getByText('$2,000.00')).toBeInTheDocument();
+      expect(screen.getByText("$1,000.00")).toBeInTheDocument();
+      expect(screen.getByText("$2,000.00")).toBeInTheDocument();
     });
   });
 
-  it('shows loading state', () => {
+  it("shows loading state", () => {
     const loadingProps = { ...mockInvoiceListProps, loading: true, invoices: [] };
     render(<InvoiceList {...loadingProps} />);
-    
-    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
+
+    expect(screen.getByTestId("loading-skeleton")).toBeInTheDocument();
   });
 
-  it('shows empty state when no invoices exist', () => {
+  it("shows empty state when no invoices exist", () => {
     const emptyProps = { ...mockInvoiceListProps, invoices: [] };
     render(<InvoiceList {...emptyProps} />);
-    
+
     expect(screen.getByText(/no invoices found/i)).toBeInTheDocument();
   });
 });

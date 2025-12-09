@@ -61,7 +61,7 @@ async function checkDuplicateBank(supabase: any, document: any, tenantId: string
   if (!bankInfo.iban && !bankInfo.account_number) return null;
   
   // Check vendors table for duplicate bank information
-  let query = supabase
+  const query = supabase
     .from('vendors')
     .select('*')
     .neq('id', document.vendor_id || 'none');
@@ -112,7 +112,7 @@ async function checkDuplicateTaxId(supabase: any, document: any, tenantId: strin
   const taxInfo = extractTaxInfo(document.xml_content);
   if (!taxInfo.vat_id && !taxInfo.tax_id) return null;
   
-  let query = supabase
+  const query = supabase
     .from('vendors')
     .select('*')
     .neq('id', document.vendor_id || 'none');

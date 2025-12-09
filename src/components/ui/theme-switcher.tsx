@@ -32,16 +32,12 @@ export function ThemeSwitcher({ variant = "dropdown" }: ThemeSwitcherProps) {
             className={cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
               "hover:bg-muted",
-              theme === value
-                ? "bg-muted text-foreground"
-                : "text-muted-foreground"
+              theme === value ? "bg-muted text-foreground" : "text-muted-foreground"
             )}
           >
             <Icon className="h-4 w-4" />
             <span>{label}</span>
-            {theme === value && (
-              <div className="ml-auto h-2 w-2 rounded-full bg-primary" />
-            )}
+            {theme === value && <div className="ml-auto h-2 w-2 rounded-full bg-primary" />}
           </button>
         ))}
       </div>

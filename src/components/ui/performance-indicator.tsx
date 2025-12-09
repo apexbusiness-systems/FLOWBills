@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { healthChecker, HealthCheckResult } from '@/lib/health-check';
-import { Activity, AlertTriangle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { healthChecker, HealthCheckResult } from "@/lib/health-check";
+import { Activity, AlertTriangle, CheckCircle } from "lucide-react";
 
 export const PerformanceIndicator: React.FC = () => {
   const [healthStatus, setHealthStatus] = useState<HealthCheckResult | null>(null);
@@ -14,7 +14,7 @@ export const PerformanceIndicator: React.FC = () => {
     };
 
     // Listen for health check events
-    window.addEventListener('health-check', handleHealthCheck as EventListener);
+    window.addEventListener("health-check", handleHealthCheck as EventListener);
 
     // Initial health check
     healthChecker.performHealthCheck().then(setHealthStatus);
@@ -23,7 +23,7 @@ export const PerformanceIndicator: React.FC = () => {
     const timer = setTimeout(() => setIsVisible(true), 1000);
 
     return () => {
-      window.removeEventListener('health-check', handleHealthCheck as EventListener);
+      window.removeEventListener("health-check", handleHealthCheck as EventListener);
       clearTimeout(timer);
     };
   }, []);
@@ -34,11 +34,11 @@ export const PerformanceIndicator: React.FC = () => {
 
   const getStatusIcon = () => {
     switch (healthStatus.status) {
-      case 'healthy':
+      case "healthy":
         return <CheckCircle className="h-3 w-3" />;
-      case 'degraded':
+      case "degraded":
         return <AlertTriangle className="h-3 w-3" />;
-      case 'unhealthy':
+      case "unhealthy":
         return <AlertTriangle className="h-3 w-3" />;
       default:
         return <Activity className="h-3 w-3" />;
@@ -47,14 +47,14 @@ export const PerformanceIndicator: React.FC = () => {
 
   const getStatusVariant = (): "default" | "secondary" | "destructive" | "outline" => {
     switch (healthStatus.status) {
-      case 'healthy':
-        return 'default';
-      case 'degraded':
-        return 'secondary';
-      case 'unhealthy':
-        return 'destructive';
+      case "healthy":
+        return "default";
+      case "degraded":
+        return "secondary";
+      case "unhealthy":
+        return "destructive";
       default:
-        return 'outline';
+        return "outline";
     }
   };
 
@@ -62,7 +62,7 @@ export const PerformanceIndicator: React.FC = () => {
     const { checks, responseTime, timestamp } = healthStatus;
     const checkEntries = Object.entries(checks);
     const passedChecks = checkEntries.filter(([_, passed]) => passed).length;
-    
+
     return (
       <div className="space-y-2">
         <div className="text-xs font-medium">System Health</div>
@@ -73,7 +73,9 @@ export const PerformanceIndicator: React.FC = () => {
         <div className="space-y-1">
           {checkEntries.map(([service, isHealthy]) => (
             <div key={service} className="flex items-center gap-2 text-xs">
-              <div className={`w-2 h-2 rounded-full ${isHealthy ? 'bg-green-500' : 'bg-red-500'}`} />
+              <div
+                className={`w-2 h-2 rounded-full ${isHealthy ? "bg-green-500" : "bg-red-500"}`}
+              />
               <span className="capitalize">{service}</span>
             </div>
           ))}
@@ -88,10 +90,7 @@ export const PerformanceIndicator: React.FC = () => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Badge 
-          variant={getStatusVariant()}
-          className="gap-1 text-xs cursor-help animate-fade-in"
-        >
+        <Badge variant={getStatusVariant()} className="gap-1 text-xs cursor-help animate-fade-in">
           {getStatusIcon()}
           {healthStatus.status}
         </Badge>

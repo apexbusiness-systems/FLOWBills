@@ -1,49 +1,46 @@
-import { useState } from 'react';
-import { Bell, Check, CheckCheck, Settings, Trash2, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { useNotifications } from '@/hooks/useNotifications';
-import { NotificationPreferencesDialog } from './NotificationPreferencesDialog';
-import { formatDistanceToNow } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Bell, Check, CheckCheck, Settings, Trash2, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { useNotifications } from "@/hooks/useNotifications";
+import { NotificationPreferencesDialog } from "./NotificationPreferencesDialog";
+import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export const NotificationBell = () => {
   const [open, setOpen] = useState(false);
   const [prefsOpen, setPrefsOpen] = useState(false);
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } =
+    useNotifications();
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'feature_update':
-        return '🚀';
-      case 'help_article':
-        return '📖';
-      case 'tip':
-        return '💡';
-      case 'system':
-        return '⚙️';
+      case "feature_update":
+        return "🚀";
+      case "help_article":
+        return "📖";
+      case "tip":
+        return "💡";
+      case "system":
+        return "⚙️";
       default:
-        return '🔔';
+        return "🔔";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high':
-        return 'text-destructive';
-      case 'normal':
-        return 'text-foreground';
-      case 'low':
-        return 'text-muted-foreground';
+      case "high":
+        return "text-destructive";
+      case "normal":
+        return "text-foreground";
+      case "low":
+        return "text-muted-foreground";
       default:
-        return 'text-foreground';
+        return "text-foreground";
     }
   };
 
@@ -58,7 +55,7 @@ export const NotificationBell = () => {
                 variant="destructive"
                 className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
               >
-                {unreadCount > 9 ? '9+' : unreadCount}
+                {unreadCount > 9 ? "9+" : unreadCount}
               </Badge>
             )}
           </Button>
@@ -104,8 +101,8 @@ export const NotificationBell = () => {
                   <div
                     key={notification.id}
                     className={cn(
-                      'p-4 hover:bg-muted/50 transition-colors',
-                      !notification.is_read && 'bg-primary/5'
+                      "p-4 hover:bg-muted/50 transition-colors",
+                      !notification.is_read && "bg-primary/5"
                     )}
                   >
                     <div className="flex gap-3">
@@ -116,9 +113,9 @@ export const NotificationBell = () => {
                         <div className="flex items-start justify-between gap-2">
                           <h4
                             className={cn(
-                              'font-medium text-sm',
+                              "font-medium text-sm",
                               getPriorityColor(notification.priority),
-                              !notification.is_read && 'font-semibold'
+                              !notification.is_read && "font-semibold"
                             )}
                           >
                             {notification.title}
@@ -154,7 +151,7 @@ export const NotificationBell = () => {
                                   }
                                 }}
                               >
-                                {notification.link_text || 'Learn more'}
+                                {notification.link_text || "Learn more"}
                                 <ExternalLink className="h-3 w-3 ml-1" />
                               </Button>
                             )}

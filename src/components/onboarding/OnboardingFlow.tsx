@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { 
-  CheckCircle, 
-  ArrowRight, 
-  ArrowLeft, 
-  Upload, 
-  Settings, 
-  Users, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  CheckCircle,
+  ArrowRight,
+  ArrowLeft,
+  Upload,
+  Settings,
+  Users,
   FileText,
   Zap,
   Target,
-  BookOpen
-} from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+  BookOpen,
+} from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface OnboardingStep {
   id: string;
@@ -44,82 +44,82 @@ const OnboardingFlow: React.FC = () => {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
-    companyName: '',
-    industry: '',
-    teamSize: '',
-    primaryGoal: '',
+    companyName: "",
+    industry: "",
+    teamSize: "",
+    primaryGoal: "",
     hasInvoices: false,
-    preferredFeatures: []
+    preferredFeatures: [],
   });
 
   const steps: OnboardingStep[] = [
     {
-      id: 'welcome',
-      title: 'Welcome to Oil & Gas Billing',
-      description: 'Let\'s get you set up for success',
+      id: "welcome",
+      title: "Welcome to Oil & Gas Billing",
+      description: "Let's get you set up for success",
       icon: Target,
       component: WelcomeStep,
       completed: false,
-      required: true
+      required: true,
     },
     {
-      id: 'company-info',
-      title: 'Company Information',
-      description: 'Tell us about your organization',
+      id: "company-info",
+      title: "Company Information",
+      description: "Tell us about your organization",
       icon: Users,
       component: CompanyInfoStep,
       completed: false,
-      required: true
+      required: true,
     },
     {
-      id: 'goals',
-      title: 'Your Goals',
-      description: 'What do you want to achieve?',
+      id: "goals",
+      title: "Your Goals",
+      description: "What do you want to achieve?",
       icon: Target,
       component: GoalsStep,
       completed: false,
-      required: true
+      required: true,
     },
     {
-      id: 'features',
-      title: 'Choose Features',
-      description: 'Select the features most important to you',
+      id: "features",
+      title: "Choose Features",
+      description: "Select the features most important to you",
       icon: Settings,
       component: FeaturesStep,
       completed: false,
-      required: false
+      required: false,
     },
     {
-      id: 'first-invoice',
-      title: 'Upload Your First Invoice',
-      description: 'Get started with invoice processing',
+      id: "first-invoice",
+      title: "Upload Your First Invoice",
+      description: "Get started with invoice processing",
       icon: Upload,
       component: FirstInvoiceStep,
       completed: false,
-      required: false
+      required: false,
     },
     {
-      id: 'complete',
-      title: 'You\'re All Set!',
-      description: 'Ready to start managing your invoices',
+      id: "complete",
+      title: "You're All Set!",
+      description: "Ready to start managing your invoices",
       icon: CheckCircle,
       component: CompleteStep,
       completed: false,
-      required: true
-    }
+      required: true,
+    },
   ];
 
   const [stepStates, setStepStates] = useState(steps);
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   const updateData = (data: Partial<OnboardingData>) => {
-    setOnboardingData(prev => ({ ...prev, ...data }));
+    setOnboardingData((prev) => ({ ...prev, ...data }));
   };
 
   const markStepComplete = (stepIndex: number) => {
-    setStepStates(prev => prev.map((step, index) => 
-      index === stepIndex ? { ...step, completed: true } : step
-    ));
+    setStepStates((prev) =>
+      prev.map((step, index) => (index === stepIndex ? { ...step, completed: true } : step))
+    );
   };
 
   const nextStep = () => {
@@ -145,14 +145,14 @@ const OnboardingFlow: React.FC = () => {
     try {
       // Save onboarding data to user profile
       markStepComplete(currentStep);
-      
+
       toast({
         title: "Welcome aboard! 🎉",
         description: "Your account is now set up and ready to use.",
       });
 
       // Close onboarding and redirect to dashboard
-      window.location.href = '/';
+      window.location.href = "/";
     } catch (error) {
       toast({
         title: "Setup Error",
@@ -178,23 +178,27 @@ const OnboardingFlow: React.FC = () => {
               Step {currentStep + 1} of {steps.length}
             </Badge>
           </div>
-          
+
           <Progress value={progress} className="h-2" />
-          
+
           <div className="flex justify-between mt-4">
             {stepStates.map((step, index) => (
               <div key={step.id} className="flex flex-col items-center">
-                <div className={`
+                <div
+                  className={`
                   w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold
-                  ${index < currentStep ? 'bg-green-500 text-white' : 
-                    index === currentStep ? 'bg-primary text-white' : 
-                    'bg-muted text-muted-foreground'}
-                `}>
+                  ${
+                    index < currentStep
+                      ? "bg-green-500 text-white"
+                      : index === currentStep
+                        ? "bg-primary text-white"
+                        : "bg-muted text-muted-foreground"
+                  }
+                `}
+                >
                   {index < currentStep ? <CheckCircle className="h-4 w-4" /> : index + 1}
                 </div>
-                <span className="text-xs mt-1 text-center max-w-16 truncate">
-                  {step.title}
-                </span>
+                <span className="text-xs mt-1 text-center max-w-16 truncate">{step.title}</span>
               </div>
             ))}
           </div>
@@ -204,16 +208,18 @@ const OnboardingFlow: React.FC = () => {
         <Card className="shadow-lg">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-              {React.createElement(stepStates[currentStep].icon, { className: "h-8 w-8 text-primary" })}
+              {React.createElement(stepStates[currentStep].icon, {
+                className: "h-8 w-8 text-primary",
+              })}
             </div>
             <CardTitle className="text-2xl">{stepStates[currentStep].title}</CardTitle>
             <CardDescription className="text-lg">
               {stepStates[currentStep].description}
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
-            <CurrentStepComponent 
+            <CurrentStepComponent
               data={onboardingData}
               updateData={updateData}
               onNext={nextStep}
@@ -224,8 +230,8 @@ const OnboardingFlow: React.FC = () => {
 
         {/* Navigation */}
         <div className="flex justify-between mt-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={prevStep}
             disabled={currentStep === 0}
             className="flex items-center space-x-2"
@@ -240,7 +246,7 @@ const OnboardingFlow: React.FC = () => {
                 Skip for now
               </Button>
             )}
-            
+
             {currentStep < steps.length - 1 ? (
               <Button onClick={nextStep} className="flex items-center space-x-2">
                 <span>Continue</span>
@@ -271,12 +277,12 @@ const WelcomeStep: React.FC<{
     <div className="text-center space-y-6">
       <div className="space-y-4">
         <p className="text-lg text-muted-foreground">
-          Hello {user?.user_metadata?.full_name || user?.email || 'there'}! 👋
+          Hello {user?.user_metadata?.full_name || user?.email || "there"}! 👋
         </p>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Welcome to the Oil & Gas Billing Platform. We'll help you streamline your invoice 
-          processing, ensure compliance, and gain insights into your operations. 
-          This quick setup will take about 3 minutes.
+          Welcome to the Oil & Gas Billing Platform. We'll help you streamline your invoice
+          processing, ensure compliance, and gain insights into your operations. This quick setup
+          will take about 3 minutes.
         </p>
         <div className="bg-primary/10 p-4 rounded-lg max-w-md mx-auto">
           <h3 className="font-semibold mb-2">What you'll set up:</h3>
@@ -288,7 +294,7 @@ const WelcomeStep: React.FC<{
           </ul>
         </div>
       </div>
-      
+
       <Button onClick={onNext} size="lg" className="mt-6">
         Let's Get Started
       </Button>
@@ -304,7 +310,9 @@ const CompanyInfoStep: React.FC<{
   const [canContinue, setCanContinue] = useState(false);
 
   useEffect(() => {
-    setCanContinue(data.companyName.length > 0 && data.industry.length > 0 && data.teamSize.length > 0);
+    setCanContinue(
+      data.companyName.length > 0 && data.industry.length > 0 && data.teamSize.length > 0
+    );
   }, [data]);
 
   return (
@@ -355,11 +363,7 @@ const CompanyInfoStep: React.FC<{
         </select>
       </div>
 
-      <Button 
-        onClick={onNext} 
-        disabled={!canContinue}
-        className="w-full mt-6"
-      >
+      <Button onClick={onNext} disabled={!canContinue} className="w-full mt-6">
         Continue
       </Button>
     </div>
@@ -372,12 +376,12 @@ const GoalsStep: React.FC<{
   onNext: () => void;
 }> = ({ data, updateData, onNext }) => {
   const goals = [
-    { id: 'efficiency', label: 'Improve invoice processing efficiency', icon: Zap },
-    { id: 'compliance', label: 'Ensure regulatory compliance', icon: CheckCircle },
-    { id: 'visibility', label: 'Gain better financial visibility', icon: Target },
-    { id: 'automation', label: 'Automate manual processes', icon: Settings },
-    { id: 'reporting', label: 'Generate better reports', icon: FileText },
-    { id: 'integration', label: 'Integrate with existing systems', icon: Users }
+    { id: "efficiency", label: "Improve invoice processing efficiency", icon: Zap },
+    { id: "compliance", label: "Ensure regulatory compliance", icon: CheckCircle },
+    { id: "visibility", label: "Gain better financial visibility", icon: Target },
+    { id: "automation", label: "Automate manual processes", icon: Settings },
+    { id: "reporting", label: "Generate better reports", icon: FileText },
+    { id: "integration", label: "Integrate with existing systems", icon: Users },
   ];
 
   return (
@@ -385,13 +389,13 @@ const GoalsStep: React.FC<{
       <p className="text-center text-muted-foreground mb-6">
         What's your primary goal with this platform?
       </p>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {goals.map((goal) => (
           <Card
             key={goal.id}
             className={`cursor-pointer transition-all hover:shadow-md ${
-              data.primaryGoal === goal.id ? 'ring-2 ring-primary bg-primary/5' : ''
+              data.primaryGoal === goal.id ? "ring-2 ring-primary bg-primary/5" : ""
             }`}
             onClick={() => updateData({ primaryGoal: goal.id })}
           >
@@ -403,11 +407,7 @@ const GoalsStep: React.FC<{
         ))}
       </div>
 
-      <Button 
-        onClick={onNext} 
-        disabled={!data.primaryGoal}
-        className="w-full mt-6"
-      >
+      <Button onClick={onNext} disabled={!data.primaryGoal} className="w-full mt-6">
         Continue
       </Button>
     </div>
@@ -420,20 +420,20 @@ const FeaturesStep: React.FC<{
   onNext: () => void;
 }> = ({ data, updateData, onNext }) => {
   const features = [
-    'Automated Invoice Processing',
-    'Compliance Monitoring',
-    'Advanced Analytics',
-    'Workflow Automation',
-    'Integration APIs',
-    'Mobile Access',
-    'Custom Reporting',
-    'Audit Trail'
+    "Automated Invoice Processing",
+    "Compliance Monitoring",
+    "Advanced Analytics",
+    "Workflow Automation",
+    "Integration APIs",
+    "Mobile Access",
+    "Custom Reporting",
+    "Audit Trail",
   ];
 
   const toggleFeature = (feature: string) => {
     const current = data.preferredFeatures || [];
     const updated = current.includes(feature)
-      ? current.filter(f => f !== feature)
+      ? current.filter((f) => f !== feature)
       : [...current, feature];
     updateData({ preferredFeatures: updated });
   };
@@ -443,7 +443,7 @@ const FeaturesStep: React.FC<{
       <p className="text-center text-muted-foreground mb-6">
         Which features are most important to you? (Optional)
       </p>
-      
+
       <div className="grid grid-cols-2 gap-3">
         {features.map((feature) => (
           <Badge
@@ -483,10 +483,10 @@ const FirstInvoiceStep: React.FC<{
       <p className="text-center text-muted-foreground mb-6">
         Want to upload your first invoice now? (Optional)
       </p>
-      
+
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          isDragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
+          isDragOver ? "border-primary bg-primary/5" : "border-muted-foreground/25"
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -507,9 +507,7 @@ const FirstInvoiceStep: React.FC<{
         <Button variant="ghost" onClick={onNext}>
           Skip for now
         </Button>
-        <Button onClick={onNext}>
-          Continue to Dashboard
-        </Button>
+        <Button onClick={onNext}>Continue to Dashboard</Button>
       </div>
     </div>
   );
@@ -524,7 +522,7 @@ const CompleteStep: React.FC<{
       <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
         <CheckCircle className="h-8 w-8 text-green-600" />
       </div>
-      
+
       <div>
         <h3 className="text-xl font-semibold mb-2">Setup Complete! 🎉</h3>
         <p className="text-muted-foreground">

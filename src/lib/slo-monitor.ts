@@ -3,8 +3,8 @@
  * Implements Google SRE-style multi-window burn rate alerting
  */
 
-import { supabase } from '@/integrations/supabase/client';
-import { SLO_BURN_WINDOWS, calculateBurnRate, shouldAlert } from './observability';
+import { supabase } from "@/integrations/supabase/client";
+import { SLO_BURN_WINDOWS, calculateBurnRate, shouldAlert } from "./observability";
 
 export interface SLODefinition {
   name: string;
@@ -25,8 +25,8 @@ export interface SLOMetrics {
 
 export interface SLOViolation {
   sloName: string;
-  violationType: 'burn_rate' | 'error_budget';
-  severity: 'critical' | 'warning' | 'info';
+  violationType: "burn_rate" | "error_budget";
+  severity: "critical" | "warning" | "info";
   burnRate: number;
   errorBudgetConsumed: number;
   windowDuration: string;
@@ -48,7 +48,7 @@ class SLOMonitor {
       ...slo,
       errorBudget: 1 - slo.target,
     });
-    
+
     this.metrics.set(slo.name, {
       totalRequests: 0,
       successfulRequests: 0,
@@ -93,19 +93,12 @@ class SLOMonitor {
 
     metrics.successRate = metrics.successfulRequests / metrics.totalRequests;
     metrics.errorRate = metrics.errorCount / metrics.totalRequests;
-    
+
     // Calculate burn rate
-    metrics.burnRate = calculateBurnRate(
-      metrics.errorCount,
-      metrics.totalRequests,
-      slo.target
-    );
-    
+    metrics.burnRate = calculateBurnRate(metrics.errorCount, metrics.totalRequests, slo.target);
+
     // Calculate budget remaining
-    metrics.budgetRemaining = Math.max(
-      0,
-      100 - (metrics.errorRate / slo.errorBudget) * 100
-    );
+    metrics.budgetRemaining = Math.max(0, 100 - (metrics.errorRate / slo.errorBudget) * 100);
 
     this.metrics.set(sloName, metrics);
 
@@ -124,7 +117,7 @@ class SLOMonitor {
       if (shouldAlert(metrics.burnRate, window)) {
         await this.recordViolation({
           sloName,
-          violationType: 'burn_rate',
+          violationType: "burn_rate",
           severity: this.getSeverity(window.name),
           burnRate: metrics.burnRate,
           errorBudgetConsumed: 100 - metrics.budgetRemaining,
@@ -144,10 +137,10 @@ class SLOMonitor {
   /**
    * Determine severity based on window duration
    */
-  private getSeverity(window: string): 'critical' | 'warning' | 'info' {
-    if (window === '1h') return 'critical';
-    if (window === '6h') return 'warning';
-    return 'info';
+  private getSeverity(window: string): "critical" | "warning" | "info" {
+    if (window === "1h") return "critical";
+    if (window === "6h") return "warning";
+    return "info";
   }
 
   /**
@@ -155,25 +148,23 @@ class SLOMonitor {
    */
   private async recordViolation(violation: SLOViolation): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('slo_violations')
-        .insert({
-          slo_name: violation.sloName,
-          violation_type: violation.violationType,
-          severity: violation.severity,
-          burn_rate: violation.burnRate,
-          error_budget_consumed: violation.errorBudgetConsumed,
-          window_duration: violation.windowDuration,
-          details: violation.details,
-        });
+      const { error } = await supabase.from("slo_violations").insert({
+        slo_name: violation.sloName,
+        violation_type: violation.violationType,
+        severity: violation.severity,
+        burn_rate: violation.burnRate,
+        error_budget_consumed: violation.errorBudgetConsumed,
+        window_duration: violation.windowDuration,
+        details: violation.details,
+      });
 
       if (error) {
-        console.error('Failed to record SLO violation:', error);
+        console.error("Failed to record SLO violation:", error);
       } else {
         console.warn(`🚨 SLO Violation: ${violation.sloName}`, violation);
       }
     } catch (error) {
-      console.error('Error recording SLO violation:', error);
+      console.error("Error recording SLO violation:", error);
     }
   }
 
@@ -219,24 +210,24 @@ export const sloMonitor = new SLOMonitor();
 
 // Register default SLOs for FlowBills
 sloMonitor.registerSLO({
-  name: 'api_availability',
+  name: "api_availability",
   target: 0.995, // 99.5%
   errorBudget: 0.005,
-  window: '30d',
+  window: "30d",
 });
 
 sloMonitor.registerSLO({
-  name: 'invoice_processing',
+  name: "invoice_processing",
   target: 0.99, // 99%
   errorBudget: 0.01,
-  window: '30d',
+  window: "30d",
 });
 
 sloMonitor.registerSLO({
-  name: 'auth_success_rate',
+  name: "auth_success_rate",
   target: 0.999, // 99.9%
   errorBudget: 0.001,
-  window: '30d',
+  window: "30d",
 });
 
 export default sloMonitor;

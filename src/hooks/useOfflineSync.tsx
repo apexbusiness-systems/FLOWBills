@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from 'react';
-import { OfflineQueue, QueuedOperation } from '@/lib/persistence';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from './use-toast';
+import { useEffect, useState, useCallback } from "react";
+import { OfflineQueue, QueuedOperation } from "@/lib/persistence";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "./use-toast";
 
 export function useOfflineSync() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -15,17 +15,17 @@ export function useOfflineSync() {
     const handleOffline = () => {
       setIsOnline(false);
       toast({
-        title: 'You are offline',
-        description: 'Changes will be synced when connection is restored.',
+        title: "You are offline",
+        description: "Changes will be synced when connection is restored.",
       });
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, [toast]);
 
@@ -49,8 +49,8 @@ export function useOfflineSync() {
         OfflineQueue.dequeue(operation.id);
         processed++;
       } catch (error) {
-        console.error('Failed to process operation:', error);
-        
+        console.error("Failed to process operation:", error);
+
         if (operation.retries >= operation.maxRetries) {
           // Max retries reached, remove from queue
           OfflineQueue.dequeue(operation.id);
@@ -67,16 +67,16 @@ export function useOfflineSync() {
 
     if (processed > 0) {
       toast({
-        title: 'Sync Complete',
-        description: `${processed} operation${processed > 1 ? 's' : ''} synced successfully.`,
+        title: "Sync Complete",
+        description: `${processed} operation${processed > 1 ? "s" : ""} synced successfully.`,
       });
     }
 
     if (failed > 0) {
       toast({
-        title: 'Sync Failed',
-        description: `${failed} operation${failed > 1 ? 's' : ''} could not be synced after maximum retries.`,
-        variant: 'destructive',
+        title: "Sync Failed",
+        description: `${failed} operation${failed > 1 ? "s" : ""} could not be synced after maximum retries.`,
+        variant: "destructive",
       });
     }
   }, [isOnline, syncing, toast]);
@@ -86,27 +86,25 @@ export function useOfflineSync() {
     const { type, table, data } = op;
 
     switch (type) {
-      case 'create':
-        const { error: createError } = await supabase
-          .from(table as any)
-          .insert(data);
+      case "create":
+        const { error: createError } = await supabase.from(table as any).insert(data);
         if (createError) throw createError;
         break;
 
-      case 'update':
+      case "update":
         const { id, ...updateData } = data;
         const { error: updateError } = await supabase
           .from(table as any)
           .update(updateData)
-          .eq('id', id);
+          .eq("id", id);
         if (updateError) throw updateError;
         break;
 
-      case 'delete':
+      case "delete":
         const { error: deleteError } = await supabase
           .from(table as any)
           .delete()
-          .eq('id', data.id);
+          .eq("id", data.id);
         if (deleteError) throw deleteError;
         break;
     }
@@ -123,7 +121,7 @@ export function useOfflineSync() {
   useEffect(() => {
     const updateSize = () => setQueueSize(OfflineQueue.size());
     updateSize();
-    
+
     const interval = setInterval(updateSize, 5000);
     return () => clearInterval(interval);
   }, []);

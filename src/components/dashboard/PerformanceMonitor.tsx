@@ -4,7 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, Activity, Database, Image, Zap, Download, RefreshCw, Play, Square } from "lucide-react";
+import {
+  AlertCircle,
+  Activity,
+  Database,
+  Image,
+  Zap,
+  Download,
+  RefreshCw,
+  Play,
+  Square,
+} from "lucide-react";
 import { performanceMonitor } from "@/lib/performance-monitor";
 import { queryOptimizer } from "@/lib/query-optimizer";
 import { assetOptimizer } from "@/lib/asset-optimizer";
@@ -33,7 +43,7 @@ const PerformanceMonitor: React.FC = () => {
   useEffect(() => {
     refreshData();
     updateLoadTestStatus();
-    
+
     // Refresh data every 5 seconds
     const interval = setInterval(() => {
       refreshData();
@@ -44,7 +54,7 @@ const PerformanceMonitor: React.FC = () => {
   }, []);
 
   // Run load test
-  const runLoadTest = async (scenario: 'light' | 'medium' | 'heavy') => {
+  const runLoadTest = async (scenario: "light" | "medium" | "heavy") => {
     if (isLoadTesting) return;
 
     setIsLoadTesting(true);
@@ -55,7 +65,7 @@ const PerformanceMonitor: React.FC = () => {
       toast({
         title: "Load Test Failed",
         description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoadTesting(false);
@@ -68,12 +78,12 @@ const PerformanceMonitor: React.FC = () => {
       performance: performanceMonitor.exportPerformanceData(),
       queries: queryOptimizer.exportQueryData(),
       assets: assetOptimizer.exportAssetData(),
-      loadTest: loadTester.getDetailedResults()
+      loadTest: loadTester.getDetailedResults(),
     };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `performance-report-${new Date().toISOString()}.json`;
     a.click();
@@ -81,7 +91,7 @@ const PerformanceMonitor: React.FC = () => {
 
     toast({
       title: "Performance Report Exported",
-      description: "Performance data has been downloaded"
+      description: "Performance data has been downloaded",
     });
   };
 
@@ -133,9 +143,17 @@ const PerformanceMonitor: React.FC = () => {
                 <div className="text-2xl font-bold">
                   {performanceData?.metrics?.[0]?.pageLoadTime?.toFixed(0) || 0}ms
                 </div>
-                <Badge className={getStatusColor(performanceData?.metrics?.[0]?.pageLoadTime || 0, { good: 2000, warning: 4000 })}>
-                  {(performanceData?.metrics?.[0]?.pageLoadTime || 0) < 2000 ? 'Good' : 
-                   (performanceData?.metrics?.[0]?.pageLoadTime || 0) < 4000 ? 'Fair' : 'Poor'}
+                <Badge
+                  className={getStatusColor(performanceData?.metrics?.[0]?.pageLoadTime || 0, {
+                    good: 2000,
+                    warning: 4000,
+                  })}
+                >
+                  {(performanceData?.metrics?.[0]?.pageLoadTime || 0) < 2000
+                    ? "Good"
+                    : (performanceData?.metrics?.[0]?.pageLoadTime || 0) < 4000
+                      ? "Fair"
+                      : "Poor"}
                 </Badge>
               </CardContent>
             </Card>
@@ -146,7 +164,7 @@ const PerformanceMonitor: React.FC = () => {
                 <Database className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{queryData?.cacheHitRate || '0%'}</div>
+                <div className="text-2xl font-bold">{queryData?.cacheHitRate || "0%"}</div>
                 <p className="text-xs text-muted-foreground">
                   {queryData?.totalQueries || 0} total queries
                 </p>
@@ -159,9 +177,9 @@ const PerformanceMonitor: React.FC = () => {
                 <Image className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{assetData?.cacheHitRate || '0%'}</div>
+                <div className="text-2xl font-bold">{assetData?.cacheHitRate || "0%"}</div>
                 <p className="text-xs text-muted-foreground">
-                  {assetData?.totalSize || '0MB'} total size
+                  {assetData?.totalSize || "0MB"} total size
                 </p>
               </CardContent>
             </Card>
@@ -173,9 +191,7 @@ const PerformanceMonitor: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-status-approved">Healthy</div>
-                <p className="text-xs text-muted-foreground">
-                  All systems operational
-                </p>
+                <p className="text-xs text-muted-foreground">All systems operational</p>
               </CardContent>
             </Card>
           </div>
@@ -194,23 +210,44 @@ const PerformanceMonitor: React.FC = () => {
                   <div>
                     <div className="flex justify-between text-sm mb-2">
                       <span>Largest Contentful Paint</span>
-                      <span>{performanceData?.metrics?.[0]?.largestContentfulPaint?.toFixed(0) || 0}ms</span>
+                      <span>
+                        {performanceData?.metrics?.[0]?.largestContentfulPaint?.toFixed(0) || 0}ms
+                      </span>
                     </div>
-                    <Progress value={Math.min((performanceData?.metrics?.[0]?.largestContentfulPaint || 0) / 2500 * 100, 100)} />
+                    <Progress
+                      value={Math.min(
+                        ((performanceData?.metrics?.[0]?.largestContentfulPaint || 0) / 2500) * 100,
+                        100
+                      )}
+                    />
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-2">
                       <span>First Input Delay</span>
-                      <span>{performanceData?.metrics?.[0]?.firstInputDelay?.toFixed(0) || 0}ms</span>
+                      <span>
+                        {performanceData?.metrics?.[0]?.firstInputDelay?.toFixed(0) || 0}ms
+                      </span>
                     </div>
-                    <Progress value={Math.min((performanceData?.metrics?.[0]?.firstInputDelay || 0) / 100 * 100, 100)} />
+                    <Progress
+                      value={Math.min(
+                        ((performanceData?.metrics?.[0]?.firstInputDelay || 0) / 100) * 100,
+                        100
+                      )}
+                    />
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-2">
                       <span>Cumulative Layout Shift</span>
-                      <span>{performanceData?.metrics?.[0]?.cumulativeLayoutShift?.toFixed(3) || 0}</span>
+                      <span>
+                        {performanceData?.metrics?.[0]?.cumulativeLayoutShift?.toFixed(3) || 0}
+                      </span>
                     </div>
-                    <Progress value={Math.min((performanceData?.metrics?.[0]?.cumulativeLayoutShift || 0) / 0.1 * 100, 100)} />
+                    <Progress
+                      value={Math.min(
+                        ((performanceData?.metrics?.[0]?.cumulativeLayoutShift || 0) / 0.1) * 100,
+                        100
+                      )}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -224,12 +261,17 @@ const PerformanceMonitor: React.FC = () => {
               <CardContent>
                 {performanceData?.slowComponents?.length > 0 ? (
                   <div className="space-y-2">
-                    {performanceData.slowComponents.slice(0, 5).map((component: any, index: number) => (
-                      <div key={index} className="flex justify-between items-center py-2 border-b">
-                        <span className="font-medium">{component.name}</span>
-                        <Badge variant="outline">{component.renderTime.toFixed(2)}ms</Badge>
-                      </div>
-                    ))}
+                    {performanceData.slowComponents
+                      .slice(0, 5)
+                      .map((component: any, index: number) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center py-2 border-b"
+                        >
+                          <span className="font-medium">{component.name}</span>
+                          <Badge variant="outline">{component.renderTime.toFixed(2)}ms</Badge>
+                        </div>
+                      ))}
                   </div>
                 ) : (
                   <p className="text-muted-foreground">No slow components detected</p>
@@ -254,11 +296,11 @@ const PerformanceMonitor: React.FC = () => {
                     <div className="text-sm text-muted-foreground">Total Queries</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{queryData?.cacheHitRate || '0%'}</div>
+                    <div className="text-2xl font-bold">{queryData?.cacheHitRate || "0%"}</div>
                     <div className="text-sm text-muted-foreground">Cache Hit Rate</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{queryData?.avgDuration || '0ms'}</div>
+                    <div className="text-2xl font-bold">{queryData?.avgDuration || "0ms"}</div>
                     <div className="text-sm text-muted-foreground">Avg Duration</div>
                   </div>
                   <div className="text-center">
@@ -310,15 +352,15 @@ const PerformanceMonitor: React.FC = () => {
                     <div className="text-sm text-muted-foreground">Total Assets</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{assetData?.cacheHitRate || '0%'}</div>
+                    <div className="text-2xl font-bold">{assetData?.cacheHitRate || "0%"}</div>
                     <div className="text-sm text-muted-foreground">Cache Hit Rate</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{assetData?.totalSize || '0MB'}</div>
+                    <div className="text-2xl font-bold">{assetData?.totalSize || "0MB"}</div>
                     <div className="text-sm text-muted-foreground">Total Size</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{assetData?.avgLoadTime || '0ms'}</div>
+                    <div className="text-2xl font-bold">{assetData?.avgLoadTime || "0ms"}</div>
                     <div className="text-sm text-muted-foreground">Avg Load Time</div>
                   </div>
                 </div>
@@ -354,13 +396,15 @@ const PerformanceMonitor: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Load Testing</CardTitle>
-                <CardDescription>Simulate load and test system performance under stress</CardDescription>
+                <CardDescription>
+                  Simulate load and test system performance under stress
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <Button
                     variant="outline"
-                    onClick={() => runLoadTest('light')}
+                    onClick={() => runLoadTest("light")}
                     disabled={isLoadTesting}
                   >
                     <Play className="h-4 w-4 mr-2" />
@@ -368,7 +412,7 @@ const PerformanceMonitor: React.FC = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => runLoadTest('medium')}
+                    onClick={() => runLoadTest("medium")}
                     disabled={isLoadTesting}
                   >
                     <Play className="h-4 w-4 mr-2" />
@@ -376,7 +420,7 @@ const PerformanceMonitor: React.FC = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => runLoadTest('heavy')}
+                    onClick={() => runLoadTest("heavy")}
                     disabled={isLoadTesting}
                   >
                     <Play className="h-4 w-4 mr-2" />
@@ -389,11 +433,7 @@ const PerformanceMonitor: React.FC = () => {
                     <CardContent className="pt-6">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-lg font-semibold">Load Test Running</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => loadTester.stopTest()}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => loadTester.stopTest()}>
                           <Square className="h-4 w-4 mr-2" />
                           Stop Test
                         </Button>

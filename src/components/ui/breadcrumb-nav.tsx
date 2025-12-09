@@ -90,30 +90,17 @@ export function BreadcrumbNav({ items, className = "" }: BreadcrumbNavProps) {
 
           return (
             <li key={item.href} className="flex items-center">
-              {index > 0 && (
-                <ChevronRight className="mx-1 h-4 w-4 text-muted-foreground/50" />
-              )}
+              {index > 0 && <ChevronRight className="mx-1 h-4 w-4 text-muted-foreground/50" />}
               {isLast ? (
-                <span
-                  className="font-medium text-foreground"
-                  aria-current="page"
-                >
-                  {isHome ? (
-                    <Home className="h-4 w-4" />
-                  ) : (
-                    item.label
-                  )}
+                <span className="font-medium text-foreground" aria-current="page">
+                  {isHome ? <Home className="h-4 w-4" /> : item.label}
                 </span>
               ) : (
                 <Link
                   to={item.href}
                   className="hover:text-foreground transition-colors inline-flex items-center"
                 >
-                  {isHome ? (
-                    <Home className="h-4 w-4" />
-                  ) : (
-                    item.label
-                  )}
+                  {isHome ? <Home className="h-4 w-4" /> : item.label}
                 </Link>
               )}
             </li>

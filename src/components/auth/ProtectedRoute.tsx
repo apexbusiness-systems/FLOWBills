@@ -1,14 +1,14 @@
-import { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { Loader2 } from 'lucide-react';
+import { ReactNode } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: 'admin' | 'operator' | 'viewer';
+  requiredRole?: "admin" | "operator" | "viewer";
 }
 
-export const ProtectedRoute = ({ children, requiredRole = 'viewer' }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, requiredRole = "viewer" }: ProtectedRouteProps) => {
   const { user, loading, hasRole } = useAuth();
   const location = useLocation();
 
@@ -33,11 +33,10 @@ export const ProtectedRoute = ({ children, requiredRole = 'viewer' }: ProtectedR
         <div className="text-center max-w-md mx-auto p-6">
           <h2 className="text-2xl font-bold text-foreground mb-4">Access Restricted</h2>
           <p className="text-muted-foreground mb-4">
-            You don't have permission to access this area. Please contact your administrator for access.
+            You don't have permission to access this area. Please contact your administrator for
+            access.
           </p>
-          <p className="text-sm text-muted-foreground">
-            Required role: {requiredRole}
-          </p>
+          <p className="text-sm text-muted-foreground">Required role: {requiredRole}</p>
         </div>
       </div>
     );

@@ -1,21 +1,21 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  DollarSign, 
-  FileText, 
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  DollarSign,
+  FileText,
   AlertTriangle,
-  Loader2
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { formatDistance } from 'date-fns';
+  Loader2,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { formatDistance } from "date-fns";
 
 interface ApprovalItem {
   id: string;
@@ -46,13 +46,13 @@ const ApprovalQueue = () => {
 
     // Set up real-time subscription
     const channel = supabase
-      .channel('approvals-changes')
+      .channel("approvals-changes")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'approvals',
+          event: "*",
+          schema: "public",
+          table: "approvals",
         },
         () => {
           fetchApprovals();
@@ -71,8 +71,9 @@ const ApprovalQueue = () => {
     try {
       // Fetch approvals with invoice details
       const { data, error } = await supabase
-        .from('approvals')
-        .select(`
+        .from("approvals")
+        .select(
+          `
           *,
           invoices (
             invoice_number,
@@ -81,15 +82,16 @@ const ApprovalQueue = () => {
             invoice_date,
             status
           )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        `
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      setApprovals(data as any || []);
+      setApprovals((data as any) || []);
     } catch (error: any) {
-      console.error('Error fetching approvals:', error);
+      console.error("Error fetching approvals:", error);
       toast({
         title: "Error",
         description: "Failed to fetch approvals",
@@ -107,21 +109,21 @@ const ApprovalQueue = () => {
     try {
       // Update approval status
       const { error: approvalError } = await supabase
-        .from('approvals')
+        .from("approvals")
         .update({
-          approval_status: 'approved',
+          approval_status: "approved",
           approved_by: user.id,
           approval_date: new Date().toISOString(),
         })
-        .eq('id', approvalId);
+        .eq("id", approvalId);
 
       if (approvalError) throw approvalError;
 
       // Update invoice status
       const { error: invoiceError } = await supabase
-        .from('invoices')
-        .update({ status: 'approved' })
-        .eq('id', invoiceId);
+        .from("invoices")
+        .update({ status: "approved" })
+        .eq("id", invoiceId);
 
       if (invoiceError) throw invoiceError;
 
@@ -132,7 +134,7 @@ const ApprovalQueue = () => {
 
       fetchApprovals();
     } catch (error: any) {
-      console.error('Approval error:', error);
+      console.error("Approval error:", error);
       toast({
         title: "Approval Failed",
         description: error.message || "Failed to approve invoice",
@@ -150,21 +152,21 @@ const ApprovalQueue = () => {
     try {
       // Update approval status
       const { error: approvalError } = await supabase
-        .from('approvals')
+        .from("approvals")
         .update({
-          approval_status: 'rejected',
+          approval_status: "rejected",
           approved_by: user.id,
           approval_date: new Date().toISOString(),
         })
-        .eq('id', approvalId);
+        .eq("id", approvalId);
 
       if (approvalError) throw approvalError;
 
       // Update invoice status
       const { error: invoiceError } = await supabase
-        .from('invoices')
-        .update({ status: 'rejected' })
-        .eq('id', invoiceId);
+        .from("invoices")
+        .update({ status: "rejected" })
+        .eq("id", invoiceId);
 
       if (invoiceError) throw invoiceError;
 
@@ -175,7 +177,7 @@ const ApprovalQueue = () => {
 
       fetchApprovals();
     } catch (error: any) {
-      console.error('Rejection error:', error);
+      console.error("Rejection error:", error);
       toast({
         title: "Rejection Failed",
         description: error.message || "Failed to reject invoice",
@@ -188,18 +190,26 @@ const ApprovalQueue = () => {
 
   const getApprovalLevelBadge = (method: string | null) => {
     if (!method) return null;
-    
-    if (method === 'manager_approval') {
-      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Manager</Badge>;
-    } else if (method === 'cfo_approval') {
-      return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">CFO</Badge>;
+
+    if (method === "manager_approval") {
+      return (
+        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          Manager
+        </Badge>
+      );
+    } else if (method === "cfo_approval") {
+      return (
+        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+          CFO
+        </Badge>
+      );
     }
     return <Badge variant="outline">Standard</Badge>;
   };
 
-  const pendingApprovals = approvals.filter(a => a.approval_status === 'pending');
-  const approvedApprovals = approvals.filter(a => a.approval_status === 'approved');
-  const rejectedApprovals = approvals.filter(a => a.approval_status === 'rejected');
+  const pendingApprovals = approvals.filter((a) => a.approval_status === "pending");
+  const approvedApprovals = approvals.filter((a) => a.approval_status === "approved");
+  const rejectedApprovals = approvals.filter((a) => a.approval_status === "rejected");
 
   if (loading) {
     return (
@@ -263,15 +273,9 @@ const ApprovalQueue = () => {
       {/* Approval Tabs */}
       <Tabs defaultValue="pending" className="w-full">
         <TabsList>
-          <TabsTrigger value="pending">
-            Pending ({pendingApprovals.length})
-          </TabsTrigger>
-          <TabsTrigger value="approved">
-            Approved ({approvedApprovals.length})
-          </TabsTrigger>
-          <TabsTrigger value="rejected">
-            Rejected ({rejectedApprovals.length})
-          </TabsTrigger>
+          <TabsTrigger value="pending">Pending ({pendingApprovals.length})</TabsTrigger>
+          <TabsTrigger value="approved">Approved ({approvedApprovals.length})</TabsTrigger>
+          <TabsTrigger value="rejected">Rejected ({rejectedApprovals.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="mt-6">
@@ -293,10 +297,10 @@ const ApprovalQueue = () => {
                         <FileText className="h-5 w-5 text-primary" />
                         <div>
                           <CardTitle className="text-lg">
-                            {approval.invoice?.invoice_number || 'N/A'}
+                            {approval.invoice?.invoice_number || "N/A"}
                           </CardTitle>
                           <CardDescription>
-                            {approval.invoice?.vendor_name || 'Unknown Vendor'}
+                            {approval.invoice?.vendor_name || "Unknown Vendor"}
                           </CardDescription>
                         </div>
                       </div>
@@ -309,19 +313,18 @@ const ApprovalQueue = () => {
                         <p className="text-sm text-muted-foreground">Amount</p>
                         <p className="text-2xl font-bold flex items-center gap-1">
                           <DollarSign className="h-5 w-5" />
-                          {approval.invoice?.amount?.toLocaleString('en-CA', {
+                          {approval.invoice?.amount?.toLocaleString("en-CA", {
                             minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
+                            maximumFractionDigits: 2,
                           })}
                         </p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Invoice Date</p>
                         <p className="text-lg font-medium">
-                          {approval.invoice?.invoice_date 
-                            ? new Date(approval.invoice.invoice_date).toLocaleDateString('en-CA')
-                            : 'N/A'
-                          }
+                          {approval.invoice?.invoice_date
+                            ? new Date(approval.invoice.invoice_date).toLocaleDateString("en-CA")
+                            : "N/A"}
                         </p>
                       </div>
                     </div>
@@ -337,7 +340,10 @@ const ApprovalQueue = () => {
 
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">
-                        Submitted {formatDistance(new Date(approval.created_at), new Date(), { addSuffix: true })}
+                        Submitted{" "}
+                        {formatDistance(new Date(approval.created_at), new Date(), {
+                          addSuffix: true,
+                        })}
                       </p>
                       <div className="flex gap-2">
                         <Button
@@ -390,11 +396,11 @@ const ApprovalQueue = () => {
                         <CheckCircle className="h-5 w-5 text-green-500" />
                         <div>
                           <CardTitle className="text-lg">
-                            {approval.invoice?.invoice_number || 'N/A'}
+                            {approval.invoice?.invoice_number || "N/A"}
                           </CardTitle>
                           <CardDescription>
-                            {approval.invoice?.vendor_name || 'Unknown Vendor'} • 
-                            ${approval.invoice?.amount?.toLocaleString('en-CA') || '0.00'}
+                            {approval.invoice?.vendor_name || "Unknown Vendor"} • $
+                            {approval.invoice?.amount?.toLocaleString("en-CA") || "0.00"}
                           </CardDescription>
                         </div>
                       </div>
@@ -427,17 +433,15 @@ const ApprovalQueue = () => {
                         <XCircle className="h-5 w-5 text-red-500" />
                         <div>
                           <CardTitle className="text-lg">
-                            {approval.invoice?.invoice_number || 'N/A'}
+                            {approval.invoice?.invoice_number || "N/A"}
                           </CardTitle>
                           <CardDescription>
-                            {approval.invoice?.vendor_name || 'Unknown Vendor'} • 
-                            ${approval.invoice?.amount?.toLocaleString('en-CA') || '0.00'}
+                            {approval.invoice?.vendor_name || "Unknown Vendor"} • $
+                            {approval.invoice?.amount?.toLocaleString("en-CA") || "0.00"}
                           </CardDescription>
                         </div>
                       </div>
-                      <Badge className="bg-red-50 text-red-700 border-red-200">
-                        Rejected
-                      </Badge>
+                      <Badge className="bg-red-50 text-red-700 border-red-200">Rejected</Badge>
                     </div>
                   </CardHeader>
                 </Card>

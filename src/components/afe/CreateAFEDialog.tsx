@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { useAFEs } from '@/hooks/useAFEs';
+import { useState } from "react";
+import { useAFEs } from "@/hooks/useAFEs";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateAFEDialogProps {
   open: boolean;
@@ -21,13 +21,13 @@ export const CreateAFEDialog = ({ open, onOpenChange }: CreateAFEDialogProps) =>
   const { createAFE } = useAFEs();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    afe_number: '',
-    description: '',
-    budget_amount: '',
-    well_name: '',
-    project_type: '',
-    approval_date: '',
-    expiry_date: '',
+    afe_number: "",
+    description: "",
+    budget_amount: "",
+    well_name: "",
+    project_type: "",
+    approval_date: "",
+    expiry_date: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,17 +47,17 @@ export const CreateAFEDialog = ({ open, onOpenChange }: CreateAFEDialogProps) =>
 
       // Reset form
       setFormData({
-        afe_number: '',
-        description: '',
-        budget_amount: '',
-        well_name: '',
-        project_type: '',
-        approval_date: '',
-        expiry_date: '',
+        afe_number: "",
+        description: "",
+        budget_amount: "",
+        well_name: "",
+        project_type: "",
+        approval_date: "",
+        expiry_date: "",
       });
       onOpenChange(false);
     } catch (error) {
-      console.error('Error creating AFE:', error);
+      console.error("Error creating AFE:", error);
     } finally {
       setLoading(false);
     }
@@ -160,7 +160,7 @@ export const CreateAFEDialog = ({ open, onOpenChange }: CreateAFEDialogProps) =>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create AFE'}
+              {loading ? "Creating..." : "Create AFE"}
             </Button>
           </div>
         </form>

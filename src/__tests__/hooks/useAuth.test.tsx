@@ -1,12 +1,12 @@
-import React from 'react';
-import { renderHook, act } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { mockSupabase, setupTestEnvironment, waitFor } from '@/lib/test-utils';
-import { vi, describe, it, beforeEach, expect } from 'vitest';
+import React from "react";
+import { renderHook, act } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { mockSupabase, setupTestEnvironment, waitFor } from "@/lib/test-utils";
+import { vi, describe, it, beforeEach, expect } from "vitest";
 
 // Mock Supabase
-vi.mock('@/integrations/supabase/client', () => ({
+vi.mock("@/integrations/supabase/client", () => ({
   supabase: mockSupabase,
 }));
 
@@ -21,18 +21,16 @@ const createWrapper = () => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
-describe('useAuth', () => {
+describe("useAuth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('initializes with loading state', () => {
+  it("initializes with loading state", () => {
     mockSupabase.auth.getSession.mockResolvedValue({
       data: { session: null },
       error: null,
@@ -46,11 +44,11 @@ describe('useAuth', () => {
     expect(result.current.user).toBe(null);
   });
 
-  it('sets user when session exists', async () => {
+  it("sets user when session exists", async () => {
     const mockUser = {
-      id: 'user-id',
-      email: 'test@example.com',
-      user_metadata: { full_name: 'Test User' },
+      id: "user-id",
+      email: "test@example.com",
+      user_metadata: { full_name: "Test User" },
     };
 
     mockSupabase.auth.getSession.mockResolvedValue({
@@ -68,7 +66,7 @@ describe('useAuth', () => {
     });
   });
 
-  it('handles sign out', async () => {
+  it("handles sign out", async () => {
     mockSupabase.auth.signOut.mockResolvedValue({
       error: null,
     });

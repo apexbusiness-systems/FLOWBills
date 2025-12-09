@@ -8,29 +8,29 @@ const ContrastChecker = () => {
       background: "hsl(45, 95%, 50%)",
       foreground: "hsl(0, 0%, 0%)",
       ratio: "10.8:1",
-      status: "excellent"
+      status: "excellent",
     },
     {
-      name: "Status Processing", 
+      name: "Status Processing",
       background: "hsl(45, 80%, 45%)",
       foreground: "hsl(0, 0%, 0%)",
       ratio: "8.2:1",
-      status: "excellent" 
+      status: "excellent",
     },
     {
       name: "Status Pending",
       background: "hsl(35, 85%, 55%)",
       foreground: "hsl(35, 50%, 15%)",
       ratio: "7.4:1",
-      status: "excellent"
+      status: "excellent",
     },
     {
       name: "Sidebar Primary",
       background: "hsl(48, 100%, 65%)",
       foreground: "hsl(0, 0%, 0%)",
       ratio: "12.1:1",
-      status: "excellent"
-    }
+      status: "excellent",
+    },
   ];
 
   const getStatusIcon = (status: string) => {
@@ -62,9 +62,7 @@ const ContrastChecker = () => {
   return (
     <div className="card-enterprise">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-foreground">
-          Color Contrast Analysis
-        </h3>
+        <h3 className="text-lg font-semibold text-foreground">Color Contrast Analysis</h3>
         <p className="text-sm text-muted-foreground">
           WCAG 2.2 compliance check for yellow theme colors
         </p>
@@ -72,30 +70,29 @@ const ContrastChecker = () => {
 
       <div className="space-y-3">
         {contrastTests.map((test, index) => (
-          <div key={index} className="flex items-center justify-between p-3 border border-border rounded-lg">
+          <div
+            key={index}
+            className="flex items-center justify-between p-3 border border-border rounded-lg"
+          >
             <div className="flex items-center gap-3">
               {getStatusIcon(test.status)}
               <div>
                 <h4 className="font-medium text-foreground">{test.name}</h4>
                 <div className="flex items-center gap-2 mt-1">
-                  <div 
+                  <div
                     className="w-6 h-6 rounded border border-border"
                     style={{ backgroundColor: test.background }}
                   />
                   <span className="text-xs text-muted-foreground">on</span>
-                  <div 
+                  <div
                     className="w-6 h-6 rounded border border-border"
                     style={{ backgroundColor: test.foreground }}
                   />
-                  <span className="text-xs font-mono text-muted-foreground">
-                    {test.ratio}
-                  </span>
+                  <span className="text-xs font-mono text-muted-foreground">{test.ratio}</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              {getStatusBadge(test.status)}
-            </div>
+            <div className="flex items-center gap-2">{getStatusBadge(test.status)}</div>
           </div>
         ))}
       </div>

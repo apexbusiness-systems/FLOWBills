@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
 export function InstallPrompt() {
@@ -16,7 +16,7 @@ export function InstallPrompt() {
 
   React.useEffect(() => {
     // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    if (window.matchMedia("(display-mode: standalone)").matches) {
       setIsInstalled(true);
       return;
     }
@@ -24,10 +24,10 @@ export function InstallPrompt() {
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      
+
       // Show prompt after 10 seconds if not dismissed before
       const timer = setTimeout(() => {
-        const dismissed = localStorage.getItem('pwa-prompt-dismissed');
+        const dismissed = localStorage.getItem("pwa-prompt-dismissed");
         if (!dismissed) {
           setShowPrompt(true);
         }
@@ -36,17 +36,17 @@ export function InstallPrompt() {
       return () => clearTimeout(timer);
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
-    
+    window.addEventListener("beforeinstallprompt", handler);
+
     // Listen for app installed event
-    window.addEventListener('appinstalled', () => {
+    window.addEventListener("appinstalled", () => {
       setIsInstalled(true);
       setShowPrompt(false);
-      localStorage.removeItem('pwa-prompt-dismissed');
+      localStorage.removeItem("pwa-prompt-dismissed");
     });
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener("beforeinstallprompt", handler);
     };
   }, []);
 
@@ -55,18 +55,18 @@ export function InstallPrompt() {
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      console.log('PWA installed');
+
+    if (outcome === "accepted") {
+      console.log("PWA installed");
     }
-    
+
     setDeferredPrompt(null);
     setShowPrompt(false);
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-prompt-dismissed', 'true');
+    localStorage.setItem("pwa-prompt-dismissed", "true");
   };
 
   if (isInstalled || !deferredPrompt) return null;
@@ -94,9 +94,9 @@ export function InstallPrompt() {
                     </CardDescription>
                   </div>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-6 w-6 -mt-1"
                   onClick={handleDismiss}
                 >
@@ -120,19 +120,11 @@ export function InstallPrompt() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  size="sm" 
-                  onClick={handleInstall}
-                  className="flex-1"
-                >
+                <Button size="sm" onClick={handleInstall} className="flex-1">
                   <Download className="mr-2 h-3 w-3" />
                   Install App
                 </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={handleDismiss}
-                >
+                <Button size="sm" variant="outline" onClick={handleDismiss}>
                   Not Now
                 </Button>
               </div>

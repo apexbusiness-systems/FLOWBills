@@ -31,7 +31,7 @@ class QueryOptimizer {
   private cache: Map<string, CacheEntry> = new Map();
   private config: CacheConfig = {
     ttl: 5 * 60 * 1000, // 5 minutes default
-    maxSize: 1000
+    maxSize: 1000,
   };
   private cleanupInterval: NodeJS.Timeout | null = null;
 
@@ -70,7 +70,7 @@ class QueryOptimizer {
           query: cacheKey,
           duration: endTime - startTime,
           timestamp: Date.now(),
-          cached: true
+          cached: true,
         });
         return { data: cached, error: null, fromCache: true };
       }
@@ -84,11 +84,11 @@ class QueryOptimizer {
 
       // Record performance metrics
       this.recordQueryMetric({
-        query: cacheKey || 'anonymous',
+        query: cacheKey || "anonymous",
         duration,
         timestamp: Date.now(),
         cached: false,
-        rowCount: Array.isArray(result.data) ? result.data.length : result.data ? 1 : 0
+        rowCount: Array.isArray(result.data) ? result.data.length : result.data ? 1 : 0,
       });
 
       // Cache successful results
@@ -100,7 +100,7 @@ class QueryOptimizer {
       if (duration > 2000) {
         toast({
           title: "Slow Query Detected",
-          description: `Query took ${(duration/1000).toFixed(1)}s to complete`,
+          description: `Query took ${(duration / 1000).toFixed(1)}s to complete`,
         });
       }
 
@@ -108,10 +108,10 @@ class QueryOptimizer {
     } catch (error) {
       const endTime = performance.now();
       this.recordQueryMetric({
-        query: cacheKey || 'anonymous',
+        query: cacheKey || "anonymous",
         duration: endTime - startTime,
         timestamp: Date.now(),
-        cached: false
+        cached: false,
       });
       throw error;
     }
@@ -147,15 +147,15 @@ class QueryOptimizer {
     // Execute queries in parallel with limited concurrency
     const concurrency = 5; // Limit concurrent queries
     const results: T[] = [];
-    
+
     for (let i = 0; i < queries.length; i += concurrency) {
       const batch = queries.slice(i, i + concurrency);
       const batchPromises = batch.map(({ fn, cacheKey, options }) =>
         this.executeQuery(fn, cacheKey, options)
       );
-      
+
       const batchResults = await Promise.all(batchPromises);
-      results.push(...batchResults as T[]);
+      results.push(...(batchResults as T[]));
     }
 
     const batchEndTime = performance.now();
@@ -165,7 +165,7 @@ class QueryOptimizer {
       query: `batch_${queries.length}_queries`,
       duration: batchDuration,
       timestamp: Date.now(),
-      cached: false
+      cached: false,
     });
 
     return results;
@@ -200,7 +200,7 @@ class QueryOptimizer {
       data: JSON.parse(JSON.stringify(data)), // Deep clone to prevent mutations
       timestamp: Date.now(),
       ttl,
-      hits: 0
+      hits: 0,
     });
   }
 
@@ -221,7 +221,7 @@ class QueryOptimizer {
   // Periodic cache cleanup (idempotent)
   startPeriodicCleanup() {
     if (this.cleanupInterval) return; // Already started
-    
+
     this.cleanupInterval = setInterval(() => {
       const now = Date.now();
       for (const [key, entry] of this.cache.entries()) {
@@ -253,24 +253,28 @@ class QueryOptimizer {
   // Get query performance analytics
   getQueryAnalytics() {
     const totalQueries = this.queryMetrics.length;
-    const cachedQueries = this.queryMetrics.filter(q => q.cached).length;
+    const cachedQueries = this.queryMetrics.filter((q) => q.cached).length;
     const avgDuration = this.queryMetrics.reduce((sum, q) => sum + q.duration, 0) / totalQueries;
-    
+
     const slowQueries = this.queryMetrics
-      .filter(q => q.duration > 1000)
+      .filter((q) => q.duration > 1000)
       .sort((a, b) => b.duration - a.duration)
       .slice(0, 10);
 
-    const queryFrequency = this.queryMetrics.reduce((freq, q) => {
-      freq[q.query] = (freq[q.query] || 0) + 1;
-      return freq;
-    }, {} as Record<string, number>);
+    const queryFrequency = this.queryMetrics.reduce(
+      (freq, q) => {
+        freq[q.query] = (freq[q.query] || 0) + 1;
+        return freq;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalQueries,
       cachedQueries,
-      cacheHitRate: totalQueries > 0 ? (cachedQueries / totalQueries * 100).toFixed(1) + '%' : '0%',
-      avgDuration: avgDuration.toFixed(2) + 'ms',
+      cacheHitRate:
+        totalQueries > 0 ? ((cachedQueries / totalQueries) * 100).toFixed(1) + "%" : "0%",
+      avgDuration: avgDuration.toFixed(2) + "ms",
       slowQueries,
       queryFrequency,
       cacheSize: this.cache.size,
@@ -278,8 +282,8 @@ class QueryOptimizer {
         key,
         hits: entry.hits,
         age: Date.now() - entry.timestamp,
-        ttl: entry.ttl
-      }))
+        ttl: entry.ttl,
+      })),
     };
   }
 
@@ -288,7 +292,7 @@ class QueryOptimizer {
     this.cache.clear();
     toast({
       title: "Cache Cleared",
-      description: "Query cache has been cleared successfully"
+      description: "Query cache has been cleared successfully",
     });
   }
 
@@ -301,7 +305,7 @@ class QueryOptimizer {
     return {
       timestamp: new Date().toISOString(),
       metrics: this.queryMetrics,
-      analytics: this.getQueryAnalytics()
+      analytics: this.getQueryAnalytics(),
     };
   }
 }
@@ -310,21 +314,22 @@ class QueryOptimizer {
 export const QueryPatterns = {
   // Paginated query with caching
   paginatedQuery: async <T>(
-    tableName: 'invoices' | 'exceptions' | 'compliance_records' | 'activities',
+    tableName: "invoices" | "exceptions" | "compliance_records" | "activities",
     page: number = 1,
     pageSize: number = 10,
     filters: Record<string, any> = {}
   ) => {
     const optimizer = QueryOptimizer.getInstance();
     const cacheKey = `${tableName}_page_${page}_${pageSize}_${JSON.stringify(filters)}`;
-    
+
     return optimizer.supabaseQuery(
       tableName,
-      async (client) => await client
-        .from(tableName as any)
-        .select('*', { count: 'exact' })
-        .range((page - 1) * pageSize, page * pageSize - 1)
-        .match(filters),
+      async (client) =>
+        await client
+          .from(tableName as any)
+          .select("*", { count: "exact" })
+          .range((page - 1) * pageSize, page * pageSize - 1)
+          .match(filters),
       cacheKey,
       { ttl: 2 * 60 * 1000 } // 2 minutes cache for paginated data
     );
@@ -332,19 +337,20 @@ export const QueryPatterns = {
 
   // Aggregation query with longer cache
   aggregationQuery: async (
-    tableName: 'invoices' | 'exceptions' | 'compliance_records' | 'activities',
+    tableName: "invoices" | "exceptions" | "compliance_records" | "activities",
     aggregations: string[],
     filters: Record<string, any> = {}
   ) => {
     const optimizer = QueryOptimizer.getInstance();
-    const cacheKey = `${tableName}_agg_${aggregations.join('_')}_${JSON.stringify(filters)}`;
-    
+    const cacheKey = `${tableName}_agg_${aggregations.join("_")}_${JSON.stringify(filters)}`;
+
     return optimizer.supabaseQuery(
       tableName,
-      async (client) => await client
-        .from(tableName as any)
-        .select(aggregations.join(', '))
-        .match(filters),
+      async (client) =>
+        await client
+          .from(tableName as any)
+          .select(aggregations.join(", "))
+          .match(filters),
       cacheKey,
       { ttl: 10 * 60 * 1000 } // 10 minutes cache for aggregations
     );
@@ -352,12 +358,12 @@ export const QueryPatterns = {
 
   // Real-time query (no cache)
   realtimeQuery: async <T>(
-    tableName: 'invoices' | 'exceptions' | 'compliance_records' | 'activities',
+    tableName: "invoices" | "exceptions" | "compliance_records" | "activities",
     query: (client: typeof supabase) => Promise<any>
   ) => {
     const optimizer = QueryOptimizer.getInstance();
     return optimizer.supabaseQuery(tableName, query, undefined, { cache: false });
-  }
+  },
 };
 
 export const queryOptimizer = QueryOptimizer.getInstance();
