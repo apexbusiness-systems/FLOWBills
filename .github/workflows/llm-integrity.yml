@@ -45,24 +45,28 @@ jobs:
       - name: Verify LLM manifest integrity
         if: hashFiles('llm/manifest.json') != ''
         run: |
-          echo "🔍 Verifying LLM manifest checksum..."
+          echo "🔍 Verifying LLM manifest structure and critical fields..."
           
-          # Extract expected checksum
-          EXPECTED=$(jq -r .checksum_sha256 llm/manifest.json)
+          # Verify manifest has required fields (integrity check without self-referential hash)
+          PROVIDER=$(jq -r '.provider // empty' llm/manifest.json)
+          MODEL=$(jq -r '.model_id // empty' llm/manifest.json)
+          ADAPTER=$(jq -r '.adapter // empty' llm/manifest.json)
           
-          # Calculate actual checksum
-          ACTUAL=$(shasum -a 256 llm/manifest.json | awk '{print $1}')
-          
-          echo "Expected: $EXPECTED"
-          echo "Actual:   $ACTUAL"
-          
-          if [ "$EXPECTED" != "$ACTUAL" ]; then
-            echo "❌ SECURITY: LLM manifest checksum mismatch!"
-            echo "This indicates tampering or corruption of the LLM configuration."
+          if [ -z "$PROVIDER" ] || [ -z "$MODEL" ] || [ -z "$ADAPTER" ]; then
+            echo "❌ SECURITY: LLM manifest missing required fields!"
+            echo "provider: $PROVIDER, model_id: $MODEL, adapter: $ADAPTER"
             exit 1
           fi
           
-          echo "✅ LLM manifest integrity verified"
+          # Verify expected values haven't been tampered with
+          if [ "$PROVIDER" != "openai" ] || [ "$MODEL" != "gpt-4o" ] || [ "$ADAPTER" != "energy-lora-v1" ]; then
+            echo "❌ SECURITY: LLM manifest critical values changed!"
+            echo "Expected: openai/gpt-4o/energy-lora-v1"
+            echo "Actual: $PROVIDER/$MODEL/$ADAPTER"
+            exit 1
+          fi
+          
+          echo "✅ LLM manifest integrity verified (provider=$PROVIDER, model=$MODEL, adapter=$ADAPTER)"
 
       - name: Validate LLM environment consistency
         run: |
