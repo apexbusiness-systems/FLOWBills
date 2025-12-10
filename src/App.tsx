@@ -82,6 +82,9 @@ const queryClient = new QueryClient({
   },
 });
 
+// Lazy load DashboardHeader
+const DashboardHeader = React.lazy(() => import("./components/dashboard/DashboardHeader"));
+
 const AuthRoutes = () => {
   const { user, loading } = useAuth();
 
@@ -96,9 +99,8 @@ const AuthRoutes = () => {
     );
   }
 
-  // Determine if current route should show public header
-  const showPublicHeader = !user;
-  const showMobileNav = !!user;
+  // Determine layout based on auth state
+  const isAuthenticated = !!user;
 
   return (
     <>
@@ -296,7 +298,9 @@ const AuthRoutes = () => {
         <Route path="*" element={<NotFound />} />
         </Routes>
       </React.Suspense>
-      {showMobileNav && <MobileBottomNav />}
+      
+      {/* Show mobile nav for authenticated users */}
+      {isAuthenticated && <MobileBottomNav />}
       <ScrollToTop />
     </>
   );
@@ -330,12 +334,7 @@ function App() {
                 <TourProvider>
                   <TourOverlay />
                   <CSRFProvider>
-                    <div className="min-h-screen flex flex-col">
-                      <div className="flex-1">
-                        <AuthRoutes />
-                      </div>
-                      <Footer />
-                    </div>
+                    <AppLayout />
                   </CSRFProvider>
                 </TourProvider>
               </AuthProvider>
@@ -346,5 +345,21 @@ function App() {
     </QueryClientProvider>
   );
 }
+
+// Separate component to access auth context for footer visibility
+const AppLayout = () => {
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
+  
+  return (
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <AuthRoutes />
+      </div>
+      {/* Only show footer on public pages */}
+      {!isAuthenticated && <Footer />}
+    </div>
+  );
+};
 
 export default App;

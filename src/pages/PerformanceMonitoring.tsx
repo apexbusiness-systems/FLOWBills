@@ -4,7 +4,6 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 const PerformanceMonitoring = () => {
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader />
       <PerformanceDashboard />
     </div>
   );

@@ -1,4 +1,4 @@
-import { toast } from "@/hooks/use-toast";
+// Performance warnings are logged to console.debug only (not shown to users)
 
 // Performance metrics interface
 export interface PerformanceMetrics {
@@ -185,7 +185,7 @@ class PerformanceMonitor {
       this.apiMetrics.shift();
     }
 
-    // Warn on slow API calls
+    // Log slow API calls to console only (not visible to users)
     if (metric.duration > 3000) {
       toast({
         title: "Slow API Response",

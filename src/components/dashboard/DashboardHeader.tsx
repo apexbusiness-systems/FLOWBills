@@ -10,12 +10,33 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import SmartSearch from "@/components/ui/smart-search";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 import { NotificationBell } from "./NotificationBell";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+import { useState } from "react";
+
+const navigationItems = [
+  { name: "Dashboard", href: "/dashboard", icon: Home },
+  { name: "Invoices", href: "/invoices", icon: FileText },
+  { name: "AFE Management", href: "/afe-management", icon: DollarSign },
+  { name: "Field Tickets", href: "/field-tickets", icon: Ticket },
+  { name: "UWI Registry", href: "/uwi-registry", icon: MapPin },
+  { name: "Three-Way Matching", href: "/three-way-matching", icon: CheckCircle2 },
+  { name: "Reports", href: "/reports", icon: BarChart3 },
+  { name: "Integrations", href: "/integrations", icon: Plug },
+  { name: "Performance", href: "/performance-monitoring", icon: Activity },
+  { name: "Help Center", href: "/help-center", icon: HelpCircle },
+];
 
 const DashboardHeader = () => {
   const { user, userRole, signOut } = useAuth();
@@ -53,6 +74,15 @@ const DashboardHeader = () => {
     return user?.email?.split('@')[0] || 'User';
   };
 
+  const getInitials = () => {
+    const name = getDisplayName();
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
   return (
     <header className="border-b bg-card shadow-sm sticky top-0 z-40 backdrop-blur-sm">
       <div className="flex h-16 items-center gap-4 px-6">
@@ -80,9 +110,9 @@ const DashboardHeader = () => {
           </div>
         </div>
 
-        {/* Navigation Controls */}
-        <div className="flex items-center gap-2 ml-4">
-          {!isHomePage && (
+        {/* Navigation Menu */}
+        <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
+          <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
@@ -103,11 +133,38 @@ const DashboardHeader = () => {
               className="gap-2 hover:bg-muted"
               aria-label="Go back"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden md:inline">Back</span>
+              <Menu className="h-5 w-5" />
+              <span className="hidden md:inline">Menu</span>
             </Button>
-          )}
-        </div>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[280px] sm:w-[320px]">
+            <SheetHeader>
+              <SheetTitle className="flex items-center gap-2">
+                <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-6 w-6 object-contain" />
+                Navigation
+              </SheetTitle>
+            </SheetHeader>
+            <nav className="mt-6 flex flex-col gap-1">
+              {navigationItems.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <Button
+                    key={item.href}
+                    variant={isActive ? "secondary" : "ghost"}
+                    className="justify-start gap-3 h-11"
+                    onClick={() => {
+                      navigate(item.href);
+                      setIsNavOpen(false);
+                    }}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.name}
+                  </Button>
+                );
+              })}
+            </nav>
+          </SheetContent>
+        </Sheet>
 
         {/* Smart Search */}
         <div className="mx-4 flex-1 max-w-md">
@@ -134,8 +191,8 @@ const DashboardHeader = () => {
                 className="flex items-center gap-2.5 h-10 px-3 hover:bg-muted/80 transition-colors"
                 aria-label="User menu"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20">
-                  <User className="h-4 w-4 text-primary" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm">
+                  {getInitials()}
                 </div>
                 <div className="hidden md:block text-left">
                   <div className="text-sm font-semibold leading-none">{getDisplayName()}</div>
@@ -145,8 +202,8 @@ const DashboardHeader = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64 p-2">
               <div className="flex items-start gap-3 px-2 py-3 mb-1">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20 flex-shrink-0">
-                  <User className="h-5 w-5 text-primary" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm flex-shrink-0">
+                  {getInitials()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold leading-none truncate">{getDisplayName()}</p>

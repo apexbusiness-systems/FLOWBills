@@ -8,7 +8,6 @@ import { ContextualTooltip } from '@/components/help/ContextualTooltip';
 const AFEManagement = () => {
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader />
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="afes" className="space-y-6">
           <TabsList>

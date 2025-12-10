@@ -5,7 +5,6 @@ import { ContextualTooltip } from '@/components/help/ContextualTooltip';
 const FieldTickets = () => {
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader />
       <main className="container mx-auto px-4 py-8">
         <ContextualTooltip
           id="field-ticket-manager"
