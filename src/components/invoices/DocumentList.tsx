@@ -15,7 +15,7 @@ import { FileText, Download, Trash2, Eye, File, Calendar, User, HardDrive } from
 import { useAuth } from "@/hooks/useAuth";
 import { useFileUpload, InvoiceDocument } from "@/hooks/useFileUpload";
 import { format } from "date-fns";
-
+import DocumentPreviewDialog from "./DocumentPreviewDialog";
 interface DocumentListProps {
   invoiceId: string;
   onDocumentsChange?: (documents: InvoiceDocument[]) => void;
@@ -26,6 +26,9 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<InvoiceDocument | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState<InvoiceDocument | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const { hasRole } = useAuth();
   const { getDocuments, deleteDocument, downloadDocument, getFilePreviewUrl } = useFileUpload();
@@ -71,10 +74,12 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   };
 
   const handlePreview = async (doc: InvoiceDocument) => {
-    const previewUrl = await getFilePreviewUrl(doc.id);
-    if (previewUrl) {
-      window.open(previewUrl, "_blank");
-    }
+    setPreviewDocument(doc);
+    setPreviewOpen(true);
+    setPreviewUrl(null);
+    
+    const url = await getFilePreviewUrl(doc.id);
+    setPreviewUrl(url);
   };
 
   const getFileIcon = (fileType: string) => {
@@ -235,9 +240,18 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
             >
               Delete Document
             </AlertDialogAction>
-          </AlertDialogFooter>
+        </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Inline Document Preview Dialog */}
+      <DocumentPreviewDialog
+        document={previewDocument}
+        previewUrl={previewUrl}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        onDownload={handleDownload}
+      />
     </>
   );
 };
