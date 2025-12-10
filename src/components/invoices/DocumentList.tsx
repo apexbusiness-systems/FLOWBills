@@ -11,11 +11,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { FileText, Download, Trash2, Eye, File, Calendar, User, HardDrive } from "lucide-react";
+import { FileText, Download, Trash2, Eye, File, Calendar, User, HardDrive, GripVertical } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useFileUpload, InvoiceDocument } from "@/hooks/useFileUpload";
 import { format } from "date-fns";
 import DocumentPreviewDialog from "./DocumentPreviewDialog";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+
 interface DocumentListProps {
   invoiceId: string;
   onDocumentsChange?: (documents: InvoiceDocument[]) => void;
@@ -34,6 +36,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   const { getDocuments, deleteDocument, downloadDocument, getFilePreviewUrl } = useFileUpload();
 
   const canDelete = hasRole("operator") || hasRole("admin");
+  const canReorder = hasRole("operator") || hasRole("admin");
 
   useEffect(() => {
     loadDocuments();
@@ -52,6 +55,17 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
     }
   };
 
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(documents);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    setDocuments(items);
+    onDocumentsChange?.(items);
+  };
+
   const handleDeleteClick = (doc: InvoiceDocument) => {
     setDocumentToDelete(doc);
     setDeleteDialogOpen(true);
@@ -62,7 +76,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
 
     const success = await deleteDocument(documentToDelete.id);
     if (success) {
-      await loadDocuments(); // Refresh list
+      await loadDocuments();
     }
 
     setDeleteDialogOpen(false);
@@ -89,6 +103,8 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
       return <FileText className="h-4 w-4 text-green-500" />;
     } else if (fileType === "text/csv") {
       return <FileText className="h-4 w-4 text-blue-500" />;
+    } else if (fileType.startsWith("image/")) {
+      return <File className="h-4 w-4 text-purple-500" />;
     }
     return <File className="h-4 w-4 text-muted-foreground" />;
   };
@@ -98,6 +114,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
     if (fileType.includes("excel") || fileType.includes("spreadsheet")) return "Excel";
     if (fileType === "text/csv") return "CSV";
     if (fileType.includes("xml")) return "XML";
+    if (fileType.startsWith("image/")) return "Image";
     return "File";
   };
 
@@ -147,79 +164,123 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   return (
     <>
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-          <HardDrive className="h-4 w-4" />
-          {documents.length} Document{documents.length > 1 ? "s" : ""} Attached
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <HardDrive className="h-4 w-4" />
+            {documents.length} Document{documents.length > 1 ? "s" : ""} Attached
+          </div>
+          {canReorder && documents.length > 1 && (
+            <span className="text-xs text-muted-foreground">
+              Drag to reorder
+            </span>
+          )}
         </div>
 
-        <div className="space-y-3">
-          {documents.map((doc) => (
-            <div
-              key={doc.id}
-              className="flex items-center gap-4 p-4 border border-border rounded-lg bg-card hover:shadow-sm transition-shadow"
-            >
-              {/* File Icon */}
-              <div className="flex-shrink-0">{getFileIcon(doc.file_type)}</div>
-
-              {/* File Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-sm font-medium text-foreground truncate">{doc.file_name}</h4>
-                  <Badge variant="outline" className="text-xs">
-                    {getFileTypeBadge(doc.file_type)}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <HardDrive className="h-3 w-3" />
-                    {formatFileSize(doc.file_size)}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {formatDate(doc.created_at)}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    Uploaded by user
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-1">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handlePreview(doc)}
-                  title="Preview document"
-                >
-                  <Eye className="h-3 w-3" />
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleDownload(doc)}
-                  title="Download document"
-                >
-                  <Download className="h-3 w-3" />
-                </Button>
-
-                {canDelete && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDeleteClick(doc)}
-                    title="Delete document"
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="documents">
+            {(provided, snapshot) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className={`space-y-3 transition-colors rounded-lg ${
+                  snapshot.isDraggingOver ? "bg-primary/5 p-2 -m-2" : ""
+                }`}
+              >
+                {documents.map((doc, index) => (
+                  <Draggable 
+                    key={doc.id} 
+                    draggableId={doc.id} 
+                    index={index}
+                    isDragDisabled={!canReorder}
                   >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                )}
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={`flex items-center gap-4 p-4 border border-border rounded-lg bg-card transition-all ${
+                          snapshot.isDragging 
+                            ? "shadow-lg ring-2 ring-primary/20 rotate-1" 
+                            : "hover:shadow-sm"
+                        }`}
+                      >
+                        {/* Drag Handle */}
+                        {canReorder && (
+                          <div
+                            {...provided.dragHandleProps}
+                            className="flex-shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <GripVertical className="h-5 w-5" />
+                          </div>
+                        )}
+
+                        {/* File Icon */}
+                        <div className="flex-shrink-0">{getFileIcon(doc.file_type)}</div>
+
+                        {/* File Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="text-sm font-medium text-foreground truncate">{doc.file_name}</h4>
+                            <Badge variant="outline" className="text-xs">
+                              {getFileTypeBadge(doc.file_type)}
+                            </Badge>
+                          </div>
+
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <HardDrive className="h-3 w-3" />
+                              {formatFileSize(doc.file_size)}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(doc.created_at)}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <User className="h-3 w-3" />
+                              Uploaded by user
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handlePreview(doc)}
+                            title="Preview document"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDownload(doc)}
+                            title="Download document"
+                          >
+                            <Download className="h-3 w-3" />
+                          </Button>
+
+                          {canDelete && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteClick(doc)}
+                              title="Delete document"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -240,7 +301,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
             >
               Delete Document
             </AlertDialogAction>
-        </AlertDialogFooter>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
