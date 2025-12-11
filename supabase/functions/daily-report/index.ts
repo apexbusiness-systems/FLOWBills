@@ -207,7 +207,7 @@ Next report: ${new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split
   } catch (error) {
     console.error("Error generating daily report:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

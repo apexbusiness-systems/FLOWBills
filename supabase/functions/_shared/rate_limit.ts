@@ -3,7 +3,7 @@
  * Enterprise-grade rate limiting with database persistence
  */
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 export interface RateLimitConfig {
   maxRequests: number;
@@ -16,6 +16,11 @@ export interface RateLimitResult {
   limit: number;
   remaining: number;
   reset: number;
+}
+
+interface RateLimitRecord {
+  request_count: number;
+  window_start: string;
 }
 
 /**
@@ -51,8 +56,9 @@ export async function checkRateLimit(
     }
 
     const now = new Date();
+    const record = existing as RateLimitRecord | null;
 
-    if (!existing) {
+    if (!record) {
       // First request in window
       await supabaseClient.from('rate_limits').insert({
         resource_key: resourceKey,
@@ -71,8 +77,8 @@ export async function checkRateLimit(
     }
 
     // Check if limit exceeded
-    if (existing.request_count >= config.maxRequests) {
-      const resetTime = new Date(existing.window_start).getTime() + config.windowSeconds * 1000;
+    if (record.request_count >= config.maxRequests) {
+      const resetTime = new Date(record.window_start).getTime() + config.windowSeconds * 1000;
       
       return {
         allowed: false,
@@ -85,9 +91,9 @@ export async function checkRateLimit(
     // Increment counter
     const { error: updateError } = await supabaseClient
       .from('rate_limits')
-      .update({ request_count: existing.request_count + 1 })
+      .update({ request_count: record.request_count + 1 })
       .eq('resource_key', resourceKey)
-      .eq('window_start', existing.window_start);
+      .eq('window_start', record.window_start);
 
     if (updateError) {
       console.error('Rate limit update error:', updateError);
@@ -95,16 +101,16 @@ export async function checkRateLimit(
       return {
         allowed: true,
         limit: config.maxRequests,
-        remaining: config.maxRequests - existing.request_count - 1,
-        reset: new Date(existing.window_start).getTime() + config.windowSeconds * 1000,
+        remaining: config.maxRequests - record.request_count - 1,
+        reset: new Date(record.window_start).getTime() + config.windowSeconds * 1000,
       };
     }
 
     return {
       allowed: true,
       limit: config.maxRequests,
-      remaining: config.maxRequests - existing.request_count - 1,
-      reset: new Date(existing.window_start).getTime() + config.windowSeconds * 1000,
+      remaining: config.maxRequests - record.request_count - 1,
+      reset: new Date(record.window_start).getTime() + config.windowSeconds * 1000,
     };
   } catch (error) {
     console.error('Rate limit error:', error);

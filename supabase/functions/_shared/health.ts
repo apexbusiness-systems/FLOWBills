@@ -1,4 +1,4 @@
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -28,7 +28,7 @@ export const healthResponses = {
 
     try {
       // Test database connectivity
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('invoices')
         .select('count(*)')
         .limit(1);
@@ -59,12 +59,12 @@ export const healthResponses = {
           status: 200 
         }
       );
-    } catch (error) {
-      console.error('Health check error:', error);
+    } catch (err) {
+      console.error('Health check error:', err);
       return new Response(
         JSON.stringify({ 
           status: 'not ready', 
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: err instanceof Error ? err.message : 'Unknown error',
           timestamp: new Date().toISOString()
         }),
         { 
@@ -117,8 +117,8 @@ flowai_function_up 1
           status: 200 
         }
       );
-    } catch (error) {
-      console.error('Metrics collection error:', error);
+    } catch (err) {
+      console.error('Metrics collection error:', err);
       return new Response(
         `# HELP flowai_function_up Function availability indicator
 # TYPE flowai_function_up gauge
