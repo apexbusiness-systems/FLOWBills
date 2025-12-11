@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRealtimeChat } from "@/hooks/useRealtimeChat";
-import { Mic, MicOff, Send, Phone, PhoneOff, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "react-i18next";
+import React, { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useRealtimeChat } from '@/hooks/useRealtimeChat';
+import { Mic, MicOff, Send, Phone, PhoneOff, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface SupportChatProps {
   isMinimized?: boolean;
@@ -16,7 +16,7 @@ interface SupportChatProps {
 export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimize }) => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [inputText, setInputText] = useState("");
+  const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -29,25 +29,25 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
     disconnect,
     startListening,
     stopListening,
-    sendTextMessage,
+    sendTextMessage
   } = useRealtimeChat();
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleConnect = async () => {
     try {
       await connect();
       toast({
-        title: t("support.connected") || "Connected",
-        description: t("support.connectedDesc") || "AI support is ready to help you 24/7",
+        title: t('support.connected') || 'Connected',
+        description: t('support.connectedDesc') || 'AI support is ready to help you 24/7',
       });
     } catch (error) {
       toast({
-        title: t("support.error") || "Connection Error",
-        description: error instanceof Error ? error.message : "Failed to connect",
-        variant: "destructive",
+        title: t('support.error') || 'Connection Error',
+        description: error instanceof Error ? error.message : 'Failed to connect',
+        variant: 'destructive',
       });
     }
   };
@@ -55,8 +55,8 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
   const handleDisconnect = () => {
     disconnect();
     toast({
-      title: t("support.disconnected") || "Disconnected",
-      description: t("support.disconnectedDesc") || "Support chat ended",
+      title: t('support.disconnected') || 'Disconnected',
+      description: t('support.disconnectedDesc') || 'Support chat ended',
     });
   };
 
@@ -67,15 +67,15 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
       } else {
         await startListening();
         toast({
-          title: t("support.listening") || "Listening",
-          description: t("support.listeningDesc") || "Speak now, I'm listening...",
+          title: t('support.listening') || 'Listening',
+          description: t('support.listeningDesc') || 'Speak now, I\'m listening...',
         });
       }
     } catch (error) {
       toast({
-        title: t("support.error") || "Error",
-        description: error instanceof Error ? error.message : "Microphone access failed",
-        variant: "destructive",
+        title: t('support.error') || 'Error',
+        description: error instanceof Error ? error.message : 'Microphone access failed',
+        variant: 'destructive',
       });
     }
   };
@@ -86,12 +86,12 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
 
     try {
       sendTextMessage(inputText);
-      setInputText("");
+      setInputText('');
     } catch (error) {
       toast({
-        title: t("support.error") || "Error",
-        description: error instanceof Error ? error.message : "Failed to send message",
-        variant: "destructive",
+        title: t('support.error') || 'Error',
+        description: error instanceof Error ? error.message : 'Failed to send message',
+        variant: 'destructive',
       });
     }
   };
@@ -114,22 +114,13 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
       <div className="p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold">{t("support.title") || "24/7 AI Support"}</h3>
+            <h3 className="font-semibold">{t('support.title') || '24/7 AI Support'}</h3>
             <p className="text-sm opacity-90">
-              {isConnected
-                ? isSpeaking
-                  ? t("support.speaking") || "Speaking..."
-                  : t("support.online") || "Online"
-                : t("support.offline") || "Offline"}
+              {isConnected ? (isSpeaking ? t('support.speaking') || 'Speaking...' : t('support.online') || 'Online') : t('support.offline') || 'Offline'}
             </p>
           </div>
           {onMinimize && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onMinimize}
-              className="text-primary-foreground"
-            >
+            <Button variant="ghost" size="icon" onClick={onMinimize} className="text-primary-foreground">
               ×
             </Button>
           )}
@@ -140,9 +131,9 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
       <ScrollArea className="flex-1 p-4">
         {messages.length === 0 && !isConnected && (
           <div className="text-center text-muted-foreground py-8">
-            <p>{t("support.welcome") || "Welcome to 24/7 AI Support"}</p>
+            <p>{t('support.welcome') || 'Welcome to 24/7 AI Support'}</p>
             <p className="text-sm mt-2">
-              {t("support.welcomeDesc") || "Connect to start chatting with voice or text"}
+              {t('support.welcomeDesc') || 'Connect to start chatting with voice or text'}
             </p>
           </div>
         )}
@@ -150,11 +141,13 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`mb-4 ${message.role === "user" ? "text-right" : "text-left"}`}
+            className={`mb-4 ${message.role === 'user' ? 'text-right' : 'text-left'}`}
           >
             <div
               className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                message.role === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted'
               }`}
             >
               {message.content}
@@ -174,12 +167,12 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {t("support.connecting") || "Connecting..."}
+                {t('support.connecting') || 'Connecting...'}
               </>
             ) : (
               <>
                 <Phone className="w-4 h-4 mr-2" />
-                {t("support.connect") || "Connect to Support"}
+                {t('support.connect') || 'Connect to Support'}
               </>
             )}
           </Button>
@@ -188,18 +181,18 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
             <div className="flex gap-2">
               <Button
                 onClick={handleToggleListening}
-                variant={isListening ? "destructive" : "secondary"}
+                variant={isListening ? 'destructive' : 'secondary'}
                 className="flex-1"
               >
                 {isListening ? (
                   <>
                     <MicOff className="w-4 h-4 mr-2" />
-                    {t("support.stopListening") || "Stop"}
+                    {t('support.stopListening') || 'Stop'}
                   </>
                 ) : (
                   <>
                     <Mic className="w-4 h-4 mr-2" />
-                    {t("support.startListening") || "Voice"}
+                    {t('support.startListening') || 'Voice'}
                   </>
                 )}
               </Button>
@@ -212,7 +205,7 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
               <Input
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder={t("support.typePlaceholder") || "Type a message..."}
+                placeholder={t('support.typePlaceholder') || 'Type a message...'}
                 disabled={!isConnected}
               />
               <Button type="submit" size="icon" disabled={!inputText.trim()}>

@@ -1,22 +1,15 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Smartphone, Key, CheckCircle, AlertTriangle, Copy } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Shield, Smartphone, Key, CheckCircle, AlertTriangle, Copy } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TwoFactorSetupProps {
   isEnabled: boolean;
@@ -26,18 +19,18 @@ interface TwoFactorSetupProps {
 export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState<"setup" | "verify" | "backup-codes">("setup");
+  const [step, setStep] = useState<'setup' | 'verify' | 'backup-codes'>('setup');
   const [loading, setLoading] = useState(false);
-  const [qrCode, setQrCode] = useState<string>("");
-  const [secret, setSecret] = useState<string>("");
-  const [verificationCode, setVerificationCode] = useState("");
+  const [qrCode, setQrCode] = useState<string>('');
+  const [secret, setSecret] = useState<string>('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
 
   const generateTwoFactorSecret = async () => {
     try {
       setLoading(true);
-      setError("");
+      setError('');
 
       // Generate a secret key (in production, this would be done server-side)
       const secretKey = generateSecretKey();
@@ -47,10 +40,10 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
       const qrCodeUrl = `otpauth://totp/FlowAi:${user?.email}?secret=${secretKey}&issuer=FlowAi`;
       setQrCode(qrCodeUrl);
 
-      setStep("verify");
+      setStep('verify');
     } catch (err) {
-      setError("Failed to generate 2FA setup. Please try again.");
-      console.error("2FA setup error:", err);
+      setError('Failed to generate 2FA setup. Please try again.');
+      console.error('2FA setup error:', err);
     } finally {
       setLoading(false);
     }
@@ -59,13 +52,13 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
   const verifyTwoFactorCode = async () => {
     try {
       setLoading(true);
-      setError("");
+      setError('');
 
       // Verify the code (in production, this would be done server-side)
       const isValid = verifyTOTPCode(secret, verificationCode);
-
+      
       if (!isValid) {
-        setError("Invalid verification code. Please try again.");
+        setError('Invalid verification code. Please try again.');
         return;
       }
 
@@ -75,15 +68,15 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
 
       // Store 2FA settings (in production, this would be encrypted server-side)
       const { error: updateError } = await supabase.auth.updateUser({
-        data: {
+        data: { 
           two_factor_enabled: true,
-          two_factor_secret: secret, // In production, this would be encrypted
-        },
+          two_factor_secret: secret // In production, this would be encrypted
+        }
       });
 
       if (updateError) throw updateError;
 
-      setStep("backup-codes");
+      setStep('backup-codes');
       onToggle(true);
 
       toast({
@@ -91,8 +84,8 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
         description: "Your account is now protected with 2FA",
       });
     } catch (err) {
-      setError("Failed to enable 2FA. Please try again.");
-      console.error("2FA verification error:", err);
+      setError('Failed to enable 2FA. Please try again.');
+      console.error('2FA verification error:', err);
     } finally {
       setLoading(false);
     }
@@ -101,12 +94,12 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
   const disableTwoFactor = async () => {
     try {
       setLoading(true);
-
+      
       const { error } = await supabase.auth.updateUser({
-        data: {
+        data: { 
           two_factor_enabled: false,
-          two_factor_secret: null,
-        },
+          two_factor_secret: null
+        }
       });
 
       if (error) throw error;
@@ -120,8 +113,8 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
         variant: "destructive",
       });
     } catch (err) {
-      setError("Failed to disable 2FA. Please try again.");
-      console.error("2FA disable error:", err);
+      setError('Failed to disable 2FA. Please try again.');
+      console.error('2FA disable error:', err);
     } finally {
       setLoading(false);
     }
@@ -137,9 +130,9 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
 
   const handleClose = () => {
     setIsOpen(false);
-    setStep("setup");
-    setVerificationCode("");
-    setError("");
+    setStep('setup');
+    setVerificationCode('');
+    setError('');
   };
 
   return (
@@ -157,9 +150,10 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
             Two-Factor Authentication
           </DialogTitle>
           <DialogDescription>
-            {isEnabled
+            {isEnabled 
               ? "Manage your two-factor authentication settings"
-              : "Add an extra layer of security to your account"}
+              : "Add an extra layer of security to your account"
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -178,9 +172,9 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
                 Two-factor authentication is currently enabled for your account.
               </AlertDescription>
             </Alert>
-
-            <Button
-              variant="destructive"
+            
+            <Button 
+              variant="destructive" 
               onClick={disableTwoFactor}
               disabled={loading}
               className="w-full"
@@ -190,7 +184,7 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
           </div>
         ) : (
           <div className="space-y-4">
-            {step === "setup" && (
+            {step === 'setup' && (
               <div className="space-y-4">
                 <Card>
                   <CardHeader>
@@ -199,24 +193,29 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
                       Authenticator App Required
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      You'll need an authenticator app like Google Authenticator, Authy, or
-                      1Password.
+                      You'll need an authenticator app like Google Authenticator, Authy, or 1Password.
                     </CardDescription>
                   </CardHeader>
                 </Card>
 
-                <Button onClick={generateTwoFactorSecret} disabled={loading} className="w-full">
+                <Button 
+                  onClick={generateTwoFactorSecret} 
+                  disabled={loading}
+                  className="w-full"
+                >
                   {loading ? "Setting up..." : "Setup 2FA"}
                 </Button>
               </div>
             )}
 
-            {step === "verify" && (
+            {step === 'verify' && (
               <div className="space-y-4">
                 <div className="text-center">
                   <div className="bg-white p-4 rounded-lg border inline-block">
                     <div className="text-xs text-muted-foreground mb-2">Scan this QR code:</div>
-                    <div className="font-mono text-xs bg-muted p-2 rounded">{qrCode}</div>
+                    <div className="font-mono text-xs bg-muted p-2 rounded">
+                      {qrCode}
+                    </div>
                   </div>
                 </div>
 
@@ -231,7 +230,7 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
                   />
                 </div>
 
-                <Button
+                <Button 
                   onClick={verifyTwoFactorCode}
                   disabled={loading || verificationCode.length !== 6}
                   className="w-full"
@@ -241,24 +240,24 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
               </div>
             )}
 
-            {step === "backup-codes" && (
+            {step === 'backup-codes' && (
               <div className="space-y-4">
                 <Alert>
                   <Key className="h-4 w-4" />
                   <AlertDescription>
-                    Save these backup codes in a secure location. You can use them to access your
-                    account if you lose your device.
+                    Save these backup codes in a secure location. You can use them to access your account if you lose your device.
                   </AlertDescription>
                 </Alert>
 
                 <div className="grid grid-cols-1 gap-2">
                   {backupCodes.map((code, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between bg-muted p-2 rounded text-sm font-mono"
-                    >
+                    <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm font-mono">
                       <span>{code}</span>
-                      <Button variant="ghost" size="sm" onClick={() => copyBackupCode(code)}>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => copyBackupCode(code)}
+                      >
                         <Copy className="h-3 w-3" />
                       </Button>
                     </div>
@@ -279,8 +278,8 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
 
 // Helper functions (in production, these would be server-side)
 const generateSecretKey = (): string => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  let result = "";
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let result = '';
   for (let i = 0; i < 32; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }

@@ -1,13 +1,13 @@
-import { useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./useAuth";
-import { useToast } from "./use-toast";
+import { useState, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
+import { useToast } from './use-toast';
 
 export interface InvoiceExtraction {
   id: string;
   invoice_id: string;
   user_id: string;
-  extraction_status: "pending" | "processing" | "completed" | "failed";
+  extraction_status: 'pending' | 'processing' | 'completed' | 'failed';
   afe_number: string | null;
   afe_id: string | null;
   uwi: string | null;
@@ -20,7 +20,7 @@ export interface InvoiceExtraction {
   extracted_data: any;
   confidence_scores: any;
   validation_results: any;
-  budget_status: "within_budget" | "over_budget" | "afe_not_found" | "no_afe" | null;
+  budget_status: 'within_budget' | 'over_budget' | 'afe_not_found' | 'no_afe' | null;
   budget_remaining: number | null;
   validation_errors: string[] | null;
   validation_warnings: string[] | null;
@@ -35,73 +35,67 @@ export const useInvoiceExtraction = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const extractInvoiceData = useCallback(
-    async (invoiceId: string, fileContent: string) => {
-      if (!user) {
-        throw new Error("User not authenticated");
+  const extractInvoiceData = useCallback(async (invoiceId: string, fileContent: string) => {
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    setExtracting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('invoice-extract', {
+        body: {
+          invoice_id: invoiceId,
+          file_content: fileContent
+        }
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || 'Extraction failed');
       }
 
-      setExtracting(true);
-      try {
-        const { data, error } = await supabase.functions.invoke("invoice-extract", {
-          body: {
-            invoice_id: invoiceId,
-            file_content: fileContent,
-          },
-        });
+      toast({
+        title: "Extraction Complete",
+        description: "Invoice data extracted and validated successfully",
+      });
 
-        if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error('Error extracting invoice:', error);
+      toast({
+        title: "Extraction Failed",
+        description: error.message || "Failed to extract invoice data",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setExtracting(false);
+    }
+  }, [user, toast]);
 
-        if (!data.success) {
-          throw new Error(data.error || "Extraction failed");
-        }
+  const getExtractionByInvoiceId = useCallback(async (invoiceId: string): Promise<InvoiceExtraction | null> => {
+    if (!user) return null;
 
-        toast({
-          title: "Extraction Complete",
-          description: "Invoice data extracted and validated successfully",
-        });
+    try {
+      const { data, error } = await supabase
+        .from('invoice_extractions')
+        .select('*')
+        .eq('invoice_id', invoiceId)
+        .eq('user_id', user.id)
+        .single();
 
-        return data;
-      } catch (error: any) {
-        console.error("Error extracting invoice:", error);
-        toast({
-          title: "Extraction Failed",
-          description: error.message || "Failed to extract invoice data",
-          variant: "destructive",
-        });
+      if (error) {
+        if (error.code === 'PGRST116') return null; // No rows found
         throw error;
-      } finally {
-        setExtracting(false);
       }
-    },
-    [user, toast]
-  );
 
-  const getExtractionByInvoiceId = useCallback(
-    async (invoiceId: string): Promise<InvoiceExtraction | null> => {
-      if (!user) return null;
-
-      try {
-        const { data, error } = await supabase
-          .from("invoice_extractions")
-          .select("*")
-          .eq("invoice_id", invoiceId)
-          .eq("user_id", user.id)
-          .single();
-
-        if (error) {
-          if (error.code === "PGRST116") return null; // No rows found
-          throw error;
-        }
-
-        return data as InvoiceExtraction;
-      } catch (error) {
-        console.error("Error fetching extraction:", error);
-        return null;
-      }
-    },
-    [user]
-  );
+      return data as InvoiceExtraction;
+    } catch (error) {
+      console.error('Error fetching extraction:', error);
+      return null;
+    }
+  }, [user]);
 
   return {
     extracting,

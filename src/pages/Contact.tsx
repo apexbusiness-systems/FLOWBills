@@ -1,15 +1,15 @@
-import { Mail, MessageSquare, Phone, Clock, CheckCircle2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Footer } from "@/components/ui/footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
-import { toast } from "sonner";
-import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
-import { SupportChat } from "@/components/support/SupportChat";
+import { Mail, MessageSquare, Phone, Clock, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Footer } from '@/components/ui/footer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { SupportChat } from '@/components/support/SupportChat';
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
@@ -18,7 +18,7 @@ export default function Contact() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    toast.success("Thank you! We'll be in touch soon.");
+    toast.success('Thank you! We\'ll be in touch soon.');
   };
 
   return (
@@ -27,8 +27,7 @@ export default function Contact() {
         <BreadcrumbNav className="mb-4" />
         <h1 className="text-4xl font-bold mb-4">Contact</h1>
         <p className="text-xl text-muted-foreground mb-12 max-w-3xl">
-          Get instant support through your preferred channel. CASL-compliant: we only contact you
-          with consent.
+          Get instant support through your preferred channel. CASL-compliant: we only contact you with consent.
         </p>
 
         <Card className="mb-12">
@@ -92,7 +91,11 @@ export default function Contact() {
                   </ul>
                 </div>
 
-                <Button onClick={() => setIsChatMinimized(false)} className="w-full" size="lg">
+                <Button 
+                  onClick={() => setIsChatMinimized(false)} 
+                  className="w-full"
+                  size="lg"
+                >
                   Start Chat Now
                 </Button>
               </TabsContent>
@@ -108,7 +111,8 @@ export default function Contact() {
                   </p>
                   <div className="flex items-center justify-center gap-4 text-sm">
                     <Badge variant="secondary" className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />1 Business Day Response
+                      <Clock className="h-3 w-3" />
+                      1 Business Day Response
                     </Badge>
                   </div>
                 </div>
@@ -118,8 +122,8 @@ export default function Contact() {
                     <CardContent className="pt-6 text-center">
                       <Mail className="h-8 w-8 text-primary mb-3 mx-auto" />
                       <h4 className="font-semibold mb-2">General Inquiries</h4>
-                      <a
-                        href="mailto:hello@flowbills.ca"
+                      <a 
+                        href="mailto:hello@flowbills.ca" 
                         className="text-sm text-primary hover:underline"
                       >
                         hello@flowbills.ca
@@ -131,8 +135,8 @@ export default function Contact() {
                     <CardContent className="pt-6 text-center">
                       <MessageSquare className="h-8 w-8 text-primary mb-3 mx-auto" />
                       <h4 className="font-semibold mb-2">Technical Support</h4>
-                      <a
-                        href="mailto:support@flowbills.ca"
+                      <a 
+                        href="mailto:support@flowbills.ca" 
                         className="text-sm text-primary hover:underline"
                       >
                         support@flowbills.ca
@@ -144,8 +148,8 @@ export default function Contact() {
                     <CardContent className="pt-6 text-center">
                       <Phone className="h-8 w-8 text-primary mb-3 mx-auto" />
                       <h4 className="font-semibold mb-2">Sales Team</h4>
-                      <a
-                        href="mailto:sales@flowbills.ca"
+                      <a 
+                        href="mailto:sales@flowbills.ca" 
                         className="text-sm text-primary hover:underline"
                       >
                         sales@flowbills.ca
@@ -158,8 +162,8 @@ export default function Contact() {
                   <p className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                     <span>
-                      <strong>CASL Compliant:</strong> We only send commercial electronic messages
-                      with your explicit consent. You can unsubscribe at any time.
+                      <strong>CASL Compliant:</strong> We only send commercial electronic messages with your explicit consent. 
+                      You can unsubscribe at any time.
                     </span>
                   </p>
                 </div>
@@ -185,8 +189,8 @@ export default function Contact() {
                 <div className="bg-muted/50 rounded-lg p-6 text-center space-y-4">
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">Call us toll-free</p>
-                    <a
-                      href="tel:1-800-FLOWBILL"
+                    <a 
+                      href="tel:1-800-FLOWBILL" 
                       className="text-3xl font-bold text-primary hover:underline"
                     >
                       1-800-FLOWBILL
@@ -228,34 +232,28 @@ export default function Contact() {
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold mb-4">Send us a message</h2>
               <p className="text-sm text-muted-foreground mb-6">
-                By submitting this form, you consent to receive commercial electronic messages from
-                FlowBills.ca. You can unsubscribe at any time.
+                By submitting this form, you consent to receive commercial electronic messages from FlowBills.ca. 
+                You can unsubscribe at any time.
               </p>
-
+              
               {!submitted ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Your Email</label>
                     <Input type="email" required placeholder="you@company.com" />
                   </div>
-
+                  
                   <div>
                     <label className="text-sm font-medium mb-2 block">Subject</label>
                     <Input required placeholder="How can we help?" />
                   </div>
-
+                  
                   <div>
                     <label className="text-sm font-medium mb-2 block">Message</label>
-                    <Textarea
-                      required
-                      placeholder="Tell us about your AP processing needs..."
-                      rows={6}
-                    />
+                    <Textarea required placeholder="Tell us about your AP processing needs..." rows={6} />
                   </div>
-
-                  <Button type="submit" className="w-full">
-                    Send Message
-                  </Button>
+                  
+                  <Button type="submit" className="w-full">Send Message</Button>
                 </form>
               ) : (
                 <div className="text-center py-12">
@@ -263,9 +261,7 @@ export default function Contact() {
                     <Mail className="h-8 w-8 text-green-600 dark:text-green-400" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Message Sent!</h3>
-                  <p className="text-muted-foreground">
-                    We'll get back to you within 1 business day.
-                  </p>
+                  <p className="text-muted-foreground">We'll get back to you within 1 business day.</p>
                 </div>
               )}
             </CardContent>
@@ -273,9 +269,9 @@ export default function Contact() {
         </section>
       </main>
       <Footer />
-      <SupportChat
-        isMinimized={isChatMinimized}
-        onMinimize={() => setIsChatMinimized(!isChatMinimized)}
+      <SupportChat 
+        isMinimized={isChatMinimized} 
+        onMinimize={() => setIsChatMinimized(!isChatMinimized)} 
       />
     </div>
   );

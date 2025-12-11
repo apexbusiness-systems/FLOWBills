@@ -1,5 +1,5 @@
 // P13 — DSAR Export Endpoint (PIPEDA Art. 8 — Individual Access)
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,21 +29,20 @@ Deno.serve(async (req) => {
 
     // Verify requesting user
     const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', ''),
+      authHeader.replace('Bearer ', '')
     );
-
+    
     if (authError || !user) {
       throw new Error('Unauthorized');
     }
 
-    const { user_id, format = 'json', include_audit_logs = false }: DSARExportRequest = await req
-      .json();
+    const { user_id, format = 'json', include_audit_logs = false }: DSARExportRequest = await req.json();
     const targetUserId = user_id || user.id;
 
     // Check if user can export this data (own data or admin)
     const { data: userRole } = await supabase.rpc('get_user_role', { user_uuid: user.id });
     const isAdmin = userRole === 'admin';
-
+    
     if (targetUserId !== user.id && !isAdmin) {
       throw new Error('Unauthorized to export other user data');
     }
@@ -57,8 +56,7 @@ Deno.serve(async (req) => {
         requested_by: user.email,
         target_user_id: targetUserId,
         format,
-        pipeda_notice:
-          'This export contains all personal data associated with your account per PIPEDA Article 8.',
+        pipeda_notice: 'This export contains all personal data associated with your account per PIPEDA Article 8.',
       },
       user_profile: {},
       consent_logs: [],
@@ -77,12 +75,10 @@ Deno.serve(async (req) => {
     // Fetch consent logs (redact if admin exporting another user's data)
     const { data: consentLogs } = await supabase
       .from('consent_logs')
-      .select(
-        'id, consent_type, consent_given, consent_text, created_at, withdrawal_date, email, phone',
-      )
+      .select('id, consent_type, consent_given, consent_text, created_at, withdrawal_date, email, phone')
       .eq('user_id', targetUserId);
-
-    exportData.consent_logs = (consentLogs || []).map((log) => ({
+    
+    exportData.consent_logs = (consentLogs || []).map(log => ({
       ...log,
       email: isAdmin && targetUserId !== user.id ? '***REDACTED***' : log.email,
       phone: isAdmin && targetUserId !== user.id ? '***REDACTED***' : log.phone,
@@ -139,14 +135,13 @@ Deno.serve(async (req) => {
           log.phone || '',
         ]),
       ];
-      const csvContent = csvRows.map((row) => row.join(',')).join('\n');
+      const csvContent = csvRows.map(row => row.join(',')).join('\n');
 
       return new Response(csvContent, {
         headers: {
           ...corsHeaders,
           'Content-Type': 'text/csv',
-          'Content-Disposition':
-            `attachment; filename="dsar-export-${targetUserId}-${Date.now()}.csv"`,
+          'Content-Disposition': `attachment; filename="dsar-export-${targetUserId}-${Date.now()}.csv"`,
         },
       });
     }
@@ -157,16 +152,15 @@ Deno.serve(async (req) => {
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json',
-          'Content-Disposition':
-            `attachment; filename="dsar-export-${targetUserId}-${Date.now()}.json"`,
+          'Content-Disposition': `attachment; filename="dsar-export-${targetUserId}-${Date.now()}.json"`,
         },
-      },
+      }
     );
   } catch (error) {
     console.error('DSAR export error:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 },
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
 });

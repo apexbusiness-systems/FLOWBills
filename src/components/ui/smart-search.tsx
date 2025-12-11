@@ -19,11 +19,11 @@ interface SmartSearchProps {
   className?: string;
 }
 
-const SmartSearch = ({
-  placeholder = "Search...",
+const SmartSearch = ({ 
+  placeholder = "Search...", 
   onSearch,
   onSelect,
-  className,
+  className 
 }: SmartSearchProps) => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +31,7 @@ const SmartSearch = ({
   const [recentSearches, setRecentSearches] = useState<string[]>([
     "Invoice INV-2024-0847",
     "Husky Energy",
-    "PO matching errors",
+    "PO matching errors"
   ]);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -42,38 +42,35 @@ const SmartSearch = ({
       title: "Invoice INV-2024-0847",
       type: "Invoice",
       description: "Husky Energy - $45,250.00 - PO mismatch",
-      url: "/invoices/INV-2024-0847",
+      url: "/invoices/INV-2024-0847"
     },
     {
-      id: "2",
+      id: "2", 
       title: "Validation Rule: PO Required",
       type: "Rule",
       description: "Error-level validation for PO number field",
-      url: "/validation",
+      url: "/validation"
     },
     {
       id: "3",
       title: "Suncor Energy",
       type: "Vendor",
       description: "Active vendor - 23 pending invoices",
-      url: "/vendors/suncor",
-    },
+      url: "/vendors/suncor"
+    }
   ];
 
   useEffect(() => {
     if (query.length > 2) {
       // Simulate API search delay
       const timer = setTimeout(() => {
-        setResults(
-          mockResults.filter(
-            (r) =>
-              r.title.toLowerCase().includes(query.toLowerCase()) ||
-              r.description.toLowerCase().includes(query.toLowerCase())
-          )
-        );
+        setResults(mockResults.filter(r => 
+          r.title.toLowerCase().includes(query.toLowerCase()) ||
+          r.description.toLowerCase().includes(query.toLowerCase())
+        ));
         setIsOpen(true);
       }, 300);
-
+      
       return () => clearTimeout(timer);
     } else {
       setResults([]);
@@ -85,9 +82,9 @@ const SmartSearch = ({
     if (searchQuery.trim()) {
       onSearch?.(searchQuery);
       // Add to recent searches
-      setRecentSearches((prev) => [
+      setRecentSearches(prev => [
         searchQuery,
-        ...prev.filter((s) => s !== searchQuery).slice(0, 4),
+        ...prev.filter(s => s !== searchQuery).slice(0, 4)
       ]);
       setIsOpen(false);
     }
@@ -158,7 +155,9 @@ const SmartSearch = ({
                       <div className="font-medium text-sm text-foreground group-hover:text-accent-foreground">
                         {result.title}
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1">{result.description}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {result.description}
+                      </div>
                     </div>
                     <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                       {result.type}

@@ -1,6 +1,6 @@
 // P6: Frontend Performance Optimizations
-import { QueryClient } from "@tanstack/react-query";
-import { RequestDeduper } from "./observability";
+import { QueryClient } from '@tanstack/react-query';
+import { RequestDeduper } from './observability';
 
 /**
  * P6: Optimized TanStack Query configuration
@@ -73,35 +73,32 @@ export async function fetchInvoicesPaginated(
   params: KeysetPaginationParams = {}
 ): Promise<PaginatedResponse<any>> {
   const { limit = 50, afterId, afterCreatedAt } = params;
-
-  return deduper.once(`invoices-${afterId || "first"}-${limit}`, async () => {
-    const { supabase } = await import("@/integrations/supabase/client");
-
+  
+  return deduper.once(`invoices-${afterId || 'first'}-${limit}`, async () => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    
     let query = supabase
-      .from("invoices")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .order("id", { ascending: false })
+      .from('invoices')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .limit(limit + 1); // Fetch one extra to check hasMore
-
+    
     // Apply keyset cursor if provided
     if (afterCreatedAt && afterId) {
-      query = query.or(
-        `created_at.lt.${afterCreatedAt},and(created_at.eq.${afterCreatedAt},id.lt.${afterId})`
-      );
+      query = query.or(`created_at.lt.${afterCreatedAt},and(created_at.eq.${afterCreatedAt},id.lt.${afterId})`);
     }
-
+    
     const { data, error } = await query;
-
+    
     if (error) throw error;
-
+    
     const hasMore = data.length > limit;
     const items = hasMore ? data.slice(0, -1) : data;
-    const nextCursor =
-      hasMore && items.length > 0
-        ? { id: items[items.length - 1].id, created_at: items[items.length - 1].created_at }
-        : undefined;
-
+    const nextCursor = hasMore && items.length > 0
+      ? { id: items[items.length - 1].id, created_at: items[items.length - 1].created_at }
+      : undefined;
+    
     return {
       data: items,
       nextCursor,
@@ -113,6 +110,9 @@ export async function fetchInvoicesPaginated(
 /**
  * P4: Idempotent mutation wrapper for critical operations
  */
-export async function idempotentMutation<T>(key: string, fn: () => Promise<T>): Promise<T> {
+export async function idempotentMutation<T>(
+  key: string,
+  fn: () => Promise<T>
+): Promise<T> {
   return deduper.once(`mutation-${key}`, fn);
 }

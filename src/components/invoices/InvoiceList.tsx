@@ -1,27 +1,27 @@
-import { useState, useMemo, useCallback, memo } from "react";
-import * as React from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { BulkActionsToolbar } from "./BulkActionsToolbar";
-import { useBulkActions } from "@/hooks/useBulkActions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo, useCallback, memo } from 'react';
+import * as React from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { BulkActionsToolbar } from './BulkActionsToolbar';
+import { useBulkActions } from '@/hooks/useBulkActions';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,23 +31,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Search,
-  Edit,
-  Trash2,
-  Plus,
+} from '@/components/ui/alert-dialog';
+import { 
+  Search, 
+  Edit, 
+  Trash2, 
+  Plus, 
   FileText,
   DollarSign,
   Calendar,
   Filter,
-  Paperclip,
-} from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useFileUpload } from "@/hooks/useFileUpload";
-import { useToast } from "@/hooks/use-toast";
-import { Invoice } from "@/hooks/useInvoices";
-import { format } from "date-fns";
+  Paperclip
+} from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { useToast } from '@/hooks/use-toast';
+import { Invoice } from '@/hooks/useInvoices';
+import { format } from 'date-fns';
 
 interface InvoiceListProps {
   invoices: Invoice[];
@@ -62,23 +62,23 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
   const { hasRole } = useAuth();
   const { getDocuments } = useFileUpload();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [documentCounts, setDocumentCounts] = useState<Record<string, number>>({});
   const [selectedInvoices, setSelectedInvoices] = useState<Set<string>>(new Set());
   const { processing, bulkApprove, bulkReject, bulkDelete, bulkExport } = useBulkActions();
 
-  const canEdit = hasRole("operator") || hasRole("admin");
-  const canDelete = hasRole("operator") || hasRole("admin");
-  const canCreate = hasRole("operator") || hasRole("admin");
+  const canEdit = hasRole('operator') || hasRole('admin');
+  const canDelete = hasRole('operator') || hasRole('admin');
+  const canCreate = hasRole('operator') || hasRole('admin');
 
   // Load document counts for invoices (optimized with batch loading)
   React.useEffect(() => {
     const loadDocumentCounts = async () => {
       const counts: Record<string, number> = {};
-
+      
       // Batch load in parallel instead of sequential O(n) - reduces to O(1) time
       const results = await Promise.allSettled(
         invoices.map(async (invoice) => {
@@ -90,13 +90,13 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
           }
         })
       );
-
+      
       results.forEach((result) => {
-        if (result.status === "fulfilled") {
+        if (result.status === 'fulfilled') {
           counts[result.value.id] = result.value.count;
         }
       });
-
+      
       setDocumentCounts(counts);
     };
 
@@ -106,30 +106,25 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
   }, [invoices, getDocuments]);
 
   // Memoized badge variant calculation - O(1) lookup
-  const getStatusBadgeVariant = useCallback((status: Invoice["status"]) => {
+  const getStatusBadgeVariant = useCallback((status: Invoice['status']) => {
     switch (status) {
-      case "pending":
-        return "pending";
-      case "approved":
-        return "approved";
-      case "rejected":
-        return "rejected";
-      case "processing":
-        return "default";
-      default:
-        return "outline";
+      case 'pending': return 'pending';
+      case 'approved': return 'approved';
+      case 'rejected': return 'rejected';
+      case 'processing': return 'default';
+      default: return 'outline';
     }
   }, []);
 
   // Memoized filtered invoices - prevents recalculation on every render
   const filteredInvoices = useMemo(() => {
-    return invoices.filter((invoice) => {
-      const matchesSearch =
+    return invoices.filter(invoice => {
+      const matchesSearch = 
         invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
         invoice.vendor_name.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
-
+      
+      const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
+      
       return matchesSearch && matchesStatus;
     });
   }, [invoices, searchTerm, statusFilter]);
@@ -149,7 +144,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
   }, [invoiceToDelete, onDelete]);
 
   const toggleInvoiceSelection = useCallback((invoiceId: string) => {
-    setSelectedInvoices((prev) => {
+    setSelectedInvoices(prev => {
       const newSet = new Set(prev);
       if (newSet.has(invoiceId)) {
         newSet.delete(invoiceId);
@@ -164,7 +159,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     if (selectedInvoices.size === filteredInvoices.length) {
       setSelectedInvoices(new Set());
     } else {
-      setSelectedInvoices(new Set(filteredInvoices.map((inv) => inv.id)));
+      setSelectedInvoices(new Set(filteredInvoices.map(inv => inv.id)));
     }
   }, [selectedInvoices.size, filteredInvoices]);
 
@@ -190,26 +185,26 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
   }, [selectedInvoices, bulkDelete]);
 
   const handleBulkExport = useCallback(() => {
-    const selected = filteredInvoices.filter((inv) => selectedInvoices.has(inv.id));
+    const selected = filteredInvoices.filter(inv => selectedInvoices.has(inv.id));
     bulkExport(selected);
   }, [filteredInvoices, selectedInvoices, bulkExport]);
 
   // Memoized formatters - prevent recreation on every render
   const formatCurrency = useCallback((amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
     }).format(amount);
   }, []);
 
   const formatDate = useCallback((dateString: string | null) => {
-    if (!dateString) return "N/A";
-    return format(new Date(dateString), "MMM dd, yyyy");
+    if (!dateString) return 'N/A';
+    return format(new Date(dateString), 'MMM dd, yyyy');
   }, []);
 
   // Memoized total calculation
-  const totalAmount = useMemo(
-    () => filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0),
+  const totalAmount = useMemo(() => 
+    filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0),
     [filteredInvoices]
   );
 
@@ -234,9 +229,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
         onReject={handleBulkReject}
         onDelete={handleBulkDelete}
         onExport={handleBulkExport}
-        onSend={() =>
-          toast({ title: "Feature coming soon", description: "Vendor notification system" })
-        }
+        onSend={() => toast({ title: "Feature coming soon", description: "Vendor notification system" })}
         onClearSelection={() => setSelectedInvoices(new Set())}
         disabled={processing}
       />
@@ -248,7 +241,9 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
                 <FileText className="h-5 w-5" />
                 Invoice Management
               </CardTitle>
-              <CardDescription>Manage and track invoice records</CardDescription>
+              <CardDescription>
+                Manage and track invoice records
+              </CardDescription>
             </div>
             {canCreate && (
               <Button onClick={onCreate} className="flex items-center gap-2">
@@ -309,7 +304,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
                 Pending Count
               </div>
               <div className="text-2xl font-bold">
-                {filteredInvoices.filter((inv) => inv.status === "processing").length}
+                {filteredInvoices.filter(inv => inv.status === 'processing').length}
               </div>
             </div>
           </div>
@@ -320,9 +315,10 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">No invoices found</h3>
               <p className="text-muted-foreground mb-4">
-                {invoices.length === 0
+                {invoices.length === 0 
                   ? "Get started by creating your first invoice"
-                  : "Try adjusting your search criteria"}
+                  : "Try adjusting your search criteria"
+                }
               </p>
               {canCreate && invoices.length === 0 && (
                 <Button onClick={onCreate}>
@@ -338,23 +334,18 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
                   <TableRow>
                     <TableHead className="w-12">
                       <Checkbox
-                        checked={
-                          selectedInvoices.size === filteredInvoices.length &&
-                          filteredInvoices.length > 0
-                        }
+                        checked={selectedInvoices.size === filteredInvoices.length && filteredInvoices.length > 0}
                         onCheckedChange={toggleSelectAll}
                       />
                     </TableHead>
                     <TableHead>Invoice #</TableHead>
-                    <TableHead>Vendor</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Files</TableHead>
-                    {(canEdit || canDelete) && (
-                      <TableHead className="text-right">Actions</TableHead>
-                    )}
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Due Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Files</TableHead>
+                    {(canEdit || canDelete) && <TableHead className="text-right">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -368,7 +359,9 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
                       </TableCell>
                       <TableCell>{invoice.invoice_number}</TableCell>
                       <TableCell>{invoice.vendor_name}</TableCell>
-                      <TableCell className="font-mono">{formatCurrency(invoice.amount)}</TableCell>
+                      <TableCell className="font-mono">
+                        {formatCurrency(invoice.amount)}
+                      </TableCell>
                       <TableCell>{formatDate(invoice.invoice_date)}</TableCell>
                       <TableCell>{formatDate(invoice.due_date)}</TableCell>
                       <TableCell>
@@ -390,7 +383,11 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             {canEdit && (
-                              <Button size="sm" variant="outline" onClick={() => onEdit(invoice)}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onEdit(invoice)}
+                              >
                                 <Edit className="h-3 w-3" />
                               </Button>
                             )}
@@ -421,13 +418,13 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete invoice "{invoiceToDelete?.invoice_number}"? This
-              action cannot be undone.
+              Are you sure you want to delete invoice "{invoiceToDelete?.invoice_number}"? 
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <AlertDialogAction 
               onClick={handleDeleteConfirm}
               className="bg-destructive hover:bg-destructive/90"
             >

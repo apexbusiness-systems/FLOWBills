@@ -3,8 +3,8 @@
 
 export const SYSTEM_CONFIG = {
   // Timezone
-  TIMEZONE: "America/Edmonton",
-
+  TIMEZONE: 'America/Edmonton',
+  
   // Performance Budgets
   PERFORMANCE: {
     API_P95_LATENCY_MS: 500,
@@ -14,7 +14,7 @@ export const SYSTEM_CONFIG = {
     LCP_MS: 2000,
     CLS: 0.1,
   },
-
+  
   // Retry Policy
   RETRY: {
     MAX_ATTEMPTS: 2,
@@ -22,26 +22,26 @@ export const SYSTEM_CONFIG = {
     MAX_DELAY_MS: 1000,
     JITTER_FACTOR: 0.2,
   },
-
+  
   // Rate Limiting
   RATE_LIMITS: {
     ANONYMOUS_PER_MIN: 10,
     AUTHENTICATED_PER_MIN: 100,
     BURST_MULTIPLIER: 2,
   },
-
+  
   // Database
   DATABASE: {
     STATEMENT_TIMEOUT_MS: 3000,
     IDLE_IN_TRANSACTION_TIMEOUT_MS: 5000,
     MAX_CONNECTIONS: 20,
   },
-
+  
   // Queue Limits
   QUEUE: {
     MAX_DEPTH: 10000,
   },
-
+  
   // Idempotency
   IDEMPOTENCY: {
     KEY_TTL_HOURS: 24,
@@ -51,7 +51,7 @@ export const SYSTEM_CONFIG = {
 
 // Security Headers - Enterprise Production Grade
 export const SECURITY_HEADERS = {
-  "Content-Security-Policy": [
+  'Content-Security-Policy': [
     "default-src 'self'",
     "script-src 'self' 'nonce-{NONCE}' https://www.googletagmanager.com",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
@@ -59,11 +59,11 @@ export const SECURITY_HEADERS = {
     "style-src 'self' 'nonce-{NONCE}'",
     "font-src 'self' data:",
     "frame-ancestors 'none'",
-  ].join("; "),
-  "X-Frame-Options": "DENY",
-  "X-Content-Type-Options": "nosniff",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+  ].join('; '),
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
 } as const;
 
 // Observability Labels

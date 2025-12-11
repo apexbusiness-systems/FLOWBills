@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, ReactElement } from "react";
+import { useCallback, useEffect, useRef, useState, ReactElement } from 'react';
 
 interface VirtualListProps<T> {
   items: T[];
@@ -20,7 +20,7 @@ export function VirtualList<T>({
   containerHeight,
   renderItem,
   overscan = 3,
-  className = "",
+  className = '',
 }: VirtualListProps<T>) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,7 +47,7 @@ export function VirtualList<T>({
       style={{ height: containerHeight }}
       onScroll={handleScroll}
     >
-      <div style={{ height: totalHeight, position: "relative" }}>
+      <div style={{ height: totalHeight, position: 'relative' }}>
         <div style={{ transform: `translateY(${offsetY}px)` }}>
           {visibleItems.map((item, index) => (
             <div key={startIndex + index} style={{ height: itemHeight }}>
@@ -78,7 +78,7 @@ export function AutoVirtualList<T>({
   renderItem,
   estimatedItemHeight = 50,
   overscan = 3,
-  className = "",
+  className = '',
 }: AutoVirtualListProps<T>) {
   const [scrollTop, setScrollTop] = useState(0);
   const [itemHeights, setItemHeights] = useState<number[]>([]);
@@ -113,7 +113,7 @@ export function AutoVirtualList<T>({
   // Calculate visible range
   let startIndex = 0;
   let accumulatedHeight = 0;
-
+  
   for (let i = 0; i < items.length; i++) {
     const height = getItemHeight(i);
     if (accumulatedHeight + height > scrollTop) {
@@ -125,7 +125,7 @@ export function AutoVirtualList<T>({
 
   let endIndex = startIndex;
   accumulatedHeight = getItemOffset(startIndex);
-
+  
   for (let i = startIndex; i < items.length; i++) {
     const height = getItemHeight(i);
     accumulatedHeight += height;
@@ -150,7 +150,7 @@ export function AutoVirtualList<T>({
       style={{ height: containerHeight }}
       onScroll={handleScroll}
     >
-      <div style={{ height: totalHeight, position: "relative" }}>
+      <div style={{ height: totalHeight, position: 'relative' }}>
         <div style={{ transform: `translateY(${offsetY}px)` }}>
           {visibleItems.map((item, index) => {
             const actualIndex = startIndex + index;

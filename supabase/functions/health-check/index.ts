@@ -1,5 +1,5 @@
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { corsHeaders } from '../_shared/cors.ts';
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { corsHeaders } from '../_shared/cors.ts'
 
 // App version and build info for uptime monitoring
 const APP_VERSION = '1.0.0';
@@ -19,40 +19,34 @@ Deno.serve(async (req) => {
   try {
     // Default path returns health info with version
     if (path === '/' || path === '') {
-      return new Response(
-        JSON.stringify({
-          status: 'healthy',
-          service: SERVICE_NAME,
-          version: APP_VERSION,
-          build: BUILD_TIMESTAMP,
-          timestamp: new Date().toISOString(),
-          uptime: Deno.osUptime?.() || 'unknown',
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
+      return new Response(JSON.stringify({ 
+        status: 'healthy',
+        service: SERVICE_NAME,
+        version: APP_VERSION,
+        build: BUILD_TIMESTAMP,
+        timestamp: new Date().toISOString(),
+        uptime: Deno.osUptime?.() || 'unknown'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (path === '/healthz') {
       // Simple health check (Kubernetes-style)
-      return new Response(
-        JSON.stringify({
-          status: 'ok',
-          version: APP_VERSION,
-          timestamp: new Date().toISOString(),
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
+      return new Response(JSON.stringify({ 
+        status: 'ok',
+        version: APP_VERSION,
+        timestamp: new Date().toISOString()
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (path === '/readyz') {
       // Readiness check - includes database connectivity
       const supabase = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       );
 
       // Test database connectivity
@@ -62,46 +56,40 @@ Deno.serve(async (req) => {
         .limit(1);
 
       if (error) {
-        return new Response(
-          JSON.stringify({
-            status: 'error',
-            version: APP_VERSION,
-            message: 'Database connection failed',
-            timestamp: new Date().toISOString(),
-          }),
-          {
-            status: 503,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          },
-        );
+        return new Response(JSON.stringify({ 
+          status: 'error',
+          version: APP_VERSION,
+          message: 'Database connection failed',
+          timestamp: new Date().toISOString()
+        }), {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
 
-      return new Response(
-        JSON.stringify({
-          status: 'ready',
-          version: APP_VERSION,
-          build: BUILD_TIMESTAMP,
-          database: 'connected',
-          timestamp: new Date().toISOString(),
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
+      return new Response(JSON.stringify({ 
+        status: 'ready',
+        version: APP_VERSION,
+        build: BUILD_TIMESTAMP,
+        database: 'connected',
+        timestamp: new Date().toISOString()
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (path === '/metrics') {
       // Prometheus metrics endpoint
       const supabase = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       );
 
       // Get metrics from database
       const [invoicesResult, exceptionsResult, queueResult] = await Promise.all([
         supabase.from('invoices').select('status').eq('status', 'approved'),
         supabase.from('exceptions').select('exception_type').eq('exception_type', 'duplicate'),
-        supabase.from('review_queue').select('id').is('resolved_at', null),
+        supabase.from('review_queue').select('id').is('resolved_at', null)
       ]);
 
       const autoApprovedCount = invoicesResult.data?.length || 0;
@@ -136,19 +124,17 @@ http_request_duration_seconds_count 135
     }
 
     return new Response('Not Found', { status: 404 });
+
   } catch (error) {
     console.error('Health check error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(
-      JSON.stringify({
-        status: 'error',
-        message: errorMessage,
-        timestamp: new Date().toISOString(),
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    );
+    return new Response(JSON.stringify({ 
+      status: 'error',
+      message: errorMessage,
+      timestamp: new Date().toISOString()
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

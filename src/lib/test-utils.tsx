@@ -1,13 +1,13 @@
-import React, { ReactElement } from "react";
-import { render, RenderOptions } from "@testing-library/react";
-import { screen, waitFor } from "@testing-library/dom";
-import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router-dom";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/hooks/useAuth";
-import { vi } from "vitest";
-import "@testing-library/jest-dom";
+import React, { ReactElement } from 'react';
+import { render, RenderOptions } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { AuthProvider } from '@/hooks/useAuth';
+import { vi } from 'vitest';
+import '@testing-library/jest-dom';
 
 // Create a test query client
 const createTestQueryClient = () =>
@@ -26,12 +26,14 @@ const createTestQueryClient = () =>
 // Test providers wrapper
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   const testQueryClient = createTestQueryClient();
-
+  
   return (
     <QueryClientProvider client={testQueryClient}>
       <BrowserRouter>
         <TooltipProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </TooltipProvider>
       </BrowserRouter>
     </QueryClientProvider>
@@ -39,21 +41,23 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Custom render function
-const customRender = (ui: ReactElement, options?: Omit<RenderOptions, "wrapper">) =>
-  render(ui, { wrapper: AllTheProviders, ...options });
+const customRender = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>,
+) => render(ui, { wrapper: AllTheProviders, ...options });
 
 // Mock user data for testing
 export const mockUser = {
-  id: "test-user-id",
-  email: "test@example.com",
-  role: "admin" as const,
+  id: 'test-user-id',
+  email: 'test@example.com',
+  role: 'admin' as const,
   user_metadata: {
-    full_name: "Test User",
+    full_name: 'Test User',
   },
   app_metadata: {},
-  aud: "authenticated",
-  created_at: "2023-01-01T00:00:00.000Z",
-  updated_at: "2023-01-01T00:00:00.000Z",
+  aud: 'authenticated',
+  created_at: '2023-01-01T00:00:00.000Z',
+  updated_at: '2023-01-01T00:00:00.000Z',
 };
 
 // Mock authenticated user context
@@ -62,7 +66,7 @@ export const mockAuthContext = {
   loading: false,
   signOut: vi.fn(),
   session: null,
-  userRole: "admin",
+  userRole: 'admin',
   hasRole: vi.fn(() => true),
 };
 
@@ -103,23 +107,23 @@ export const mockSupabase = {
 
 // Mock data generators
 export const generateMockInvoice = (overrides: any = {}) => ({
-  id: "mock-invoice-1",
-  vendor_name: "Test Vendor",
-  invoice_number: "INV-001",
-  invoice_date: "2023-01-01",
+  id: 'mock-invoice-1',
+  vendor_name: 'Test Vendor',
+  invoice_number: 'INV-001',
+  invoice_date: '2023-01-01',
   amount: 1000,
-  status: "pending",
-  user_id: "test-user-id",
-  created_at: "2023-01-01T00:00:00.000Z",
-  updated_at: "2023-01-01T00:00:00.000Z",
+  status: 'pending',
+  user_id: 'test-user-id',
+  created_at: '2023-01-01T00:00:00.000Z',
+  updated_at: '2023-01-01T00:00:00.000Z',
   ...overrides,
 });
 
 // Test environment setup
 export const setupTestEnvironment = () => {
-  Object.defineProperty(window, "matchMedia", {
+  Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: vi.fn().mockImplementation((query) => ({
+    value: vi.fn().mockImplementation(query => ({
       matches: false,
       media: query,
       onchange: null,
@@ -144,14 +148,14 @@ export const setupTestEnvironment = () => {
   })) as any;
 
   global.fetch = vi.fn();
-
+  
   const localStorageMock = {
     getItem: vi.fn(),
     setItem: vi.fn(),
     removeItem: vi.fn(),
     clear: vi.fn(),
   };
-  Object.defineProperty(window, "localStorage", {
+  Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
   });
 };

@@ -1,4 +1,5 @@
-import { PerformanceDashboard } from "@/components/performance/PerformanceDashboard";
+import { PerformanceDashboard } from '@/components/performance/PerformanceDashboard';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 const PerformanceMonitoring = () => {
   return (

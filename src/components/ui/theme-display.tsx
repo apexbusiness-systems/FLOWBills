@@ -4,42 +4,12 @@ import { Button } from "@/components/ui/button";
 const ThemeDisplay = () => {
   const colorSwatches = [
     { name: "Primary", bg: "bg-primary", text: "text-primary-foreground", value: "45° 95% 35%" },
-    {
-      name: "Primary Light",
-      bg: "bg-primary-light",
-      text: "text-primary-foreground",
-      value: "48° 95% 45%",
-    },
-    {
-      name: "Primary Dark",
-      bg: "bg-primary-dark",
-      text: "text-primary-foreground",
-      value: "42° 85% 25%",
-    },
-    {
-      name: "Secondary",
-      bg: "bg-secondary",
-      text: "text-secondary-foreground",
-      value: "25° 95% 48%",
-    },
-    {
-      name: "Status Pending",
-      bg: "bg-status-pending",
-      text: "text-status-pending-foreground",
-      value: "35° 95% 55%",
-    },
-    {
-      name: "Status Approved",
-      bg: "bg-status-approved",
-      text: "text-status-approved-foreground",
-      value: "142° 70% 35%",
-    },
-    {
-      name: "Status Processing",
-      bg: "bg-status-processing",
-      text: "text-status-processing-foreground",
-      value: "45° 85% 45%",
-    },
+    { name: "Primary Light", bg: "bg-primary-light", text: "text-primary-foreground", value: "48° 95% 45%" },
+    { name: "Primary Dark", bg: "bg-primary-dark", text: "text-primary-foreground", value: "42° 85% 25%" },
+    { name: "Secondary", bg: "bg-secondary", text: "text-secondary-foreground", value: "25° 95% 48%" },
+    { name: "Status Pending", bg: "bg-status-pending", text: "text-status-pending-foreground", value: "35° 95% 55%" },
+    { name: "Status Approved", bg: "bg-status-approved", text: "text-status-approved-foreground", value: "142° 70% 35%" },
+    { name: "Status Processing", bg: "bg-status-processing", text: "text-status-processing-foreground", value: "45° 85% 45%" },
   ];
 
   return (
@@ -56,7 +26,7 @@ const ThemeDisplay = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {colorSwatches.map((swatch) => (
-          <div
+          <div 
             key={swatch.name}
             className={`${swatch.bg} ${swatch.text} p-4 rounded-lg shadow-sm border border-border/20`}
           >
@@ -71,18 +41,10 @@ const ThemeDisplay = () => {
 
       <div className="mt-4 pt-4 border-t border-border">
         <div className="flex flex-wrap gap-2">
-          <Button variant="default" size="sm">
-            Primary Button
-          </Button>
-          <Button variant="secondary" size="sm">
-            Secondary Button
-          </Button>
-          <Button variant="outline" size="sm">
-            Outline Button
-          </Button>
-          <Button variant="ghost" size="sm">
-            Ghost Button
-          </Button>
+          <Button variant="default" size="sm">Primary Button</Button>
+          <Button variant="secondary" size="sm">Secondary Button</Button>
+          <Button variant="outline" size="sm">Outline Button</Button>
+          <Button variant="ghost" size="sm">Ghost Button</Button>
         </div>
       </div>
     </div>

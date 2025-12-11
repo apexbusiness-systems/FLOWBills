@@ -1,17 +1,20 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Upload, FileText, FolderOpen } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Upload, FileText, FolderOpen } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface UploadWidgetProps {
-  size?: "small" | "medium" | "large";
+  size?: 'small' | 'medium' | 'large';
   onUploadClick?: () => void;
 }
 
-export const UploadWidget = ({ size = "medium", onUploadClick }: UploadWidgetProps) => {
+export const UploadWidget = ({ size = 'medium', onUploadClick }: UploadWidgetProps) => {
   return (
-    <Card
-      className={cn("card-enterprise", size === "large" && "col-span-full md:col-span-2")}
+    <Card 
+      className={cn(
+        'card-enterprise',
+        size === 'large' && 'col-span-full md:col-span-2'
+      )}
       data-tour="upload-widget"
     >
       <CardHeader>

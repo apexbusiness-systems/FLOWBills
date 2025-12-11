@@ -3,7 +3,7 @@
  * Handles localStorage, sessionStorage, IndexedDB, and cache management
  */
 
-import { queryOptimizer } from "./query-optimizer";
+import { queryOptimizer } from './query-optimizer';
 
 // ============= Form Draft Persistence =============
 
@@ -22,11 +22,11 @@ export const FormPersistence = {
       timestamp: Date.now(),
       userId,
     };
-
+    
     try {
       localStorage.setItem(`form_draft_${formId}`, JSON.stringify(draft));
     } catch (error) {
-      console.warn("Failed to save form draft:", error);
+      console.warn('Failed to save form draft:', error);
     }
   },
 
@@ -36,7 +36,7 @@ export const FormPersistence = {
       if (!stored) return null;
 
       const draft: FormDraft<T> = JSON.parse(stored);
-
+      
       // Verify userId matches if provided
       if (userId && draft.userId && draft.userId !== userId) {
         this.clearDraft(formId);
@@ -52,7 +52,7 @@ export const FormPersistence = {
 
       return draft.data;
     } catch (error) {
-      console.warn("Failed to load form draft:", error);
+      console.warn('Failed to load form draft:', error);
       return null;
     }
   },
@@ -61,17 +61,17 @@ export const FormPersistence = {
     try {
       localStorage.removeItem(`form_draft_${formId}`);
     } catch (error) {
-      console.warn("Failed to clear form draft:", error);
+      console.warn('Failed to clear form draft:', error);
     }
   },
 
   getAllDrafts(): FormDraft[] {
     const drafts: FormDraft[] = [];
-
+    
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key?.startsWith("form_draft_")) {
+        if (key?.startsWith('form_draft_')) {
           const stored = localStorage.getItem(key);
           if (stored) {
             drafts.push(JSON.parse(stored));
@@ -79,7 +79,7 @@ export const FormPersistence = {
         }
       }
     } catch (error) {
-      console.warn("Failed to get all drafts:", error);
+      console.warn('Failed to get all drafts:', error);
     }
 
     return drafts;
@@ -93,7 +93,7 @@ export const FormPersistence = {
     try {
       for (let i = localStorage.length - 1; i >= 0; i--) {
         const key = localStorage.key(i);
-        if (key?.startsWith("form_draft_")) {
+        if (key?.startsWith('form_draft_')) {
           const stored = localStorage.getItem(key);
           if (stored) {
             const draft: FormDraft = JSON.parse(stored);
@@ -105,7 +105,7 @@ export const FormPersistence = {
         }
       }
     } catch (error) {
-      console.warn("Failed to clear expired drafts:", error);
+      console.warn('Failed to clear expired drafts:', error);
     }
 
     return cleared;
@@ -123,25 +123,25 @@ export interface SessionState {
 }
 
 export const SessionRecovery = {
-  saveState(state: Omit<SessionState, "timestamp">): void {
+  saveState(state: Omit<SessionState, 'timestamp'>): void {
     try {
       const fullState: SessionState = {
         ...state,
         timestamp: Date.now(),
       };
-      sessionStorage.setItem("app_session_state", JSON.stringify(fullState));
+      sessionStorage.setItem('app_session_state', JSON.stringify(fullState));
     } catch (error) {
-      console.warn("Failed to save session state:", error);
+      console.warn('Failed to save session state:', error);
     }
   },
 
   loadState(): SessionState | null {
     try {
-      const stored = sessionStorage.getItem("app_session_state");
+      const stored = sessionStorage.getItem('app_session_state');
       if (!stored) return null;
 
       const state: SessionState = JSON.parse(stored);
-
+      
       // Auto-expire after 1 hour
       if (Date.now() - state.timestamp > 60 * 60 * 1000) {
         this.clearState();
@@ -150,16 +150,16 @@ export const SessionRecovery = {
 
       return state;
     } catch (error) {
-      console.warn("Failed to load session state:", error);
+      console.warn('Failed to load session state:', error);
       return null;
     }
   },
 
   clearState(): void {
     try {
-      sessionStorage.removeItem("app_session_state");
+      sessionStorage.removeItem('app_session_state');
     } catch (error) {
-      console.warn("Failed to clear session state:", error);
+      console.warn('Failed to clear session state:', error);
     }
   },
 };
@@ -168,7 +168,7 @@ export const SessionRecovery = {
 
 export interface QueuedOperation {
   id: string;
-  type: "create" | "update" | "delete";
+  type: 'create' | 'update' | 'delete';
   table: string;
   data: any;
   timestamp: number;
@@ -177,7 +177,7 @@ export interface QueuedOperation {
 }
 
 export const OfflineQueue = {
-  enqueue(operation: Omit<QueuedOperation, "id" | "timestamp" | "retries">): string {
+  enqueue(operation: Omit<QueuedOperation, 'id' | 'timestamp' | 'retries'>): string {
     const op: QueuedOperation = {
       ...operation,
       id: crypto.randomUUID(),
@@ -189,51 +189,51 @@ export const OfflineQueue = {
     try {
       const queue = this.getQueue();
       queue.push(op);
-      localStorage.setItem("offline_queue", JSON.stringify(queue));
+      localStorage.setItem('offline_queue', JSON.stringify(queue));
       return op.id;
     } catch (error) {
-      console.error("Failed to enqueue operation:", error);
+      console.error('Failed to enqueue operation:', error);
       throw error;
     }
   },
 
   getQueue(): QueuedOperation[] {
     try {
-      const stored = localStorage.getItem("offline_queue");
+      const stored = localStorage.getItem('offline_queue');
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.warn("Failed to get offline queue:", error);
+      console.warn('Failed to get offline queue:', error);
       return [];
     }
   },
 
   dequeue(id: string): void {
     try {
-      const queue = this.getQueue().filter((op) => op.id !== id);
-      localStorage.setItem("offline_queue", JSON.stringify(queue));
+      const queue = this.getQueue().filter(op => op.id !== id);
+      localStorage.setItem('offline_queue', JSON.stringify(queue));
     } catch (error) {
-      console.warn("Failed to dequeue operation:", error);
+      console.warn('Failed to dequeue operation:', error);
     }
   },
 
   incrementRetry(id: string): void {
     try {
       const queue = this.getQueue();
-      const op = queue.find((o) => o.id === id);
+      const op = queue.find(o => o.id === id);
       if (op) {
         op.retries++;
-        localStorage.setItem("offline_queue", JSON.stringify(queue));
+        localStorage.setItem('offline_queue', JSON.stringify(queue));
       }
     } catch (error) {
-      console.warn("Failed to increment retry:", error);
+      console.warn('Failed to increment retry:', error);
     }
   },
 
   clearQueue(): void {
     try {
-      localStorage.removeItem("offline_queue");
+      localStorage.removeItem('offline_queue');
     } catch (error) {
-      console.warn("Failed to clear queue:", error);
+      console.warn('Failed to clear queue:', error);
     }
   },
 
@@ -248,16 +248,16 @@ export const CacheManager = {
   async clearAllCaches(): Promise<void> {
     // Clear query cache
     queryOptimizer.clearCache();
-
+    
     // Clear browser caches
-    if ("caches" in window) {
+    if ('caches' in window) {
       const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
     }
   },
 
   async getCacheSize(): Promise<number> {
-    if (!("storage" in navigator && "estimate" in navigator.storage)) {
+    if (!('storage' in navigator && 'estimate' in navigator.storage)) {
       return 0;
     }
 
@@ -265,7 +265,7 @@ export const CacheManager = {
       const estimate = await navigator.storage.estimate();
       return estimate.usage || 0;
     } catch (error) {
-      console.warn("Failed to estimate cache size:", error);
+      console.warn('Failed to estimate cache size:', error);
       return 0;
     }
   },
@@ -281,7 +281,7 @@ export const CacheManager = {
         }
       }
     } catch (error) {
-      console.warn("Failed to get localStorage size:", error);
+      console.warn('Failed to get localStorage size:', error);
     }
     return size;
   },
@@ -294,15 +294,12 @@ export function startPersistenceCleanup(): void {
   FormPersistence.clearExpiredDrafts();
 
   // Schedule periodic cleanup (every 6 hours)
-  setInterval(
-    () => {
-      const cleared = FormPersistence.clearExpiredDrafts();
-      if (cleared > 0) {
-        console.log(`Cleared ${cleared} expired form drafts`);
-      }
-    },
-    6 * 60 * 60 * 1000
-  );
+  setInterval(() => {
+    const cleared = FormPersistence.clearExpiredDrafts();
+    if (cleared > 0) {
+      console.log(`Cleared ${cleared} expired form drafts`);
+    }
+  }, 6 * 60 * 60 * 1000);
 }
 
 // ============= Export All =============

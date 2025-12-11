@@ -1,34 +1,26 @@
-import { useState, useCallback, memo } from "react";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import {
-  GripVertical,
-  Layout,
-  FileText,
-  DollarSign,
-  MapPin,
-  BarChart3,
-  CheckCircle2,
-} from "lucide-react";
-import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDashboardLayout } from "@/hooks/useDashboardLayout";
-import { DashboardConfigPanel } from "@/components/dashboard/DashboardConfigPanel";
-import { StatsWidget } from "@/components/dashboard/widgets/StatsWidget";
-import { ActivityWidget } from "@/components/dashboard/widgets/ActivityWidget";
-import { UploadWidget } from "@/components/dashboard/widgets/UploadWidget";
-import { ChartWidget } from "@/components/dashboard/widgets/ChartWidget";
-import { SupportChat } from "@/components/support/SupportChat";
-import WorkflowPipeline from "@/components/dashboard/WorkflowPipeline";
-import InvoiceUpload from "@/components/dashboard/InvoiceUpload";
-import { InvoiceStatusTracker } from "@/components/dashboard/InvoiceStatusTracker";
-import { ApprovalWorkflowStatus } from "@/components/dashboard/ApprovalWorkflowStatus";
-import { TourTrigger } from "@/components/tour/TourTrigger";
-import { InvoiceTour } from "@/components/tour/InvoiceTour";
-import { ContextualTooltip } from "@/components/help/ContextualTooltip";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback, memo } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { GripVertical, Layout, FileText, DollarSign, MapPin, BarChart3, CheckCircle2 } from 'lucide-react';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDashboardLayout } from '@/hooks/useDashboardLayout';
+import { DashboardConfigPanel } from '@/components/dashboard/DashboardConfigPanel';
+import { StatsWidget } from '@/components/dashboard/widgets/StatsWidget';
+import { ActivityWidget } from '@/components/dashboard/widgets/ActivityWidget';
+import { UploadWidget } from '@/components/dashboard/widgets/UploadWidget';
+import { ChartWidget } from '@/components/dashboard/widgets/ChartWidget';
+import { SupportChat } from '@/components/support/SupportChat';
+import WorkflowPipeline from '@/components/dashboard/WorkflowPipeline';
+import InvoiceUpload from '@/components/dashboard/InvoiceUpload';
+import { InvoiceStatusTracker } from '@/components/dashboard/InvoiceStatusTracker';
+import { ApprovalWorkflowStatus } from '@/components/dashboard/ApprovalWorkflowStatus';
+import { TourTrigger } from '@/components/tour/TourTrigger';
+import { InvoiceTour } from '@/components/tour/InvoiceTour';
+import { ContextualTooltip } from '@/components/help/ContextualTooltip';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -44,29 +36,26 @@ export default function Dashboard() {
   } = useDashboardLayout();
 
   // Memoized callbacks for stable references
-  const handleDragEnd = useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return;
+  const handleDragEnd = useCallback((result: DropResult) => {
+    if (!result.destination) return;
 
-      const items = Array.from(visibleWidgets);
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(result.destination.index, 0, reorderedItem);
+    const items = Array.from(visibleWidgets);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
 
-      reorderWidgets(items);
-      toast.success("Layout updated");
-    },
-    [visibleWidgets, reorderWidgets]
-  );
+    reorderWidgets(items);
+    toast.success('Layout updated');
+  }, [visibleWidgets, reorderWidgets]);
 
   const renderWidget = useCallback((widget: any) => {
     switch (widget.type) {
-      case "stats":
+      case 'stats':
         return <StatsWidget title={widget.title} size={widget.size} />;
-      case "activity":
+      case 'activity':
         return <ActivityWidget size={widget.size} />;
-      case "upload":
+      case 'upload':
         return <UploadWidget size={widget.size} />;
-      case "chart":
+      case 'chart':
         return <ChartWidget title={widget.title} size={widget.size} />;
       default:
         return null;
@@ -77,7 +66,7 @@ export default function Dashboard() {
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <InvoiceTour />
       <BreadcrumbNav className="mb-4" />
-
+      
       <div className="flex items-center justify-between mb-6" data-tour="dashboard-header">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -88,13 +77,13 @@ export default function Dashboard() {
         <div className="flex items-center gap-2">
           <TourTrigger />
           <Button
-            variant={isConfigMode ? "default" : "outline"}
+            variant={isConfigMode ? 'default' : 'outline'}
             size="sm"
             onClick={() => setIsConfigMode(!isConfigMode)}
-            aria-label={isConfigMode ? "Exit edit mode" : "Enter edit mode"}
+            aria-label={isConfigMode ? 'Exit edit mode' : 'Enter edit mode'}
           >
             <Layout className="h-4 w-4 mr-2" aria-hidden="true" />
-            {isConfigMode ? "Done" : "Edit Layout"}
+            {isConfigMode ? 'Done' : 'Edit Layout'}
           </Button>
           <DashboardConfigPanel
             widgets={widgets}
@@ -114,9 +103,9 @@ export default function Dashboard() {
           tourId="invoice-workflow"
           placement="bottom"
         >
-          <Card
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => navigate("/invoices")}
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/invoices')}
             data-tour="invoice-card"
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -136,9 +125,9 @@ export default function Dashboard() {
           tourId="invoice-workflow"
           placement="bottom"
         >
-          <Card
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => navigate("/afe-management")}
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/afe-management')}
             data-tour="afe-card"
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -159,9 +148,9 @@ export default function Dashboard() {
           tourId="invoice-workflow"
           placement="bottom"
         >
-          <Card
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => navigate("/field-tickets")}
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/field-tickets')}
             data-tour="field-tickets-card"
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -182,9 +171,9 @@ export default function Dashboard() {
           tourId="invoice-workflow"
           placement="bottom"
         >
-          <Card
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => navigate("/uwi-registry")}
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/uwi-registry')}
             data-tour="uwi-card"
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -197,9 +186,9 @@ export default function Dashboard() {
           </Card>
         </ContextualTooltip>
 
-        <Card
-          className="cursor-pointer hover:bg-muted/50 transition-colors"
-          onClick={() => navigate("/reports")}
+        <Card 
+          className="cursor-pointer hover:bg-muted/50 transition-colors" 
+          onClick={() => navigate('/reports')}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Reports & Analytics</CardTitle>
@@ -219,8 +208,8 @@ export default function Dashboard() {
           placement="bottom"
         >
           <Card
-            className="cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() => navigate("/three-way-matching")}
+            className="cursor-pointer hover:bg-muted/50 transition-colors" 
+            onClick={() => navigate('/three-way-matching')}
             data-tour="matching-card"
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -270,9 +259,9 @@ export default function Dashboard() {
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       className={cn(
-                        "relative transition-all",
-                        snapshot.isDragging && "z-50 rotate-2 scale-105",
-                        isConfigMode && "ring-2 ring-primary/20 rounded-lg"
+                        'relative transition-all',
+                        snapshot.isDragging && 'z-50 rotate-2 scale-105',
+                        isConfigMode && 'ring-2 ring-primary/20 rounded-lg'
                       )}
                     >
                       {isConfigMode && (
@@ -306,9 +295,9 @@ export default function Dashboard() {
         </div>
       )}
 
-      <SupportChat
-        isMinimized={isSupportMinimized}
-        onMinimize={() => setIsSupportMinimized(!isSupportMinimized)}
+      <SupportChat 
+        isMinimized={isSupportMinimized} 
+        onMinimize={() => setIsSupportMinimized(!isSupportMinimized)} 
       />
     </div>
   );

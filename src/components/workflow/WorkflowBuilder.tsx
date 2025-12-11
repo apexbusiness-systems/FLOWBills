@@ -1,81 +1,75 @@
-import { useState, useCallback } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import {
-  Play,
-  Pause,
-  Settings,
-  Trash2,
+import { useState, useCallback } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Play, 
+  Pause, 
+  Settings, 
+  Trash2, 
   Plus,
   CheckCircle,
   AlertTriangle,
   Mail,
-  Database,
-} from "lucide-react";
-import { WorkflowStep, Workflow } from "@/hooks/useWorkflows";
-import ConditionBuilder from "./ConditionBuilder";
+  Database
+} from 'lucide-react';
+import { WorkflowStep, Workflow } from '@/hooks/useWorkflows';
+import ConditionBuilder from './ConditionBuilder';
 
 interface WorkflowBuilderProps {
   workflow?: Workflow;
-  onSave: (workflow: Omit<Workflow, "id" | "created_at" | "updated_at">) => void;
+  onSave: (workflow: Omit<Workflow, 'id' | 'created_at' | 'updated_at'>) => void;
   onCancel: () => void;
 }
 
 const stepTypes = [
-  {
-    type: "condition",
-    name: "Condition",
-    icon: AlertTriangle,
-    color: "bg-amber-500",
-    description: "Conditional routing based on data",
+  { 
+    type: 'condition', 
+    name: 'Condition', 
+    icon: AlertTriangle, 
+    color: 'bg-amber-500',
+    description: 'Conditional routing based on data'
   },
-  {
-    type: "validation",
-    name: "Validation",
-    icon: CheckCircle,
-    color: "bg-status-processing",
-    description: "Validate data against rules",
+  { 
+    type: 'validation', 
+    name: 'Validation', 
+    icon: CheckCircle, 
+    color: 'bg-status-processing',
+    description: 'Validate data against rules'
   },
-  {
-    type: "approval",
-    name: "Approval",
-    icon: AlertTriangle,
-    color: "bg-status-pending",
-    description: "Require manual approval",
+  { 
+    type: 'approval', 
+    name: 'Approval', 
+    icon: AlertTriangle, 
+    color: 'bg-status-pending',
+    description: 'Require manual approval'
   },
-  {
-    type: "notification",
-    name: "Notification",
-    icon: Mail,
-    color: "bg-primary",
-    description: "Send notifications",
+  { 
+    type: 'notification', 
+    name: 'Notification', 
+    icon: Mail, 
+    color: 'bg-primary',
+    description: 'Send notifications'
   },
-  {
-    type: "integration",
-    name: "Integration",
-    icon: Database,
-    color: "bg-secondary",
-    description: "Connect to external systems",
+  { 
+    type: 'integration', 
+    name: 'Integration', 
+    icon: Database, 
+    color: 'bg-secondary',
+    description: 'Connect to external systems'
   },
 ];
 
 const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) => {
-  const [name, setName] = useState(workflow?.name || "");
-  const [description, setDescription] = useState(workflow?.description || "");
-  const [workflowType, setWorkflowType] = useState(workflow?.workflow_type || "invoice_processing");
+  const [name, setName] = useState(workflow?.name || '');
+  const [description, setDescription] = useState(workflow?.description || '');
+  const [workflowType, setWorkflowType] = useState(workflow?.workflow_type || 'invoice_processing');
   const [steps, setSteps] = useState<WorkflowStep[]>(workflow?.steps || []);
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
 
@@ -84,23 +78,25 @@ const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) =
   const addStep = (stepType: string) => {
     const newStep: WorkflowStep = {
       id: generateStepId(),
-      type: stepType as WorkflowStep["type"],
-      name: `${stepTypes.find((t) => t.type === stepType)?.name || "Step"} ${steps.length + 1}`,
+      type: stepType as WorkflowStep['type'],
+      name: `${stepTypes.find(t => t.type === stepType)?.name || 'Step'} ${steps.length + 1}`,
       config: {},
       position: { x: 100 + steps.length * 200, y: 100 },
       connections: [],
     };
 
-    setSteps((prev) => [...prev, newStep]);
+    setSteps(prev => [...prev, newStep]);
     setSelectedStep(newStep.id);
   };
 
   const updateStep = (stepId: string, updates: Partial<WorkflowStep>) => {
-    setSteps((prev) => prev.map((step) => (step.id === stepId ? { ...step, ...updates } : step)));
+    setSteps(prev => prev.map(step => 
+      step.id === stepId ? { ...step, ...updates } : step
+    ));
   };
 
   const deleteStep = (stepId: string) => {
-    setSteps((prev) => prev.filter((step) => step.id !== stepId));
+    setSteps(prev => prev.filter(step => step.id !== stepId));
     if (selectedStep === stepId) {
       setSelectedStep(null);
     }
@@ -130,7 +126,7 @@ const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) =
     });
   };
 
-  const selectedStepData = steps.find((step) => step.id === selectedStep);
+  const selectedStepData = steps.find(step => step.id === selectedStep);
 
   return (
     <div className="h-full flex">
@@ -140,7 +136,7 @@ const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) =
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl font-bold text-foreground">
-                {workflow ? "Edit Workflow" : "Create Workflow"}
+                {workflow ? 'Edit Workflow' : 'Create Workflow'}
               </h2>
               <p className="text-muted-foreground">
                 Design your automated workflow with drag-and-drop steps
@@ -244,9 +240,9 @@ const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) =
                       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                     >
                       {steps.map((step, index) => {
-                        const stepTypeInfo = stepTypes.find((t) => t.type === step.type);
+                        const stepTypeInfo = stepTypes.find(t => t.type === step.type);
                         const Icon = stepTypeInfo?.icon || Settings;
-
+                        
                         return (
                           <Draggable key={step.id} draggableId={step.id} index={index}>
                             {(provided, snapshot) => (
@@ -255,18 +251,16 @@ const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) =
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                                 className={`cursor-pointer transition-all ${
-                                  selectedStep === step.id
-                                    ? "ring-2 ring-primary shadow-lg"
-                                    : "hover:shadow-md"
-                                } ${snapshot.isDragging ? "rotate-2 scale-105" : ""}`}
+                                  selectedStep === step.id 
+                                    ? 'ring-2 ring-primary shadow-lg' 
+                                    : 'hover:shadow-md'
+                                } ${snapshot.isDragging ? 'rotate-2 scale-105' : ''}`}
                                 onClick={() => setSelectedStep(step.id)}
                               >
                                 <CardContent className="p-4">
                                   <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
-                                      <div
-                                        className={`p-2 rounded-full ${stepTypeInfo?.color} text-white`}
-                                      >
+                                      <div className={`p-2 rounded-full ${stepTypeInfo?.color} text-white`}>
                                         <Icon className="h-4 w-4" />
                                       </div>
                                       <Badge variant="secondary">{index + 1}</Badge>
@@ -320,7 +314,7 @@ const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) =
               />
             </div>
 
-            {selectedStepData.type === "condition" && (
+            {selectedStepData.type === 'condition' && (
               <div>
                 <ConditionBuilder
                   conditions={selectedStepData.conditions || []}
@@ -329,14 +323,17 @@ const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) =
               </div>
             )}
 
-            {selectedStepData.type === "validation" && (
+            {selectedStepData.type === 'validation' && (
               <div>
                 <Label>Validation Rules</Label>
-                <Textarea placeholder="Configure validation rules..." className="mt-2" />
+                <Textarea 
+                  placeholder="Configure validation rules..."
+                  className="mt-2"
+                />
               </div>
             )}
 
-            {selectedStepData.type === "approval" && (
+            {selectedStepData.type === 'approval' && (
               <div>
                 <Label>Approval Settings</Label>
                 <Select>
@@ -352,14 +349,17 @@ const WorkflowBuilder = ({ workflow, onSave, onCancel }: WorkflowBuilderProps) =
               </div>
             )}
 
-            {selectedStepData.type === "notification" && (
+            {selectedStepData.type === 'notification' && (
               <div>
                 <Label>Notification Template</Label>
-                <Textarea placeholder="Email template..." className="mt-2" />
+                <Textarea 
+                  placeholder="Email template..."
+                  className="mt-2"
+                />
               </div>
             )}
 
-            {selectedStepData.type === "integration" && (
+            {selectedStepData.type === 'integration' && (
               <div>
                 <Label>Integration Type</Label>
                 <Select>

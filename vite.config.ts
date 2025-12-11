@@ -71,29 +71,35 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core vendor chunks - load first, highest priority
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-router': ['react-router-dom'],
-          // Supabase in separate chunk - loaded async after initial render
-          'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-query': ['@tanstack/react-query'],
-          // UI framework - lazy loaded on demand
-          'vendor-ui-core': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-tooltip',
-          ],
-          'vendor-ui-form': [
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-select',
-            '@radix-ui/react-switch',
-            '@radix-ui/react-tabs',
-          ],
-          // Animation and charts - loaded on demand
-          'vendor-motion': ['framer-motion'],
-          'vendor-charts': ['recharts'],
+        manualChunks: (id) => {
+          // Core vendor chunk
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          // Router chunk
+          if (id.includes('node_modules/react-router')) {
+            return 'vendor-router';
+          }
+          // Supabase chunk
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
+          // Query chunk
+          if (id.includes('node_modules/@tanstack')) {
+            return 'vendor-query';
+          }
+          // UI components chunk
+          if (id.includes('node_modules/@radix-ui')) {
+            return 'vendor-ui';
+          }
+          // Charts chunk
+          if (id.includes('node_modules/recharts')) {
+            return 'vendor-charts';
+          }
+          // Other large dependencies
+          if (id.includes('node_modules')) {
+            return 'vendor-misc';
+          }
         },
         // Optimize asset file names for caching
         assetFileNames: (assetInfo) => {
@@ -109,10 +115,9 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
-      // Safe tree-shaking - preserve all side effects
       treeshake: {
-        moduleSideEffects: true,
-        propertyReadSideEffects: true,
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
       },
     },
     target: 'es2020',

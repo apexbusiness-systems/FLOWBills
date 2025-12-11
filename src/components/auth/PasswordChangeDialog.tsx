@@ -3,14 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Lock, Mail, Key } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -22,13 +15,13 @@ export const PasswordChangeDialog = () => {
     email: "",
     currentPassword: "",
     newPassword: "",
-    confirmPassword: "",
+    confirmPassword: ""
   });
   const [error, setError] = useState("");
   const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
     setError("");
   };
 
@@ -64,7 +57,7 @@ export const PasswordChangeDialog = () => {
 
       // Update password
       const { error: updateError } = await supabase.auth.updateUser({
-        password: formData.newPassword,
+        password: formData.newPassword
       });
 
       if (updateError) {
@@ -74,15 +67,14 @@ export const PasswordChangeDialog = () => {
 
       toast({
         title: "Password updated successfully!",
-        description:
-          "Your password has been changed. You can now use your new password to sign in.",
+        description: "Your password has been changed. You can now use your new password to sign in.",
         variant: "default",
       });
-
+      
       setIsOpen(false);
       setFormData({ email: "", currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err: any) {
-      setError("An unexpected error occurred. Please try again.");
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -103,10 +95,12 @@ export const PasswordChangeDialog = () => {
             Enter your current credentials and choose a new password.
           </DialogDescription>
         </DialogHeader>
-
+        
         {error && (
           <Alert className="border-destructive/50 bg-destructive/10">
-            <AlertDescription className="text-destructive">{error}</AlertDescription>
+            <AlertDescription className="text-destructive">
+              {error}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -126,7 +120,7 @@ export const PasswordChangeDialog = () => {
               />
             </div>
           </div>
-
+          
           <div className="space-y-2">
             <Label htmlFor="currentPassword">Current Password</Label>
             <div className="relative">
@@ -142,7 +136,7 @@ export const PasswordChangeDialog = () => {
               />
             </div>
           </div>
-
+          
           <div className="space-y-2">
             <Label htmlFor="newPassword">New Password</Label>
             <div className="relative">
@@ -159,7 +153,7 @@ export const PasswordChangeDialog = () => {
               />
             </div>
           </div>
-
+          
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm New Password</Label>
             <div className="relative">
@@ -176,17 +170,21 @@ export const PasswordChangeDialog = () => {
               />
             </div>
           </div>
-
+          
           <div className="flex gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
+            <Button 
+              type="button" 
+              variant="outline" 
               className="flex-1"
               onClick={() => setIsOpen(false)}
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              className="flex-1" 
+              disabled={isLoading}
+            >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Change Password
             </Button>

@@ -39,14 +39,14 @@ interface SpeechRecognitionAlternative {
   confidence: number;
 }
 
-declare const SpeechRecognition: {
+declare var SpeechRecognition: {
   prototype: SpeechRecognition;
-  new (): SpeechRecognition;
+  new(): SpeechRecognition;
 };
 
-declare const webkitSpeechRecognition: {
+declare var webkitSpeechRecognition: {
   prototype: SpeechRecognition;
-  new (): SpeechRecognition;
+  new(): SpeechRecognition;
 };
 
 interface Window {

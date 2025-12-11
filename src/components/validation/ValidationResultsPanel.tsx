@@ -1,10 +1,17 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { CheckCircle, AlertTriangle, XCircle, Info, Clock, RefreshCw } from "lucide-react";
-import { InvoiceValidationResult, ValidationResult } from "@/hooks/useValidationRules";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { 
+  CheckCircle, 
+  AlertTriangle, 
+  XCircle, 
+  Info, 
+  Clock,
+  RefreshCw
+} from 'lucide-react';
+import { InvoiceValidationResult, ValidationResult } from '@/hooks/useValidationRules';
 
 interface ValidationResultsPanelProps {
   validationResult: InvoiceValidationResult | null;
@@ -12,10 +19,10 @@ interface ValidationResultsPanelProps {
   onRevalidate?: () => void;
 }
 
-const ValidationResultsPanel = ({
-  validationResult,
-  loading = false,
-  onRevalidate,
+const ValidationResultsPanel = ({ 
+  validationResult, 
+  loading = false, 
+  onRevalidate 
 }: ValidationResultsPanelProps) => {
   if (!validationResult && !loading) {
     return (
@@ -56,43 +63,31 @@ const ValidationResultsPanel = ({
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case "critical":
-        return <XCircle className="h-4 w-4 text-destructive" />;
-      case "error":
-        return <XCircle className="h-4 w-4 text-destructive" />;
-      case "warning":
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      case "info":
-        return <Info className="h-4 w-4 text-blue-600" />;
-      default:
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'critical': return <XCircle className="h-4 w-4 text-destructive" />;
+      case 'error': return <XCircle className="h-4 w-4 text-destructive" />;
+      case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      case 'info': return <Info className="h-4 w-4 text-blue-600" />;
+      default: return <CheckCircle className="h-4 w-4 text-green-600" />;
     }
   };
 
   const getSeverityBadgeVariant = (severity: string) => {
     switch (severity) {
-      case "critical":
-        return "destructive";
-      case "error":
-        return "destructive";
-      case "warning":
-        return "secondary";
-      case "info":
-        return "outline";
-      default:
-        return "default";
+      case 'critical': return 'destructive';
+      case 'error': return 'destructive';
+      case 'warning': return 'secondary';
+      case 'info': return 'outline';
+      default: return 'default';
     }
   };
 
-  const passedCount = validationResult.results.filter((r) => r.passed).length;
+  const passedCount = validationResult.results.filter(r => r.passed).length;
   const totalCount = validationResult.results.length;
   const passRate = totalCount > 0 ? (passedCount / totalCount) * 100 : 100;
 
-  const criticalIssues = validationResult.results.filter(
-    (r) => !r.passed && r.severity === "critical"
-  );
-  const errors = validationResult.results.filter((r) => !r.passed && r.severity === "error");
-  const warnings = validationResult.results.filter((r) => !r.passed && r.severity === "warning");
+  const criticalIssues = validationResult.results.filter(r => !r.passed && r.severity === 'critical');
+  const errors = validationResult.results.filter(r => !r.passed && r.severity === 'error');
+  const warnings = validationResult.results.filter(r => !r.passed && r.severity === 'warning');
 
   return (
     <div className="space-y-4">
@@ -109,8 +104,8 @@ const ValidationResultsPanel = ({
               Validation Results
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Badge variant={validationResult.overall_passed ? "default" : "destructive"}>
-                {validationResult.overall_passed ? "PASSED" : "FAILED"}
+              <Badge variant={validationResult.overall_passed ? 'default' : 'destructive'}>
+                {validationResult.overall_passed ? 'PASSED' : 'FAILED'}
               </Badge>
               {onRevalidate && (
                 <Button variant="outline" size="sm" onClick={onRevalidate}>
@@ -126,9 +121,7 @@ const ValidationResultsPanel = ({
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span>Rules Passed</span>
-                <span>
-                  {passedCount} of {totalCount}
-                </span>
+                <span>{passedCount} of {totalCount}</span>
               </div>
               <Progress value={passRate} className="h-2" />
             </div>
@@ -167,9 +160,8 @@ const ValidationResultsPanel = ({
         <Alert variant="destructive">
           <XCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Critical Issues Found:</strong> {criticalIssues.length} critical validation
-            {criticalIssues.length > 1 ? "s" : ""} failed. This invoice cannot be processed until
-            these issues are resolved.
+            <strong>Critical Issues Found:</strong> {criticalIssues.length} critical validation{criticalIssues.length > 1 ? 's' : ''} failed. 
+            This invoice cannot be processed until these issues are resolved.
           </AlertDescription>
         </Alert>
       )}
@@ -177,7 +169,7 @@ const ValidationResultsPanel = ({
       {/* Individual Results */}
       <div className="space-y-2">
         {validationResult.results.map((result, index) => (
-          <Card key={index} className={`${!result.passed ? "border-destructive/20" : ""}`}>
+          <Card key={index} className={`${!result.passed ? 'border-destructive/20' : ''}`}>
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 {getSeverityIcon(result.severity)}
@@ -188,16 +180,13 @@ const ValidationResultsPanel = ({
                       {result.severity}
                     </Badge>
                     {result.passed && (
-                      <Badge
-                        variant="outline"
-                        className="bg-green-50 text-green-700 border-green-200"
-                      >
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                         Passed
                       </Badge>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{result.message}</p>
-
+                  
                   {result.suggested_action && !result.passed && (
                     <div className="bg-muted/50 rounded-md p-2 mt-2">
                       <p className="text-sm text-foreground">

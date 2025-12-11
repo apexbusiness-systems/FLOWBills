@@ -20,19 +20,12 @@ jobs:
         run: |
           set -e
           echo "🔒 Checking for changes to protected LLM files..."
-
-          # Get changed files - use PR base for PRs, HEAD~1 for pushes
+          
+          # Get changed files
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ rag/ 2>/dev/null || echo "")
+            CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ rag/)
           else
-            # For pushes, check if HEAD~1 exists (initial commits won't have it)
-            if git rev-parse HEAD~1 >/dev/null 2>&1; then
-              CHANGED=$(git diff --name-only HEAD~1 HEAD -- llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ rag/ 2>/dev/null || echo "")
-            else
-              echo "✅ Initial commit - no LLM change comparison needed"
-              CHANGED=""
-            fi
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- llm/ supabase/functions/llm/ supabase/functions/oil-gas-assistant/ rag/)
           fi
           
           if [ -n "$CHANGED" ]; then

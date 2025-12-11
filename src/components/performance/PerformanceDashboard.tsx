@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { performanceProfiler } from "@/lib/performance-profiler";
-import { Activity, AlertTriangle, TrendingUp, Download, RefreshCw } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { performanceProfiler } from '@/lib/performance-profiler';
+import { Activity, AlertTriangle, TrendingUp, Download, RefreshCw } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 export const PerformanceDashboard = () => {
   const [report, setReport] = useState<any>(null);
@@ -28,19 +28,15 @@ export const PerformanceDashboard = () => {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "critical":
-        return "destructive";
-      case "high":
-        return "destructive";
-      case "medium":
-        return "default";
-      default:
-        return "secondary";
+      case 'critical': return 'destructive';
+      case 'high': return 'destructive';
+      case 'medium': return 'default';
+      default: return 'secondary';
     }
   };
 
   const getSeverityIcon = (severity: string) => {
-    if (severity === "critical" || severity === "high") {
+    if (severity === 'critical' || severity === 'high') {
       return <AlertTriangle className="h-4 w-4" />;
     }
     return <Activity className="h-4 w-4" />;
@@ -48,9 +44,9 @@ export const PerformanceDashboard = () => {
 
   const exportData = () => {
     const data = performanceProfiler.exportMetrics();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `performance-metrics-${Date.now()}.json`;
     a.click();
@@ -66,14 +62,16 @@ export const PerformanceDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Performance Dashboard</h1>
-          <p className="text-muted-foreground">
-            Real-time performance profiling and bottleneck analysis
-          </p>
+          <p className="text-muted-foreground">Real-time performance profiling and bottleneck analysis</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setAutoRefresh(!autoRefresh)}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? "animate-spin" : ""}`} />
-            {autoRefresh ? "Auto" : "Manual"}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAutoRefresh(!autoRefresh)}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+            {autoRefresh ? 'Auto' : 'Manual'}
           </Button>
           <Button variant="outline" size="sm" onClick={loadReport}>
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -83,14 +81,10 @@ export const PerformanceDashboard = () => {
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              performanceProfiler.clear();
-              loadReport();
-            }}
-          >
+          <Button variant="outline" size="sm" onClick={() => {
+            performanceProfiler.clear();
+            loadReport();
+          }}>
             Clear Data
           </Button>
         </div>
@@ -123,9 +117,7 @@ export const PerformanceDashboard = () => {
             <CardTitle className="text-sm font-medium text-destructive">Critical Issues</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">
-              {report.summary.criticalBottlenecks}
-            </div>
+            <div className="text-2xl font-bold text-destructive">{report.summary.criticalBottlenecks}</div>
             <p className="text-xs text-muted-foreground">Requires immediate attention</p>
           </CardContent>
         </Card>
@@ -135,9 +127,7 @@ export const PerformanceDashboard = () => {
             <CardTitle className="text-sm font-medium text-orange-600">High Priority</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {report.summary.highBottlenecks}
-            </div>
+            <div className="text-2xl font-bold text-orange-600">{report.summary.highBottlenecks}</div>
             <p className="text-xs text-muted-foreground">Performance concerns</p>
           </CardContent>
         </Card>
@@ -184,16 +174,16 @@ export const PerformanceDashboard = () => {
                     <div>
                       <p className="text-muted-foreground">Avg Render Time</p>
                       <p className="font-semibold">{bottleneck.renderTime.toFixed(2)}ms</p>
-                      <Progress
-                        value={Math.min((bottleneck.renderTime / 50) * 100, 100)}
+                      <Progress 
+                        value={Math.min((bottleneck.renderTime / 50) * 100, 100)} 
                         className="mt-1"
                       />
                     </div>
                     <div>
                       <p className="text-muted-foreground">Re-render Count</p>
                       <p className="font-semibold">{bottleneck.reRenderCount}</p>
-                      <Progress
-                        value={Math.min((bottleneck.reRenderCount / 50) * 100, 100)}
+                      <Progress 
+                        value={Math.min((bottleneck.reRenderCount / 50) * 100, 100)} 
                         className="mt-1"
                       />
                     </div>
@@ -224,7 +214,9 @@ export const PerformanceDashboard = () => {
             <Activity className="h-5 w-5" />
             Slowest Components
           </CardTitle>
-          <CardDescription>Components with highest average render times</CardDescription>
+          <CardDescription>
+            Components with highest average render times
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -232,11 +224,15 @@ export const PerformanceDashboard = () => {
               <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex-1">
                   <p className="font-medium">{comp.component}</p>
-                  <p className="text-xs text-muted-foreground">{comp.renderCount} renders</p>
+                  <p className="text-xs text-muted-foreground">
+                    {comp.renderCount} renders
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold">{comp.avgTime.toFixed(2)}ms</p>
-                  <p className="text-xs text-muted-foreground">Max: {comp.maxTime.toFixed(2)}ms</p>
+                  <p className="text-xs text-muted-foreground">
+                    Max: {comp.maxTime.toFixed(2)}ms
+                  </p>
                 </div>
               </div>
             ))}

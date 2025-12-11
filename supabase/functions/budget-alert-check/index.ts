@@ -1,8 +1,8 @@
-import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-import { Resend } from 'npm:resend@2.0.0';
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -55,7 +55,7 @@ serve(async (req) => {
       console.log('No active alert rules found');
       return new Response(
         JSON.stringify({ message: 'No active rules', checked: 0 }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -127,9 +127,7 @@ serve(async (req) => {
           }
 
           const alertMessage = rule.alert_type === 'percentage'
-            ? `AFE ${afe.afe_number} has reached ${
-              utilizationPercentage.toFixed(1)
-            }% budget utilization (${rule.threshold_value}% threshold exceeded)`
+            ? `AFE ${afe.afe_number} has reached ${utilizationPercentage.toFixed(1)}% budget utilization (${rule.threshold_value}% threshold exceeded)`
             : `AFE ${afe.afe_number} has only $${remainingAmount.toLocaleString()} remaining (below $${rule.threshold_value.toLocaleString()} threshold)`;
 
           // Create alert log
@@ -155,25 +153,15 @@ serve(async (req) => {
               await resend.emails.send({
                 from: 'FlowBills Budget Alerts <alerts@flowbills.ca>',
                 to: [recipient],
-                subject: `${
-                  severity === 'critical' ? '🚨 CRITICAL' : '⚠️ WARNING'
-                }: Budget Alert for AFE ${afe.afe_number}`,
+                subject: `${severity === 'critical' ? '🚨 CRITICAL' : '⚠️ WARNING'}: Budget Alert for AFE ${afe.afe_number}`,
                 html: `
                   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <div style="background: ${
-                  severity === 'critical' ? '#dc2626' : '#f59e0b'
-                }; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-                      <h1 style="margin: 0; font-size: 24px;">${
-                  severity === 'critical' ? '🚨 Critical' : '⚠️ Warning'
-                } Budget Alert</h1>
+                    <div style="background: ${severity === 'critical' ? '#dc2626' : '#f59e0b'}; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                      <h1 style="margin: 0; font-size: 24px;">${severity === 'critical' ? '🚨 Critical' : '⚠️ Warning'} Budget Alert</h1>
                     </div>
                     <div style="padding: 30px; background: #f9fafb; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
                       <h2 style="margin-top: 0; color: #111827;">AFE: ${afe.afe_number}</h2>
-                      ${
-                  afe.well_name
-                    ? `<p style="color: #6b7280; margin: 5px 0;"><strong>Well:</strong> ${afe.well_name}</p>`
-                    : ''
-                }
+                      ${afe.well_name ? `<p style="color: #6b7280; margin: 5px 0;"><strong>Well:</strong> ${afe.well_name}</p>` : ''}
                       
                       <div style="background: white; padding: 20px; border-radius: 6px; margin: 20px 0;">
                         <p style="margin: 0 0 10px 0; color: #111827;"><strong>Alert:</strong> ${alertMessage}</p>
@@ -181,9 +169,7 @@ serve(async (req) => {
                         <p style="margin: 5px 0; color: #6b7280;"><strong>Budget:</strong> $${budgetAmount.toLocaleString()}</p>
                         <p style="margin: 5px 0; color: #6b7280;"><strong>Spent:</strong> $${spentAmount.toLocaleString()}</p>
                         <p style="margin: 5px 0; color: #6b7280;"><strong>Remaining:</strong> $${remainingAmount.toLocaleString()}</p>
-                        <p style="margin: 5px 0; color: #6b7280;"><strong>Utilization:</strong> ${
-                  utilizationPercentage.toFixed(1)
-                }%</p>
+                        <p style="margin: 5px 0; color: #6b7280;"><strong>Utilization:</strong> ${utilizationPercentage.toFixed(1)}%</p>
                       </div>
                       
                       <p style="color: #6b7280; margin: 20px 0 0 0; font-size: 14px;">
@@ -225,8 +211,9 @@ serve(async (req) => {
         rules_checked: rules.length,
         alerts_triggered: alertsTriggered,
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+
   } catch (error: any) {
     console.error('Error in budget-alert-check:', error);
     return new Response(
@@ -234,7 +221,7 @@ serve(async (req) => {
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
+      }
     );
   }
 });

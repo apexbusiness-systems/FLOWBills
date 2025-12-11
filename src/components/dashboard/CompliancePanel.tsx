@@ -9,15 +9,15 @@ const complianceItems = [
     status: "compliant",
     score: 98,
     lastAudit: "March 2024",
-    icon: Shield,
+    icon: Shield
   },
   {
     id: "pipeda",
     title: "PIPEDA/Alberta PIPA",
-    status: "compliant",
+    status: "compliant", 
     score: 95,
     lastAudit: "February 2024",
-    icon: Eye,
+    icon: Eye
   },
   {
     id: "pci",
@@ -25,16 +25,16 @@ const complianceItems = [
     status: "review",
     score: 87,
     lastAudit: "January 2024",
-    icon: Lock,
+    icon: Lock
   },
   {
     id: "iso27001",
     title: "ISO/IEC 27001 ISMS",
     status: "compliant",
     score: 92,
-    lastAudit: "March 2024",
-    icon: FileCheck,
-  },
+    lastAudit: "March 2024", 
+    icon: FileCheck
+  }
 ];
 
 const CompliancePanel = () => {
@@ -59,8 +59,12 @@ const CompliancePanel = () => {
     <div className="card-enterprise">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold text-foreground">Compliance & Security</h3>
-          <Badge className="status-approved">{overallScore}% Overall</Badge>
+          <h3 className="text-lg font-semibold text-foreground">
+            Compliance & Security
+          </h3>
+          <Badge className="status-approved">
+            {overallScore}% Overall
+          </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
           Enterprise security and regulatory compliance status
@@ -72,7 +76,7 @@ const CompliancePanel = () => {
         {complianceItems.map((item) => {
           const Icon = item.icon;
           return (
-            <div
+            <div 
               key={item.id}
               className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary/50 transition-colors"
             >
@@ -81,14 +85,20 @@ const CompliancePanel = () => {
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-foreground">{item.title}</h4>
-                  <p className="text-xs text-muted-foreground">Last audit: {item.lastAudit}</p>
+                  <h4 className="text-sm font-medium text-foreground">
+                    {item.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Last audit: {item.lastAudit}
+                  </p>
                 </div>
               </div>
-
+              
               <div className="flex items-center gap-3">
                 <div className="text-right">
-                  <div className="text-sm font-medium text-foreground">{item.score}%</div>
+                  <div className="text-sm font-medium text-foreground">
+                    {item.score}%
+                  </div>
                   <Progress value={item.score} className="w-16 h-1 mt-1" />
                 </div>
                 {getStatusBadge(item.status)}
@@ -102,7 +112,7 @@ const CompliancePanel = () => {
         <div className="flex items-center gap-2 text-sm">
           <AlertCircle className="h-4 w-4 text-status-pending" />
           <span className="text-muted-foreground">
-            Next security review scheduled for
+            Next security review scheduled for 
             <span className="font-medium text-foreground ml-1">June 2024</span>
           </span>
         </div>

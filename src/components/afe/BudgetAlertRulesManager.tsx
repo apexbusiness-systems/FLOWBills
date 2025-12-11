@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Bell, Plus, Trash2, Edit, AlertTriangle, Info } from "lucide-react";
-import { useAlertRules } from "@/hooks/useAlertRules";
-import { CreateAlertRuleDialog } from "./CreateAlertRuleDialog";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Bell, Plus, Trash2, Edit, AlertTriangle, Info } from 'lucide-react';
+import { useAlertRules } from '@/hooks/useAlertRules';
+import { CreateAlertRuleDialog } from './CreateAlertRuleDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from 'date-fns';
 
 export const BudgetAlertRulesManager = () => {
   const { rules, logs, loading, deleteRule, toggleRule } = useAlertRules();
@@ -30,17 +30,14 @@ export const BudgetAlertRulesManager = () => {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "critical":
-        return "destructive";
-      case "warning":
-        return "default";
-      default:
-        return "secondary";
+      case 'critical': return 'destructive';
+      case 'warning': return 'default';
+      default: return 'secondary';
     }
   };
 
   const getAlertTypeLabel = (type: string) => {
-    return type === "threshold" ? "Dollar Amount" : "Percentage";
+    return type === 'threshold' ? 'Dollar Amount' : 'Percentage';
   };
 
   return (
@@ -86,29 +83,23 @@ export const BudgetAlertRulesManager = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h4 className="font-semibold">{rule.rule_name}</h4>
-                      <Badge variant={rule.is_active ? "default" : "secondary"}>
-                        {rule.is_active ? "Active" : "Inactive"}
+                      <Badge variant={rule.is_active ? 'default' : 'secondary'}>
+                        {rule.is_active ? 'Active' : 'Inactive'}
                       </Badge>
-                      <Badge variant="outline">{getAlertTypeLabel(rule.alert_type)}</Badge>
+                      <Badge variant="outline">
+                        {getAlertTypeLabel(rule.alert_type)}
+                      </Badge>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span>
-                        Threshold:{" "}
-                        {rule.alert_type === "percentage"
-                          ? `${rule.threshold_value}%`
-                          : `$${rule.threshold_value.toLocaleString()}`}
+                        Threshold: {rule.alert_type === 'percentage' ? `${rule.threshold_value}%` : `$${rule.threshold_value.toLocaleString()}`}
                       </span>
                       <span>•</span>
                       <span>{rule.email_recipients.length} recipient(s)</span>
                       {rule.last_triggered_at && (
                         <>
                           <span>•</span>
-                          <span>
-                            Last triggered{" "}
-                            {formatDistanceToNow(new Date(rule.last_triggered_at), {
-                              addSuffix: true,
-                            })}
-                          </span>
+                          <span>Last triggered {formatDistanceToNow(new Date(rule.last_triggered_at), { addSuffix: true })}</span>
                         </>
                       )}
                     </div>
@@ -118,7 +109,11 @@ export const BudgetAlertRulesManager = () => {
                       checked={rule.is_active}
                       onCheckedChange={(checked) => toggleRule(rule.id, checked)}
                     />
-                    <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(rule.id)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setDeleteConfirm(rule.id)}
+                    >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
@@ -136,7 +131,9 @@ export const BudgetAlertRulesManager = () => {
             <AlertTriangle className="h-5 w-5" />
             Recent Alerts
           </CardTitle>
-          <CardDescription>History of triggered budget alerts</CardDescription>
+          <CardDescription>
+            History of triggered budget alerts
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {logs.length === 0 ? (
@@ -147,10 +144,11 @@ export const BudgetAlertRulesManager = () => {
           ) : (
             <div className="space-y-3">
               {logs.slice(0, 10).map((log) => (
-                <div key={log.id} className="flex items-start gap-3 p-3 border rounded-lg bg-card">
-                  <AlertTriangle
-                    className={`h-5 w-5 mt-0.5 ${log.severity === "critical" ? "text-destructive" : "text-warning"}`}
-                  />
+                <div
+                  key={log.id}
+                  className="flex items-start gap-3 p-3 border rounded-lg bg-card"
+                >
+                  <AlertTriangle className={`h-5 w-5 mt-0.5 ${log.severity === 'critical' ? 'text-destructive' : 'text-warning'}`} />
                   <div className="flex-1">
                     <p className="text-sm font-medium">{log.alert_message}</p>
                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
@@ -159,9 +157,7 @@ export const BudgetAlertRulesManager = () => {
                       </Badge>
                       <span>Utilization: {log.budget_utilization.toFixed(1)}%</span>
                       <span>•</span>
-                      <span>
-                        {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
-                      </span>
+                      <span>{formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}</span>
                     </div>
                   </div>
                 </div>
@@ -171,7 +167,10 @@ export const BudgetAlertRulesManager = () => {
         </CardContent>
       </Card>
 
-      <CreateAlertRuleDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
+      <CreateAlertRuleDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
 
       <AlertDialog open={deleteConfirm !== null} onOpenChange={() => setDeleteConfirm(null)}>
         <AlertDialogContent>

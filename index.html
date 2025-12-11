@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <!-- Build v5 - Cache bust: 2025-12-09T02:30:00Z - CRITICAL FIX: Resolved empty bundle production blocker -->
+  <!-- Build v4 - Cache bust: 2025-12-06T19:45:00Z -->
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -406,36 +406,36 @@
       </div>
     </div>
     <script>
-      // FIXED: Only clear service workers and caches when recovering from a failure
-      // Clearing on every load was causing reload loops and defeating PWA caching
+      // ALWAYS clear service workers on every load to prevent stale cache issues
+      // This is critical for production stability after deployment
       (function() {
+        console.log('[FlowBills] Clearing service workers on load...');
+        
+        // Always unregister ALL service workers - no exceptions
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => {
+              console.log('[Recovery] Unregistering SW:', registration.scope);
+              registration.unregister();
+            });
+          });
+        }
+        
+        // Always clear all caches
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => {
+              console.log('[Recovery] Clearing cache:', name);
+              caches.delete(name);
+            });
+          });
+        }
+        
+        // Only clear storage on previous failure
         const hadPreviousFailure = localStorage.getItem('flowbills_load_failed') === 'true';
-
         if (hadPreviousFailure) {
-          console.log('[FlowBills] Recovery mode: clearing service workers and caches...');
+          console.log('[Recovery] Previous load failure detected');
           localStorage.removeItem('flowbills_load_failed');
-
-          // Clear service workers only on recovery
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-              registrations.forEach(registration => {
-                console.log('[Recovery] Unregistering SW:', registration.scope);
-                registration.unregister();
-              });
-            });
-          }
-
-          // Clear caches only on recovery
-          if ('caches' in window) {
-            caches.keys().then(names => {
-              names.forEach(name => {
-                console.log('[Recovery] Clearing cache:', name);
-                caches.delete(name);
-              });
-            });
-          }
-        } else {
-          console.log('[FlowBills] Normal load - using cached resources');
         }
       })();
       

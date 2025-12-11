@@ -1,4 +1,4 @@
-import 'https://deno.land/x/xhr@0.1.0/mod.ts';
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 // CORS headers for web app compatibility
@@ -7,16 +7,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-import { assertLLMLock, DENO_MODEL_ID } from '../_shared/llm_guard.ts';
+import { assertLLMLock, DENO_MODEL_ID, DENO_ENDPOINT } from "../_shared/llm_guard.ts";
 
 // Oil & Gas Query Validation
 function validateOilGasQuery(query: string): void {
   if (!query || query.trim().length === 0) {
-    throw new Error('Empty query not allowed');
+    throw new Error("Empty query not allowed");
   }
 
   if (query.length > 4000) {
-    throw new Error('Query too long - max 4000 characters for safety');
+    throw new Error("Query too long - max 4000 characters for safety");
   }
 
   // Log for audit trail (truncated for privacy)
@@ -24,99 +24,75 @@ function validateOilGasQuery(query: string): void {
 }
 
 // Industry-specific RAG retrieval
-function retrieveOilGasContext(query: string, _supabase: any): Promise<string[]> {
-  console.log('📚 Retrieving O&G industry context...');
-
+async function retrieveOilGasContext(query: string, supabase: any): Promise<string[]> {
+  console.log("📚 Retrieving O&G industry context...");
+  
   try {
     // Enhanced industry context with billing-specific knowledge
     const industryContext = [
-      'WITSML (Wellsite Information Transfer Standard Markup Language) is the industry standard for drilling and completion data exchange.',
-      'RESQML provides standardized data formats for subsurface reservoir models and geological interpretations.',
-      'PRODML handles production data management with standardized schemas for hydrocarbon production reporting.',
-      'SPE PRMS (Petroleum Resources Management System) defines reserves and resources classifications: 1P, 2P, 3P reserves.',
-      'OSDU provides a common data platform for upstream oil and gas operations with standardized APIs.',
-      'Joint Interest Billing (JIB) is the accounting process for allocating shared costs among working interest owners based on ownership percentages.',
-      'Authorization for Expenditure (AFE) is a capital budgeting document that must be approved before commencing oil & gas projects.',
-      'Field tickets are service verification documents that record actual work performed, including GPS-validated time, location, and equipment usage.',
-      'Three-way matching validates Purchase Order, Field Ticket, and Invoice alignment before payment approval in oil & gas operations.',
-      'CAPL (Canadian Association of Petroleum Landmen) establishes standard procedures and documentation for Canadian oil & gas operations.',
-      'Master Service Agreements (MSA) define contracted rates and terms that must be validated against incoming invoices.',
-      'Digital field ticketing platforms like OpenTicket enable real-time service verification with GPS validation and automated matching.',
-      'Canadian Energy Regulator (CER) requires compliance reporting for interprovincial pipelines and international energy trade.',
-      'Working interest percentages determine cost allocation in JIB, with operators billing non-operators for their proportionate share.',
-      'AFE supplements and change orders must be approved when project costs exceed original authorized amounts.',
-      'Price variance tolerance (typically 5-10%) determines when invoice amounts require additional approval in O&G AP workflows.',
-      'UWI (Unique Well Identifier) links invoices to specific wells for accurate cost tracking and regulatory reporting in Canada.',
-      'Day rates vs footage rates are common drilling pricing structures that affect invoice calculation and validation rules.',
-      'HST/GST handling varies by province and service type, requiring accurate tax classification in Canadian O&G billing.',
-      "Enverus OpenInvoice is the industry's largest e-invoicing network for oil & gas, enabling automated invoice submission and processing.",
+      "WITSML (Wellsite Information Transfer Standard Markup Language) is the industry standard for drilling and completion data exchange.",
+      "RESQML provides standardized data formats for subsurface reservoir models and geological interpretations.",
+      "PRODML handles production data management with standardized schemas for hydrocarbon production reporting.",
+      "SPE PRMS (Petroleum Resources Management System) defines reserves and resources classifications: 1P, 2P, 3P reserves.",
+      "OSDU provides a common data platform for upstream oil and gas operations with standardized APIs.",
+      "Joint Interest Billing (JIB) is the accounting process for allocating shared costs among working interest owners based on ownership percentages.",
+      "Authorization for Expenditure (AFE) is a capital budgeting document that must be approved before commencing oil & gas projects.",
+      "Field tickets are service verification documents that record actual work performed, including GPS-validated time, location, and equipment usage.",
+      "Three-way matching validates Purchase Order, Field Ticket, and Invoice alignment before payment approval in oil & gas operations.",
+      "CAPL (Canadian Association of Petroleum Landmen) establishes standard procedures and documentation for Canadian oil & gas operations.",
+      "Master Service Agreements (MSA) define contracted rates and terms that must be validated against incoming invoices.",
+      "Digital field ticketing platforms like OpenTicket enable real-time service verification with GPS validation and automated matching.",
+      "Canadian Energy Regulator (CER) requires compliance reporting for interprovincial pipelines and international energy trade.",
+      "Working interest percentages determine cost allocation in JIB, with operators billing non-operators for their proportionate share.",
+      "AFE supplements and change orders must be approved when project costs exceed original authorized amounts.",
+      "Price variance tolerance (typically 5-10%) determines when invoice amounts require additional approval in O&G AP workflows.",
+      "UWI (Unique Well Identifier) links invoices to specific wells for accurate cost tracking and regulatory reporting in Canada.",
+      "Day rates vs footage rates are common drilling pricing structures that affect invoice calculation and validation rules.",
+      "HST/GST handling varies by province and service type, requiring accurate tax classification in Canadian O&G billing.",
+      "Enverus OpenInvoice is the industry's largest e-invoicing network for oil & gas, enabling automated invoice submission and processing."
     ];
 
     // Enhanced context matching with billing keywords
     const billingKeywords = [
-      'invoice',
-      'billing',
-      'payment',
-      'afe',
-      'field ticket',
-      'jib',
-      'joint interest',
-      'approval',
-      'vendor',
-      'cost',
-      'budget',
-      'pricing',
-      'three-way',
-      'matching',
-      'capl',
-      'msa',
-      'purchase order',
-      'po',
+      'invoice', 'billing', 'payment', 'afe', 'field ticket', 'jib', 
+      'joint interest', 'approval', 'vendor', 'cost', 'budget', 'pricing',
+      'three-way', 'matching', 'capl', 'msa', 'purchase order', 'po'
     ];
-
+    
     const technicalKeywords = [
-      'witsml',
-      'resqml',
-      'prodml',
-      'osdu',
-      'reserves',
-      'prms',
-      'drilling',
-      'completion',
-      'production',
-      'well',
-      'uwi',
+      'witsml', 'resqml', 'prodml', 'osdu', 'reserves', 'prms',
+      'drilling', 'completion', 'production', 'well', 'uwi'
     ];
-
+    
     const queryLower = query.toLowerCase();
-
+    
     // Prioritize billing context if query contains billing keywords
-    const hasBillingKeyword = billingKeywords.some((kw) => queryLower.includes(kw));
-    const hasTechnicalKeyword = technicalKeywords.some((kw) => queryLower.includes(kw));
-
+    const hasBillingKeyword = billingKeywords.some(kw => queryLower.includes(kw));
+    const hasTechnicalKeyword = technicalKeywords.some(kw => queryLower.includes(kw));
+    
     let relevantContext: string[];
-
+    
     if (hasBillingKeyword) {
       // Prioritize billing-related context
-      relevantContext = industryContext.filter((context) => {
+      relevantContext = industryContext.filter(context => {
         const contextLower = context.toLowerCase();
-        return billingKeywords.some((kw) => contextLower.includes(kw));
+        return billingKeywords.some(kw => contextLower.includes(kw));
       }).slice(0, 5);
-
+      
       // Add some technical context if relevant
       if (hasTechnicalKeyword) {
         relevantContext = relevantContext.concat(
-          industryContext.filter((context) => {
+          industryContext.filter(context => {
             const contextLower = context.toLowerCase();
-            return technicalKeywords.some((kw) => contextLower.includes(kw));
-          }).slice(0, 2),
+            return technicalKeywords.some(kw => contextLower.includes(kw));
+          }).slice(0, 2)
         );
       }
     } else if (hasTechnicalKeyword) {
       // Technical query - focus on standards
-      relevantContext = industryContext.filter((context) => {
+      relevantContext = industryContext.filter(context => {
         const contextLower = context.toLowerCase();
-        return technicalKeywords.some((kw) => contextLower.includes(kw));
+        return technicalKeywords.some(kw => contextLower.includes(kw));
       }).slice(0, 5);
     } else {
       // General query - return mix of both
@@ -125,11 +101,10 @@ function retrieveOilGasContext(query: string, _supabase: any): Promise<string[]>
 
     console.log(`📊 Retrieved ${relevantContext.length} industry context chunks`);
     return relevantContext;
+    
   } catch (error) {
-    console.error('❌ RAG retrieval failed:', error);
-    return [
-      'No industry-specific context available. Please provide more specific technical details.',
-    ];
+    console.error("❌ RAG retrieval failed:", error);
+    return ["No industry-specific context available. Please provide more specific technical details."];
   }
 }
 
@@ -146,11 +121,11 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     const { query, user_id, context } = await req.json();
-
+    
     // Validate the incoming query
     validateOilGasQuery(query);
 
@@ -160,8 +135,7 @@ Deno.serve(async (req) => {
     const industryContext = await retrieveOilGasContext(query, supabase);
 
     // Build system prompt with industry knowledge
-    const systemPrompt =
-      `You are FlowAi, a specialized Oil & Gas AI assistant with deep knowledge of industry standards, billing practices, and operational workflows in Canadian oil & gas.
+    const systemPrompt = `You are FlowAi, a specialized Oil & Gas AI assistant with deep knowledge of industry standards, billing practices, and operational workflows in Canadian oil & gas.
 
 TECHNICAL DATA STANDARDS:
 - WITSML, RESQML, PRODML data standards
@@ -281,7 +255,7 @@ Remember: You must provide citations for any industry-specific claims. If you ca
     // Prepare messages for the LLM
     const messages = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: query },
+      { role: 'user', content: query }
     ];
 
     // Add conversation context if provided
@@ -307,7 +281,7 @@ Remember: You must provide citations for any industry-specific claims. If you ca
 
     if (!openAIResponse.ok) {
       const errorData = await openAIResponse.text();
-      console.error('❌ OpenAI API error:', errorData);
+      console.error("❌ OpenAI API error:", errorData);
       throw new Error(`OpenAI API error: ${openAIResponse.status}`);
     }
 
@@ -324,40 +298,35 @@ Remember: You must provide citations for any industry-specific claims. If you ca
         query: query.substring(0, 200), // Truncated for privacy
         model: Deno.env.get('LLM_MODEL_ID'),
         response_length: response.length,
-        context_chunks: industryContext.length,
-      },
+        context_chunks: industryContext.length
+      }
     });
 
-    console.log('✅ O&G assistant response generated successfully');
+    console.log("✅ O&G assistant response generated successfully");
 
-    return new Response(
-      JSON.stringify({
-        response,
-        citations: industryContext,
-        model: Deno.env.get('LLM_MODEL_ID'),
-        context_used: industryContext.length > 0,
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    );
+    return new Response(JSON.stringify({ 
+      response,
+      citations: industryContext,
+      model: Deno.env.get('LLM_MODEL_ID'),
+      context_used: industryContext.length > 0
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
   } catch (error) {
     console.error('❌ Oil & Gas Assistant error:', error);
-
+    
     // Security: Never expose internal details in production
-    const errorMessage = (error as Error).message?.includes('SECURITY:')
+    const errorMessage = (error as Error).message?.includes('SECURITY:') 
       ? 'LLM security system active - access denied'
       : 'Oil & Gas assistant temporarily unavailable';
 
-    return new Response(
-      JSON.stringify({
-        error: errorMessage,
-        details: Deno.env.get('NODE_ENV') === 'development' ? (error as Error).message : undefined,
-      }),
-      {
-        status: (error as Error).message?.includes('SECURITY:') ? 503 : 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    );
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      details: Deno.env.get('NODE_ENV') === 'development' ? (error as Error).message : undefined
+    }), {
+      status: (error as Error).message?.includes('SECURITY:') ? 503 : 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

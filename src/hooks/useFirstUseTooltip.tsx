@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "./useAuth";
+import { useState, useEffect } from 'react';
+import { useAuth } from './useAuth';
 
-const STORAGE_KEY = "flowbills_shown_tooltips";
+const STORAGE_KEY = 'flowbills_shown_tooltips';
 
 export const useFirstUseTooltip = (tooltipId: string) => {
   const { user } = useAuth();
@@ -12,8 +12,8 @@ export const useFirstUseTooltip = (tooltipId: string) => {
     if (!user) return;
 
     const storageKey = `${STORAGE_KEY}_${user.id}`;
-    const shownTooltips = JSON.parse(localStorage.getItem(storageKey) || "{}");
-
+    const shownTooltips = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    
     if (!shownTooltips[tooltipId]) {
       setShouldShow(true);
       setIsOpen(true);
@@ -22,9 +22,9 @@ export const useFirstUseTooltip = (tooltipId: string) => {
 
   const markAsShown = () => {
     if (!user) return;
-
+    
     const storageKey = `${STORAGE_KEY}_${user.id}`;
-    const shownTooltips = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    const shownTooltips = JSON.parse(localStorage.getItem(storageKey) || '{}');
     shownTooltips[tooltipId] = true;
     localStorage.setItem(storageKey, JSON.stringify(shownTooltips));
     setShouldShow(false);

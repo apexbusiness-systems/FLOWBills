@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
-import InvoiceList from "@/components/invoices/InvoiceList";
-import { EditInvoiceDialog } from "@/components/invoices/EditInvoiceDialog";
-import FileUploadZone from "@/components/invoices/FileUploadZone";
-import { useInvoices, Invoice } from "@/hooks/useInvoices";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, List, Workflow } from "lucide-react";
-import WorkflowPipeline from "@/components/dashboard/WorkflowPipeline";
+import { useState } from 'react';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import InvoiceList from '@/components/invoices/InvoiceList';
+import { EditInvoiceDialog } from '@/components/invoices/EditInvoiceDialog';
+import FileUploadZone from '@/components/invoices/FileUploadZone';
+import { useInvoices, Invoice } from '@/hooks/useInvoices';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Upload, List, Workflow } from 'lucide-react';
+import WorkflowPipeline from '@/components/dashboard/WorkflowPipeline';
 
 const Invoices = () => {
   const { invoices, loading, createInvoice, updateInvoice, deleteInvoice } = useInvoices();
@@ -36,7 +36,7 @@ const Invoices = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <BreadcrumbNav className="mb-4" />
-
+      
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Invoice Management</h1>
         <p className="text-muted-foreground">

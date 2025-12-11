@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient, UseMutationOptions } from "@tanstack/react-query";
-import { useToast } from "./use-toast";
-import { OfflineQueue } from "@/lib/persistence";
+import { useMutation, useQueryClient, UseMutationOptions } from '@tanstack/react-query';
+import { useToast } from './use-toast';
+import { OfflineQueue } from '@/lib/persistence';
 
 interface OptimisticMutationOptions<TData, TVariables> {
   queryKey: any[];
@@ -8,17 +8,12 @@ interface OptimisticMutationOptions<TData, TVariables> {
   optimisticUpdater?: (oldData: any, variables: TVariables) => any;
   offlineSupport?: boolean;
   offlineTable?: string;
-  offlineType?: "create" | "update" | "delete";
+  offlineType?: 'create' | 'update' | 'delete';
   successMessage?: string;
   errorMessage?: string;
   onError?: (error: Error, variables: TVariables, context: any) => void;
   onSuccess?: (data: TData, variables: TVariables, context: any) => void;
-  onSettled?: (
-    data: TData | undefined,
-    error: Error | null,
-    variables: TVariables,
-    context: any
-  ) => void;
+  onSettled?: (data: TData | undefined, error: Error | null, variables: TVariables, context: any) => void;
 }
 
 export function useOptimisticMutation<TData = unknown, TVariables = unknown>(
@@ -29,7 +24,7 @@ export function useOptimisticMutation<TData = unknown, TVariables = unknown>(
 
   return useMutation<TData, Error, TVariables>({
     mutationFn: options.mutationFn,
-
+    
     onMutate: async (variables) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: options.queryKey });
@@ -39,8 +34,9 @@ export function useOptimisticMutation<TData = unknown, TVariables = unknown>(
 
       // Optimistically update cache if updater provided
       if (options.optimisticUpdater) {
-        queryClient.setQueryData(options.queryKey, (old: any) =>
-          options.optimisticUpdater!(old, variables)
+        queryClient.setQueryData(
+          options.queryKey,
+          (old: any) => options.optimisticUpdater!(old, variables)
         );
       }
 
@@ -54,7 +50,7 @@ export function useOptimisticMutation<TData = unknown, TVariables = unknown>(
             maxRetries: 3,
           });
         } catch (error) {
-          console.warn("Failed to queue offline operation:", error);
+          console.warn('Failed to queue offline operation:', error);
         }
       }
 
@@ -68,9 +64,9 @@ export function useOptimisticMutation<TData = unknown, TVariables = unknown>(
       }
 
       toast({
-        title: "Error",
-        description: options.errorMessage || error.message || "Operation failed",
-        variant: "destructive",
+        title: 'Error',
+        description: options.errorMessage || error.message || 'Operation failed',
+        variant: 'destructive',
       });
 
       // Call original onError if provided
@@ -80,7 +76,7 @@ export function useOptimisticMutation<TData = unknown, TVariables = unknown>(
     onSuccess: (data, variables, context: any) => {
       if (options.successMessage) {
         toast({
-          title: "Success",
+          title: 'Success',
           description: options.successMessage,
         });
       }

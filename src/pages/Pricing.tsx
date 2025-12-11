@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { Check, Calculator } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,18 +8,18 @@ import { Slider } from "@/components/ui/slider";
 import { Footer } from "@/components/ui/footer";
 import { TrackLink } from "@/components/ui/TrackLink";
 import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
-import {
-  PRICING_PLANS,
-  calculateMonthlyBill,
+import { 
+  PRICING_PLANS, 
+  calculateMonthlyBill, 
   formatCurrency,
-  getRecommendedPlan,
+  getRecommendedPlan 
 } from "@/lib/constants/pricing";
 
 export default function Pricing() {
   const [invoiceVolume, setInvoiceVolume] = useState(2000);
-
-  const starterCalc = calculateMonthlyBill("STARTER", invoiceVolume);
-  const growthCalc = calculateMonthlyBill("GROWTH", invoiceVolume);
+  
+  const starterCalc = calculateMonthlyBill('STARTER', invoiceVolume);
+  const growthCalc = calculateMonthlyBill('GROWTH', invoiceVolume);
   const recommended = getRecommendedPlan(invoiceVolume);
 
   return (
@@ -39,8 +32,7 @@ export default function Pricing() {
             Simple, Volume-Based Pricing
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            No per-seat charges. Pay based on invoice volume. Unlimited internal users and vendor
-            access included.
+            No per-seat charges. Pay based on invoice volume. Unlimited internal users and vendor access included.
           </p>
         </div>
 
@@ -51,7 +43,9 @@ export default function Pricing() {
               <Calculator className="h-6 w-6 text-primary" />
               <CardTitle className="text-2xl">Pricing Calculator</CardTitle>
             </div>
-            <CardDescription>Estimate your monthly cost based on invoice volume</CardDescription>
+            <CardDescription>
+              Estimate your monthly cost based on invoice volume
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
@@ -83,7 +77,7 @@ export default function Pricing() {
               <div className="space-y-3">
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   Starter Plan
-                  {recommended.plan_id === "STARTER" && (
+                  {recommended.plan_id === 'STARTER' && (
                     <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
                       Recommended
                     </span>
@@ -92,9 +86,7 @@ export default function Pricing() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Base Price:</span>
-                    <span className="font-medium">
-                      {formatCurrency(starterCalc.base_price_cents)}
-                    </span>
+                    <span className="font-medium">{formatCurrency(starterCalc.base_price_cents)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Included Invoices:</span>
@@ -103,20 +95,14 @@ export default function Pricing() {
                   {starterCalc.overage_count > 0 && (
                     <>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          Overage ({starterCalc.overage_count}):
-                        </span>
-                        <span className="font-medium">
-                          {formatCurrency(starterCalc.overage_price_cents)}
-                        </span>
+                        <span className="text-muted-foreground">Overage ({starterCalc.overage_count}):</span>
+                        <span className="font-medium">{formatCurrency(starterCalc.overage_price_cents)}</span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between pt-2 border-t font-bold text-base">
                     <span>Total:</span>
-                    <span className="text-primary">
-                      {formatCurrency(starterCalc.total_price_cents)}
-                    </span>
+                    <span className="text-primary">{formatCurrency(starterCalc.total_price_cents)}</span>
                   </div>
                 </div>
               </div>
@@ -124,7 +110,7 @@ export default function Pricing() {
               <div className="space-y-3">
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   Growth Plan
-                  {recommended.plan_id === "GROWTH" && (
+                  {recommended.plan_id === 'GROWTH' && (
                     <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
                       Recommended
                     </span>
@@ -133,9 +119,7 @@ export default function Pricing() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Base Price:</span>
-                    <span className="font-medium">
-                      {formatCurrency(growthCalc.base_price_cents)}
-                    </span>
+                    <span className="font-medium">{formatCurrency(growthCalc.base_price_cents)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Included Invoices:</span>
@@ -144,20 +128,14 @@ export default function Pricing() {
                   {growthCalc.overage_count > 0 && (
                     <>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          Overage ({growthCalc.overage_count}):
-                        </span>
-                        <span className="font-medium">
-                          {formatCurrency(growthCalc.overage_price_cents)}
-                        </span>
+                        <span className="text-muted-foreground">Overage ({growthCalc.overage_count}):</span>
+                        <span className="font-medium">{formatCurrency(growthCalc.overage_price_cents)}</span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between pt-2 border-t font-bold text-base">
                     <span>Total:</span>
-                    <span className="text-primary">
-                      {formatCurrency(growthCalc.total_price_cents)}
-                    </span>
+                    <span className="text-primary">{formatCurrency(growthCalc.total_price_cents)}</span>
                   </div>
                 </div>
               </div>
@@ -184,18 +162,14 @@ export default function Pricing() {
               </CardDescription>
               <div className="pt-4">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-bold">
-                    {formatCurrency(PRICING_PLANS.STARTER.base_price_cents)}
-                  </span>
+                  <span className="text-5xl font-bold">{formatCurrency(PRICING_PLANS.STARTER.base_price_cents)}</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Includes up to {PRICING_PLANS.STARTER.included_invoices.toLocaleString()}{" "}
-                  invoices/month
+                  Includes up to {PRICING_PLANS.STARTER.included_invoices.toLocaleString()} invoices/month
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {formatCurrency(PRICING_PLANS.STARTER.overage_price_per_invoice_cents)} per
-                  additional invoice
+                  {formatCurrency(PRICING_PLANS.STARTER.overage_price_per_invoice_cents)} per additional invoice
                 </p>
               </div>
             </CardHeader>
@@ -258,18 +232,14 @@ export default function Pricing() {
               </CardDescription>
               <div className="pt-4">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-bold">
-                    {formatCurrency(PRICING_PLANS.GROWTH.base_price_cents)}
-                  </span>
+                  <span className="text-5xl font-bold">{formatCurrency(PRICING_PLANS.GROWTH.base_price_cents)}</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Includes up to {PRICING_PLANS.GROWTH.included_invoices.toLocaleString()}{" "}
-                  invoices/month
+                  Includes up to {PRICING_PLANS.GROWTH.included_invoices.toLocaleString()} invoices/month
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {formatCurrency(PRICING_PLANS.GROWTH.overage_price_per_invoice_cents)} per
-                  additional invoice
+                  {formatCurrency(PRICING_PLANS.GROWTH.overage_price_per_invoice_cents)} per additional invoice
                 </p>
               </div>
             </CardHeader>
@@ -277,9 +247,7 @@ export default function Pricing() {
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Everything in Starter</strong>
-                  </span>
+                  <span><strong>Everything in Starter</strong></span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
@@ -371,36 +339,36 @@ export default function Pricing() {
             <div>
               <h3 className="font-semibold text-lg mb-2">Do you charge per user?</h3>
               <p className="text-muted-foreground">
-                No. All internal team members and vendor portal users are included at no additional
-                cost. You only pay based on invoice volume processed.
+                No. All internal team members and vendor portal users are included at no additional cost. 
+                You only pay based on invoice volume processed.
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-lg mb-2">What counts as an "invoice processed"?</h3>
               <p className="text-muted-foreground">
-                Any invoice uploaded and run through our OCR extraction pipeline counts toward your
-                monthly limit. Drafts, deleted invoices, and failed uploads do not count.
+                Any invoice uploaded and run through our OCR extraction pipeline counts toward your monthly limit. 
+                Drafts, deleted invoices, and failed uploads do not count.
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-lg mb-2">Can I upgrade or downgrade anytime?</h3>
               <p className="text-muted-foreground">
-                Yes. Changes take effect at the start of your next billing cycle. If you exceed your
-                plan's included volume, overage charges apply automatically.
+                Yes. Changes take effect at the start of your next billing cycle. 
+                If you exceed your plan's included volume, overage charges apply automatically.
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-lg mb-2">What payment methods do you accept?</h3>
               <p className="text-muted-foreground">
-                We accept all major credit cards via Stripe. Enterprise customers can arrange
-                ACH/wire transfers and annual invoicing.
+                We accept all major credit cards via Stripe. Enterprise customers can arrange ACH/wire transfers 
+                and annual invoicing.
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-lg mb-2">Is there a free trial?</h3>
               <p className="text-muted-foreground">
-                Yes. All plans include a 14-day free trial with full feature access. No credit card
-                required to start.
+                Yes. All plans include a 14-day free trial with full feature access. 
+                No credit card required to start.
               </p>
             </div>
           </div>

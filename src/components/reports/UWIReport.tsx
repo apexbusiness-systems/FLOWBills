@@ -1,40 +1,18 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Download, Filter } from "lucide-react";
-import { useReports, UWIProductionData } from "@/hooks/useReports";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Download, Filter } from 'lucide-react';
+import { useReports, UWIProductionData } from '@/hooks/useReports';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 export const UWIReportComponent = () => {
   const [data, setData] = useState<UWIProductionData[]>([]);
-  const [province, setProvince] = useState<string>("");
-  const [status, setStatus] = useState<string>("");
+  const [province, setProvince] = useState<string>('');
+  const [status, setStatus] = useState<string>('');
   const { loading, getUWIProductionData, exportToCSV } = useReports();
 
   const loadReport = async () => {
@@ -50,10 +28,10 @@ export const UWIReportComponent = () => {
   }, []);
 
   const handleExport = () => {
-    exportToCSV(data, "uwi_production_data");
+    exportToCSV(data, 'uwi_production_data');
   };
 
-  const chartData = data.slice(0, 10).map((uwi) => ({
+  const chartData = data.slice(0, 10).map(uwi => ({
     name: uwi.uwi.slice(-8),
     invoices: uwi.total_invoices,
     amount: uwi.total_amount,
@@ -71,15 +49,12 @@ export const UWIReportComponent = () => {
     },
   };
 
-  const totals = data.reduce(
-    (acc, uwi) => ({
-      total_uwis: acc.total_uwis + 1,
-      total_invoices: acc.total_invoices + uwi.total_invoices,
-      total_amount: acc.total_amount + uwi.total_amount,
-      total_field_tickets: acc.total_field_tickets + uwi.total_field_tickets,
-    }),
-    { total_uwis: 0, total_invoices: 0, total_amount: 0, total_field_tickets: 0 }
-  );
+  const totals = data.reduce((acc, uwi) => ({
+    total_uwis: acc.total_uwis + 1,
+    total_invoices: acc.total_invoices + uwi.total_invoices,
+    total_amount: acc.total_amount + uwi.total_amount,
+    total_field_tickets: acc.total_field_tickets + uwi.total_field_tickets,
+  }), { total_uwis: 0, total_invoices: 0, total_amount: 0, total_field_tickets: 0 });
 
   return (
     <Card>
@@ -200,28 +175,21 @@ export const UWIReportComponent = () => {
                   {data.map((uwi) => (
                     <TableRow key={uwi.uwi}>
                       <TableCell className="font-mono text-xs">{uwi.uwi}</TableCell>
-                      <TableCell>{uwi.well_name || "-"}</TableCell>
+                      <TableCell>{uwi.well_name || '-'}</TableCell>
                       <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            uwi.status === "active"
-                              ? "bg-success/20 text-success"
-                              : uwi.status === "drilling"
-                                ? "bg-primary/20 text-primary"
-                                : uwi.status === "completed"
-                                  ? "bg-muted text-muted-foreground"
-                                  : "bg-warning/20 text-warning"
-                          }`}
-                        >
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          uwi.status === 'active' ? 'bg-success/20 text-success' :
+                          uwi.status === 'drilling' ? 'bg-primary/20 text-primary' :
+                          uwi.status === 'completed' ? 'bg-muted text-muted-foreground' :
+                          'bg-warning/20 text-warning'
+                        }`}>
                           {uwi.status}
                         </span>
                       </TableCell>
-                      <TableCell>{uwi.province || "-"}</TableCell>
-                      <TableCell>{uwi.operator || "-"}</TableCell>
+                      <TableCell>{uwi.province || '-'}</TableCell>
+                      <TableCell>{uwi.operator || '-'}</TableCell>
                       <TableCell className="text-right">{uwi.total_invoices}</TableCell>
-                      <TableCell className="text-right">
-                        ${uwi.total_amount.toLocaleString()}
-                      </TableCell>
+                      <TableCell className="text-right">${uwi.total_amount.toLocaleString()}</TableCell>
                       <TableCell className="text-right">{uwi.total_field_tickets}</TableCell>
                     </TableRow>
                   ))}

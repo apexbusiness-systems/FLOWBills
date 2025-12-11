@@ -11,5 +11,9 @@ interface PageTransitionProps {
  * Provides consistent animation when navigating between pages
  */
 export const PageTransition = ({ children, className }: PageTransitionProps) => {
-  return <div className={cn("animate-fade-in", className)}>{children}</div>;
+  return (
+    <div className={cn("animate-fade-in", className)}>
+      {children}
+    </div>
+  );
 };

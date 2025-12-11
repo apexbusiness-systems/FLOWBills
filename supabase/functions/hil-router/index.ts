@@ -1,5 +1,5 @@
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { corsHeaders } from '../_shared/cors.ts';
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { corsHeaders } from '../_shared/cors.ts'
 
 // Type definitions
 interface InvoiceAnalysis {
@@ -49,11 +49,9 @@ const validateInput = (invoice: InvoiceAnalysis): ValidationResult => {
     errors.push('Valid invoice_id is required');
   }
 
-  if (
-    typeof invoice.confidence_score !== 'number' ||
-    invoice.confidence_score < 0 ||
-    invoice.confidence_score > 100
-  ) {
+  if (typeof invoice.confidence_score !== 'number' || 
+      invoice.confidence_score < 0 || 
+      invoice.confidence_score > 100) {
     errors.push('confidence_score must be a number between 0 and 100');
   }
 
@@ -79,42 +77,41 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 
   try {
     // Rate limiting
-    const clientIp = req.headers.get('x-forwarded-for') ||
-      req.headers.get('x-real-ip') ||
-      'unknown';
-
+    const clientIp = req.headers.get('x-forwarded-for') || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+    
     if (!checkRateLimit(clientIp)) {
       console.warn(`Rate limit exceeded for IP: ${clientIp}`);
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     // Get client IP and user agent for logging
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') ||
-      'unknown';
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const userAgent = req.headers.get('user-agent') || 'unknown';
 
     const requestBody = await req.json();
     const { invoice } = requestBody as { invoice: InvoiceAnalysis };
-
+    
     // Enhanced input validation
     const validation = validateInput(invoice);
     if (!validation.valid) {
       console.error('Input validation failed:', validation.errors);
-
+      
       // Log security event for invalid input
       await supabase.from('security_events').insert({
         event_type: 'invalid_input_hil_router',
@@ -123,24 +120,21 @@ Deno.serve(async (req) => {
           errors: validation.errors,
           ip_address: clientIP,
           user_agent: userAgent,
-          input_sample: JSON.stringify(invoice).substring(0, 500),
-        },
+          input_sample: JSON.stringify(invoice).substring(0, 500)
+        }
       });
-
-      return new Response(
-        JSON.stringify({
-          error: 'Invalid input data',
-          details: validation.errors,
-          routing_decision: 'human_review',
-          requires_human_review: true,
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
+      
+      return new Response(JSON.stringify({ 
+        error: 'Invalid input data',
+        details: validation.errors,
+        routing_decision: 'human_review',
+        requires_human_review: true
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
-
+    
     console.log('HIL routing for invoice:', invoice.invoice_id);
 
     // Define confidence thresholds
@@ -184,7 +178,7 @@ Deno.serve(async (req) => {
 
     // Check for missing critical data
     const criticalFields = ['vendor_id', 'amount', 'invoice_date'];
-    const missingFields = criticalFields.filter((field) =>
+    const missingFields = criticalFields.filter(field => 
       !invoice.extracted_data || !invoice.extracted_data[field]
     );
 
@@ -203,7 +197,7 @@ Deno.serve(async (req) => {
       priority: priority,
       flagged_fields: flaggedFields,
       confidence_score: invoice.confidence_score,
-      requires_human_review: routingDecision === 'human_review',
+      requires_human_review: routingDecision === 'human_review'
     };
 
     // If requires human review, add to review queue
@@ -215,7 +209,7 @@ Deno.serve(async (req) => {
           priority: priority,
           reason: reason,
           confidence_score: invoice.confidence_score,
-          flagged_fields: flaggedFields,
+          flagged_fields: flaggedFields
         });
 
       if (queueError) {
@@ -229,9 +223,9 @@ Deno.serve(async (req) => {
     const newStatus = routingDecision === 'auto_approve' ? 'approved' : 'processing';
     const { error: updateError } = await supabase
       .from('invoices')
-      .update({
+      .update({ 
         status: newStatus,
-        confidence_score: invoice.confidence_score,
+        confidence_score: invoice.confidence_score
       })
       .eq('id', invoice.invoice_id);
 
@@ -249,7 +243,7 @@ Deno.serve(async (req) => {
           amount_approved: invoice.amount,
           approval_date: new Date().toISOString(),
           comments: 'Auto-approved by HIL router',
-          auto_approved: true,
+          auto_approved: true
         });
 
       if (approvalError) {
@@ -262,20 +256,18 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     console.error('HIL routing error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(
-      JSON.stringify({
-        error: errorMessage,
-        routing_decision: 'human_review',
-        reason: 'Error in automated processing',
-        requires_human_review: true,
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    );
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      routing_decision: 'human_review',
+      reason: 'Error in automated processing',
+      requires_human_review: true
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

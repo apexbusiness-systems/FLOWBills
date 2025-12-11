@@ -16,15 +16,15 @@ interface StatusCardProps {
   onClick?: () => void;
 }
 
-const StatusCard = ({
-  title,
-  value,
-  change,
-  changeType = "neutral",
-  icon: Icon,
+const StatusCard = ({ 
+  title, 
+  value, 
+  change, 
+  changeType = "neutral", 
+  icon: Icon, 
   status,
   description,
-  onClick,
+  onClick 
 }: StatusCardProps) => {
   const navigate = useNavigate();
   const { getInvoicesStats } = useInvoices();
@@ -32,19 +32,18 @@ const StatusCard = ({
 
   // Use real data for invoice-related metrics
   const getRealValue = (): string | number => {
+    
     switch (title) {
-      case "Monthly Volume":
+      case 'Monthly Volume':
         return `$${(stats.totalAmount / 1000000).toFixed(1)}M`;
-      case "Active Invoices":
+      case 'Active Invoices':
         return stats.totalCount;
-      case "Processing Rate": {
-        const rate =
-          stats.totalCount > 0
-            ? ((stats.approvedCount + stats.paidCount) / stats.totalCount) * 100
-            : 94.2; // Default rate
+      case 'Processing Rate':
+        const rate = stats.totalCount > 0 
+          ? ((stats.approvedCount + stats.paidCount) / stats.totalCount) * 100
+          : 94.2; // Default rate
         return `${rate.toFixed(1)}%`;
-      }
-      case "Exception Queue":
+      case 'Exception Queue':
         return stats.rejectedCount + stats.pendingCount;
       default:
         return value;
@@ -52,30 +51,26 @@ const StatusCard = ({
   };
 
   const getRealChange = (): string => {
+    
     switch (title) {
-      case "Monthly Volume":
+      case 'Monthly Volume':
         return `${stats.totalCount} invoices total`;
-      case "Active Invoices":
+      case 'Active Invoices':
         return `${stats.pendingCount} pending approval`;
-      case "Processing Rate":
+      case 'Processing Rate':
         return `${stats.approvedCount} approved`;
-      case "Exception Queue":
+      case 'Exception Queue':
         return `${stats.rejectedCount} rejected`;
       default:
-        return change || "";
+        return change || '';
     }
   };
 
   const handleClick = () => {
     if (onClick) {
       onClick();
-    } else if (
-      title.includes("Invoice") ||
-      title.includes("Volume") ||
-      title.includes("Exception") ||
-      title.includes("Processing")
-    ) {
-      navigate("/invoices");
+    } else if (title.includes('Invoice') || title.includes('Volume') || title.includes('Exception') || title.includes('Processing')) {
+      navigate('/invoices');
     }
   };
 
@@ -106,24 +101,24 @@ const StatusCard = ({
   };
 
   const formatValue = (val: string | number) => {
-    if (typeof val === "number") {
+    if (typeof val === 'number') {
       return val;
     }
     // Extract numeric value from strings like "$2.4M" or "94.2%"
     const numMatch = val.match(/[\d,.]+/);
-    return numMatch ? parseFloat(numMatch[0].replace(/,/g, "")) : 0;
+    return numMatch ? parseFloat(numMatch[0].replace(/,/g, '')) : 0;
   };
 
   const formatDisplay = (val: number, original: string | number) => {
-    if (typeof original === "number") {
+    if (typeof original === 'number') {
       return Math.round(val).toString();
     }
     // Preserve formatting for currency and percentages
-    if (typeof original === "string") {
-      if (original.includes("$")) {
+    if (typeof original === 'string') {
+      if (original.includes('$')) {
         return `$${(val / 1000000).toFixed(1)}M`;
       }
-      if (original.includes("%")) {
+      if (original.includes('%')) {
         return `${val.toFixed(1)}%`;
       }
     }
@@ -134,7 +129,10 @@ const StatusCard = ({
   const displayChange = getRealChange();
 
   return (
-    <div className="metric-card group hover-lift cursor-pointer" onClick={handleClick}>
+    <div 
+      className="metric-card group hover-lift cursor-pointer"
+      onClick={handleClick}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/20 text-primary group-hover:from-primary/20 group-hover:to-primary/30 transition-all duration-300">
@@ -143,7 +141,7 @@ const StatusCard = ({
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
             <p className="text-3xl font-bold text-foreground">
-              <AnimatedCounter
+              <AnimatedCounter 
                 value={formatValue(displayValue)}
                 formatter={(val) => formatDisplay(val, displayValue)}
                 duration={1500}
@@ -153,24 +151,14 @@ const StatusCard = ({
         </div>
         {status && (
           <div className="flex items-center gap-2">
-            <StatusIndicator
-              status={
-                status === "pending"
-                  ? "warning"
-                  : status === "approved"
-                    ? "healthy"
-                    : status === "rejected"
-                      ? "error"
-                      : "processing"
-              }
-            />
+            <StatusIndicator status={status === "pending" ? "warning" : status === "approved" ? "healthy" : status === "rejected" ? "error" : "processing"} />
             <Badge className={`${getStatusBadgeClass()} capitalize animate-fade-in`}>
               {status}
             </Badge>
           </div>
         )}
       </div>
-
+      
       <div className="mt-4 flex items-center justify-between">
         {displayChange && (
           <span className={`text-sm font-medium ${getChangeClass()} flex items-center gap-1`}>
@@ -181,7 +169,7 @@ const StatusCard = ({
         )}
         {description && (
           <p className="text-xs text-muted-foreground opacity-70 group-hover:opacity-100 transition-opacity">
-            {description || "Click to view details"}
+            {description || 'Click to view details'}
           </p>
         )}
       </div>

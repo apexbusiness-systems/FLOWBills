@@ -1,20 +1,15 @@
-import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  Search,
-  Book,
-  Video,
-  MessageCircle,
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { 
+  Search, 
+  Book, 
+  Video, 
+  MessageCircle, 
   ExternalLink,
   ChevronRight,
   FileText,
@@ -26,15 +21,15 @@ import {
   Users,
   Lightbulb,
   AlertCircle,
-  CheckCircle,
-} from "lucide-react";
+  CheckCircle
+} from 'lucide-react';
 
 interface HelpArticle {
   id: string;
   title: string;
   description: string;
   category: string;
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   content: string;
   tags: string[];
   lastUpdated: string;
@@ -49,22 +44,22 @@ interface HelpCategory {
 }
 
 const HelpDocumentation: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const helpCategories: HelpCategory[] = [
     {
-      id: "getting-started",
-      name: "Getting Started",
-      description: "Learn the basics and set up your account",
+      id: 'getting-started',
+      name: 'Getting Started',
+      description: 'Learn the basics and set up your account',
       icon: Zap,
       articles: [
         {
-          id: "quick-start",
-          title: "Quick Start Guide",
-          description: "Get up and running in 5 minutes",
-          category: "getting-started",
-          difficulty: "Beginner",
+          id: 'quick-start',
+          title: 'Quick Start Guide',
+          description: 'Get up and running in 5 minutes',
+          category: 'getting-started',
+          difficulty: 'Beginner',
           content: `# Quick Start Guide
 
 Welcome to the Oil & Gas Billing Platform! This guide will help you get started quickly.
@@ -88,15 +83,15 @@ Welcome to the Oil & Gas Billing Platform! This guide will help you get started 
 - Analytics dashboard
 - Compliance monitoring
 - Integration options`,
-          tags: ["onboarding", "setup", "basics"],
-          lastUpdated: "2024-01-15",
+          tags: ['onboarding', 'setup', 'basics'],
+          lastUpdated: '2024-01-15'
         },
         {
-          id: "account-setup",
-          title: "Account and Profile Setup",
-          description: "Configure your account settings and profile",
-          category: "getting-started",
-          difficulty: "Beginner",
+          id: 'account-setup',
+          title: 'Account and Profile Setup',
+          description: 'Configure your account settings and profile',
+          category: 'getting-started',
+          difficulty: 'Beginner',
           content: `# Account and Profile Setup
 
 ## Personal Profile
@@ -113,23 +108,23 @@ Welcome to the Oil & Gas Billing Platform! This guide will help you get started 
 - Enable two-factor authentication
 - Set up backup email addresses
 - Review login history`,
-          tags: ["account", "profile", "security"],
-          lastUpdated: "2024-01-14",
-        },
-      ],
+          tags: ['account', 'profile', 'security'],
+          lastUpdated: '2024-01-14'
+        }
+      ]
     },
     {
-      id: "invoice-processing",
-      name: "Invoice Processing",
-      description: "Learn how to process and manage invoices",
+      id: 'invoice-processing',
+      name: 'Invoice Processing',
+      description: 'Learn how to process and manage invoices',
       icon: FileText,
       articles: [
         {
-          id: "upload-invoices",
-          title: "Uploading and Processing Invoices",
-          description: "How to upload and process invoice documents",
-          category: "invoice-processing",
-          difficulty: "Beginner",
+          id: 'upload-invoices',
+          title: 'Uploading and Processing Invoices',
+          description: 'How to upload and process invoice documents',
+          category: 'invoice-processing',
+          difficulty: 'Beginner',
           content: `# Uploading and Processing Invoices
 
 ## Supported File Types
@@ -149,15 +144,15 @@ Welcome to the Oil & Gas Billing Platform! This guide will help you get started 
 3. **Validation**: Data is checked against your rules
 4. **Review**: Manual review if needed
 5. **Approval**: Final approval and processing`,
-          tags: ["upload", "processing", "ocr"],
-          lastUpdated: "2024-01-16",
+          tags: ['upload', 'processing', 'ocr'],
+          lastUpdated: '2024-01-16'
         },
         {
-          id: "validation-rules",
-          title: "Setting Up Validation Rules",
-          description: "Create rules to automatically validate invoice data",
-          category: "invoice-processing",
-          difficulty: "Intermediate",
+          id: 'validation-rules',
+          title: 'Setting Up Validation Rules',
+          description: 'Create rules to automatically validate invoice data',
+          category: 'invoice-processing',
+          difficulty: 'Intermediate',
           content: `# Setting Up Validation Rules
 
 ## Types of Validation Rules
@@ -179,23 +174,23 @@ Welcome to the Oil & Gas Billing Platform! This guide will help you get started 
 - Test rules with sample data first
 - Monitor rule performance regularly
 - Update rules as business needs change`,
-          tags: ["validation", "rules", "automation"],
-          lastUpdated: "2024-01-13",
-        },
-      ],
+          tags: ['validation', 'rules', 'automation'],
+          lastUpdated: '2024-01-13'
+        }
+      ]
     },
     {
-      id: "compliance",
-      name: "Compliance & Security",
-      description: "Understand compliance requirements and security features",
+      id: 'compliance',
+      name: 'Compliance & Security',
+      description: 'Understand compliance requirements and security features',
       icon: Shield,
       articles: [
         {
-          id: "regulatory-compliance",
-          title: "Regulatory Compliance Overview",
-          description: "Understanding compliance requirements for oil & gas",
-          category: "compliance",
-          difficulty: "Intermediate",
+          id: 'regulatory-compliance',
+          title: 'Regulatory Compliance Overview',
+          description: 'Understanding compliance requirements for oil & gas',
+          category: 'compliance',
+          difficulty: 'Intermediate',
           content: `# Regulatory Compliance Overview
 
 ## Key Regulations
@@ -215,23 +210,23 @@ Welcome to the Oil & Gas Billing Platform! This guide will help you get started 
 - Staff training on regulations
 - Document retention policies
 - Regular system updates`,
-          tags: ["compliance", "regulations", "audit"],
-          lastUpdated: "2024-01-12",
-        },
-      ],
+          tags: ['compliance', 'regulations', 'audit'],
+          lastUpdated: '2024-01-12'
+        }
+      ]
     },
     {
-      id: "analytics",
-      name: "Analytics & Reporting",
-      description: "Generate insights and reports from your data",
+      id: 'analytics',
+      name: 'Analytics & Reporting',
+      description: 'Generate insights and reports from your data',
       icon: BarChart3,
       articles: [
         {
-          id: "dashboard-overview",
-          title: "Analytics Dashboard Overview",
-          description: "Understanding your analytics dashboard",
-          category: "analytics",
-          difficulty: "Beginner",
+          id: 'dashboard-overview',
+          title: 'Analytics Dashboard Overview',
+          description: 'Understanding your analytics dashboard',
+          category: 'analytics',
+          difficulty: 'Beginner',
           content: `# Analytics Dashboard Overview
 
 ## Key Metrics
@@ -252,23 +247,23 @@ Welcome to the Oil & Gas Billing Platform! This guide will help you get started 
 - Invoice amounts
 - Processing status
 - Compliance status`,
-          tags: ["dashboard", "metrics", "analytics"],
-          lastUpdated: "2024-01-11",
-        },
-      ],
+          tags: ['dashboard', 'metrics', 'analytics'],
+          lastUpdated: '2024-01-11'
+        }
+      ]
     },
     {
-      id: "integrations",
-      name: "Integrations",
-      description: "Connect with your existing systems",
+      id: 'integrations',
+      name: 'Integrations',
+      description: 'Connect with your existing systems',
       icon: Settings,
       articles: [
         {
-          id: "api-documentation",
-          title: "API Documentation",
-          description: "Complete guide to our REST API",
-          category: "integrations",
-          difficulty: "Advanced",
+          id: 'api-documentation',
+          title: 'API Documentation',
+          description: 'Complete guide to our REST API',
+          category: 'integrations',
+          difficulty: 'Advanced',
           content: `# API Documentation
 
 ## Authentication
@@ -310,23 +305,23 @@ Response:
 - 1000 requests per hour
 - 10 MB max file size
 - JSON responses only`,
-          tags: ["api", "integration", "development"],
-          lastUpdated: "2024-01-10",
-        },
-      ],
+          tags: ['api', 'integration', 'development'],
+          lastUpdated: '2024-01-10'
+        }
+      ]
     },
     {
-      id: "troubleshooting",
-      name: "Troubleshooting",
-      description: "Common issues and solutions",
+      id: 'troubleshooting',
+      name: 'Troubleshooting',
+      description: 'Common issues and solutions',
       icon: AlertCircle,
       articles: [
         {
-          id: "common-issues",
-          title: "Common Issues and Solutions",
-          description: "Quick fixes for frequently encountered problems",
-          category: "troubleshooting",
-          difficulty: "Beginner",
+          id: 'common-issues',
+          title: 'Common Issues and Solutions',
+          description: 'Quick fixes for frequently encountered problems',
+          category: 'troubleshooting',
+          difficulty: 'Beginner',
           content: `# Common Issues and Solutions
 
 ## Upload Issues
@@ -368,37 +363,32 @@ Response:
   - Reduce file sizes
   - Upload fewer files at once
   - Contact support if persistent`,
-          tags: ["troubleshooting", "errors", "performance"],
-          lastUpdated: "2024-01-09",
-        },
-      ],
-    },
+          tags: ['troubleshooting', 'errors', 'performance'],
+          lastUpdated: '2024-01-09'
+        }
+      ]
+    }
   ];
 
-  const allArticles = helpCategories.flatMap((cat) => cat.articles);
-
-  const filteredArticles = allArticles.filter((article) => {
-    const matchesSearch =
-      searchQuery === "" ||
+  const allArticles = helpCategories.flatMap(cat => cat.articles);
+  
+  const filteredArticles = allArticles.filter(article => {
+    const matchesSearch = searchQuery === '' || 
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-
+      article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
     const matchesCategory = !selectedCategory || article.category === selectedCategory;
-
+    
     return matchesSearch && matchesCategory;
   });
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case "Beginner":
-        return "bg-green-100 text-green-800";
-      case "Intermediate":
-        return "bg-yellow-100 text-yellow-800";
-      case "Advanced":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case 'Beginner': return 'bg-green-100 text-green-800';
+      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
+      case 'Advanced': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -454,10 +444,7 @@ Response:
                 <CardContent>
                   <div className="space-y-2">
                     {category.articles.slice(0, 3).map((article) => (
-                      <div
-                        key={article.id}
-                        className="flex items-center justify-between p-2 hover:bg-muted/50 rounded"
-                      >
+                      <div key={article.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
                         <span className="text-sm">{article.title}</span>
                         <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       </div>
@@ -478,7 +465,7 @@ Response:
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">
-                {searchQuery ? `Search results for "${searchQuery}"` : "All Articles"}
+                {searchQuery ? `Search results for "${searchQuery}"` : 'All Articles'}
               </h3>
               <span className="text-sm text-muted-foreground">
                 {filteredArticles.length} articles found
@@ -493,10 +480,7 @@ Response:
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
                           <h4 className="text-lg font-medium">{article.title}</h4>
-                          <Badge
-                            variant="outline"
-                            className={getDifficultyColor(article.difficulty)}
-                          >
+                          <Badge variant="outline" className={getDifficultyColor(article.difficulty)}>
                             {article.difficulty}
                           </Badge>
                         </div>
@@ -527,23 +511,23 @@ Response:
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                title: "Getting Started Tutorial",
-                description: "Complete walkthrough of setting up your account",
-                duration: "12:34",
-                thumbnail: "/api/placeholder/400/225",
+                title: 'Getting Started Tutorial',
+                description: 'Complete walkthrough of setting up your account',
+                duration: '12:34',
+                thumbnail: '/api/placeholder/400/225'
               },
               {
-                title: "Invoice Processing Workflow",
-                description: "Learn how to process invoices efficiently",
-                duration: "8:45",
-                thumbnail: "/api/placeholder/400/225",
+                title: 'Invoice Processing Workflow',
+                description: 'Learn how to process invoices efficiently',
+                duration: '8:45',
+                thumbnail: '/api/placeholder/400/225'
               },
               {
-                title: "Advanced Analytics",
-                description: "Deep dive into analytics and reporting features",
-                duration: "15:20",
-                thumbnail: "/api/placeholder/400/225",
-              },
+                title: 'Advanced Analytics',
+                description: 'Deep dive into analytics and reporting features',
+                duration: '15:20',
+                thumbnail: '/api/placeholder/400/225'
+              }
             ].map((video, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
                 <div className="aspect-video bg-muted rounded-t-lg flex items-center justify-center">
@@ -571,7 +555,9 @@ Response:
                   <MessageCircle className="h-5 w-5" />
                   <span>Contact Support</span>
                 </CardTitle>
-                <CardDescription>Get help from our support team</CardDescription>
+                <CardDescription>
+                  Get help from our support team
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -579,16 +565,22 @@ Response:
                     <span>Email Support</span>
                     <Badge variant="outline">24/7</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">support@oilgasbilling.com</p>
+                  <p className="text-sm text-muted-foreground">
+                    support@oilgasbilling.com
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span>Live Chat</span>
                     <Badge className="bg-green-100 text-green-800">Online</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">Available 9 AM - 5 PM EST</p>
+                  <p className="text-sm text-muted-foreground">
+                    Available 9 AM - 5 PM EST
+                  </p>
                 </div>
-                <Button className="w-full">Start Live Chat</Button>
+                <Button className="w-full">
+                  Start Live Chat
+                </Button>
               </CardContent>
             </Card>
 
@@ -598,7 +590,9 @@ Response:
                   <Users className="h-5 w-5" />
                   <span>Community Forum</span>
                 </CardTitle>
-                <CardDescription>Connect with other users</CardDescription>
+                <CardDescription>
+                  Connect with other users
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -624,13 +618,17 @@ Response:
                 <Lightbulb className="h-5 w-5" />
                 <span>Feature Requests</span>
               </CardTitle>
-              <CardDescription>Suggest new features or improvements</CardDescription>
+              <CardDescription>
+                Suggest new features or improvements
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
                 Have an idea for a new feature? We'd love to hear from you!
               </p>
-              <Button variant="outline">Submit Feature Request</Button>
+              <Button variant="outline">
+                Submit Feature Request
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -647,34 +645,32 @@ Response:
             <AccordionItem value="item-1">
               <AccordionTrigger>How do I upload my first invoice?</AccordionTrigger>
               <AccordionContent>
-                You can upload invoices by dragging and dropping files into the upload area, using
-                the file browser, or sending them to your unique email address. Supported formats
-                include PDF, PNG, and JPG files up to 50MB.
+                You can upload invoices by dragging and dropping files into the upload area, 
+                using the file browser, or sending them to your unique email address. 
+                Supported formats include PDF, PNG, and JPG files up to 50MB.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
               <AccordionTrigger>What file formats are supported?</AccordionTrigger>
               <AccordionContent>
-                We support PDF documents and image files (PNG, JPG, JPEG) up to 50MB in size. PDF
-                files generally provide the best OCR results for text extraction.
+                We support PDF documents and image files (PNG, JPG, JPEG) up to 50MB in size. 
+                PDF files generally provide the best OCR results for text extraction.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
               <AccordionTrigger>How accurate is the data extraction?</AccordionTrigger>
               <AccordionContent>
-                Our AI-powered OCR achieves over 95% accuracy on clear, digital documents. Accuracy
-                may vary with scanned documents or poor image quality. You can always review and
-                edit extracted data before final approval.
+                Our AI-powered OCR achieves over 95% accuracy on clear, digital documents. 
+                Accuracy may vary with scanned documents or poor image quality. 
+                You can always review and edit extracted data before final approval.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-4">
-              <AccordionTrigger>
-                Can I integrate with my existing accounting system?
-              </AccordionTrigger>
+              <AccordionTrigger>Can I integrate with my existing accounting system?</AccordionTrigger>
               <AccordionContent>
-                Yes! We offer REST API integration and pre-built connectors for popular accounting
-                systems like QuickBooks, SAP, and Oracle. Check our integrations documentation for
-                detailed setup instructions.
+                Yes! We offer REST API integration and pre-built connectors for popular 
+                accounting systems like QuickBooks, SAP, and Oracle. Check our 
+                integrations documentation for detailed setup instructions.
               </AccordionContent>
             </AccordionItem>
           </Accordion>

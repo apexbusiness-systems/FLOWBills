@@ -1,8 +1,16 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle, AlertTriangle, Zap, Clock, Users, Settings } from "lucide-react";
-import { WorkflowStep } from "@/hooks/useWorkflows";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  FileText, 
+  CheckCircle, 
+  AlertTriangle, 
+  Zap,
+  Clock,
+  Users,
+  Settings
+} from 'lucide-react';
+import { WorkflowStep } from '@/hooks/useWorkflows';
 
 interface WorkflowTemplate {
   id: string;
@@ -12,7 +20,7 @@ interface WorkflowTemplate {
   icon: React.ComponentType<any>;
   steps: WorkflowStep[];
   estimatedTime: string;
-  complexity: "Simple" | "Medium" | "Advanced";
+  complexity: 'Simple' | 'Medium' | 'Advanced';
 }
 
 interface WorkflowTemplatesProps {
@@ -21,164 +29,164 @@ interface WorkflowTemplatesProps {
 
 const templates: WorkflowTemplate[] = [
   {
-    id: "invoice-approval",
-    name: "Invoice Approval Workflow",
-    description: "Standard invoice processing with validation and approval steps",
-    category: "Invoice Processing",
+    id: 'invoice-approval',
+    name: 'Invoice Approval Workflow',
+    description: 'Standard invoice processing with validation and approval steps',
+    category: 'Invoice Processing',
     icon: FileText,
-    estimatedTime: "2-5 minutes",
-    complexity: "Simple",
+    estimatedTime: '2-5 minutes',
+    complexity: 'Simple',
     steps: [
       {
-        id: "validate-invoice",
-        type: "validation",
-        name: "Validate Invoice Data",
-        config: { rules: ["amount_check", "vendor_verification"] },
+        id: 'validate-invoice',
+        type: 'validation',
+        name: 'Validate Invoice Data',
+        config: { rules: ['amount_check', 'vendor_verification'] },
         position: { x: 100, y: 100 },
-        connections: ["approve-invoice"],
+        connections: ['approve-invoice'],
       },
       {
-        id: "approve-invoice",
-        type: "approval",
-        name: "Manager Approval",
-        config: { approver_role: "manager", threshold: 10000 },
+        id: 'approve-invoice',
+        type: 'approval',
+        name: 'Manager Approval',
+        config: { approver_role: 'manager', threshold: 10000 },
         position: { x: 300, y: 100 },
-        connections: ["send-notification"],
+        connections: ['send-notification'],
       },
       {
-        id: "send-notification",
-        type: "notification",
-        name: "Approval Notification",
-        config: { template: "invoice_approved", recipients: ["finance"] },
+        id: 'send-notification',
+        type: 'notification',
+        name: 'Approval Notification',
+        config: { template: 'invoice_approved', recipients: ['finance'] },
         position: { x: 500, y: 100 },
         connections: [],
       },
     ],
   },
   {
-    id: "exception-handling",
-    name: "Exception Resolution",
-    description: "Automated exception detection and resolution workflow",
-    category: "Exception Management",
+    id: 'exception-handling',
+    name: 'Exception Resolution',
+    description: 'Automated exception detection and resolution workflow',
+    category: 'Exception Management',
     icon: AlertTriangle,
-    estimatedTime: "1-3 minutes",
-    complexity: "Medium",
+    estimatedTime: '1-3 minutes',
+    complexity: 'Medium',
     steps: [
       {
-        id: "detect-exception",
-        type: "validation",
-        name: "Exception Detection",
-        config: { auto_detect: true, severity_threshold: "medium" },
+        id: 'detect-exception',
+        type: 'validation',
+        name: 'Exception Detection',
+        config: { auto_detect: true, severity_threshold: 'medium' },
         position: { x: 100, y: 100 },
-        connections: ["categorize-exception"],
+        connections: ['categorize-exception'],
       },
       {
-        id: "categorize-exception",
-        type: "validation",
-        name: "Categorize Exception",
-        config: { categories: ["data_mismatch", "missing_po", "validation_error"] },
+        id: 'categorize-exception',
+        type: 'validation',
+        name: 'Categorize Exception',
+        config: { categories: ['data_mismatch', 'missing_po', 'validation_error'] },
         position: { x: 300, y: 100 },
-        connections: ["auto-resolve"],
+        connections: ['auto-resolve'],
       },
       {
-        id: "auto-resolve",
-        type: "integration",
-        name: "Auto Resolution",
-        config: { resolution_rules: "standard", fallback_to_manual: true },
+        id: 'auto-resolve',
+        type: 'integration',
+        name: 'Auto Resolution',
+        config: { resolution_rules: 'standard', fallback_to_manual: true },
         position: { x: 500, y: 100 },
-        connections: ["notify-resolution"],
+        connections: ['notify-resolution'],
       },
       {
-        id: "notify-resolution",
-        type: "notification",
-        name: "Resolution Notice",
-        config: { template: "exception_resolved" },
+        id: 'notify-resolution',
+        type: 'notification',
+        name: 'Resolution Notice',
+        config: { template: 'exception_resolved' },
         position: { x: 700, y: 100 },
         connections: [],
       },
     ],
   },
   {
-    id: "compliance-check",
-    name: "Compliance Verification",
-    description: "Automated compliance checking with reporting",
-    category: "Compliance",
+    id: 'compliance-check',
+    name: 'Compliance Verification',
+    description: 'Automated compliance checking with reporting',
+    category: 'Compliance',
     icon: CheckCircle,
-    estimatedTime: "3-7 minutes",
-    complexity: "Advanced",
+    estimatedTime: '3-7 minutes',
+    complexity: 'Advanced',
     steps: [
       {
-        id: "collect-documents",
-        type: "integration",
-        name: "Document Collection",
-        config: { sources: ["nov_api", "jib_system"], document_types: ["permits", "certificates"] },
+        id: 'collect-documents',
+        type: 'integration',
+        name: 'Document Collection',
+        config: { sources: ['nov_api', 'jib_system'], document_types: ['permits', 'certificates'] },
         position: { x: 100, y: 100 },
-        connections: ["verify-compliance"],
+        connections: ['verify-compliance'],
       },
       {
-        id: "verify-compliance",
-        type: "validation",
-        name: "Compliance Check",
-        config: { standards: ["railroad_commission", "environmental"], strict_mode: true },
+        id: 'verify-compliance',
+        type: 'validation',
+        name: 'Compliance Check',
+        config: { standards: ['railroad_commission', 'environmental'], strict_mode: true },
         position: { x: 300, y: 100 },
-        connections: ["generate-report"],
+        connections: ['generate-report'],
       },
       {
-        id: "generate-report",
-        type: "integration",
-        name: "Generate Report",
-        config: { format: "pdf", include_recommendations: true },
+        id: 'generate-report',
+        type: 'integration',
+        name: 'Generate Report',
+        config: { format: 'pdf', include_recommendations: true },
         position: { x: 500, y: 100 },
-        connections: ["review-approval"],
+        connections: ['review-approval'],
       },
       {
-        id: "review-approval",
-        type: "approval",
-        name: "Compliance Review",
-        config: { approver_role: "compliance_officer" },
+        id: 'review-approval',
+        type: 'approval',
+        name: 'Compliance Review',
+        config: { approver_role: 'compliance_officer' },
         position: { x: 700, y: 100 },
         connections: [],
       },
     ],
   },
   {
-    id: "integration-sync",
-    name: "System Integration Sync",
-    description: "Automated data synchronization between systems",
-    category: "Integration",
+    id: 'integration-sync',
+    name: 'System Integration Sync',
+    description: 'Automated data synchronization between systems',
+    category: 'Integration',
     icon: Zap,
-    estimatedTime: "5-10 minutes",
-    complexity: "Advanced",
+    estimatedTime: '5-10 minutes',
+    complexity: 'Advanced',
     steps: [
       {
-        id: "fetch-data",
-        type: "integration",
-        name: "Fetch External Data",
-        config: { sources: ["nov_api"], batch_size: 100 },
+        id: 'fetch-data',
+        type: 'integration',
+        name: 'Fetch External Data',
+        config: { sources: ['nov_api'], batch_size: 100 },
         position: { x: 100, y: 100 },
-        connections: ["validate-data"],
+        connections: ['validate-data'],
       },
       {
-        id: "validate-data",
-        type: "validation",
-        name: "Data Validation",
+        id: 'validate-data',
+        type: 'validation',
+        name: 'Data Validation',
         config: { schema_validation: true, duplicate_check: true },
         position: { x: 300, y: 100 },
-        connections: ["transform-data"],
+        connections: ['transform-data'],
       },
       {
-        id: "transform-data",
-        type: "integration",
-        name: "Data Transformation",
-        config: { mapping_rules: "standard", normalize: true },
+        id: 'transform-data',
+        type: 'integration',
+        name: 'Data Transformation',
+        config: { mapping_rules: 'standard', normalize: true },
         position: { x: 500, y: 100 },
-        connections: ["sync-complete"],
+        connections: ['sync-complete'],
       },
       {
-        id: "sync-complete",
-        type: "notification",
-        name: "Sync Notification",
-        config: { template: "sync_complete", include_stats: true },
+        id: 'sync-complete',
+        type: 'notification',
+        name: 'Sync Notification',
+        config: { template: 'sync_complete', include_stats: true },
         position: { x: 700, y: 100 },
         connections: [],
       },
@@ -189,18 +197,14 @@ const templates: WorkflowTemplate[] = [
 const WorkflowTemplates = ({ onSelectTemplate }: WorkflowTemplatesProps) => {
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
-      case "Simple":
-        return "bg-status-approved";
-      case "Medium":
-        return "bg-status-pending";
-      case "Advanced":
-        return "bg-status-processing";
-      default:
-        return "bg-secondary";
+      case 'Simple': return 'bg-status-approved';
+      case 'Medium': return 'bg-status-pending';
+      case 'Advanced': return 'bg-status-processing';
+      default: return 'bg-secondary';
     }
   };
 
-  const categories = [...new Set(templates.map((t) => t.category))];
+  const categories = [...new Set(templates.map(t => t.category))];
 
   return (
     <div className="space-y-6">
@@ -211,13 +215,13 @@ const WorkflowTemplates = ({ onSelectTemplate }: WorkflowTemplatesProps) => {
         </p>
       </div>
 
-      {categories.map((category) => (
+      {categories.map(category => (
         <div key={category}>
           <h3 className="text-lg font-semibold mb-4 text-foreground">{category}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {templates
-              .filter((template) => template.category === category)
-              .map((template) => {
+              .filter(template => template.category === category)
+              .map(template => {
                 const Icon = template.icon;
                 return (
                   <Card key={template.id} className="hover:shadow-lg transition-shadow">
@@ -229,7 +233,7 @@ const WorkflowTemplates = ({ onSelectTemplate }: WorkflowTemplatesProps) => {
                           </div>
                           <div>
                             <CardTitle className="text-lg">{template.name}</CardTitle>
-                            <Badge
+                            <Badge 
                               variant="secondary"
                               className={`mt-1 text-white ${getComplexityColor(template.complexity)}`}
                             >
@@ -238,9 +242,11 @@ const WorkflowTemplates = ({ onSelectTemplate }: WorkflowTemplatesProps) => {
                           </div>
                         </div>
                       </div>
-                      <CardDescription className="mt-2">{template.description}</CardDescription>
+                      <CardDescription className="mt-2">
+                        {template.description}
+                      </CardDescription>
                     </CardHeader>
-
+                    
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between text-sm">
@@ -267,7 +273,10 @@ const WorkflowTemplates = ({ onSelectTemplate }: WorkflowTemplatesProps) => {
                           )}
                         </div>
 
-                        <Button className="w-full" onClick={() => onSelectTemplate(template)}>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => onSelectTemplate(template)}
+                        >
                           Use Template
                         </Button>
                       </div>

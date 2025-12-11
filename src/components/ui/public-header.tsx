@@ -29,13 +29,17 @@ export const PublicHeader = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <NavLink
-            to="/"
+          <NavLink 
+            to="/" 
             end
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             activeClassName=""
           >
-            <img src={companyLogo} alt="FlowBills Logo" className="h-8 w-8" />
+            <img 
+              src={companyLogo} 
+              alt="FlowBills Logo" 
+              className="h-8 w-8"
+            />
             <span className="text-xl font-bold text-foreground">
               Flow<span className="text-primary">Bills</span>
             </span>
@@ -85,7 +89,7 @@ export const PublicHeader = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <nav
+          <nav 
             id="mobile-menu"
             className="md:hidden pb-4 animate-fade-in"
             aria-label="Mobile navigation"

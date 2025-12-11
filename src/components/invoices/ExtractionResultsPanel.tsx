@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { useInvoiceExtraction } from "@/hooks/useInvoiceExtraction";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2, XCircle, AlertTriangle, FileText, TrendingUp } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from 'react';
+import { useInvoiceExtraction } from '@/hooks/useInvoiceExtraction';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle2, XCircle, AlertTriangle, FileText, TrendingUp } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ExtractionResultsPanelProps {
   invoiceId: string;
@@ -53,31 +53,21 @@ export const ExtractionResultsPanel = ({ invoiceId }: ExtractionResultsPanelProp
 
   const getBudgetStatusColor = (status: string) => {
     switch (status) {
-      case "within_budget":
-        return "bg-green-500";
-      case "over_budget":
-        return "bg-red-500";
-      case "afe_not_found":
-        return "bg-yellow-500";
-      case "no_afe":
-        return "bg-gray-500";
-      default:
-        return "bg-gray-400";
+      case 'within_budget': return 'bg-green-500';
+      case 'over_budget': return 'bg-red-500';
+      case 'afe_not_found': return 'bg-yellow-500';
+      case 'no_afe': return 'bg-gray-500';
+      default: return 'bg-gray-400';
     }
   };
 
   const getBudgetStatusLabel = (status: string) => {
     switch (status) {
-      case "within_budget":
-        return "Within Budget";
-      case "over_budget":
-        return "Over Budget";
-      case "afe_not_found":
-        return "AFE Not Found";
-      case "no_afe":
-        return "No AFE";
-      default:
-        return "Unknown";
+      case 'within_budget': return 'Within Budget';
+      case 'over_budget': return 'Over Budget';
+      case 'afe_not_found': return 'AFE Not Found';
+      case 'no_afe': return 'No AFE';
+      default: return 'Unknown';
     }
   };
 
@@ -89,13 +79,15 @@ export const ExtractionResultsPanel = ({ invoiceId }: ExtractionResultsPanelProp
             <FileText className="w-5 h-5" />
             AI Extraction Results
           </CardTitle>
-          <CardDescription>Automatically extracted data and validation status</CardDescription>
+          <CardDescription>
+            Automatically extracted data and validation status
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Extraction Status */}
           <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
             <span className="text-sm font-medium">Extraction Status</span>
-            <Badge variant={extraction.extraction_status === "completed" ? "default" : "secondary"}>
+            <Badge variant={extraction.extraction_status === 'completed' ? 'default' : 'secondary'}>
               {extraction.extraction_status}
             </Badge>
           </div>
@@ -146,10 +138,9 @@ export const ExtractionResultsPanel = ({ invoiceId }: ExtractionResultsPanelProp
             {extraction.budget_remaining !== null && (
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Budget Remaining</p>
-                <p
-                  className={`text-sm font-medium flex items-center gap-1 ${extraction.budget_remaining < 0 ? "text-destructive" : ""}`}
-                >
-                  <TrendingUp className="w-3 h-3" />${extraction.budget_remaining.toLocaleString()}
+                <p className={`text-sm font-medium flex items-center gap-1 ${extraction.budget_remaining < 0 ? 'text-destructive' : ''}`}>
+                  <TrendingUp className="w-3 h-3" />
+                  ${extraction.budget_remaining.toLocaleString()}
                 </p>
               </div>
             )}
@@ -186,9 +177,7 @@ export const ExtractionResultsPanel = ({ invoiceId }: ExtractionResultsPanelProp
               <AlertDescription>
                 <div className="space-y-1">
                   {extraction.validation_errors.map((error: string, index: number) => (
-                    <div key={index} className="text-sm">
-                      {error}
-                    </div>
+                    <div key={index} className="text-sm">{error}</div>
                   ))}
                 </div>
               </AlertDescription>
@@ -202,9 +191,7 @@ export const ExtractionResultsPanel = ({ invoiceId }: ExtractionResultsPanelProp
               <AlertDescription>
                 <div className="space-y-1">
                   {extraction.validation_warnings.map((warning: string, index: number) => (
-                    <div key={index} className="text-sm">
-                      {warning}
-                    </div>
+                    <div key={index} className="text-sm">{warning}</div>
                   ))}
                 </div>
               </AlertDescription>
@@ -212,15 +199,15 @@ export const ExtractionResultsPanel = ({ invoiceId }: ExtractionResultsPanelProp
           )}
 
           {/* Success Message */}
-          {extraction.extraction_status === "completed" &&
-            (!extraction.validation_errors || extraction.validation_errors.length === 0) && (
-              <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-600">
-                  Invoice data extracted and validated successfully
-                </AlertDescription>
-              </Alert>
-            )}
+          {extraction.extraction_status === 'completed' && 
+           (!extraction.validation_errors || extraction.validation_errors.length === 0) && (
+            <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-600">
+                Invoice data extracted and validated successfully
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>

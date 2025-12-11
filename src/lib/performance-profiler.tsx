@@ -3,7 +3,7 @@
  * Provides comprehensive performance analysis and bottleneck identification
  */
 
-import React from "react";
+import React from 'react';
 
 interface PerformanceMetric {
   name: string;
@@ -18,7 +18,7 @@ interface BottleneckAnalysis {
   renderTime: number;
   reRenderCount: number;
   suggestions: string[];
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
 class PerformanceProfiler {
@@ -33,7 +33,7 @@ class PerformanceProfiler {
   }
 
   private initializeObservers() {
-    if ("PerformanceObserver" in window) {
+    if ('PerformanceObserver' in window) {
       try {
         const longTaskObserver = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
@@ -43,15 +43,15 @@ class PerformanceProfiler {
                 name: `long-task-${entry.name}`,
                 duration: entry.duration,
                 timestamp: Date.now(),
-                metadata: { type: "long-task", entry },
+                metadata: { type: 'long-task', entry },
               });
             }
           }
         });
-        longTaskObserver.observe({ entryTypes: ["longtask", "measure"] });
+        longTaskObserver.observe({ entryTypes: ['longtask', 'measure'] });
         this.observers.push(longTaskObserver);
       } catch (e) {
-        console.log("Long task observer not supported");
+        console.log('Long task observer not supported');
       }
     }
   }
@@ -61,50 +61,50 @@ class PerformanceProfiler {
     try {
       const result = fn();
       const duration = performance.now() - start;
-
+      
       this.recordMetric({ name, duration, timestamp: Date.now(), metadata });
-
+      
       if (duration > 16.67) {
         console.warn(`⚠️ Slow operation: ${name} took ${duration.toFixed(2)}ms`);
       }
-
+      
       return result;
     } catch (error) {
       const duration = performance.now() - start;
-      this.recordMetric({
-        name,
-        duration,
-        timestamp: Date.now(),
-        metadata: { ...metadata, error: true },
+      this.recordMetric({ 
+        name, 
+        duration, 
+        timestamp: Date.now(), 
+        metadata: { ...metadata, error: true } 
       });
       throw error;
     }
   }
 
   async profileAsync<T>(
-    name: string,
-    fn: () => Promise<T>,
+    name: string, 
+    fn: () => Promise<T>, 
     metadata?: Record<string, any>
   ): Promise<T> {
     const start = performance.now();
     try {
       const result = await fn();
       const duration = performance.now() - start;
-
+      
       this.recordMetric({ name, duration, timestamp: Date.now(), metadata });
-
+      
       if (duration > 100) {
         console.warn(`⚠️ Slow async operation: ${name} took ${duration.toFixed(2)}ms`);
       }
-
+      
       return result;
     } catch (error) {
       const duration = performance.now() - start;
-      this.recordMetric({
-        name,
-        duration,
-        timestamp: Date.now(),
-        metadata: { ...metadata, error: true },
+      this.recordMetric({ 
+        name, 
+        duration, 
+        timestamp: Date.now(), 
+        metadata: { ...metadata, error: true } 
       });
       throw error;
     }
@@ -136,7 +136,7 @@ class PerformanceProfiler {
 
   private recordMetric(metric: PerformanceMetric) {
     this.metrics.push(metric);
-
+    
     if (this.metrics.length > 1000) {
       this.metrics = this.metrics.slice(-1000);
     }
@@ -150,18 +150,18 @@ class PerformanceProfiler {
       const renderCount = this.renderCounts.get(component) || 0;
 
       const suggestions: string[] = [];
-      let severity: "low" | "medium" | "high" | "critical" = "low";
+      let severity: 'low' | 'medium' | 'high' | 'critical' = 'low';
 
       if (avgTime > 16.67) {
-        suggestions.push("Apply React.memo() to prevent unnecessary re-renders");
-        suggestions.push("Use useMemo() for expensive calculations");
-        severity = avgTime > 50 ? "high" : "medium";
+        suggestions.push('Apply React.memo() to prevent unnecessary re-renders');
+        suggestions.push('Use useMemo() for expensive calculations');
+        severity = avgTime > 50 ? 'high' : 'medium';
       }
 
       if (renderCount > 20) {
-        suggestions.push("Investigate why component re-renders frequently");
-        suggestions.push("Consider using useCallback() for event handlers");
-        severity = renderCount > 50 ? "critical" : "high";
+        suggestions.push('Investigate why component re-renders frequently');
+        suggestions.push('Consider using useCallback() for event handlers');
+        severity = renderCount > 50 ? 'critical' : 'high';
       }
 
       if (suggestions.length > 0) {
@@ -183,21 +183,21 @@ class PerformanceProfiler {
   }
 
   private estimateComplexity(avgTime: number, renderCount: number): string {
-    if (avgTime > 100 || renderCount > 50) return "O(n²) or worse";
-    if (avgTime > 50 || renderCount > 20) return "O(n log n)";
-    if (avgTime > 16.67) return "O(n)";
-    return "O(1) or O(log n)";
+    if (avgTime > 100 || renderCount > 50) return 'O(n²) or worse';
+    if (avgTime > 50 || renderCount > 20) return 'O(n log n)';
+    if (avgTime > 16.67) return 'O(n)';
+    return 'O(1) or O(log n)';
   }
 
   getReport() {
     const bottlenecks = this.analyzeBottlenecks();
-
+    
     return {
       summary: {
         totalMetrics: this.metrics.length,
         totalComponents: this.renderCounts.size,
-        criticalBottlenecks: bottlenecks.filter((b) => b.severity === "critical").length,
-        highBottlenecks: bottlenecks.filter((b) => b.severity === "high").length,
+        criticalBottlenecks: bottlenecks.filter(b => b.severity === 'critical').length,
+        highBottlenecks: bottlenecks.filter(b => b.severity === 'high').length,
       },
       bottlenecks,
       topSlowComponents: Array.from(this.renderTimes.entries())
@@ -234,7 +234,7 @@ class PerformanceProfiler {
   }
 
   dispose() {
-    this.observers.forEach((observer) => observer.disconnect());
+    this.observers.forEach(observer => observer.disconnect());
     this.observers = [];
     this.clear();
   }
@@ -245,7 +245,7 @@ export const performanceProfiler = new PerformanceProfiler();
 export function usePerformanceProfiler(componentName: string) {
   const startTimeRef = { current: performance.now() };
 
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     const duration = performance.now() - startTimeRef.current;
     performanceProfiler.recordRender(componentName, duration);
     startTimeRef.current = performance.now();
@@ -265,8 +265,8 @@ export function withPerformanceProfiler<P extends object>(
   Component: React.ComponentType<P>,
   componentName?: string
 ) {
-  const name = componentName || Component.displayName || Component.name || "Unknown";
-
+  const name = componentName || Component.displayName || Component.name || 'Unknown';
+  
   return function ProfiledComponent(props: P) {
     usePerformanceProfiler(name);
     return <Component {...props} />;

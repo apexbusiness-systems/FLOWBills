@@ -1,5 +1,5 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { toMessage } from '../_shared/errors.ts';
+import { toMessage } from "../_shared/errors.ts";
 import { corsHeaders } from '../_shared/cors.ts';
 
 // Type definitions
@@ -45,16 +45,16 @@ Deno.serve(async (req) => {
     );
 
     const { file_data, file_type, invoice_id }: OCRRequest = await req.json();
-
+    
     console.log(`Processing OCR for file type: ${file_type}`);
     const startTime = Date.now();
 
     // Simulate OCR processing with basic text extraction
     // In production, integrate with Tesseract.js or cloud OCR service
     const mockExtraction = await simulateOCRExtraction(file_data, file_type);
-
+    
     const processingTime = Date.now() - startTime;
-
+    
     const extracted_data = {
       invoice_number: u(mockExtraction.fields.invoice_number),
       amount: u(mockExtraction.fields.amount),
@@ -64,27 +64,26 @@ Deno.serve(async (req) => {
       due_date: u(mockExtraction.fields.due_date),
       po_number: u(mockExtraction.fields.po_number),
     };
-
+    
     const ocr_metadata = {
       processing_time: processingTime,
       method: 'tesseract-simulation',
-      confidence_average: Object.values(mockExtraction.confidence_scores).reduce((a, b) =>
-        a + b, 0) / Object.values(mockExtraction.confidence_scores).length,
+      confidence_average: Object.values(mockExtraction.confidence_scores).reduce((a, b) => a + b, 0) / Object.values(mockExtraction.confidence_scores).length
     };
-
+    
     const response: OCRResponse = {
       success: true,
       extracted_data,
       raw_text: mockExtraction.raw_text,
       confidence_scores: mockExtraction.confidence_scores,
-      ocr_metadata,
+      ocr_metadata
     };
 
-    // Update invoice with OCR results if invoice_id provided
+    // Update invoice with OCR results if invoice_id provided  
     if (invoice_id) {
       const avg = response.ocr_metadata?.confidence_average ?? 0;
       const confidence_score = Math.round(avg);
-
+      
       const { error: updateError } = await supabase
         .from('invoices')
         .update({
@@ -92,7 +91,7 @@ Deno.serve(async (req) => {
           field_confidence_scores: mockExtraction.confidence_scores,
           ocr_metadata: response.ocr_metadata,
           extracted_data: mockExtraction.fields,
-          confidence_score,
+          confidence_score
         })
         .eq('id', invoice_id);
 
@@ -108,18 +107,19 @@ Deno.serve(async (req) => {
       entity_type: 'invoice',
       entity_id: invoice_id || crypto.randomUUID(),
       new_values: { ocr_confidence: avg },
-      user_id: null, // System action
+      user_id: null // System action
     });
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (err: unknown) {
     console.error('OCR extraction error:', err);
-
+    
     const errorResponse: OCRResponse = {
       success: false,
-      error: toMessage(err),
+      error: toMessage(err)
     };
 
     return new Response(JSON.stringify(errorResponse), {
@@ -129,9 +129,9 @@ Deno.serve(async (req) => {
   }
 });
 
-async function simulateOCRExtraction(_fileData: string, _fileType: string) {
+async function simulateOCRExtraction(fileData: string, fileType: string) {
   // Simulate processing delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 500));
 
   // Mock OCR results based on common invoice patterns
   const mockRawText = `
@@ -188,6 +188,6 @@ async function simulateOCRExtraction(_fileData: string, _fileType: string) {
       invoice_date: 0.92,
       due_date: 0.89,
       po_number: 0.85,
-    },
+    }
   };
 }

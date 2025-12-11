@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -16,28 +16,28 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useFieldTickets } from "@/hooks/useFieldTickets";
-import { useAFEs } from "@/hooks/useAFEs";
-import { useInvoices } from "@/hooks/useInvoices";
-import { MapPin, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/select';
+import { useFieldTickets } from '@/hooks/useFieldTickets';
+import { useAFEs } from '@/hooks/useAFEs';
+import { useInvoices } from '@/hooks/useInvoices';
+import { MapPin, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
-  ticket_number: z.string().min(1, "Ticket number is required"),
-  vendor_name: z.string().min(1, "Vendor name is required"),
-  service_date: z.string().min(1, "Service date is required"),
-  amount: z.string().min(1, "Amount is required"),
+  ticket_number: z.string().min(1, 'Ticket number is required'),
+  vendor_name: z.string().min(1, 'Vendor name is required'),
+  service_date: z.string().min(1, 'Service date is required'),
+  amount: z.string().min(1, 'Amount is required'),
   invoice_id: z.string().optional(),
   afe_id: z.string().optional(),
   service_type: z.string().optional(),
@@ -54,7 +54,10 @@ interface CreateFieldTicketDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const CreateFieldTicketDialog = ({ open, onOpenChange }: CreateFieldTicketDialogProps) => {
+export const CreateFieldTicketDialog = ({
+  open,
+  onOpenChange,
+}: CreateFieldTicketDialogProps) => {
   const { createFieldTicket } = useFieldTickets();
   const { afes } = useAFEs();
   const { invoices } = useInvoices();
@@ -66,12 +69,12 @@ export const CreateFieldTicketDialog = ({ open, onOpenChange }: CreateFieldTicke
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      ticket_number: "",
-      vendor_name: "",
-      service_date: "",
-      amount: "",
-      service_type: "",
-      location: "",
+      ticket_number: '',
+      vendor_name: '',
+      service_date: '',
+      amount: '',
+      service_type: '',
+      location: '',
     },
   });
 
@@ -100,11 +103,10 @@ export const CreateFieldTicketDialog = ({ open, onOpenChange }: CreateFieldTicke
         setGpsLoading(false);
       },
       (error) => {
-        console.error("GPS error:", error);
+        console.error('GPS error:', error);
         toast({
           title: "Location Error",
-          description:
-            "Unable to get your location. Please ensure location permissions are enabled.",
+          description: "Unable to get your location. Please ensure location permissions are enabled.",
           variant: "destructive",
         });
         setGpsLoading(false);
@@ -133,9 +135,9 @@ export const CreateFieldTicketDialog = ({ open, onOpenChange }: CreateFieldTicke
     };
 
     const result = await createFieldTicket(ticketData);
-
+    
     setIsSubmitting(false);
-
+    
     if (result) {
       form.reset();
       setGpsCoordinates(null);
@@ -275,7 +277,7 @@ export const CreateFieldTicketDialog = ({ open, onOpenChange }: CreateFieldTicke
                       <SelectContent>
                         {afes.map((afe) => (
                           <SelectItem key={afe.id} value={afe.id}>
-                            {afe.afe_number} - {afe.description || "No description"}
+                            {afe.afe_number} - {afe.description || 'No description'}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -353,7 +355,7 @@ export const CreateFieldTicketDialog = ({ open, onOpenChange }: CreateFieldTicke
                   </FormItem>
                 )}
               />
-
+              
               <Button
                 type="button"
                 variant="outline"
@@ -367,9 +369,9 @@ export const CreateFieldTicketDialog = ({ open, onOpenChange }: CreateFieldTicke
                 ) : (
                   <MapPin className="mr-2 h-4 w-4" />
                 )}
-                {gpsCoordinates ? "GPS Captured ✓" : "Capture GPS Location"}
+                {gpsCoordinates ? 'GPS Captured ✓' : 'Capture GPS Location'}
               </Button>
-
+              
               {gpsCoordinates && (
                 <p className="text-xs text-muted-foreground">
                   GPS: {gpsCoordinates.lat.toFixed(6)}, {gpsCoordinates.lng.toFixed(6)}
@@ -392,7 +394,11 @@ export const CreateFieldTicketDialog = ({ open, onOpenChange }: CreateFieldTicke
             />
 
             <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>

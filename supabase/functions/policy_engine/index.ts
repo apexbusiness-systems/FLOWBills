@@ -1,10 +1,10 @@
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { corsHeaders } from '../_shared/cors.ts';
-import { z } from 'https://deno.land/x/zod@v3.23.8/mod.ts';
+import { createClient } from "jsr:@supabase/supabase-js@2"
+import { corsHeaders } from '../_shared/cors.ts'
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 // Input validation schema
 const PolicyRequestSchema = z.object({
-  document_id: z.string().min(1, 'Document ID is required'),
+  document_id: z.string().min(1, "Document ID is required"),
   policy_types: z.array(z.enum(['validation', 'approval', 'routing', 'fraud'])).optional(),
   context: z.record(z.any()).optional().default({}),
 });
@@ -22,7 +22,7 @@ function evaluateExpression(expression: string, context: any): boolean {
   try {
     // Simple expressions like "amount > 1000" or "country_code == 'DE'"
     // WARNING: This is a simplified implementation. Use a proper expression evaluator in production.
-
+    
     // Replace context variables
     let evaluableExpr = expression;
     for (const [key, value] of Object.entries(context)) {
@@ -40,30 +40,30 @@ function evaluateExpression(expression: string, context: any): boolean {
       // Handle boolean operators
       return eval(evaluableExpr);
     }
-
+    
     // Handle simple comparisons
     if (evaluableExpr.includes('>=')) {
-      const [left, right] = evaluableExpr.split('>=').map((s) => s.trim());
+      const [left, right] = evaluableExpr.split('>=').map(s => s.trim());
       return parseFloat(eval(left)) >= parseFloat(eval(right));
     }
     if (evaluableExpr.includes('<=')) {
-      const [left, right] = evaluableExpr.split('<=').map((s) => s.trim());
+      const [left, right] = evaluableExpr.split('<=').map(s => s.trim());
       return parseFloat(eval(left)) <= parseFloat(eval(right));
     }
     if (evaluableExpr.includes('>')) {
-      const [left, right] = evaluableExpr.split('>').map((s) => s.trim());
+      const [left, right] = evaluableExpr.split('>').map(s => s.trim());
       return parseFloat(eval(left)) > parseFloat(eval(right));
     }
     if (evaluableExpr.includes('<')) {
-      const [left, right] = evaluableExpr.split('<').map((s) => s.trim());
+      const [left, right] = evaluableExpr.split('<').map(s => s.trim());
       return parseFloat(eval(left)) < parseFloat(eval(right));
     }
     if (evaluableExpr.includes('==')) {
-      const [left, right] = evaluableExpr.split('==').map((s) => s.trim());
+      const [left, right] = evaluableExpr.split('==').map(s => s.trim());
       return eval(left) === eval(right);
     }
     if (evaluableExpr.includes('!=')) {
-      const [left, right] = evaluableExpr.split('!=').map((s) => s.trim());
+      const [left, right] = evaluableExpr.split('!=').map(s => s.trim());
       return eval(left) !== eval(right);
     }
 
@@ -78,7 +78,7 @@ function evaluateExpression(expression: string, context: any): boolean {
 function evaluatePolicy(policy: any, context: any): PolicyEvaluationResult {
   const conditions = policy.conditions || {};
   const actions = policy.actions || [];
-
+  
   let triggered = true;
   const details: any = {};
 
@@ -94,11 +94,11 @@ function evaluatePolicy(policy: any, context: any): PolicyEvaluationResult {
     } else if (typeof conditionValue === 'object' && conditionValue !== null) {
       // Object-based conditions
       const condition = conditionValue as any;
-
+      
       if (condition.field && condition.operator && condition.value !== undefined) {
         const fieldValue = context[condition.field];
         let conditionMet = false;
-
+        
         switch (condition.operator) {
           case '>':
             conditionMet = fieldValue > condition.value;
@@ -127,15 +127,15 @@ function evaluatePolicy(policy: any, context: any): PolicyEvaluationResult {
           default:
             conditionMet = false;
         }
-
+        
         details[conditionKey] = {
           field: condition.field,
           operator: condition.operator,
           expected: condition.value,
           actual: fieldValue,
-          result: conditionMet,
+          result: conditionMet
         };
-
+        
         if (!conditionMet) {
           triggered = false;
         }
@@ -148,26 +148,26 @@ function evaluatePolicy(policy: any, context: any): PolicyEvaluationResult {
     policy_name: policy.policy_name,
     triggered,
     actions: triggered ? actions : [],
-    details,
+    details
   };
 }
 
 // Calculate diff between before/after states
 function calculateDiff(before: any, after: any): any {
   const diff: any = {};
-
+  
   for (const key in after) {
     if (before[key] !== after[key]) {
       diff[key] = { before: before[key], after: after[key] };
     }
   }
-
+  
   for (const key in before) {
     if (!(key in after)) {
       diff[key] = { before: before[key], after: null };
     }
   }
-
+  
   return diff;
 }
 
@@ -179,28 +179,27 @@ Deno.serve(async (req) => {
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     // Parse and validate request
     const body = await req.json();
     const parsed = PolicyRequestSchema.safeParse(body);
-
+    
     if (!parsed.success) {
       return new Response(
-        JSON.stringify({
+        JSON.stringify({ 
           error: 'Validation failed',
-          details: parsed.error.issues,
+          details: parsed.error.issues 
         }),
-        {
+        { 
           status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
       );
     }
 
-    const { document_id, policy_types = ['validation', 'approval', 'routing', 'fraud'], context } =
-      parsed.data;
+    const { document_id, policy_types = ['validation', 'approval', 'routing', 'fraud'], context } = parsed.data;
     const tenantId = body.tenant_id || 'system';
 
     // Get document data for context
@@ -214,10 +213,10 @@ Deno.serve(async (req) => {
     if (docError || !document) {
       return new Response(
         JSON.stringify({ error: 'Document not found' }),
-        {
+        { 
           status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
       );
     }
 
@@ -235,7 +234,7 @@ Deno.serve(async (req) => {
       receiver_id: document.receiver_id,
       issue_date: document.issue_date,
       due_date: document.due_date,
-      created_at: document.created_at,
+      created_at: document.created_at
     };
 
     // Fetch active policies for the tenant
@@ -251,10 +250,10 @@ Deno.serve(async (req) => {
       console.error('Failed to fetch policies:', policyError);
       return new Response(
         JSON.stringify({ error: 'Failed to fetch policies' }),
-        {
+        { 
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
       );
     }
 
@@ -266,7 +265,7 @@ Deno.serve(async (req) => {
     for (const policy of policies || []) {
       const result = evaluatePolicy(policy, evaluationContext);
       results.push(result);
-
+      
       if (result.triggered) {
         triggeredPolicies.push(policy);
       }
@@ -275,7 +274,7 @@ Deno.serve(async (req) => {
     // Execute actions from triggered policies
     let finalDecision = 'approved';
     const executedActions: any[] = [];
-
+    
     for (const policy of triggeredPolicies) {
       for (const action of policy.actions || []) {
         switch (action.type) {
@@ -290,7 +289,7 @@ Deno.serve(async (req) => {
               invoice_id: document.id,
               reason: `Policy triggered: ${policy.policy_name}`,
               priority: action.priority || 3,
-              flagged_fields: { policy_triggered: true, policy_name: policy.policy_name },
+              flagged_fields: { policy_triggered: true, policy_name: policy.policy_name }
             });
             executedActions.push({ policy: policy.policy_name, action: 'routed_to_review' });
             break;
@@ -300,7 +299,7 @@ Deno.serve(async (req) => {
               flag_type: action.flag_type || 'vendor_mismatch',
               risk_score: action.risk_score || 50,
               details: { policy_triggered: policy.policy_name, ...action.details },
-              tenant_id: tenantId,
+              tenant_id: tenantId
             });
             executedActions.push({ policy: policy.policy_name, action: 'flagged_for_fraud' });
             break;
@@ -309,11 +308,7 @@ Deno.serve(async (req) => {
               .from('einvoice_documents')
               .update({ status: action.new_status })
               .eq('id', document.id);
-            executedActions.push({
-              policy: policy.policy_name,
-              action: 'status_updated',
-              new_status: action.new_status,
-            });
+            executedActions.push({ policy: policy.policy_name, action: 'status_updated', new_status: action.new_status });
             break;
         }
       }
@@ -337,7 +332,7 @@ Deno.serve(async (req) => {
       old_values: beforeState,
       new_values: afterDocument || document,
       ip_address: req.headers.get('x-forwarded-for')?.split(',')[0],
-      user_agent: req.headers.get('user-agent'),
+      user_agent: req.headers.get('user-agent')
     });
 
     // Increment metrics
@@ -345,13 +340,13 @@ Deno.serve(async (req) => {
       tenant_id: tenantId,
       model: 'policy_engine',
       stage: 'evaluation',
-      confidence: results.filter((r) => r.triggered).length / Math.max(1, results.length),
+      confidence: results.filter(r => r.triggered).length / Math.max(1, results.length),
       payload: {
         document_id,
         policies_evaluated: results.length,
         policies_triggered: triggeredPolicies.length,
-        final_decision: finalDecision,
-      },
+        final_decision: finalDecision
+      }
     });
 
     const response = {
@@ -361,23 +356,21 @@ Deno.serve(async (req) => {
       final_decision: finalDecision,
       executed_actions: executedActions,
       state_diff: diff,
-      evaluated_at: new Date().toISOString(),
+      evaluated_at: new Date().toISOString()
     };
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     console.error('Policy engine error:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Policy evaluation failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    );
+    return new Response(JSON.stringify({ 
+      error: 'Policy evaluation failed',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

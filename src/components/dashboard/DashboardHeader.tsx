@@ -1,31 +1,14 @@
-import {
-  User,
-  LogOut,
-  Shield,
-  Settings,
-  Palette,
-  Menu,
-  FileText,
-  DollarSign,
-  MapPin,
-  BarChart3,
-  CheckCircle2,
-  Ticket,
-  Plug,
-  Activity,
-  Home,
-  HelpCircle,
-} from "lucide-react";
+import { Building2, Bell, User, LogOut, Shield, Settings, Home, ArrowLeft, Palette } from "lucide-react";
 import companyLogo from "@/assets/company-logo.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
@@ -59,8 +42,10 @@ const DashboardHeader = () => {
   const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isNavOpen, setIsNavOpen] = useState(false);
-
+  
+  // Check if we're on the homepage
+  const isHomePage = location.pathname === '/';
+  
   const handleSearch = (query: string) => {
     if (import.meta.env.DEV) {
       console.log("Searching for:", query);
@@ -70,19 +55,15 @@ const DashboardHeader = () => {
 
   const getRoleBadgeVariant = (role: string | null) => {
     switch (role) {
-      case "admin":
-        return "destructive";
-      case "operator":
-        return "default";
-      case "viewer":
-        return "secondary";
-      default:
-        return "outline";
+      case 'admin': return 'destructive';
+      case 'operator': return 'default';
+      case 'viewer': return 'secondary';
+      default: return 'outline';
     }
   };
 
   const getRoleIcon = (role: string | null) => {
-    if (role === "admin") return <Shield className="h-3 w-3" />;
+    if (role === 'admin') return <Shield className="h-3 w-3" />;
     return null;
   };
 
@@ -90,7 +71,7 @@ const DashboardHeader = () => {
     if (user?.user_metadata?.full_name) {
       return user.user_metadata.full_name;
     }
-    return user?.email?.split("@")[0] || "User";
+    return user?.email?.split('@')[0] || 'User';
   };
 
   const getInitials = () => {
@@ -108,15 +89,19 @@ const DashboardHeader = () => {
         {/* Logo and Brand */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate('/')}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
             aria-label="Go to homepage"
           >
-            <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-8 w-8 object-contain" />
+            <img 
+              src={companyLogo} 
+              alt="FLOWBills.ca Logo" 
+              className="h-8 w-8 object-contain"
+            />
           </button>
           <div className="hidden sm:block">
-            <button
-              onClick={() => navigate("/")}
+            <button 
+              onClick={() => navigate('/')}
               className="text-left hover:opacity-80 transition-opacity"
             >
               <h1 className="text-lg font-semibold text-foreground">Flow Billing</h1>
@@ -131,8 +116,22 @@ const DashboardHeader = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 hover:bg-muted ml-2"
-              aria-label="Open navigation menu"
+              onClick={() => navigate('/')}
+              className="gap-2 hover:bg-primary/10"
+              aria-label="Back to dashboard"
+            >
+              <Home className="h-4 w-4" />
+              <span className="hidden md:inline">Dashboard</span>
+            </Button>
+          )}
+          
+          {!isHomePage && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.history.back()}
+              className="gap-2 hover:bg-muted"
+              aria-label="Go back"
             >
               <Menu className="h-5 w-5" />
               <span className="hidden md:inline">Menu</span>
@@ -172,9 +171,7 @@ const DashboardHeader = () => {
           <SmartSearch
             placeholder="Search invoices, vendors, POs..."
             onSearch={handleSearch}
-            onSelect={(result) => {
-              /* Handle search result selection */
-            }}
+            onSelect={(result) => {/* Handle search result selection */}}
           />
         </div>
 
@@ -182,14 +179,14 @@ const DashboardHeader = () => {
         <div className="flex items-center gap-3">
           {/* System Performance Indicator */}
           <PerformanceIndicator />
-
+          
           <NotificationBell />
 
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
+              <Button 
+                variant="ghost" 
                 size="sm"
                 className="flex items-center gap-2.5 h-10 px-3 hover:bg-muted/80 transition-colors"
                 aria-label="User menu"
@@ -214,32 +211,32 @@ const DashboardHeader = () => {
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant={getRoleBadgeVariant(userRole)} className="text-xs font-medium">
                       {getRoleIcon(userRole)}
-                      <span className="ml-1">{userRole?.toUpperCase() || "LOADING..."}</span>
+                      <span className="ml-1">{userRole?.toUpperCase() || 'LOADING...'}</span>
                     </Badge>
                   </div>
                 </div>
               </div>
-
+              
               <DropdownMenuSeparator className="my-2" />
-
-              <DropdownMenuItem
-                onClick={() => navigate("/profile")}
+              
+              <DropdownMenuItem 
+                onClick={() => navigate('/profile')} 
                 className="cursor-pointer rounded-md px-3 py-2.5 hover:bg-muted"
               >
                 <User className="mr-3 h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">My Profile</span>
               </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => navigate("/profile")}
+              
+              <DropdownMenuItem 
+                onClick={() => navigate('/profile')} 
                 className="cursor-pointer rounded-md px-3 py-2.5 hover:bg-muted"
               >
                 <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Settings</span>
               </DropdownMenuItem>
-
+              
               <DropdownMenuSeparator className="my-2" />
-
+              
               <div className="px-2 py-1.5">
                 <div className="flex items-center gap-2 px-1 mb-2">
                   <Palette className="h-4 w-4 text-muted-foreground" />
@@ -247,11 +244,11 @@ const DashboardHeader = () => {
                 </div>
                 <ThemeSwitcher variant="inline" />
               </div>
-
+              
               <DropdownMenuSeparator className="my-2" />
-
-              <DropdownMenuItem
-                onClick={signOut}
+              
+              <DropdownMenuItem 
+                onClick={signOut} 
                 className="cursor-pointer rounded-md px-3 py-2.5 text-destructive hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
               >
                 <LogOut className="mr-3 h-4 w-4" />

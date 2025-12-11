@@ -1,59 +1,48 @@
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useWorkflows, Workflow } from "@/hooks/useWorkflows";
-import WorkflowList from "@/components/workflow/WorkflowList";
-import WorkflowBuilder from "@/components/workflow/WorkflowBuilder";
-import WorkflowTemplates from "@/components/workflow/WorkflowTemplates";
-import ApprovalWorkflowTemplates from "@/components/workflow/ApprovalWorkflowTemplates";
-import LoadingSkeleton from "@/components/ui/loading-skeleton";
-import { toast } from "@/hooks/use-toast";
-import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
-import { ContextualTooltip } from "@/components/help/ContextualTooltip";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useWorkflows, Workflow } from '@/hooks/useWorkflows';
+import WorkflowList from '@/components/workflow/WorkflowList';
+import WorkflowBuilder from '@/components/workflow/WorkflowBuilder';
+import WorkflowTemplates from '@/components/workflow/WorkflowTemplates';
+import ApprovalWorkflowTemplates from '@/components/workflow/ApprovalWorkflowTemplates';
+import LoadingSkeleton from '@/components/ui/loading-skeleton';
+import { toast } from '@/hooks/use-toast';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { ContextualTooltip } from '@/components/help/ContextualTooltip';
 
-type ViewMode = "list" | "builder" | "templates";
+type ViewMode = 'list' | 'builder' | 'templates';
 
 const Workflows = () => {
-  const {
-    workflows,
-    instances,
-    loading,
-    createWorkflow,
-    updateWorkflow,
-    deleteWorkflow,
-    startWorkflow,
-    executeWorkflow,
-  } = useWorkflows();
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const { workflows, instances, loading, createWorkflow, updateWorkflow, deleteWorkflow, startWorkflow, executeWorkflow } = useWorkflows();
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
 
   const handleCreateWorkflow = () => {
     setEditingWorkflow(null);
-    setViewMode("builder");
+    setViewMode('builder');
   };
 
   const handleEditWorkflow = (workflow: Workflow) => {
     setEditingWorkflow(workflow);
-    setViewMode("builder");
+    setViewMode('builder');
   };
 
-  const handleSaveWorkflow = async (
-    workflowData: Omit<Workflow, "id" | "created_at" | "updated_at">
-  ) => {
+  const handleSaveWorkflow = async (workflowData: Omit<Workflow, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       if (editingWorkflow) {
         await updateWorkflow(editingWorkflow.id, workflowData);
       } else {
         await createWorkflow(workflowData);
       }
-      setViewMode("list");
+      setViewMode('list');
       setEditingWorkflow(null);
     } catch (error) {
-      console.error("Error saving workflow:", error);
+      console.error('Error saving workflow:', error);
     }
   };
 
   const handleDeleteWorkflow = async (id: string) => {
-    if (confirm("Are you sure you want to delete this workflow?")) {
+    if (confirm('Are you sure you want to delete this workflow?')) {
       await deleteWorkflow(id);
     }
   };
@@ -64,25 +53,25 @@ const Workflows = () => {
 
   const handleExecuteWorkflow = async (workflowId: string) => {
     // For demo purposes, we'll use a dummy entity
-    await executeWorkflow(workflowId, "invoice", "demo-entity-id");
+    await executeWorkflow(workflowId, 'invoice', 'demo-entity-id');
   };
 
   const handleSelectTemplate = (template: any) => {
     setEditingWorkflow({
-      id: "",
+      id: '',
       name: template.name,
       description: template.description,
-      workflow_type: "invoice_processing",
+      workflow_type: 'invoice_processing',
       steps: template.steps,
       is_active: true,
-      created_at: "",
-      updated_at: "",
+      created_at: '',
+      updated_at: '',
     });
-    setViewMode("builder");
+    setViewMode('builder');
   };
 
   const handleCancel = () => {
-    setViewMode("list");
+    setViewMode('list');
     setEditingWorkflow(null);
   };
 
@@ -99,7 +88,7 @@ const Workflows = () => {
     );
   }
 
-  if (viewMode === "builder") {
+  if (viewMode === 'builder') {
     return (
       <div className="h-screen">
         <WorkflowBuilder
@@ -111,7 +100,7 @@ const Workflows = () => {
     );
   }
 
-  if (viewMode === "templates") {
+  if (viewMode === 'templates') {
     return (
       <div className="container mx-auto p-6">
         <WorkflowTemplates onSelectTemplate={handleSelectTemplate} />
@@ -142,9 +131,7 @@ const Workflows = () => {
           >
             <TabsTrigger value="approval-templates">Approval Templates</TabsTrigger>
           </ContextualTooltip>
-          <TabsTrigger value="templates" onClick={() => setViewMode("templates")}>
-            General Templates
-          </TabsTrigger>
+          <TabsTrigger value="templates" onClick={() => setViewMode('templates')}>General Templates</TabsTrigger>
           <ContextualTooltip
             id="workflow-instances-tab"
             title="Running Workflow Instances"
@@ -178,21 +165,15 @@ const Workflows = () => {
 
         <TabsContent value="instances" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {instances.map((instance) => (
+            {instances.map(instance => (
               <div key={instance.id} className="card-enterprise p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-medium">Instance {instance.id.slice(0, 8)}</h3>
-                  <span
-                    className={`px-2 py-1 rounded text-xs text-white ${
-                      instance.status === "running"
-                        ? "bg-status-processing"
-                        : instance.status === "completed"
-                          ? "bg-status-approved"
-                          : instance.status === "failed"
-                            ? "bg-destructive"
-                            : "bg-status-pending"
-                    }`}
-                  >
+                  <span className={`px-2 py-1 rounded text-xs text-white ${
+                    instance.status === 'running' ? 'bg-status-processing' :
+                    instance.status === 'completed' ? 'bg-status-approved' :
+                    instance.status === 'failed' ? 'bg-destructive' : 'bg-status-pending'
+                  }`}>
                     {instance.status}
                   </span>
                 </div>

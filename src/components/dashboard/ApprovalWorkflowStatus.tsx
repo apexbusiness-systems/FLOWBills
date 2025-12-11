@@ -25,11 +25,11 @@ interface Approval {
 
 const getApprovalLevelBadge = (method: string | null) => {
   switch (method) {
-    case "auto_approval":
+    case 'auto_approval':
       return <Badge variant="approved">Auto-Approved</Badge>;
-    case "manager_approval":
+    case 'manager_approval':
       return <Badge variant="pending">Manager Review</Badge>;
-    case "cfo_approval":
+    case 'cfo_approval':
       return <Badge variant="pending">CFO Review</Badge>;
     default:
       return <Badge variant="outline">Pending</Badge>;
@@ -38,11 +38,11 @@ const getApprovalLevelBadge = (method: string | null) => {
 
 const getApprovalIcon = (status: string) => {
   switch (status) {
-    case "approved":
+    case 'approved':
       return <CheckCircle className="h-4 w-4 text-status-approved" />;
-    case "rejected":
+    case 'rejected':
       return <XCircle className="h-4 w-4 text-destructive" />;
-    case "pending":
+    case 'pending':
       return <Clock className="h-4 w-4 text-amber-500" />;
     default:
       return <User className="h-4 w-4 text-muted-foreground" />;
@@ -60,10 +60,9 @@ export const ApprovalWorkflowStatus = () => {
 
     const fetchPendingApprovals = async () => {
       try {
-        const query = supabase
-          .from("approvals")
-          .select(
-            `
+        let query = supabase
+          .from('approvals')
+          .select(`
             id,
             invoice_id,
             approval_status,
@@ -76,11 +75,10 @@ export const ApprovalWorkflowStatus = () => {
               vendor_name,
               amount
             )
-          `
-          )
-          .eq("user_id", user.id)
-          .eq("approval_status", "pending")
-          .order("created_at", { ascending: false })
+          `)
+          .eq('user_id', user.id)
+          .eq('approval_status', 'pending')
+          .order('created_at', { ascending: false })
           .limit(5);
 
         const { data, error } = await query;
@@ -88,7 +86,7 @@ export const ApprovalWorkflowStatus = () => {
         if (error) throw error;
         setPendingApprovals(data || []);
       } catch (error) {
-        console.error("Error fetching pending approvals:", error);
+        console.error('Error fetching pending approvals:', error);
       } finally {
         setLoading(false);
       }
@@ -98,19 +96,15 @@ export const ApprovalWorkflowStatus = () => {
 
     // Subscribe to real-time updates
     const channel = supabase
-      .channel("approval-updates")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "approvals",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          fetchPendingApprovals();
-        }
-      )
+      .channel('approval-updates')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'approvals',
+        filter: `user_id=eq.${user.id}`
+      }, () => {
+        fetchPendingApprovals();
+      })
       .subscribe();
 
     return () => {
@@ -143,8 +137,10 @@ export const ApprovalWorkflowStatus = () => {
           <div className="text-center py-8">
             <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground">No pending approvals</p>
-            {(userRole === "admin" || userRole === "operator") && (
-              <p className="text-sm text-muted-foreground mt-2">All invoices have been processed</p>
+            {(userRole === 'admin' || userRole === 'operator') && (
+              <p className="text-sm text-muted-foreground mt-2">
+                All invoices have been processed
+              </p>
             )}
           </div>
         </CardContent>
@@ -156,7 +152,7 @@ export const ApprovalWorkflowStatus = () => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Pending Approvals</CardTitle>
-        <Button variant="outline" size="sm" onClick={() => navigate("/approval-queue")}>
+        <Button variant="outline" size="sm" onClick={() => navigate('/approval-queue')}>
           View All ({pendingApprovals.length})
         </Button>
       </CardHeader>
@@ -172,7 +168,7 @@ export const ApprovalWorkflowStatus = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="text-sm font-medium text-foreground truncate">
-                    {approval.invoices?.invoice_number || "Invoice"}
+                    {approval.invoices?.invoice_number || 'Invoice'}
                   </h4>
                   {getApprovalLevelBadge(approval.approval_method)}
                 </div>
@@ -181,10 +177,12 @@ export const ApprovalWorkflowStatus = () => {
                   <span className="font-medium">
                     ${(approval.amount_approved || approval.invoices?.amount || 0).toLocaleString()}
                   </span>
-                  <span>{format(new Date(approval.created_at), "MMM d, h:mm a")}</span>
+                  <span>{format(new Date(approval.created_at), 'MMM d, h:mm a')}</span>
                 </div>
                 {approval.notes && (
-                  <p className="text-xs text-muted-foreground mt-1 truncate">{approval.notes}</p>
+                  <p className="text-xs text-muted-foreground mt-1 truncate">
+                    {approval.notes}
+                  </p>
                 )}
               </div>
             </div>

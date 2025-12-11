@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Settings, CheckCircle, AlertTriangle, Plus, Edit, Trash2, Save, X } from "lucide-react";
+import { 
+  Settings, 
+  CheckCircle, 
+  AlertTriangle, 
+  Plus, 
+  Edit, 
+  Trash2,
+  Save,
+  X
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -26,17 +35,17 @@ const defaultRules: ValidationRule[] = [
     value: "",
     severity: "error",
     active: true,
-    description: "Purchase Order number must be present",
+    description: "Purchase Order number must be present"
   },
   {
-    id: "2",
+    id: "2", 
     name: "Amount Validation",
     field: "amount",
     operator: "greater_than",
     value: "0",
     severity: "error",
     active: true,
-    description: "Invoice amount must be greater than zero",
+    description: "Invoice amount must be greater than zero"
   },
   {
     id: "3",
@@ -46,18 +55,18 @@ const defaultRules: ValidationRule[] = [
     value: "CA-",
     severity: "warning",
     active: true,
-    description: "Canadian vendor codes should contain CA- prefix",
+    description: "Canadian vendor codes should contain CA- prefix"
   },
   {
     id: "4",
     name: "GST/HST Check",
-    field: "tax_amount",
+    field: "tax_amount", 
     operator: "not_empty",
     value: "",
     severity: "warning",
     active: true,
-    description: "Tax amount should be specified for Canadian invoices",
-  },
+    description: "Tax amount should be specified for Canadian invoices"
+  }
 ];
 
 const ValidationRules = () => {
@@ -73,7 +82,7 @@ const ValidationRules = () => {
     value: "",
     severity: "error",
     active: true,
-    description: "",
+    description: ""
   });
 
   const getSeverityBadge = (severity: string) => {
@@ -90,9 +99,9 @@ const ValidationRules = () => {
   };
 
   const toggleRuleActive = (ruleId: string) => {
-    setRules((prev) =>
-      prev.map((rule) => (rule.id === ruleId ? { ...rule, active: !rule.active } : rule))
-    );
+    setRules(prev => prev.map(rule =>
+      rule.id === ruleId ? { ...rule, active: !rule.active } : rule
+    ));
     toast({
       title: "Rule updated",
       description: "Validation rule status has been changed.",
@@ -100,7 +109,7 @@ const ValidationRules = () => {
   };
 
   const deleteRule = (ruleId: string) => {
-    setRules((prev) => prev.filter((rule) => rule.id !== ruleId));
+    setRules(prev => prev.filter(rule => rule.id !== ruleId));
     toast({
       title: "Rule deleted",
       description: "Validation rule has been removed.",
@@ -125,29 +134,29 @@ const ValidationRules = () => {
       value: newRule.value || "",
       severity: newRule.severity!,
       active: newRule.active!,
-      description: newRule.description || "",
+      description: newRule.description || ""
     };
 
-    setRules((prev) => [...prev, rule]);
+    setRules(prev => [...prev, rule]);
     setNewRule({
       name: "",
       field: "",
       operator: "not_empty",
       value: "",
-      severity: "error",
+      severity: "error", 
       active: true,
-      description: "",
+      description: ""
     });
     setShowAddForm(false);
-
+    
     toast({
       title: "Rule added",
       description: "New validation rule has been created.",
     });
   };
 
-  const activeRules = rules.filter((rule) => rule.active).length;
-  const errorRules = rules.filter((rule) => rule.severity === "error" && rule.active).length;
+  const activeRules = rules.filter(rule => rule.active).length;
+  const errorRules = rules.filter(rule => rule.severity === "error" && rule.active).length;
 
   return (
     <div className="card-enterprise">
@@ -160,7 +169,11 @@ const ValidationRules = () => {
           <div className="flex items-center gap-2">
             <Badge variant="approved">{activeRules} Active</Badge>
             <Badge variant="rejected">{errorRules} Critical</Badge>
-            <Button size="sm" variant="enterprise" onClick={() => setShowAddForm(true)}>
+            <Button 
+              size="sm" 
+              variant="enterprise"
+              onClick={() => setShowAddForm(true)}
+            >
               <Plus className="h-4 w-4" />
               Add Rule
             </Button>
@@ -181,7 +194,7 @@ const ValidationRules = () => {
               <Input
                 id="rule-name"
                 value={newRule.name || ""}
-                onChange={(e) => setNewRule((prev) => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setNewRule(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="e.g., Amount Validation"
               />
             </div>
@@ -190,7 +203,7 @@ const ValidationRules = () => {
               <Input
                 id="rule-field"
                 value={newRule.field || ""}
-                onChange={(e) => setNewRule((prev) => ({ ...prev, field: e.target.value }))}
+                onChange={(e) => setNewRule(prev => ({ ...prev, field: e.target.value }))}
                 placeholder="e.g., amount, po_number"
               />
             </div>
@@ -200,9 +213,7 @@ const ValidationRules = () => {
                 id="rule-operator"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={newRule.operator}
-                onChange={(e) =>
-                  setNewRule((prev) => ({ ...prev, operator: e.target.value as any }))
-                }
+                onChange={(e) => setNewRule(prev => ({ ...prev, operator: e.target.value as any }))}
               >
                 <option value="not_empty">Not Empty</option>
                 <option value="equals">Equals</option>
@@ -216,7 +227,7 @@ const ValidationRules = () => {
               <Input
                 id="rule-value"
                 value={newRule.value || ""}
-                onChange={(e) => setNewRule((prev) => ({ ...prev, value: e.target.value }))}
+                onChange={(e) => setNewRule(prev => ({ ...prev, value: e.target.value }))}
                 placeholder="Comparison value"
               />
             </div>
@@ -226,9 +237,7 @@ const ValidationRules = () => {
                 id="rule-severity"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={newRule.severity}
-                onChange={(e) =>
-                  setNewRule((prev) => ({ ...prev, severity: e.target.value as any }))
-                }
+                onChange={(e) => setNewRule(prev => ({ ...prev, severity: e.target.value as any }))}
               >
                 <option value="error">Error</option>
                 <option value="warning">Warning</option>
@@ -240,7 +249,7 @@ const ValidationRules = () => {
               <Input
                 id="rule-description"
                 value={newRule.description || ""}
-                onChange={(e) => setNewRule((prev) => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => setNewRule(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Brief description of the validation rule"
               />
             </div>
@@ -261,7 +270,7 @@ const ValidationRules = () => {
       {/* Rules List */}
       <div className="space-y-3">
         {rules.map((rule) => (
-          <div
+          <div 
             key={rule.id}
             className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
               rule.active ? "border-border bg-background" : "border-border bg-muted/30 opacity-75"
@@ -277,19 +286,20 @@ const ValidationRules = () => {
                 {getSeverityBadge(rule.severity)}
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-medium text-foreground">{rule.name}</h4>
+                <h4 className="text-sm font-medium text-foreground">
+                  {rule.name}
+                </h4>
                 <p className="text-xs text-muted-foreground">
-                  Field: <span className="font-mono">{rule.field}</span> • Operator:{" "}
-                  <span className="capitalize">{rule.operator.replace("_", " ")}</span>
+                  Field: <span className="font-mono">{rule.field}</span> • 
+                  Operator: <span className="capitalize">{rule.operator.replace('_', ' ')}</span>
                   {rule.value && (
-                    <>
-                      {" "}
-                      • Value: <span className="font-mono">{rule.value}</span>
-                    </>
+                    <> • Value: <span className="font-mono">{rule.value}</span></>
                   )}
                 </p>
                 {rule.description && (
-                  <p className="text-xs text-muted-foreground mt-1">{rule.description}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {rule.description}
+                  </p>
                 )}
               </div>
             </div>
@@ -326,8 +336,8 @@ const ValidationRules = () => {
 
       <div className="mt-4 pt-4 border-t border-border">
         <p className="text-xs text-muted-foreground">
-          Validation rules are applied during invoice ingestion and processing. Error-level rules
-          will block invoice progression until resolved.
+          Validation rules are applied during invoice ingestion and processing. 
+          Error-level rules will block invoice progression until resolved.
         </p>
       </div>
     </div>

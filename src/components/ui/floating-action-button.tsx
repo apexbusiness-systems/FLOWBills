@@ -21,16 +21,14 @@ const FloatingActionButton = ({
 }: FloatingActionButtonProps) => {
   const sizeClasses = {
     sm: "h-12 w-12",
-    md: "h-14 w-14",
-    lg: "h-16 w-16",
+    md: "h-14 w-14", 
+    lg: "h-16 w-16"
   };
 
   const variantClasses = {
     primary: "bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl",
-    secondary:
-      "bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg hover:shadow-xl",
-    emergency:
-      "bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-lg hover:shadow-xl animate-pulse-glow",
+    secondary: "bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg hover:shadow-xl",
+    emergency: "bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-lg hover:shadow-xl animate-pulse-glow"
   };
 
   return (

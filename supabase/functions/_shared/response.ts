@@ -5,11 +5,7 @@
 
 import { corsHeaders } from './cors.ts';
 
-export function jsonResponse(
-  data: any,
-  status = 200,
-  headers: Record<string, string> = {},
-): Response {
+export function jsonResponse(data: any, status = 200, headers: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json', ...headers },
@@ -19,7 +15,7 @@ export function jsonResponse(
 export function errorResponse(message: string, status = 500, details?: any): Response {
   return jsonResponse(
     { error: message, ...(details && { details }) },
-    status,
+    status
   );
 }
 

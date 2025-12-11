@@ -1,5 +1,5 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { toMessage } from '../_shared/errors.ts';
+import { toMessage } from "../_shared/errors.ts";
 import { corsHeaders } from '../_shared/cors.ts';
 
 // Type definitions
@@ -47,9 +47,8 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    const { invoice_id, invoice_data, policy_types = ['approval', 'fraud'] }: PolicyRequest =
-      await req.json();
-
+    const { invoice_id, invoice_data, policy_types = ['approval', 'fraud'] }: PolicyRequest = await req.json();
+    
     console.log(`Evaluating policies for invoice ${invoice_id}, amount: ${invoice_data.amount}`);
 
     // Fetch active policies
@@ -76,22 +75,21 @@ Deno.serve(async (req) => {
 
       if (result.triggered) {
         console.log(`Policy triggered: ${policy.policy_name}`);
-
+        
         // Apply policy actions
         const actions = result.actions;
-
+        
         if (actions.require_approvals) {
           requiredApprovals = Math.max(requiredApprovals, actions.require_approvals);
           finalDecision = 'require_approval';
-          routingReason =
-            `Policy "${policy.policy_name}" requires ${actions.require_approvals} approvals`;
+          routingReason = `Policy "${policy.policy_name}" requires ${actions.require_approvals} approvals`;
         }
-
+        
         if (actions.flag_for_review) {
           finalDecision = 'flag_for_review';
           routingReason = `Policy "${policy.policy_name}" flagged for manual review`;
         }
-
+        
         if (actions.block_processing) {
           finalDecision = 'block';
           routingReason = `Policy "${policy.policy_name}" blocked processing`;
@@ -105,7 +103,7 @@ Deno.serve(async (req) => {
             entity_id: invoice_id,
             flag_type: actions.create_fraud_flag,
             risk_score: actions.risk_score || 50,
-            details: { policy_id: policy.id, triggered_by: policy.policy_name },
+            details: { policy_id: policy.id, triggered_by: policy.policy_name }
           });
         }
       }
@@ -115,8 +113,8 @@ Deno.serve(async (req) => {
     const { error: updateError } = await supabase
       .from('invoices')
       .update({
-        approval_policy_id: policies.find((p) => p.policy_type === 'approval')?.id,
-        status: finalDecision === 'auto_approve' ? 'approved' : 'pending_approval',
+        approval_policy_id: policies.find(p => p.policy_type === 'approval')?.id,
+        status: finalDecision === 'auto_approve' ? 'approved' : 'pending_approval'
       })
       .eq('id', invoice_id);
 
@@ -131,7 +129,7 @@ Deno.serve(async (req) => {
           invoice_id,
           approval_level: i + 1,
           status: 'pending',
-          amount_approved: invoice_data.amount,
+          amount_approved: invoice_data.amount
         });
       }
     }
@@ -143,11 +141,7 @@ Deno.serve(async (req) => {
         reason: routingReason,
         priority: 3,
         confidence_score: invoice_data.confidence_score || 0,
-        flagged_fields: {
-          policies_triggered: evaluationResults.filter((r) => r.triggered).map((r) =>
-            r.policy_name
-          ),
-        },
+        flagged_fields: { policies_triggered: evaluationResults.filter(r => r.triggered).map(r => r.policy_name) }
       });
     }
 
@@ -159,9 +153,9 @@ Deno.serve(async (req) => {
       new_values: {
         decision: finalDecision,
         required_approvals: requiredApprovals,
-        policies_triggered: evaluationResults.filter((r) => r.triggered).length,
+        policies_triggered: evaluationResults.filter(r => r.triggered).length
       },
-      user_id: null, // System action
+      user_id: null // System action
     });
 
     const response: PolicyEngineResponse = {
@@ -170,15 +164,16 @@ Deno.serve(async (req) => {
       policies_evaluated: evaluationResults,
       final_decision: finalDecision,
       required_approvals: requiredApprovals,
-      routing_reason: routingReason,
+      routing_reason: routingReason
     };
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (err: unknown) {
     console.error('Policy engine error:', err);
-
+    
     const errorResponse: PolicyEngineResponse = {
       success: false,
       invoice_id: '',
@@ -186,7 +181,7 @@ Deno.serve(async (req) => {
       final_decision: 'block',
       required_approvals: 0,
       routing_reason: 'Policy engine error',
-      error: toMessage(err),
+      error: toMessage(err)
     };
 
     return new Response(JSON.stringify(errorResponse), {
@@ -199,7 +194,7 @@ Deno.serve(async (req) => {
 async function evaluatePolicy(policy: any, invoiceData: any, supabase: any): Promise<PolicyResult> {
   const conditions = policy.conditions;
   const actions = policy.actions;
-
+  
   let triggered = false;
   let details = '';
 
@@ -222,15 +217,10 @@ async function evaluatePolicy(policy: any, invoiceData: any, supabase: any): Pro
           .neq('id', invoiceData.vendor_id)
           .not('bank_account', 'is', null);
 
-        const { data: list } = await supabase.from('vendors').select('bank_account').eq(
-          'id',
-          invoiceData.vendor_id,
-        ).limit(1);
+        const { data: list } = await supabase.from("vendors").select("bank_account").eq("id", invoiceData.vendor_id).limit(1);
         const target = list?.[0]?.bank_account ?? null;
         const vendorList: Vendor[] = vendors ?? [];
-        const duplicates = vendorList.filter((v: Vendor) =>
-          v.bank_account != null && v.bank_account === target
-        );
+        const duplicates = vendorList.filter((v: Vendor) => v.bank_account != null && v.bank_account === target);
 
         if (duplicates && duplicates.length > 0) {
           triggered = true;
@@ -243,6 +233,7 @@ async function evaluatePolicy(policy: any, invoiceData: any, supabase: any): Pro
         // Implementation would be similar to bank account check
       }
     }
+
   } catch (err: unknown) {
     console.error(`Error evaluating policy ${policy.policy_name}:`, err);
   }
@@ -252,6 +243,6 @@ async function evaluatePolicy(policy: any, invoiceData: any, supabase: any): Pro
     policy_name: policy.policy_name,
     triggered,
     actions: triggered ? actions : {},
-    details: triggered ? details : undefined,
+    details: triggered ? details : undefined
   };
 }

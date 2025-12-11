@@ -22,7 +22,7 @@ export interface MetricLabels {
 
 export interface LogEntry {
   timestamp: string;
-  level: "debug" | "info" | "warn" | "error";
+  level: 'debug' | 'info' | 'warn' | 'error';
   message: string;
   trace_context?: TraceContext;
   labels?: MetricLabels;
@@ -46,7 +46,7 @@ export class StructuredLogger {
     };
   }
 
-  private log(level: LogEntry["level"], message: string, data?: Record<string, any>) {
+  private log(level: LogEntry['level'], message: string, data?: Record<string, any>) {
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
@@ -60,19 +60,19 @@ export class StructuredLogger {
   }
 
   debug(message: string, data?: Record<string, any>) {
-    this.log("debug", message, data);
+    this.log('debug', message, data);
   }
 
   info(message: string, data?: Record<string, any>) {
-    this.log("info", message, data);
+    this.log('info', message, data);
   }
 
   warn(message: string, data?: Record<string, any>) {
-    this.log("warn", message, data);
+    this.log('warn', message, data);
   }
 
   error(message: string, data?: Record<string, any>) {
-    this.log("error", message, data);
+    this.log('error', message, data);
   }
 
   /**
@@ -103,10 +103,10 @@ export interface BurnRateWindow {
 }
 
 export const SLO_BURN_WINDOWS: BurnRateWindow[] = [
-  { name: "1h", duration_minutes: 60, threshold: 14.4 }, // 1% budget in 1 hour
-  { name: "6h", duration_minutes: 360, threshold: 6 }, // 5% budget in 6 hours
-  { name: "24h", duration_minutes: 1440, threshold: 3 }, // 10% budget in 24 hours
-  { name: "72h", duration_minutes: 4320, threshold: 1 }, // 30% budget in 72 hours
+  { name: '1h', duration_minutes: 60, threshold: 14.4 }, // 1% budget in 1 hour
+  { name: '6h', duration_minutes: 360, threshold: 6 },   // 5% budget in 6 hours
+  { name: '24h', duration_minutes: 1440, threshold: 3 }, // 10% budget in 24 hours
+  { name: '72h', duration_minutes: 4320, threshold: 1 }, // 30% budget in 72 hours
 ];
 
 export function calculateBurnRate(
@@ -115,17 +115,20 @@ export function calculateBurnRate(
   sloTarget: number = 0.995 // 99.5% SLO
 ): number {
   if (totalRequests === 0) return 0;
-
+  
   const errorRate = errorCount / totalRequests;
   const errorBudget = 1 - sloTarget;
-
+  
   return errorRate / errorBudget;
 }
 
 /**
  * Check if burn rate exceeds threshold for alerting
  */
-export function shouldAlert(burnRate: number, window: BurnRateWindow): boolean {
+export function shouldAlert(
+  burnRate: number,
+  window: BurnRateWindow
+): boolean {
   return burnRate > window.threshold;
 }
 

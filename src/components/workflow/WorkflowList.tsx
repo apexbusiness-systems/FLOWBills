@@ -1,27 +1,27 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Play,
-  Pause,
-  Edit,
-  Trash2,
+} from '@/components/ui/dropdown-menu';
+import { 
+  Play, 
+  Pause, 
+  Edit, 
+  Trash2, 
   MoreHorizontal,
   Search,
   Plus,
   Activity,
-  Clock,
-} from "lucide-react";
-import { Workflow, WorkflowInstance } from "@/hooks/useWorkflows";
-import { formatDistanceToNow } from "date-fns";
+  Clock
+} from 'lucide-react';
+import { Workflow, WorkflowInstance } from '@/hooks/useWorkflows';
+import { formatDistanceToNow } from 'date-fns';
 
 interface WorkflowListProps {
   workflows: Workflow[];
@@ -33,46 +33,40 @@ interface WorkflowListProps {
   onCreate: () => void;
 }
 
-const WorkflowList = ({
-  workflows,
-  instances,
-  onEdit,
-  onDelete,
-  onToggleActive,
+const WorkflowList = ({ 
+  workflows, 
+  instances, 
+  onEdit, 
+  onDelete, 
+  onToggleActive, 
   onExecute,
-  onCreate,
+  onCreate 
 }: WorkflowListProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<string>('all');
 
-  const filteredWorkflows = workflows.filter((workflow) => {
-    const matchesSearch =
-      workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      workflow.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === "all" || workflow.workflow_type === filterType;
+  const filteredWorkflows = workflows.filter(workflow => {
+    const matchesSearch = workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         workflow.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === 'all' || workflow.workflow_type === filterType;
     return matchesSearch && matchesType;
   });
 
   const getWorkflowInstances = (workflowId: string) => {
-    return instances.filter((instance) => instance.workflow_id === workflowId);
+    return instances.filter(instance => instance.workflow_id === workflowId);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "running":
-        return "bg-status-processing";
-      case "completed":
-        return "bg-status-approved";
-      case "failed":
-        return "bg-destructive";
-      case "paused":
-        return "bg-status-pending";
-      default:
-        return "bg-secondary";
+      case 'running': return 'bg-status-processing';
+      case 'completed': return 'bg-status-approved';
+      case 'failed': return 'bg-destructive';
+      case 'paused': return 'bg-status-pending';
+      default: return 'bg-secondary';
     }
   };
 
-  const workflowTypes = [...new Set(workflows.map((w) => w.workflow_type))];
+  const workflowTypes = [...new Set(workflows.map(w => w.workflow_type))];
 
   return (
     <div className="space-y-6">
@@ -80,7 +74,9 @@ const WorkflowList = ({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Workflows</h2>
-          <p className="text-muted-foreground">Manage and monitor your automated workflows</p>
+          <p className="text-muted-foreground">
+            Manage and monitor your automated workflows
+          </p>
         </div>
         <Button onClick={onCreate} className="btn-primary">
           <Plus className="h-4 w-4 mr-2" />
@@ -102,14 +98,16 @@ const WorkflowList = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
-              {filterType === "all" ? "All Types" : filterType.replace("_", " ")}
+              {filterType === 'all' ? 'All Types' : filterType.replace('_', ' ')}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setFilterType("all")}>All Types</DropdownMenuItem>
-            {workflowTypes.map((type) => (
+            <DropdownMenuItem onClick={() => setFilterType('all')}>
+              All Types
+            </DropdownMenuItem>
+            {workflowTypes.map(type => (
               <DropdownMenuItem key={type} onClick={() => setFilterType(type)}>
-                {type.replace("_", " ")}
+                {type.replace('_', ' ')}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -124,22 +122,22 @@ const WorkflowList = ({
               <Activity className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="text-lg font-semibold mb-2">No workflows found</h3>
               <p className="text-muted-foreground mb-4">
-                {searchTerm
-                  ? "Try adjusting your search terms"
-                  : "Create your first workflow to get started"}
+                {searchTerm ? 'Try adjusting your search terms' : 'Create your first workflow to get started'}
               </p>
-              {!searchTerm && <Button onClick={onCreate}>Create Workflow</Button>}
+              {!searchTerm && (
+                <Button onClick={onCreate}>
+                  Create Workflow
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredWorkflows.map((workflow) => {
+          {filteredWorkflows.map(workflow => {
             const workflowInstances = getWorkflowInstances(workflow.id);
-            const runningInstances = workflowInstances.filter((i) => i.status === "running").length;
-            const completedInstances = workflowInstances.filter(
-              (i) => i.status === "completed"
-            ).length;
+            const runningInstances = workflowInstances.filter(i => i.status === 'running').length;
+            const completedInstances = workflowInstances.filter(i => i.status === 'completed').length;
             const lastRun = workflowInstances[0]?.started_at;
 
             return (
@@ -149,18 +147,18 @@ const WorkflowList = ({
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <CardTitle className="text-lg">{workflow.name}</CardTitle>
-                        <Badge
+                        <Badge 
                           variant={workflow.is_active ? "default" : "secondary"}
                           className={workflow.is_active ? "bg-status-approved" : ""}
                         >
-                          {workflow.is_active ? "Active" : "Inactive"}
+                          {workflow.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mb-3">
-                        {workflow.description || "No description"}
+                        {workflow.description || 'No description'}
                       </p>
                       <Badge variant="outline" className="text-xs">
-                        {workflow.workflow_type.replace("_", " ")}
+                        {workflow.workflow_type.replace('_', ' ')}
                       </Badge>
                     </div>
                     <DropdownMenu>
@@ -174,7 +172,7 @@ const WorkflowList = ({
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem
+                        <DropdownMenuItem 
                           onClick={() => onToggleActive(workflow.id, !workflow.is_active)}
                         >
                           {workflow.is_active ? (
@@ -189,7 +187,7 @@ const WorkflowList = ({
                             </>
                           )}
                         </DropdownMenuItem>
-                        <DropdownMenuItem
+                        <DropdownMenuItem 
                           onClick={() => onDelete(workflow.id)}
                           className="text-destructive"
                         >
@@ -244,17 +242,17 @@ const WorkflowList = ({
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
                         onClick={() => onEdit(workflow)}
                         className="flex-1"
                       >
                         <Edit className="h-4 w-4 mr-1" />
                         Edit
                       </Button>
-                      <Button
-                        size="sm"
+                      <Button 
+                        size="sm" 
                         onClick={() => onExecute(workflow.id)}
                         disabled={!workflow.is_active}
                         className="flex-1"

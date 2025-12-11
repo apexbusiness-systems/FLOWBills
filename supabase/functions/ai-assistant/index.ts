@@ -1,4 +1,4 @@
-import 'https://deno.land/x/xhr@0.1.0/mod.ts';
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const BUCKET = new Map<string, { tokens: number; ts: number }>();
+const BUCKET = new Map<string,{tokens:number,ts:number}>();
 const RATE = { refillPerSec: 1, burst: 10 };
 
 function take(key: string): boolean {
@@ -30,9 +30,9 @@ function userIdFromAuth(req: Request): Promise<string | null> {
 }
 
 function clientIp(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0] ||
-    req.headers.get('x-real-ip') ||
-    'unknown';
+  return req.headers.get('x-forwarded-for')?.split(',')[0] || 
+         req.headers.get('x-real-ip') || 
+         'unknown';
 }
 
 Deno.serve(async (req) => {
@@ -50,9 +50,9 @@ Deno.serve(async (req) => {
     // Rate limiting
     const userId = (await userIdFromAuth(req)) ?? clientIp(req);
     if (!take(userId)) {
-      return new Response('Too Many Requests', {
+      return new Response("Too Many Requests", { 
         status: 429,
-        headers: corsHeaders,
+        headers: corsHeaders
       });
     }
 
@@ -105,10 +105,9 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          {
-            role: 'system',
-            content:
-              `You are FlowAi, a specialized AI assistant for oil & gas billing and invoice processing in Canadian operations.
+          { 
+            role: 'system', 
+            content: `You are FlowAi, a specialized AI assistant for oil & gas billing and invoice processing in Canadian operations.
 
 INDUSTRY EXPERTISE - Oil & Gas Billing:
 
@@ -182,9 +181,9 @@ RESPONSE GUIDELINES:
 - Maintain data security and confidentiality
 - Provide actionable, specific guidance
 - Cite Canadian regulations when applicable
-${context ? `\nAdditional Context: ${context}` : ''}`,
+${context ? `\nAdditional Context: ${context}` : ''}` 
           },
-          { role: 'user', content: prompt },
+          { role: 'user', content: prompt }
         ],
         max_tokens: 500,
         temperature: 0.7,
@@ -211,15 +210,13 @@ ${context ? `\nAdditional Context: ${context}` : ''}`,
       });
     }
 
-    return new Response(
-      JSON.stringify({
-        response: generatedText,
-        usage: data.usage,
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    );
+    return new Response(JSON.stringify({ 
+      response: generatedText,
+      usage: data.usage 
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
   } catch (error) {
     console.error('Error in ai-assistant function:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {

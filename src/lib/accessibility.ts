@@ -23,9 +23,9 @@ export const getAccessibleButtonProps = (
   isLoading?: boolean,
   isDisabled?: boolean
 ) => ({
-  "aria-label": label,
-  "aria-busy": isLoading,
-  "aria-disabled": isDisabled,
+  'aria-label': label,
+  'aria-busy': isLoading,
+  'aria-disabled': isDisabled,
   disabled: isDisabled || isLoading,
 });
 
@@ -33,43 +33,42 @@ export const getAccessibleButtonProps = (
  * Creates accessible link props for external links
  */
 export const getExternalLinkProps = (label?: string) => ({
-  target: "_blank",
-  rel: "noopener noreferrer",
-  "aria-label": label ? `${label} (opens in new tab)` : "Opens in new tab",
+  target: '_blank',
+  rel: 'noopener noreferrer',
+  'aria-label': label ? `${label} (opens in new tab)` : 'Opens in new tab',
 });
 
 /**
  * Creates live region props for dynamic content announcements
  */
-export const getLiveRegionProps = (politeness: "polite" | "assertive" = "polite") => ({
-  role: "status",
-  "aria-live": politeness,
-  "aria-atomic": "true",
+export const getLiveRegionProps = (
+  politeness: 'polite' | 'assertive' = 'polite'
+) => ({
+  role: 'status',
+  'aria-live': politeness,
+  'aria-atomic': 'true',
 });
 
 /**
  * Checks if reduced motion is preferred
  */
 export const prefersReducedMotion = (): boolean => {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 };
 
 /**
  * Announces text to screen readers
  */
-export const announceToScreenReader = (
-  message: string,
-  politeness: "polite" | "assertive" = "polite"
-) => {
-  const announcement = document.createElement("div");
-  announcement.setAttribute("role", "status");
-  announcement.setAttribute("aria-live", politeness);
-  announcement.setAttribute("aria-atomic", "true");
-  announcement.className = "sr-only";
+export const announceToScreenReader = (message: string, politeness: 'polite' | 'assertive' = 'polite') => {
+  const announcement = document.createElement('div');
+  announcement.setAttribute('role', 'status');
+  announcement.setAttribute('aria-live', politeness);
+  announcement.setAttribute('aria-atomic', 'true');
+  announcement.className = 'sr-only';
   announcement.textContent = message;
-
+  
   document.body.appendChild(announcement);
-
+  
   setTimeout(() => {
     document.body.removeChild(announcement);
   }, 1000);
@@ -86,13 +85,13 @@ export const focusManagement = {
     const focusableElements = containerRef.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
-
+    
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
-
+    
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return;
-
+      if (e.key !== 'Tab') return;
+      
       if (e.shiftKey && document.activeElement === firstElement) {
         e.preventDefault();
         lastElement.focus();
@@ -101,11 +100,11 @@ export const focusManagement = {
         firstElement.focus();
       }
     };
-
-    containerRef.addEventListener("keydown", handleKeyDown);
-    return () => containerRef.removeEventListener("keydown", handleKeyDown);
+    
+    containerRef.addEventListener('keydown', handleKeyDown);
+    return () => containerRef.removeEventListener('keydown', handleKeyDown);
   },
-
+  
   /**
    * Returns focus to the previously focused element
    */
@@ -121,8 +120,7 @@ export const focusManagement = {
  * Returns props for skip link component
  */
 export const getSkipToMainProps = () => ({
-  href: "#main-content",
-  className:
-    "sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md",
-  children: "Skip to main content",
+  href: '#main-content',
+  className: 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md',
+  children: 'Skip to main content',
 });

@@ -1,26 +1,26 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
-import {
-  User,
-  Building2,
-  Phone,
-  Mail,
-  Shield,
-  Briefcase,
-  Calendar,
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { 
+  User, 
+  Building2, 
+  Phone, 
+  Mail, 
+  Shield, 
+  Briefcase, 
+  Calendar, 
   Save,
-  Loader2,
-} from "lucide-react";
+  Loader2 
+} from 'lucide-react';
 
 interface ProfileData {
   full_name: string;
@@ -36,11 +36,11 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({
-    full_name: "",
-    company_name: "",
-    phone: "",
-    department: "",
-    job_title: "",
+    full_name: '',
+    company_name: '',
+    phone: '',
+    department: '',
+    job_title: ''
   });
 
   useEffect(() => {
@@ -54,11 +54,11 @@ const Profile = () => {
     // Stub implementation - no profiles table exists
     setTimeout(() => {
       setProfileData({
-        full_name: "",
-        company_name: "",
-        phone: "",
-        department: "",
-        job_title: "",
+        full_name: '',
+        company_name: '',
+        phone: '',
+        department: '',
+        job_title: ''
       });
       setLoading(false);
     }, 500);
@@ -70,7 +70,7 @@ const Profile = () => {
     setSaving(true);
     // Stub implementation - no profiles table exists
     toast({
-      title: "Success",
+      title: "Success", 
       description: "Profile updated successfully (stub implementation)",
       variant: "default",
     });
@@ -78,19 +78,15 @@ const Profile = () => {
   };
 
   const handleInputChange = (field: keyof ProfileData, value: string) => {
-    setProfileData((prev) => ({ ...prev, [field]: value }));
+    setProfileData(prev => ({ ...prev, [field]: value }));
   };
 
   const getRoleBadgeVariant = (role: string | null) => {
     switch (role) {
-      case "admin":
-        return "destructive";
-      case "operator":
-        return "default";
-      case "viewer":
-        return "secondary";
-      default:
-        return "outline";
+      case 'admin': return 'destructive';
+      case 'operator': return 'default';
+      case 'viewer': return 'secondary';
+      default: return 'outline';
     }
   };
 
@@ -112,7 +108,9 @@ const Profile = () => {
       <BreadcrumbNav className="mb-4" />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">User Profile</h1>
-        <p className="text-muted-foreground">Manage your account information and preferences</p>
+        <p className="text-muted-foreground">
+          Manage your account information and preferences
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -122,7 +120,7 @@ const Profile = () => {
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <User className="h-10 w-10 text-primary" />
             </div>
-            <CardTitle className="text-xl">{profileData.full_name || "User"}</CardTitle>
+            <CardTitle className="text-xl">{profileData.full_name || 'User'}</CardTitle>
             <CardDescription className="flex items-center gap-2 justify-center">
               <Mail className="h-4 w-4" />
               {user?.email}
@@ -130,7 +128,7 @@ const Profile = () => {
             <div className="flex justify-center mt-2">
               <Badge variant={getRoleBadgeVariant(userRole)} className="flex items-center gap-1">
                 <Shield className="h-3 w-3" />
-                {userRole?.toUpperCase() || "LOADING..."}
+                {userRole?.toUpperCase() || 'LOADING...'}
               </Badge>
             </div>
           </CardHeader>
@@ -138,7 +136,7 @@ const Profile = () => {
             <div className="text-center text-sm text-muted-foreground">
               <p>Member since</p>
               <p className="font-medium">
-                {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "Unknown"}
+                {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
               </p>
             </div>
           </CardContent>
@@ -151,7 +149,9 @@ const Profile = () => {
               <Briefcase className="h-5 w-5" />
               Profile Information
             </CardTitle>
-            <CardDescription>Update your personal and company information</CardDescription>
+            <CardDescription>
+              Update your personal and company information
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -164,7 +164,7 @@ const Profile = () => {
                     placeholder="John Doe"
                     className="pl-10"
                     value={profileData.full_name}
-                    onChange={(e) => handleInputChange("full_name", e.target.value)}
+                    onChange={(e) => handleInputChange('full_name', e.target.value)}
                   />
                 </div>
               </div>
@@ -178,7 +178,7 @@ const Profile = () => {
                     placeholder="Operations Manager"
                     className="pl-10"
                     value={profileData.job_title}
-                    onChange={(e) => handleInputChange("job_title", e.target.value)}
+                    onChange={(e) => handleInputChange('job_title', e.target.value)}
                   />
                 </div>
               </div>
@@ -192,7 +192,7 @@ const Profile = () => {
                     placeholder="Oil & Gas Company Inc."
                     className="pl-10"
                     value={profileData.company_name}
-                    onChange={(e) => handleInputChange("company_name", e.target.value)}
+                    onChange={(e) => handleInputChange('company_name', e.target.value)}
                   />
                 </div>
               </div>
@@ -206,7 +206,7 @@ const Profile = () => {
                     placeholder="Finance & Accounting"
                     className="pl-10"
                     value={profileData.department}
-                    onChange={(e) => handleInputChange("department", e.target.value)}
+                    onChange={(e) => handleInputChange('department', e.target.value)}
                   />
                 </div>
               </div>
@@ -220,7 +220,7 @@ const Profile = () => {
                     placeholder="+1 (555) 123-4567"
                     className="pl-10"
                     value={profileData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
                   />
                 </div>
               </div>
@@ -229,10 +229,18 @@ const Profile = () => {
             <Separator />
 
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={fetchProfile} disabled={saving}>
+              <Button 
+                variant="outline" 
+                onClick={fetchProfile}
+                disabled={saving}
+              >
                 Reset
               </Button>
-              <Button onClick={handleSave} disabled={saving} className="flex items-center gap-2">
+              <Button 
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-2"
+              >
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                 <Save className="h-4 w-4" />
                 Save Changes
@@ -248,14 +256,16 @@ const Profile = () => {
             <Shield className="h-5 w-5" />
             Account Security
           </CardTitle>
-          <CardDescription>Security information and account settings</CardDescription>
+          <CardDescription>
+            Security information and account settings
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert>
             <Shield className="h-4 w-4" />
             <AlertDescription>
-              Your account is secured with enterprise-grade authentication. Contact your
-              administrator to change roles or permissions.
+              Your account is secured with enterprise-grade authentication. 
+              Contact your administrator to change roles or permissions.
             </AlertDescription>
           </Alert>
         </CardContent>

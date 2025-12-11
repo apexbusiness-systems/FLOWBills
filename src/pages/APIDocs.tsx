@@ -1,8 +1,8 @@
-import { Code, Key, Webhook } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Footer } from "@/components/ui/footer";
-import { TrackLink } from "@/components/ui/TrackLink";
-import { Button } from "@/components/ui/button";
+import { Code, Key, Webhook } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Footer } from '@/components/ui/footer';
+import { TrackLink } from '@/components/ui/TrackLink';
+import { Button } from '@/components/ui/button';
 
 export default function APIDocs() {
   return (
@@ -18,7 +18,9 @@ export default function APIDocs() {
             <CardHeader>
               <Code className="h-12 w-12 text-primary mb-4" />
               <CardTitle>REST API</CardTitle>
-              <CardDescription>Full programmatic access to invoice processing</CardDescription>
+              <CardDescription>
+                Full programmatic access to invoice processing
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm">
@@ -34,7 +36,9 @@ export default function APIDocs() {
             <CardHeader>
               <Webhook className="h-12 w-12 text-primary mb-4" />
               <CardTitle>Webhooks</CardTitle>
-              <CardDescription>Real-time notifications for events</CardDescription>
+              <CardDescription>
+                Real-time notifications for events
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm">
@@ -50,7 +54,9 @@ export default function APIDocs() {
             <CardHeader>
               <Key className="h-12 w-12 text-primary mb-4" />
               <CardTitle>Authentication</CardTitle>
-              <CardDescription>Secure API key management</CardDescription>
+              <CardDescription>
+                Secure API key management
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm">
@@ -66,8 +72,7 @@ export default function APIDocs() {
         <section className="bg-muted/50 rounded-lg p-8">
           <h2 className="text-2xl font-bold mb-4">Documentation</h2>
           <p className="text-muted-foreground mb-4">
-            Full API documentation is available to customers. Contact us for early access or see our
-            OpenAPI schema.
+            Full API documentation is available to customers. Contact us for early access or see our OpenAPI schema.
           </p>
           <div className="flex gap-4">
             <TrackLink to="/contact" source="api-docs-access">

@@ -1,11 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from "react";
-import { useValidationRules } from "@/hooks/useValidationRules";
-import ValidationRulesList from "@/components/validation/ValidationRulesList";
-import CreateValidationRuleDialog from "@/components/validation/CreateValidationRuleDialog";
-import { Shield, TrendingUp, CheckCircle, AlertTriangle } from "lucide-react";
-import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useEffect, useState } from 'react';
+import { useValidationRules } from '@/hooks/useValidationRules';
+import ValidationRulesList from '@/components/validation/ValidationRulesList';
+import CreateValidationRuleDialog from '@/components/validation/CreateValidationRuleDialog';
+import { Shield, TrendingUp, CheckCircle, AlertTriangle } from 'lucide-react';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 
 const ValidationRules = () => {
   const { getRuleStats } = useValidationRules();
@@ -22,9 +22,7 @@ const ValidationRules = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Validation Rules</h1>
-          <p className="text-muted-foreground">
-            Manage automated invoice validation and quality controls
-          </p>
+          <p className="text-muted-foreground">Manage automated invoice validation and quality controls</p>
         </div>
         <CreateValidationRuleDialog />
       </div>
@@ -88,7 +86,7 @@ const ValidationRules = () => {
             <div className="flex flex-wrap gap-2">
               {Object.entries(stats.by_type).map(([type, count]: [string, any]) => (
                 <Badge key={type} variant="secondary" className="px-3 py-1">
-                  {type.replace("_", " ")}: {count}
+                  {type.replace('_', ' ')}: {count}
                 </Badge>
               ))}
             </div>

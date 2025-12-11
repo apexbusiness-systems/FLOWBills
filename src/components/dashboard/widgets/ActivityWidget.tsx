@@ -1,62 +1,65 @@
-import { FileText, CheckCircle, AlertTriangle, DollarSign, Clock } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { FileText, CheckCircle, AlertTriangle, DollarSign, Clock } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ActivityWidgetProps {
-  size?: "small" | "medium" | "large";
+  size?: 'small' | 'medium' | 'large';
 }
 
 const activities = [
   {
     id: 1,
-    type: "invoice_received",
-    title: "Invoice INV-2024-0847 received",
-    description: "Husky Energy - $45,250.00",
-    timestamp: "2 minutes ago",
-    status: "processing",
+    type: 'invoice_received',
+    title: 'Invoice INV-2024-0847 received',
+    description: 'Husky Energy - $45,250.00',
+    timestamp: '2 minutes ago',
+    status: 'processing',
     icon: FileText,
   },
   {
     id: 2,
-    type: "payment_approved",
-    title: "Payment batch PB-240315 approved",
-    description: "15 invoices - $127,830.45 total",
-    timestamp: "1 hour ago",
-    status: "approved",
+    type: 'payment_approved',
+    title: 'Payment batch PB-240315 approved',
+    description: '15 invoices - $127,830.45 total',
+    timestamp: '1 hour ago',
+    status: 'approved',
     icon: CheckCircle,
   },
   {
     id: 3,
-    type: "matching_issue",
-    title: "PO matching failed",
-    description: "Invoice INV-2024-0845 - No matching PO found",
-    timestamp: "3 hours ago",
-    status: "rejected",
+    type: 'matching_issue',
+    title: 'PO matching failed',
+    description: 'Invoice INV-2024-0845 - No matching PO found',
+    timestamp: '3 hours ago',
+    status: 'rejected',
     icon: AlertTriangle,
   },
 ];
 
-export const ActivityWidget = ({ size = "medium" }: ActivityWidgetProps) => {
+export const ActivityWidget = ({ size = 'medium' }: ActivityWidgetProps) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "processing":
+      case 'processing':
         return <Badge className="status-processing">Processing</Badge>;
-      case "approved":
+      case 'approved':
         return <Badge className="status-approved">Completed</Badge>;
-      case "rejected":
+      case 'rejected':
         return <Badge className="status-rejected">Attention</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
   };
 
-  const itemsToShow = size === "large" ? 5 : 3;
+  const itemsToShow = size === 'large' ? 5 : 3;
 
   return (
-    <Card
-      className={cn("card-enterprise", size === "large" && "col-span-full")}
+    <Card 
+      className={cn(
+        'card-enterprise',
+        size === 'large' && 'col-span-full'
+      )}
       data-tour="activity-widget"
     >
       <CardHeader>

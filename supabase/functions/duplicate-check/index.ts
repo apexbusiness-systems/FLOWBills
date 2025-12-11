@@ -1,6 +1,6 @@
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { corsHeaders } from '../_shared/cors.ts';
-import { z } from 'https://deno.land/x/zod@v3.23.8/mod.ts';
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { corsHeaders } from '../_shared/cors.ts'
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 // Input validation schema
 const InvoiceIn = z.object({
@@ -20,9 +20,9 @@ const RATE_LIMIT = {
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 function getRateLimitKey(req: Request): string {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||
-    req.headers.get('x-real-ip') ||
-    'unknown';
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 
+             req.headers.get('x-real-ip') || 
+             'unknown';
   return `duplicate-check:${ip}`;
 }
 
@@ -72,19 +72,19 @@ Deno.serve(async (req) => {
   // Rate limiting check
   const rateLimitKey = getRateLimitKey(req);
   const rateLimit = checkRateLimit(rateLimitKey);
-
+  
   if (!rateLimit.allowed) {
     return new Response(
       JSON.stringify({ error: 'Rate limit exceeded' }),
-      {
+      { 
         status: 429,
-        headers: {
-          ...corsHeaders,
+        headers: { 
+          ...corsHeaders, 
           'Content-Type': 'application/json',
           'X-RateLimit-Remaining': '0',
-          'Retry-After': '60',
-        },
-      },
+          'Retry-After': '60'
+        }
+      }
     );
   }
 
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     // Use service role for secure database operations
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     // Enhanced input parsing and validation
@@ -102,22 +102,23 @@ Deno.serve(async (req) => {
       if (!rawBody || rawBody.trim() === '') {
         throw new Error('Request body is required');
       }
-
+      
       body = JSON.parse(rawBody);
       if (typeof body !== 'object' || Array.isArray(body)) {
         throw new Error('Request body must be a valid object');
       }
-    } catch (_parseError) {
+      
+    } catch (parseError) {
       return new Response(
         JSON.stringify({ error: 'Invalid JSON format' }),
-        {
+        { 
           status: 400,
-          headers: {
-            ...corsHeaders,
+          headers: { 
+            ...corsHeaders, 
             'Content-Type': 'application/json',
-            'X-RateLimit-Remaining': rateLimit.remaining.toString(),
-          },
-        },
+            'X-RateLimit-Remaining': rateLimit.remaining.toString()
+          }
+        }
       );
     }
 
@@ -125,37 +126,35 @@ Deno.serve(async (req) => {
     const parsed = InvoiceIn.safeParse(body);
     if (!parsed.success) {
       return new Response(
-        JSON.stringify({
+        JSON.stringify({ 
           error: 'Validation failed',
           details: parsed.error.issues.map((issue: any) => ({
             field: issue.path.join('.'),
-            message: issue.message,
-          })),
+            message: issue.message
+          }))
         }),
-        {
+        { 
           status: 400,
-          headers: {
-            ...corsHeaders,
+          headers: { 
+            ...corsHeaders, 
             'Content-Type': 'application/json',
-            'X-RateLimit-Remaining': rateLimit.remaining.toString(),
-          },
-        },
+            'X-RateLimit-Remaining': rateLimit.remaining.toString()
+          }
+        }
       );
     }
 
     const invoice = parsed.data;
-
+    
     console.log('Duplicate check for invoice:', invoice.invoice_number);
 
     // Generate hash for duplicate detection with enhanced security
-    const hashString = `${invoice.vendor_id}-${invoice.amount_cents}-${invoice.invoice_date}-${
-      invoice.po_number || 'no-po'
-    }`;
+    const hashString = `${invoice.vendor_id}-${invoice.amount_cents}-${invoice.invoice_date}-${invoice.po_number || 'no-po'}`;
     const encoder = new TextEncoder();
     const data = encoder.encode(hashString);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const duplicateHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    const duplicateHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
     // Check for exact hash match using safe queries with timeout
     const { data: exactDuplicate, error: exactError } = await supabase
@@ -192,61 +191,58 @@ Deno.serve(async (req) => {
       is_exact_duplicate: exactDuplicate && exactDuplicate.length > 0,
       exact_match: exactDuplicate?.[0] || null,
       potential_duplicates: fuzzyDuplicates || [],
-      risk_score: exactDuplicate && exactDuplicate.length > 0
-        ? 100
-        : (fuzzyDuplicates && fuzzyDuplicates.length > 0 ? 75 : 0),
+      risk_score: exactDuplicate && exactDuplicate.length > 0 ? 100 : 
+                  (fuzzyDuplicates && fuzzyDuplicates.length > 0 ? 75 : 0)
     };
 
     console.log('Duplicate check result:', result);
 
     return new Response(JSON.stringify(result), {
-      headers: {
-        ...corsHeaders,
+      headers: { 
+        ...corsHeaders, 
         'Content-Type': 'application/json',
-        'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+        'X-RateLimit-Remaining': rateLimit.remaining.toString()
       },
     });
+
   } catch (error) {
     console.error('Duplicate check error:', error);
-
+    
     // Log security event for monitoring
     try {
       const supabase = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       );
-
+      
       await supabase.from('security_events').insert({
         event_type: 'duplicate_check_error',
         severity: 'medium',
         ip_address: req.headers.get('x-forwarded-for')?.split(',')[0],
         user_agent: req.headers.get('user-agent'),
-        details: {
+        details: { 
           error_type: error instanceof Error ? error.name : 'unknown',
           endpoint: 'duplicate-check',
-          timestamp: new Date().toISOString(),
-        },
+          timestamp: new Date().toISOString()
+        }
       });
     } catch (logError) {
       console.error('Failed to log security event:', logError);
     }
-
+    
     const errorMessage = error instanceof Error ? sanitizeErrorMessage(error) : 'Processing error';
-    return new Response(
-      JSON.stringify({
-        error: errorMessage,
-        duplicate_hash: null,
-        is_exact_duplicate: false,
-        risk_score: 0,
-      }),
-      {
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
-        },
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      duplicate_hash: null,
+      is_exact_duplicate: false,
+      risk_score: 0 
+    }), {
+      status: 500,
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'application/json',
+        'X-RateLimit-Remaining': rateLimit.remaining.toString()
       },
-    );
+    });
   }
 });

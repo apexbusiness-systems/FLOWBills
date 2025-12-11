@@ -3,8 +3,8 @@
  * Implements production-ready performance enhancements
  */
 
-import { performanceMonitor } from "./performance-monitor";
-import { queryOptimizer } from "./query-optimizer";
+import { performanceMonitor } from './performance-monitor';
+import { queryOptimizer } from './query-optimizer';
 
 interface OptimizationConfig {
   enableCaching: boolean;
@@ -40,11 +40,11 @@ class ProductionOptimizer {
    */
   initialize(): void {
     if (import.meta.env.DEV) {
-      console.log("🚀 Production optimizations disabled in development");
+      console.log('🚀 Production optimizations disabled in development');
       return;
     }
 
-    console.log("🚀 Initializing production optimizations...");
+    console.log('🚀 Initializing production optimizations...');
 
     if (this.config.enablePerformanceMonitoring) {
       this.initializePerformanceMonitoring();
@@ -60,8 +60,8 @@ class ProductionOptimizer {
 
     this.setupResourceHints();
     this.optimizeNetworkRequests();
-
-    console.log("✅ Production optimizations initialized");
+    
+    console.log('✅ Production optimizations initialized');
   }
 
   /**
@@ -72,25 +72,14 @@ class ProductionOptimizer {
     performanceMonitor.startAPIMonitoring();
 
     // Track navigation performance
-    if ("performance" in window && "getEntriesByType" in window.performance) {
-      window.addEventListener("load", () => {
+    if ('performance' in window && 'getEntriesByType' in window.performance) {
+      window.addEventListener('load', () => {
         setTimeout(() => {
-          const navTiming = performance.getEntriesByType(
-            "navigation"
-          )[0] as PerformanceNavigationTiming;
+          const navTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
           if (navTiming) {
-            performanceMonitor.recordMetric(
-              "page-load",
-              navTiming.loadEventEnd - navTiming.fetchStart
-            );
-            performanceMonitor.recordMetric(
-              "dom-interactive",
-              navTiming.domInteractive - navTiming.fetchStart
-            );
-            performanceMonitor.recordMetric(
-              "ttfb",
-              navTiming.responseStart - navTiming.requestStart
-            );
+            performanceMonitor.recordMetric('page-load', navTiming.loadEventEnd - navTiming.fetchStart);
+            performanceMonitor.recordMetric('dom-interactive', navTiming.domInteractive - navTiming.fetchStart);
+            performanceMonitor.recordMetric('ttfb', navTiming.responseStart - navTiming.requestStart);
           }
         }, 0);
       });
@@ -112,9 +101,9 @@ class ProductionOptimizer {
    */
   private initializeCaching(): void {
     // Enable service worker for offline caching
-    if ("serviceWorker" in navigator && !import.meta.env.DEV) {
-      navigator.serviceWorker.register("/sw.js").catch((error) => {
-        console.error("Service Worker registration failed:", error);
+    if ('serviceWorker' in navigator && !import.meta.env.DEV) {
+      navigator.serviceWorker.register('/sw.js').catch((error) => {
+        console.error('Service Worker registration failed:', error);
       });
     }
 
@@ -127,15 +116,15 @@ class ProductionOptimizer {
    */
   private setupResourceHints(): void {
     // Preconnect to Supabase
-    const preconnectLink = document.createElement("link");
-    preconnectLink.rel = "preconnect";
-    preconnectLink.href = "https://yvyjzlbosmtesldczhnm.supabase.co";
+    const preconnectLink = document.createElement('link');
+    preconnectLink.rel = 'preconnect';
+    preconnectLink.href = 'https://yvyjzlbosmtesldczhnm.supabase.co';
     document.head.appendChild(preconnectLink);
 
     // DNS prefetch for external resources
-    const dnsPrefetch = document.createElement("link");
-    dnsPrefetch.rel = "dns-prefetch";
-    dnsPrefetch.href = "https://yvyjzlbosmtesldczhnm.supabase.co";
+    const dnsPrefetch = document.createElement('link');
+    dnsPrefetch.rel = 'dns-prefetch';
+    dnsPrefetch.href = 'https://yvyjzlbosmtesldczhnm.supabase.co';
     document.head.appendChild(dnsPrefetch);
   }
 
@@ -147,13 +136,13 @@ class ProductionOptimizer {
     const originalFetch = window.fetch;
     const pendingRequests = new Map<string, Promise<Response>>();
 
-    window.fetch = function (input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-      const url = typeof input === "string" ? input : input.toString();
-
+    window.fetch = function(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+      const url = typeof input === 'string' ? input : input.toString();
+      
       // Deduplicate identical requests
-      if (init?.method === "GET" || !init?.method) {
+      if (init?.method === 'GET' || !init?.method) {
         if (pendingRequests.has(url)) {
-          return pendingRequests.get(url)!.then((res) => res.clone());
+          return pendingRequests.get(url)!.then(res => res.clone());
         }
 
         const fetchPromise = originalFetch(input, init);
@@ -179,46 +168,37 @@ class ProductionOptimizer {
 
     // Intercept and cache GET requests
     const originalFetch = window.fetch;
-    window.fetch = async function (
-      input: RequestInfo | URL,
-      init?: RequestInit
-    ): Promise<Response> {
-      if (init?.method && init.method !== "GET") {
+    window.fetch = async function(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+      if (init?.method && init.method !== 'GET') {
         return originalFetch(input, init);
       }
 
-      const url = typeof input === "string" ? input : input.toString();
+      const url = typeof input === 'string' ? input : input.toString();
       const cached = cache.get(url);
       const now = Date.now();
 
       if (cached && now - cached.timestamp < TTL) {
         // Return cached data while revalidating in background
-        originalFetch(input, init).then((response) => {
-          response
-            .clone()
-            .json()
-            .then((data) => {
-              cache.set(url, { data, timestamp: Date.now() });
-            });
+        originalFetch(input, init).then(response => {
+          response.clone().json().then(data => {
+            cache.set(url, { data, timestamp: Date.now() });
+          });
         });
 
         return new Response(JSON.stringify(cached.data), {
-          headers: { "Content-Type": "application/json", "X-Cache": "HIT" },
+          headers: { 'Content-Type': 'application/json', 'X-Cache': 'HIT' }
         });
       }
 
       // Fetch fresh data
       const response = await originalFetch(input, init);
       const clonedResponse = response.clone();
-
-      clonedResponse
-        .json()
-        .then((data) => {
-          cache.set(url, { data, timestamp: Date.now() });
-        })
-        .catch(() => {
-          // Non-JSON response, skip caching
-        });
+      
+      clonedResponse.json().then(data => {
+        cache.set(url, { data, timestamp: Date.now() });
+      }).catch(() => {
+        // Non-JSON response, skip caching
+      });
 
       return response;
     };

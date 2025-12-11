@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Footer } from "@/components/ui/footer";
-import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
-import { Calendar, Clock, Tag } from "lucide-react";
-import { format } from "date-fns";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Footer } from '@/components/ui/footer';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { Calendar, Clock, Tag } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface BlogPost {
   url: string;
@@ -24,61 +24,41 @@ export default function Blog() {
 
   const fetchBlogPosts = async () => {
     try {
-      const response = await fetch("/sitemap-news.xml");
+      const response = await fetch('/sitemap-news.xml');
       const text = await response.text();
       const parser = new DOMParser();
-      const xml = parser.parseFromString(text, "text/xml");
-
-      const urlElements = xml.getElementsByTagName("url");
+      const xml = parser.parseFromString(text, 'text/xml');
+      
+      const urlElements = xml.getElementsByTagName('url');
       const postsData: BlogPost[] = [];
-
+      
       for (let i = 0; i < urlElements.length; i++) {
         const urlElement = urlElements[i];
-        const loc = urlElement.getElementsByTagName("loc")[0]?.textContent;
-        const newsElement = urlElement.getElementsByTagNameNS(
-          "http://www.google.com/schemas/sitemap-news/0.9",
-          "news"
-        )[0];
-
+        const loc = urlElement.getElementsByTagName('loc')[0]?.textContent;
+        const newsElement = urlElement.getElementsByTagNameNS('http://www.google.com/schemas/sitemap-news/0.9', 'news')[0];
+        
         if (newsElement && loc) {
-          const title =
-            newsElement.getElementsByTagNameNS(
-              "http://www.google.com/schemas/sitemap-news/0.9",
-              "title"
-            )[0]?.textContent || "";
-          const publicationDate =
-            newsElement.getElementsByTagNameNS(
-              "http://www.google.com/schemas/sitemap-news/0.9",
-              "publication_date"
-            )[0]?.textContent || "";
-          const keywordsText =
-            newsElement.getElementsByTagNameNS(
-              "http://www.google.com/schemas/sitemap-news/0.9",
-              "keywords"
-            )[0]?.textContent || "";
-          const keywords = keywordsText
-            .split(",")
-            .map((k) => k.trim())
-            .filter(Boolean);
-
+          const title = newsElement.getElementsByTagNameNS('http://www.google.com/schemas/sitemap-news/0.9', 'title')[0]?.textContent || '';
+          const publicationDate = newsElement.getElementsByTagNameNS('http://www.google.com/schemas/sitemap-news/0.9', 'publication_date')[0]?.textContent || '';
+          const keywordsText = newsElement.getElementsByTagNameNS('http://www.google.com/schemas/sitemap-news/0.9', 'keywords')[0]?.textContent || '';
+          const keywords = keywordsText.split(',').map(k => k.trim()).filter(Boolean);
+          
           postsData.push({
             url: loc,
             title,
             publicationDate,
-            keywords,
+            keywords
           });
         }
       }
-
+      
       // Sort by date, newest first
-      postsData.sort(
-        (a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime()
-      );
-
+      postsData.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
+      
       setPosts(postsData);
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching blog posts:", error);
+      console.error('Error fetching blog posts:', error);
       setLoading(false);
     }
   };
@@ -90,42 +70,41 @@ export default function Blog() {
     const schema = {
       "@context": "https://schema.org",
       "@type": "Blog",
-      name: "FlowBills Blog",
-      description:
-        "Latest insights on invoice automation, AI, and accounts payable best practices for oil & gas",
-      url: "https://flowbills.ca/blog",
-      blogPost: posts.map((post) => ({
+      "name": "FlowBills Blog",
+      "description": "Latest insights on invoice automation, AI, and accounts payable best practices for oil & gas",
+      "url": "https://flowbills.ca/blog",
+      "blogPost": posts.map(post => ({
         "@type": "BlogPosting",
-        headline: post.title,
-        url: post.url,
-        datePublished: post.publicationDate,
-        author: {
+        "headline": post.title,
+        "url": post.url,
+        "datePublished": post.publicationDate,
+        "author": {
           "@type": "Organization",
-          name: "FlowBills",
+          "name": "FlowBills"
         },
-        publisher: {
+        "publisher": {
           "@type": "Organization",
-          name: "FlowBills",
-          logo: {
+          "name": "FlowBills",
+          "logo": {
             "@type": "ImageObject",
-            url: "https://flowbills.ca/icons/og-image.png",
-          },
+            "url": "https://flowbills.ca/icons/og-image.png"
+          }
         },
-        keywords: post.keywords.join(", "),
-      })),
+        "keywords": post.keywords.join(', ')
+      }))
     };
 
-    let schemaScript = document.getElementById("blog-schema") as HTMLScriptElement | null;
+    let schemaScript = document.getElementById('blog-schema') as HTMLScriptElement | null;
     if (!schemaScript) {
-      schemaScript = document.createElement("script") as HTMLScriptElement;
-      schemaScript.id = "blog-schema";
-      schemaScript.type = "application/ld+json";
+      schemaScript = document.createElement('script') as HTMLScriptElement;
+      schemaScript.id = 'blog-schema';
+      schemaScript.type = 'application/ld+json';
       document.head.appendChild(schemaScript);
     }
     schemaScript.textContent = JSON.stringify(schema);
 
     return () => {
-      const script = document.getElementById("blog-schema");
+      const script = document.getElementById('blog-schema');
       if (script) {
         script.remove();
       }
@@ -133,13 +112,13 @@ export default function Blog() {
   }, [posts]);
 
   const getSlugFromUrl = (url: string): string => {
-    const parts = url.split("/");
-    return parts[parts.length - 1] || "blog-post";
+    const parts = url.split('/');
+    return parts[parts.length - 1] || 'blog-post';
   };
 
   const formatDate = (dateString: string): string => {
     try {
-      return format(new Date(dateString), "MMMM d, yyyy");
+      return format(new Date(dateString), 'MMMM d, yyyy');
     } catch {
       return dateString;
     }
@@ -154,13 +133,12 @@ export default function Blog() {
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-12">
         <BreadcrumbNav className="mb-4" />
-
+        
         <div className="max-w-4xl mx-auto">
           <div className="mb-12">
             <h1 className="text-4xl font-bold mb-4">Blog</h1>
             <p className="text-xl text-muted-foreground">
-              Latest insights on invoice automation, AI, and accounts payable best practices for the
-              oil & gas industry
+              Latest insights on invoice automation, AI, and accounts payable best practices for the oil & gas industry
             </p>
           </div>
 
@@ -182,9 +160,7 @@ export default function Blog() {
           ) : posts.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">
-                  No blog posts available yet. Check back soon!
-                </p>
+                <p className="text-muted-foreground">No blog posts available yet. Check back soon!</p>
               </CardContent>
             </Card>
           ) : (
@@ -229,7 +205,7 @@ export default function Blog() {
           {posts.length > 0 && (
             <div className="mt-12 text-center">
               <p className="text-sm text-muted-foreground">
-                Showing {posts.length} {posts.length === 1 ? "post" : "posts"}
+                Showing {posts.length} {posts.length === 1 ? 'post' : 'posts'}
               </p>
             </div>
           )}

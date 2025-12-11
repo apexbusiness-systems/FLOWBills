@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import {
-  MessageCircle,
-  Mic,
-  MicOff,
-  Send,
-  Bot,
+import { 
+  MessageCircle, 
+  Mic, 
+  MicOff, 
+  Send, 
+  Bot, 
   Lightbulb,
   FileText,
   AlertCircle,
@@ -12,7 +12,7 @@ import {
   Volume2,
   VolumeX,
   Minimize2,
-  Maximize2,
+  Maximize2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,10 +23,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface Message {
   id: string;
-  type: "user" | "assistant" | "system";
+  type: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
-  category?: "general" | "regulatory" | "technical" | "workflow";
+  category?: 'general' | 'regulatory' | 'technical' | 'workflow';
 }
 
 interface OilGasAssistantProps {
@@ -39,13 +39,12 @@ const OilGasAssistant = ({ onTaskSuggestion, onNavigate }: OilGasAssistantProps)
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: "1",
-      type: "assistant",
-      content:
-        "Hello! I'm your Oil & Gas Billing Assistant. I'm trained on Canadian energy regulations, NOV systems, JIB processes, and industry best practices. How can I help streamline your operations today?",
+      id: '1',
+      type: 'assistant',
+      content: "Hello! I'm your Oil & Gas Billing Assistant. I'm trained on Canadian energy regulations, NOV systems, JIB processes, and industry best practices. How can I help streamline your operations today?",
       timestamp: new Date(),
-      category: "general",
-    },
+      category: 'general'
+    }
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -60,25 +59,25 @@ const OilGasAssistant = ({ onTaskSuggestion, onNavigate }: OilGasAssistantProps)
   const industryKnowledge = {
     regulations: [
       "Canadian Energy Regulator (CER) billing requirements",
-      "Alberta Energy Regulator (AER) fee structures",
+      "Alberta Energy Regulator (AER) fee structures", 
       "British Columbia Oil and Gas Commission regulations",
       "PIPEDA and Alberta PIPA compliance for billing data",
-      "Joint Interest Billing (JIB) procedures and standards",
+      "Joint Interest Billing (JIB) procedures and standards"
     ],
     systems: [
       "NOV AccessNOV portal integration",
       "Oracle E-Business Suite AP modules",
       "SAP Ariba cXML processing",
       "EDI X12 810/820 transactions",
-      "Microsoft Dynamics integration patterns",
+      "Microsoft Dynamics integration patterns"
     ],
     workflows: [
       "Three-way matching (PO, Receipt, Invoice)",
-      "Field ticket allocation and JIB distribution",
+      "Field ticket allocation and JIB distribution", 
       "Working interest calculations",
       "Monthly billing cycles and cutoffs",
-      "Exception handling and approval workflows",
-    ],
+      "Exception handling and approval workflows"
+    ]
   };
 
   const quickSuggestions = [
@@ -87,17 +86,16 @@ const OilGasAssistant = ({ onTaskSuggestion, onNavigate }: OilGasAssistantProps)
     { text: "Compliance check", category: "regulatory", action: "compliance_check" },
     { text: "Smart upload guide", category: "workflow", action: "upload_help" },
     { text: "Workflow automation", category: "workflow", action: "automation_help" },
-    { text: "Performance analytics", category: "technical", action: "analytics_help" },
+    { text: "Performance analytics", category: "technical", action: "analytics_help" }
   ];
 
   useEffect(() => {
-    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-      const SpeechRecognitionClass =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       recognition.current = new SpeechRecognitionClass();
       recognition.current!.continuous = false;
       recognition.current!.interimResults = false;
-      recognition.current!.lang = "en-US";
+      recognition.current!.lang = 'en-US';
 
       recognition.current!.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
@@ -124,9 +122,7 @@ const OilGasAssistant = ({ onTaskSuggestion, onNavigate }: OilGasAssistantProps)
 
   const generateIndustryResponse = async (userMessage: string): Promise<string> => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         return "Please sign in to access AI assistance.";
       }
@@ -134,8 +130,8 @@ const OilGasAssistant = ({ onTaskSuggestion, onNavigate }: OilGasAssistantProps)
       // Enhanced context with conversation history and industry knowledge
       const conversationContext = messages
         .slice(-5) // Last 5 messages for context
-        .map((m) => `${m.type}: ${m.content}`)
-        .join("\n");
+        .map(m => `${m.type}: ${m.content}`)
+        .join('\n');
 
       const enhancedContext = `
 You are an expert Oil & Gas Billing AI Assistant with deep knowledge of:
@@ -159,10 +155,10 @@ RESPONSE GUIDELINES:
 
 USER QUESTION: ${userMessage}`;
 
-      const response = await supabase.functions.invoke("ai-assistant", {
+      const response = await supabase.functions.invoke('ai-assistant', {
         body: {
           prompt: enhancedContext,
-          context: "Advanced Oil & Gas Billing Expert",
+          context: 'Advanced Oil & Gas Billing Expert'
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -170,21 +166,22 @@ USER QUESTION: ${userMessage}`;
       });
 
       if (response.error) {
-        console.error("AI Assistant error:", response.error);
+        console.error('AI Assistant error:', response.error);
         return getSmartOfflineResponse(userMessage);
       }
 
       return response.data?.response || getSmartOfflineResponse(userMessage);
+      
     } catch (error) {
-      console.error("AI Assistant Error:", error);
+      console.error('AI Assistant Error:', error);
       return getSmartOfflineResponse(userMessage);
     }
   };
 
   const getSmartOfflineResponse = (message: string): string => {
     const lowerMessage = message.toLowerCase();
-
-    if (lowerMessage.includes("jib") || lowerMessage.includes("allocation")) {
+    
+    if (lowerMessage.includes('jib') || lowerMessage.includes('allocation')) {
       return `📊 **JIB Allocation Guidance**
 
 **Step-by-step process:**
@@ -200,8 +197,8 @@ USER QUESTION: ${userMessage}`;
 
 **Next Steps:** Would you like me to help set up automated validation rules for your JIB process?`;
     }
-
-    if (lowerMessage.includes("nov") || lowerMessage.includes("access")) {
+    
+    if (lowerMessage.includes('nov') || lowerMessage.includes('access')) {
       return `🔗 **NOV AccessNOV Integration Support**
 
 **Connection Troubleshooting:**
@@ -221,8 +218,8 @@ USER QUESTION: ${userMessage}`;
 
 Need help with specific error codes or want me to review your integration setup?`;
     }
-
-    if (lowerMessage.includes("upload") || lowerMessage.includes("invoice")) {
+    
+    if (lowerMessage.includes('upload') || lowerMessage.includes('invoice')) {
       return `📋 **Smart Invoice Upload Guide**
 
 **Supported Formats & Optimization:**
@@ -246,8 +243,8 @@ Need help with specific error codes or want me to review your integration setup?
 
 **Validation Rules Setup:** Want me to help configure custom validation rules for your workflow?`;
     }
-
-    if (lowerMessage.includes("compliance") || lowerMessage.includes("regulation")) {
+    
+    if (lowerMessage.includes('compliance') || lowerMessage.includes('regulation')) {
       return `🛡️ **Regulatory Compliance Center**
 
 **Canadian Energy Compliance Stack:**
@@ -271,7 +268,7 @@ Need help with specific error codes or want me to review your integration setup?
 **Compliance Dashboard:** Would you like me to show you the compliance monitoring tools and help set up automated reporting?`;
     }
 
-    if (lowerMessage.includes("workflow") || lowerMessage.includes("automation")) {
+    if (lowerMessage.includes('workflow') || lowerMessage.includes('automation')) {
       return `⚡ **Intelligent Workflow Automation**
 
 **Pre-built Workflow Templates:**
@@ -293,7 +290,7 @@ Need help with specific error codes or want me to review your integration setup?
 
 Ready to build a custom workflow? I can guide you through the visual workflow builder!`;
     }
-
+    
     return `👋 **Hi! I'm your Advanced Oil & Gas Billing Assistant**
 
 I specialize in Canadian energy industry operations and can help with:
@@ -317,16 +314,16 @@ I specialize in Canadian energy industry operations and can help with:
   };
 
   const speakMessage = (text: string) => {
-    if ("speechSynthesis" in window) {
+    if ('speechSynthesis' in window) {
       synthesis.current.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 0.8;
-
+      
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
-
+      
       synthesis.current.speak(utterance);
     }
   };
@@ -361,33 +358,34 @@ I specialize in Canadian energy industry operations and can help with:
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      type: "user",
+      type: 'user',
       content: inputMessage,
       timestamp: new Date(),
-      category: "general",
+      category: 'general'
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInputMessage("");
     setIsLoading(true);
 
     try {
       const response = await generateIndustryResponse(inputMessage);
-
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        type: "assistant",
+        type: 'assistant',
         content: response,
         timestamp: new Date(),
-        category: "general",
+        category: 'general'
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
-
+      setMessages(prev => [...prev, assistantMessage]);
+      
       // Auto-speak response if it's short enough
       if (response.length < 200) {
         speakMessage(response);
       }
+      
     } catch (error) {
       toast({
         title: "Assistant Error",
@@ -399,11 +397,11 @@ I specialize in Canadian energy industry operations and can help with:
     }
   };
 
-  const handleQuickSuggestion = async (suggestion: (typeof quickSuggestions)[0]) => {
+  const handleQuickSuggestion = async (suggestion: typeof quickSuggestions[0]) => {
     setInputMessage(suggestion.text);
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
     sendMessage();
-
+    
     // Navigate to relevant section if applicable
     if (suggestion.action === "upload_help") {
       onNavigate?.("inbox");
@@ -416,14 +414,10 @@ I specialize in Canadian energy industry operations and can help with:
 
   const getCategoryIcon = (category?: string) => {
     switch (category) {
-      case "regulatory":
-        return <AlertCircle className="h-4 w-4" />;
-      case "technical":
-        return <FileText className="h-4 w-4" />;
-      case "workflow":
-        return <CheckCircle className="h-4 w-4" />;
-      default:
-        return <Lightbulb className="h-4 w-4" />;
+      case 'regulatory': return <AlertCircle className="h-4 w-4" />;
+      case 'technical': return <FileText className="h-4 w-4" />;
+      case 'workflow': return <CheckCircle className="h-4 w-4" />;
+      default: return <Lightbulb className="h-4 w-4" />;
     }
   };
 
@@ -440,19 +434,15 @@ I specialize in Canadian energy industry operations and can help with:
   }
 
   return (
-    <div
-      className={`fixed bottom-6 right-6 z-50 bg-card border border-border rounded-lg shadow-xl transition-all duration-300 ${
-        isMinimized ? "w-80 h-16" : "w-96 h-[600px]"
-      }`}
-    >
+    <div className={`fixed bottom-6 right-6 z-50 bg-card border border-border rounded-lg shadow-xl transition-all duration-300 ${
+      isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
+    }`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border bg-gradient-to-r from-primary/10 to-primary-light/10 rounded-t-lg">
         <div className="flex items-center gap-2">
           <Bot className="h-5 w-5 text-primary" />
           <span className="font-semibold text-foreground">Oil & Gas Assistant</span>
-          <Badge variant="processing" className="text-xs">
-            AI-Powered
-          </Badge>
+          <Badge variant="processing" className="text-xs">AI-Powered</Badge>
         </div>
         <div className="flex items-center gap-1">
           {isSpeaking && (
@@ -494,17 +484,12 @@ I specialize in Canadian energy industry operations and can help with:
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 h-80">
             {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
-                    message.type === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground"
-                  }`}
-                >
+              <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] p-3 rounded-lg ${
+                  message.type === 'user' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted text-foreground'
+                }`}>
                   <div className="text-sm">{message.content}</div>
                   <div className="text-xs opacity-70 mt-1">
                     {message.timestamp.toLocaleTimeString()}
@@ -535,7 +520,7 @@ I specialize in Canadian energy industry operations and can help with:
                   placeholder="Ask about JIB, NOV integration, regulations, workflows..."
                   className="min-h-[40px] max-h-[80px] resize-none pr-10"
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
                       sendMessage();
                     }
@@ -547,7 +532,7 @@ I specialize in Canadian energy industry operations and can help with:
                   variant="ghost"
                   size="sm"
                   onClick={isListening ? stopListening : startListening}
-                  className={isListening ? "text-destructive" : ""}
+                  className={isListening ? 'text-destructive' : ''}
                 >
                   {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>

@@ -24,7 +24,7 @@ export interface RateLimitResult {
 export async function checkRateLimit(
   supabaseClient: ReturnType<typeof createClient>,
   key: string,
-  config: RateLimitConfig,
+  config: RateLimitConfig
 ): Promise<RateLimitResult> {
   const resourceKey = `${config.keyPrefix}:${key}`;
   const windowStart = new Date(Date.now() - config.windowSeconds * 1000);
@@ -73,7 +73,7 @@ export async function checkRateLimit(
     // Check if limit exceeded
     if (existing.request_count >= config.maxRequests) {
       const resetTime = new Date(existing.window_start).getTime() + config.windowSeconds * 1000;
-
+      
       return {
         allowed: false,
         limit: config.maxRequests,
@@ -123,7 +123,7 @@ export async function checkRateLimit(
  */
 export function rateLimitResponse(result: RateLimitResult, corsHeaders: Record<string, string>) {
   const retryAfter = Math.ceil((result.reset - Date.now()) / 1000);
-
+  
   return new Response(
     JSON.stringify({
       error: 'Too Many Requests',
@@ -140,7 +140,7 @@ export function rateLimitResponse(result: RateLimitResult, corsHeaders: Record<s
         'X-RateLimit-Reset': result.reset.toString(),
         'Retry-After': retryAfter.toString(),
       },
-    },
+    }
   );
 }
 

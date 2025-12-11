@@ -1,7 +1,26 @@
-// Startup diagnostic - verify module loaded successfully
-console.log("[FlowBills] Module loaded at", new Date().toISOString());
+// Startup diagnostic - verify module loaded
+console.log('[FlowBills] Module loaded at', new Date().toISOString());
 
-// Declare global flag for load detection
+// Emergency recovery: if we previously failed to load, clear everything
+const lastLoadFailed = localStorage.getItem('flowbills_load_failed') === 'true';
+if (lastLoadFailed) {
+  console.warn('[FlowBills] Previous load failed - clearing caches and service workers...');
+  localStorage.removeItem('flowbills_load_failed');
+  
+  // Clear all caches
+  if ('caches' in window) {
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+  }
+  
+  // Unregister all service workers
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(reg => reg.unregister());
+    });
+  }
+}
+
+// Declare global flag
 declare global {
   interface Window {
     __FLOWBILLS_LOADED__?: boolean;
@@ -20,76 +39,74 @@ import { queryOptimizer } from "./lib/query-optimizer";
 import { startPersistenceCleanup } from "./lib/persistence";
 
 // Global error handlers to catch errors before React renders
-window.addEventListener("error", (event) => {
-  console.error("============================================");
-  console.error("[FlowBills Global Error Handler] Uncaught error!");
-  console.error("Error:", event.error);
-  console.error("Message:", event.message);
-  console.error("Filename:", event.filename);
-  console.error("Line:", event.lineno);
-  console.error("Column:", event.colno);
-  console.error("Timestamp:", new Date().toISOString());
-  console.error("============================================");
-
+window.addEventListener('error', (event) => {
+  console.error('============================================');
+  console.error('[FlowBills Global Error Handler] Uncaught error!');
+  console.error('Error:', event.error);
+  console.error('Message:', event.message);
+  console.error('Filename:', event.filename);
+  console.error('Line:', event.lineno);
+  console.error('Column:', event.colno);
+  console.error('Timestamp:', new Date().toISOString());
+  console.error('============================================');
+  
   // Store in localStorage for debugging
   try {
     const errorReport = {
-      type: "global_error",
+      type: 'global_error',
       message: event.message,
       filename: event.filename,
       lineno: event.lineno,
       colno: event.colno,
-      error: event.error
-        ? {
-            name: event.error.name,
-            message: event.error.message,
-            stack: event.error.stack,
-          }
-        : null,
+      error: event.error ? {
+        name: event.error.name,
+        message: event.error.message,
+        stack: event.error.stack
+      } : null,
       timestamp: new Date().toISOString(),
-      url: window.location.href,
+      url: window.location.href
     };
-
-    const existingErrors = JSON.parse(localStorage.getItem("global_errors") || "[]");
+    
+    const existingErrors = JSON.parse(localStorage.getItem('global_errors') || '[]');
     existingErrors.push(errorReport);
-
+    
     if (existingErrors.length > 10) {
       existingErrors.splice(0, existingErrors.length - 10);
     }
-
-    localStorage.setItem("global_errors", JSON.stringify(existingErrors));
+    
+    localStorage.setItem('global_errors', JSON.stringify(existingErrors));
   } catch (storageError) {
-    console.error("Failed to store global error:", storageError);
+    console.error('Failed to store global error:', storageError);
   }
 });
 
-window.addEventListener("unhandledrejection", (event) => {
-  console.error("============================================");
-  console.error("[FlowBills Global Error Handler] Unhandled promise rejection!");
-  console.error("Reason:", event.reason);
-  console.error("Promise:", event.promise);
-  console.error("Timestamp:", new Date().toISOString());
-  console.error("============================================");
-
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('============================================');
+  console.error('[FlowBills Global Error Handler] Unhandled promise rejection!');
+  console.error('Reason:', event.reason);
+  console.error('Promise:', event.promise);
+  console.error('Timestamp:', new Date().toISOString());
+  console.error('============================================');
+  
   // Store in localStorage for debugging
   try {
     const errorReport = {
-      type: "unhandled_rejection",
-      reason: event.reason ? String(event.reason) : "Unknown",
+      type: 'unhandled_rejection',
+      reason: event.reason ? String(event.reason) : 'Unknown',
       timestamp: new Date().toISOString(),
-      url: window.location.href,
+      url: window.location.href
     };
-
-    const existingErrors = JSON.parse(localStorage.getItem("global_errors") || "[]");
+    
+    const existingErrors = JSON.parse(localStorage.getItem('global_errors') || '[]');
     existingErrors.push(errorReport);
-
+    
     if (existingErrors.length > 10) {
       existingErrors.splice(0, existingErrors.length - 10);
     }
-
-    localStorage.setItem("global_errors", JSON.stringify(existingErrors));
+    
+    localStorage.setItem('global_errors', JSON.stringify(existingErrors));
   } catch (storageError) {
-    console.error("Failed to store unhandled rejection:", storageError);
+    console.error('Failed to store unhandled rejection:', storageError);
   }
 });
 
@@ -104,10 +121,10 @@ if (!import.meta.env.DEV) {
     queryOptimizer.startPeriodicCleanup();
     startPersistenceCleanup();
   };
-
+  
   // Defer initialization to avoid blocking initial render
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initPerformance);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPerformance);
   } else {
     initPerformance();
   }
@@ -116,9 +133,26 @@ if (!import.meta.env.DEV) {
   startPersistenceCleanup();
 }
 
-// Service worker is managed by VitePWA plugin (vite.config.ts)
-// Service worker clearing is handled in index.html only when recovering from load failures
-// This allows PWA caching to work normally while maintaining a recovery mechanism
+// TEMPORARILY DISABLED: Service worker registration
+// The SW was causing production issues by serving stale bundles.
+// App will run as plain SPA until SW strategy is refined.
+// See: P0 incident - "Application Loading Error"
+//
+// import('./lib/sw-health-monitor').then(({ swHealthMonitor }) => {
+//   window.addEventListener('load', () => {
+//     swHealthMonitor.register();
+//   });
+// });
+
+// Clear any existing service workers on startup to fix stuck users
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    registrations.forEach(reg => {
+      console.log('[FlowBills] Unregistering stale SW:', reg.scope);
+      reg.unregister();
+    });
+  });
+}
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -139,14 +173,14 @@ if (!rootElement) {
 }
 
 try {
-  console.log("[FlowBills] React render initiated");
+  console.log('[FlowBills] React render initiated');
   createRoot(rootElement).render(<App />);
 } catch (error) {
-  console.error("============================================");
-  console.error("[FlowBills] Failed to render React app!");
-  console.error("Error:", error);
-  console.error("============================================");
-
+  console.error('============================================');
+  console.error('[FlowBills] Failed to render React app!');
+  console.error('Error:', error);
+  console.error('============================================');
+  
   // Display user-friendly error
   rootElement.innerHTML = `
     <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: #f9fafb; font-family: system-ui, -apple-system, sans-serif;">
@@ -156,7 +190,7 @@ try {
         <button onclick="window.location.reload()" style="background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">
           Reload Page
         </button>
-        ${import.meta.env.DEV ? `<pre style="margin-top: 16px; padding: 12px; background: #f3f4f6; border-radius: 4px; text-align: left; font-size: 12px; overflow-x: auto;">${error}</pre>` : ""}
+        ${import.meta.env.DEV ? `<pre style="margin-top: 16px; padding: 12px; background: #f3f4f6; border-radius: 4px; text-align: left; font-size: 12px; overflow-x: auto;">${error}</pre>` : ''}
       </div>
     </div>
   `;

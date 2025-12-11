@@ -1,9 +1,9 @@
 // P17 — Post-Launch Monitoring: Daily Report Generation
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 interface DailyMetrics {
@@ -24,13 +24,13 @@ interface DailyMetrics {
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get date range (previous 24 hours)
@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
 
     const totalChecks = healthChecks?.length || 0;
     const successfulChecks = healthChecks?.filter(
-      (check) => check.new_values?.status === 'healthy',
+      (check) => check.new_values?.status === 'healthy'
     ).length || 0;
     const availability = totalChecks > 0 ? (successfulChecks / totalChecks) * 100 : 0;
 
@@ -70,9 +70,7 @@ Deno.serve(async (req) => {
 
     if (metricsError) throw metricsError;
 
-    const latencies = apiMetrics?.map((m) =>
-      m.new_values?.duration_ms || 0
-    ).sort((a, b) => a - b) || [];
+    const latencies = apiMetrics?.map((m) => m.new_values?.duration_ms || 0).sort((a, b) => a - b) || [];
     const p95Index = Math.floor(latencies.length * 0.95);
     const p95_latency_ms = latencies[p95Index] || 0;
 
@@ -91,7 +89,7 @@ Deno.serve(async (req) => {
 
     // 4. Calculate STP Rate (Straight Through Processing)
     const autoApprovedInvoices = invoices?.filter(
-      (inv) => inv.status === 'approved', // Assuming auto-approved invoices have this status
+      (inv) => inv.status === 'approved' // Assuming auto-approved invoices have this status
     ).length || 0;
     const stp_rate = totalInvoices > 0 ? (autoApprovedInvoices / totalInvoices) * 100 : 0;
 
@@ -186,20 +184,7 @@ ${metrics.top_errors.map((e, i) => `${i + 1}. ${e.error_type}: ${e.count} occurr
 📈 TRENDS & RECOMMENDATIONS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-${
-      metrics.availability < 99.5
-        ? '⚠️ Availability below SLO (99.5%) - investigate incidents\n'
-        : ''
-    }${
-      metrics.p95_latency_ms > 800 ? '⚠️ P95 latency above SLO (800ms) - review slow queries\n' : ''
-    }${metrics.error_ratio > 0.5 ? '⚠️ Error ratio above SLO (0.5%) - check top errors\n' : ''}${
-      metrics.stp_rate < 85 ? '⚠️ STP rate below target (85%) - review approval workflow\n' : ''
-    }${
-      metrics.availability >= 99.5 && metrics.p95_latency_ms <= 800 && metrics.error_ratio <= 0.5 &&
-        metrics.stp_rate >= 85
-        ? '✅ All SLOs met - system performing well\n'
-        : ''
-    }
+${metrics.availability < 99.5 ? '⚠️ Availability below SLO (99.5%) - investigate incidents\n' : ''}${metrics.p95_latency_ms > 800 ? '⚠️ P95 latency above SLO (800ms) - review slow queries\n' : ''}${metrics.error_ratio > 0.5 ? '⚠️ Error ratio above SLO (0.5%) - check top errors\n' : ''}${metrics.stp_rate < 85 ? '⚠️ STP rate below target (85%) - review approval workflow\n' : ''}${metrics.availability >= 99.5 && metrics.p95_latency_ms <= 800 && metrics.error_ratio <= 0.5 && metrics.stp_rate >= 85 ? '✅ All SLOs met - system performing well\n' : ''}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Report ID: ${crypto.randomUUID()}
@@ -215,18 +200,18 @@ Next report: ${new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split
         formatted_report: formattedReport,
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
-      },
+      }
     );
   } catch (error) {
-    console.error('Error generating daily report:', error);
+    console.error("Error generating daily report:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
-      },
+      }
     );
   }
 });

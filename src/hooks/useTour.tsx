@@ -1,13 +1,13 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./useAuth";
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
 
 interface TourStep {
   id: string;
   target: string;
   title: string;
   content: string;
-  placement?: "top" | "bottom" | "left" | "right";
+  placement?: 'top' | 'bottom' | 'left' | 'right';
   action?: () => void;
   disableBeacon?: boolean;
 }
@@ -43,7 +43,7 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
 
   const loadCompletedTours = async () => {
     if (!user) return;
-
+    
     const stored = localStorage.getItem(`tours_completed_${user.id}`);
     if (stored) {
       setCompletedTours(JSON.parse(stored));
@@ -52,7 +52,7 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
 
   const markTourCompleted = async (tourName: string) => {
     if (!user) return;
-
+    
     const updated = [...new Set([...completedTours, tourName])];
     setCompletedTours(updated);
     localStorage.setItem(`tours_completed_${user.id}`, JSON.stringify(updated));
@@ -118,7 +118,7 @@ export const TourProvider = ({ children }: { children: ReactNode }) => {
 export const useTour = () => {
   const context = useContext(TourContext);
   if (context === undefined) {
-    throw new Error("useTour must be used within a TourProvider");
+    throw new Error('useTour must be used within a TourProvider');
   }
   return context;
 };

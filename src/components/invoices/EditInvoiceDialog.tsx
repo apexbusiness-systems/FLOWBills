@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { format } from "date-fns";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { format } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -18,47 +18,47 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Invoice } from "@/hooks/useInvoices";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Invoice } from '@/hooks/useInvoices';
 
 const invoiceSchema = z.object({
   invoice_number: z
     .string()
     .trim()
-    .min(1, "Invoice number is required")
-    .max(50, "Invoice number must be less than 50 characters"),
+    .min(1, 'Invoice number is required')
+    .max(50, 'Invoice number must be less than 50 characters'),
   vendor_name: z
     .string()
     .trim()
-    .min(1, "Vendor name is required")
-    .max(100, "Vendor name must be less than 100 characters"),
+    .min(1, 'Vendor name is required')
+    .max(100, 'Vendor name must be less than 100 characters'),
   amount: z
     .string()
     .trim()
-    .min(1, "Amount is required")
+    .min(1, 'Amount is required')
     .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-      message: "Amount must be a positive number",
+      message: 'Amount must be a positive number',
     }),
-  invoice_date: z.date({ required_error: "Invoice date is required" }),
+  invoice_date: z.date({ required_error: 'Invoice date is required' }),
   due_date: z.date().optional(),
-  status: z.enum(["pending", "approved", "rejected", "processing"], {
-    required_error: "Status is required",
+  status: z.enum(['pending', 'approved', 'rejected', 'processing'], {
+    required_error: 'Status is required',
   }),
-  notes: z.string().trim().max(1000, "Notes must be less than 1000 characters").optional(),
+  notes: z.string().trim().max(1000, 'Notes must be less than 1000 characters').optional(),
 });
 
 type InvoiceFormData = z.infer<typeof invoiceSchema>;
@@ -70,17 +70,22 @@ interface EditInvoiceDialogProps {
   onSave: (id: string, updates: Partial<Invoice>) => Promise<void>;
 }
 
-export function EditInvoiceDialog({ invoice, open, onOpenChange, onSave }: EditInvoiceDialogProps) {
+export function EditInvoiceDialog({
+  invoice,
+  open,
+  onOpenChange,
+  onSave,
+}: EditInvoiceDialogProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   const form = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
-      invoice_number: "",
-      vendor_name: "",
-      amount: "",
-      status: "pending",
-      notes: "",
+      invoice_number: '',
+      vendor_name: '',
+      amount: '',
+      status: 'pending',
+      notes: '',
     },
   });
 
@@ -88,12 +93,12 @@ export function EditInvoiceDialog({ invoice, open, onOpenChange, onSave }: EditI
     if (invoice && open) {
       form.reset({
         invoice_number: invoice.invoice_number,
-        vendor_name: invoice.vendor_name || "",
+        vendor_name: invoice.vendor_name || '',
         amount: invoice.amount.toString(),
         invoice_date: new Date(invoice.invoice_date),
         due_date: invoice.due_date ? new Date(invoice.due_date) : undefined,
         status: invoice.status,
-        notes: invoice.notes || "",
+        notes: invoice.notes || '',
       });
     }
   }, [invoice, open, form]);
@@ -107,14 +112,14 @@ export function EditInvoiceDialog({ invoice, open, onOpenChange, onSave }: EditI
         invoice_number: data.invoice_number,
         vendor_name: data.vendor_name,
         amount: Number(data.amount),
-        invoice_date: format(data.invoice_date, "yyyy-MM-dd"),
-        due_date: data.due_date ? format(data.due_date, "yyyy-MM-dd") : undefined,
+        invoice_date: format(data.invoice_date, 'yyyy-MM-dd'),
+        due_date: data.due_date ? format(data.due_date, 'yyyy-MM-dd') : undefined,
         status: data.status,
         notes: data.notes || null,
       });
       onOpenChange(false);
     } catch (error) {
-      console.error("Error updating invoice:", error);
+      console.error('Error updating invoice:', error);
     } finally {
       setIsSaving(false);
     }
@@ -211,11 +216,15 @@ export function EditInvoiceDialog({ invoice, open, onOpenChange, onSave }: EditI
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              'w-full pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                            {field.value ? (
+                              format(field.value, 'PPP')
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -225,7 +234,9 @@ export function EditInvoiceDialog({ invoice, open, onOpenChange, onSave }: EditI
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date('1900-01-01')
+                          }
                           initialFocus
                         />
                       </PopoverContent>
@@ -247,11 +258,15 @@ export function EditInvoiceDialog({ invoice, open, onOpenChange, onSave }: EditI
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              'w-full pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                            {field.value ? (
+                              format(field.value, 'PPP')
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -261,7 +276,7 @@ export function EditInvoiceDialog({ invoice, open, onOpenChange, onSave }: EditI
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < new Date("1900-01-01")}
+                          disabled={(date) => date < new Date('1900-01-01')}
                           initialFocus
                         />
                       </PopoverContent>

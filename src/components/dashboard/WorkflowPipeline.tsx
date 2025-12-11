@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import {
-  FileText,
-  CheckCircle,
-  Users,
-  CreditCard,
+import { 
+  FileText, 
+  CheckCircle, 
+  Users, 
+  CreditCard, 
   Send,
   ArrowRight,
   AlertTriangle,
-  Loader2,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -32,7 +32,7 @@ const getWorkflowSteps = (counts: WorkflowCounts) => [
     icon: FileText,
     count: counts.inbox,
     status: counts.inbox > 20 ? "attention" : "active",
-    color: "bg-status-processing",
+    color: "bg-status-processing"
   },
   {
     id: "validate",
@@ -40,8 +40,8 @@ const getWorkflowSteps = (counts: WorkflowCounts) => [
     description: "Data validation and mapping",
     icon: CheckCircle,
     count: counts.validated,
-    status: "active",
-    color: "bg-status-pending",
+    status: "active", 
+    color: "bg-status-pending"
   },
   {
     id: "match",
@@ -50,7 +50,7 @@ const getWorkflowSteps = (counts: WorkflowCounts) => [
     icon: Users,
     count: counts.matched,
     status: counts.matched > 10 ? "attention" : "active",
-    color: counts.matched > 10 ? "bg-destructive" : "bg-primary",
+    color: counts.matched > 10 ? "bg-destructive" : "bg-primary"
   },
   {
     id: "approve",
@@ -59,7 +59,7 @@ const getWorkflowSteps = (counts: WorkflowCounts) => [
     icon: CheckCircle,
     count: counts.pending_approval,
     status: "active",
-    color: "bg-amber-500",
+    color: "bg-amber-500"
   },
   {
     id: "pay",
@@ -68,7 +68,7 @@ const getWorkflowSteps = (counts: WorkflowCounts) => [
     icon: CreditCard,
     count: counts.approved,
     status: "completed",
-    color: "bg-status-approved",
+    color: "bg-status-approved"
   },
   {
     id: "remit",
@@ -77,8 +77,8 @@ const getWorkflowSteps = (counts: WorkflowCounts) => [
     icon: Send,
     count: counts.paid,
     status: "completed",
-    color: "bg-status-approved",
-  },
+    color: "bg-status-approved"
+  }
 ];
 
 const WorkflowPipeline = () => {
@@ -90,21 +90,21 @@ const WorkflowPipeline = () => {
     matched: 0,
     pending_approval: 0,
     approved: 0,
-    paid: 0,
+    paid: 0
   });
   const [loading, setLoading] = useState(true);
   const [totalInvoices, setTotalInvoices] = useState(0);
 
   useEffect(() => {
     if (!user) return;
-
+    
     const fetchCounts = async () => {
       try {
         // Fetch invoice counts by status
         const { data: invoices, error } = await supabase
-          .from("invoices")
-          .select("status")
-          .eq("user_id", user.id);
+          .from('invoices')
+          .select('status')
+          .eq('user_id', user.id);
 
         if (error) throw error;
 
@@ -114,30 +114,30 @@ const WorkflowPipeline = () => {
           matched: 0,
           pending_approval: 0,
           approved: 0,
-          paid: 0,
+          paid: 0
         };
 
-        invoices?.forEach((invoice) => {
+        invoices?.forEach(invoice => {
           switch (invoice.status) {
-            case "pending":
-            case "processing":
+            case 'pending':
+            case 'processing':
               statusCounts.inbox++;
               break;
-            case "extracted":
-            case "validated":
+            case 'extracted':
+            case 'validated':
               statusCounts.validated++;
               break;
-            case "matched":
+            case 'matched':
               statusCounts.matched++;
               break;
-            case "pending_approval":
+            case 'pending_approval':
               statusCounts.pending_approval++;
               break;
-            case "approved":
-            case "approved_auto":
+            case 'approved':
+            case 'approved_auto':
               statusCounts.approved++;
               break;
-            case "paid":
+            case 'paid':
               statusCounts.paid++;
               break;
           }
@@ -146,7 +146,7 @@ const WorkflowPipeline = () => {
         setCounts(statusCounts);
         setTotalInvoices(invoices?.length || 0);
       } catch (error) {
-        console.error("Error fetching workflow counts:", error);
+        console.error('Error fetching workflow counts:', error);
       } finally {
         setLoading(false);
       }
@@ -156,19 +156,15 @@ const WorkflowPipeline = () => {
 
     // Subscribe to real-time updates
     const channel = supabase
-      .channel("invoice-updates")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "invoices",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          fetchCounts();
-        }
-      )
+      .channel('invoice-updates')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'invoices',
+        filter: `user_id=eq.${user.id}`
+      }, () => {
+        fetchCounts();
+      })
       .subscribe();
 
     return () => {
@@ -177,8 +173,9 @@ const WorkflowPipeline = () => {
   }, [user]);
 
   const workflowSteps = getWorkflowSteps(counts);
-  const completionRate =
-    totalInvoices > 0 ? Math.round(((counts.approved + counts.paid) / totalInvoices) * 100) : 0;
+  const completionRate = totalInvoices > 0 
+    ? Math.round(((counts.approved + counts.paid) / totalInvoices) * 100) 
+    : 0;
 
   if (loading) {
     return (
@@ -193,7 +190,9 @@ const WorkflowPipeline = () => {
   return (
     <div className="card-enterprise">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-foreground mb-2">Invoice Processing Pipeline</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-2">
+          Invoice Processing Pipeline
+        </h3>
         <p className="text-sm text-muted-foreground">
           Track invoices through the complete billing workflow
         </p>
@@ -207,7 +206,7 @@ const WorkflowPipeline = () => {
         {workflowSteps.map((step, index) => {
           const Icon = step.icon;
           const isLast = index === workflowSteps.length - 1;
-
+          
           return (
             <div key={step.id} className="relative">
               <Button
@@ -224,19 +223,21 @@ const WorkflowPipeline = () => {
                       <AlertTriangle className="h-4 w-4 text-destructive" />
                     )}
                   </div>
-                  <div
-                    className={`h-6 w-6 rounded-full ${step.color} flex items-center justify-center text-white text-xs font-bold`}
-                  >
+                  <div className={`h-6 w-6 rounded-full ${step.color} flex items-center justify-center text-white text-xs font-bold`}>
                     {step.count}
                   </div>
                 </div>
-
+                
                 <div className="text-left w-full">
-                  <h4 className="font-medium text-sm text-foreground">{step.title}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{step.description}</p>
+                  <h4 className="font-medium text-sm text-foreground">
+                    {step.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {step.description}
+                  </p>
                 </div>
               </Button>
-
+              
               {!isLast && (
                 <ArrowRight className="absolute top-1/2 -right-2 h-4 w-4 text-muted-foreground transform -translate-y-1/2 hidden xl:block" />
               )}
@@ -248,14 +249,9 @@ const WorkflowPipeline = () => {
       <div className="mt-6 pt-4 border-t border-border">
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Next milestone:{" "}
-            <span className="font-medium text-foreground">Monthly JIB reconciliation</span>
+            Next milestone: <span className="font-medium text-foreground">Monthly JIB reconciliation</span>
           </div>
-          <Button
-            size="sm"
-            className="btn-primary"
-            onClick={() => navigate("/invoices?tab=workflow")}
-          >
+          <Button size="sm" className="btn-primary" onClick={() => navigate('/invoices?tab=workflow')}>
             View Full Pipeline
           </Button>
         </div>

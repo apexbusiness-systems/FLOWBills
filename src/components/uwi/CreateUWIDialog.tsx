@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -16,23 +16,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useUWIs } from "@/hooks/useUWIs";
-import { Loader2 } from "lucide-react";
+} from '@/components/ui/select';
+import { useUWIs } from '@/hooks/useUWIs';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
-  uwi: z.string().min(1, "UWI is required"),
+  uwi: z.string().min(1, 'UWI is required'),
   well_name: z.string().optional(),
-  status: z.string().min(1, "Status is required"),
+  status: z.string().min(1, 'Status is required'),
   province: z.string().optional(),
   location: z.string().optional(),
   operator: z.string().optional(),
@@ -41,18 +41,18 @@ const formSchema = z.object({
 });
 
 const CANADIAN_PROVINCES = [
-  "Alberta",
-  "British Columbia",
-  "Saskatchewan",
-  "Manitoba",
-  "Ontario",
-  "Quebec",
-  "New Brunswick",
-  "Nova Scotia",
-  "Newfoundland and Labrador",
-  "Northwest Territories",
-  "Yukon",
-  "Nunavut",
+  'Alberta',
+  'British Columbia',
+  'Saskatchewan',
+  'Manitoba',
+  'Ontario',
+  'Quebec',
+  'New Brunswick',
+  'Nova Scotia',
+  'Newfoundland and Labrador',
+  'Northwest Territories',
+  'Yukon',
+  'Nunavut',
 ];
 
 interface CreateUWIDialogProps {
@@ -67,14 +67,14 @@ export const CreateUWIDialog = ({ open, onOpenChange }: CreateUWIDialogProps) =>
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      uwi: "",
-      well_name: "",
-      status: "active",
-      province: "",
-      location: "",
-      operator: "",
-      spud_date: "",
-      completion_date: "",
+      uwi: '',
+      well_name: '',
+      status: 'active',
+      province: '',
+      location: '',
+      operator: '',
+      spud_date: '',
+      completion_date: '',
     },
   });
 
@@ -93,9 +93,9 @@ export const CreateUWIDialog = ({ open, onOpenChange }: CreateUWIDialogProps) =>
     };
 
     const result = await createUWI(uwiData);
-
+    
     setIsSubmitting(false);
-
+    
     if (result) {
       form.reset();
       onOpenChange(false);
@@ -107,7 +107,9 @@ export const CreateUWIDialog = ({ open, onOpenChange }: CreateUWIDialogProps) =>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add UWI</DialogTitle>
-          <DialogDescription>Add a new Unique Well Identifier to the registry</DialogDescription>
+          <DialogDescription>
+            Add a new Unique Well Identifier to the registry
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -253,7 +255,11 @@ export const CreateUWIDialog = ({ open, onOpenChange }: CreateUWIDialogProps) =>
             </div>
 
             <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>

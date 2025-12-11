@@ -1,61 +1,46 @@
-import { useState } from "react";
-import { useThreeWayMatching } from "@/hooks/useThreeWayMatching";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, XCircle, AlertCircle, Search, Filter, TrendingUp } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from 'react';
+import { useThreeWayMatching } from '@/hooks/useThreeWayMatching';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { CheckCircle2, XCircle, AlertCircle, Search, Filter, TrendingUp } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const ThreeWayMatchingInterface = () => {
-  const { matchedSets, loading, fetchMatchedSets, approveMatch, rejectMatch, getMatchStats } =
-    useThreeWayMatching();
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { matchedSets, loading, fetchMatchedSets, approveMatch, rejectMatch, getMatchStats } = useThreeWayMatching();
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const stats = getMatchStats();
 
-  const filteredSets = matchedSets.filter((set) => {
-    const matchesSearch =
-      search === "" ||
+  const filteredSets = matchedSets.filter(set => {
+    const matchesSearch = search === '' || 
       set.invoice_number.toLowerCase().includes(search.toLowerCase()) ||
       set.vendor_name.toLowerCase().includes(search.toLowerCase()) ||
       set.afe_number?.toLowerCase().includes(search.toLowerCase());
-
-    const matchesStatus = statusFilter === "all" || set.match_status === statusFilter;
-
+    
+    const matchesStatus = statusFilter === 'all' || set.match_status === statusFilter;
+    
     return matchesSearch && matchesStatus;
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "perfect":
-        return "bg-green-500/10 text-green-700 border-green-500/20";
-      case "partial":
-        return "bg-yellow-500/10 text-yellow-700 border-yellow-500/20";
-      case "mismatch":
-        return "bg-red-500/10 text-red-700 border-red-500/20";
-      default:
-        return "bg-muted";
+      case 'perfect': return 'bg-green-500/10 text-green-700 border-green-500/20';
+      case 'partial': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20';
+      case 'mismatch': return 'bg-red-500/10 text-red-700 border-red-500/20';
+      default: return 'bg-muted';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "perfect":
-        return <CheckCircle2 className="h-4 w-4" />;
-      case "partial":
-        return <AlertCircle className="h-4 w-4" />;
-      case "mismatch":
-        return <XCircle className="h-4 w-4" />;
+      case 'perfect': return <CheckCircle2 className="h-4 w-4" />;
+      case 'partial': return <AlertCircle className="h-4 w-4" />;
+      case 'mismatch': return <XCircle className="h-4 w-4" />;
     }
   };
 
@@ -64,7 +49,7 @@ export const ThreeWayMatchingInterface = () => {
   };
 
   const handleReject = async (matchId: string) => {
-    const reason = prompt("Enter rejection reason:");
+    const reason = prompt('Enter rejection reason:');
     if (reason) {
       await rejectMatch(matchId, reason);
     }
@@ -181,12 +166,16 @@ export const ThreeWayMatchingInterface = () => {
                       size="sm"
                       variant="default"
                       onClick={() => handleApprove(set.id)}
-                      disabled={set.match_status === "mismatch"}
+                      disabled={set.match_status === 'mismatch'}
                     >
                       <CheckCircle2 className="h-4 w-4 mr-1" />
                       Approve
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleReject(set.id)}>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleReject(set.id)}
+                    >
                       <XCircle className="h-4 w-4 mr-1" />
                       Reject
                     </Button>
@@ -196,7 +185,7 @@ export const ThreeWayMatchingInterface = () => {
               <CardContent className="space-y-4">
                 {/* Issues */}
                 {set.issues.length > 0 && (
-                  <Alert variant={set.match_status === "mismatch" ? "destructive" : "default"}>
+                  <Alert variant={set.match_status === 'mismatch' ? 'destructive' : 'default'}>
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
                       <ul className="list-disc list-inside space-y-1">
@@ -262,9 +251,7 @@ export const ThreeWayMatchingInterface = () => {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Variance:</span>
-                          <span
-                            className={`font-medium ${Math.abs(set.amount_variance) > 0 ? "text-red-600" : "text-green-600"}`}
-                          >
+                          <span className={`font-medium ${Math.abs(set.amount_variance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
                             ${set.amount_variance.toFixed(2)}
                           </span>
                         </div>
@@ -281,10 +268,7 @@ export const ThreeWayMatchingInterface = () => {
                     <h4 className="font-semibold text-sm">Ticket Details</h4>
                     <div className="grid gap-2">
                       {set.field_tickets.map((ticket) => (
-                        <div
-                          key={ticket.id}
-                          className="flex items-center justify-between p-2 border rounded-lg"
-                        >
+                        <div key={ticket.id} className="flex items-center justify-between p-2 border rounded-lg">
                           <div className="flex items-center gap-4">
                             <span className="font-mono text-sm">{ticket.ticket_number}</span>
                             <span className="text-sm text-muted-foreground">

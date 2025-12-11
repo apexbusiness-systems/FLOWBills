@@ -7,7 +7,7 @@ export const Brand = {
   name: "FLOWBills.ca",
   tagline: "Automate invoices. Approve faster. Close with confidence.",
   subline: "Capture → validate → dedupe/fraud check → human-in-the-loop → approve → export to ERP.",
-
+  
   // Content security: prevent re-introduction of banned terms
   bannedTerms: [
     /tradeline/i,
@@ -16,7 +16,7 @@ export const Brand = {
     /\btelecom\b/i,
     /klaviyo/i,
     /marketing\s*automation/i,
-    /email\s*campaigns/i,
+    /email\s*campaigns/i
   ],
 } as const;
 
@@ -25,16 +25,16 @@ export const Brand = {
  */
 export const validateContent = (content: string): { valid: boolean; violations: string[] } => {
   const violations: string[] = [];
-
-  Brand.bannedTerms.forEach((pattern) => {
+  
+  Brand.bannedTerms.forEach(pattern => {
     if (pattern.test(content)) {
       violations.push(`Banned term pattern detected: ${pattern}`);
     }
   });
-
+  
   return {
     valid: violations.length === 0,
-    violations,
+    violations
   };
 };
 
@@ -48,7 +48,7 @@ export const SiteConfig = {
     strictMode: true,
   },
   analytics: {
-    gtmId: "", // GTM disabled - not using VITE_ env vars per Lovable requirements
+    gtmId: '', // GTM disabled - not using VITE_ env vars per Lovable requirements
     enableTracking: false,
     enableProductionOnly: true,
   },
@@ -61,7 +61,7 @@ export const SiteConfig = {
     allowMarketingIntegrations: false, // Block Klaviyo and similar
     enableThirdPartyScripts: false,
     enableErrorTracking: !import.meta.env.DEV,
-  },
+  }
 } as const;
 
 export default SiteConfig;

@@ -1,11 +1,11 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Calculator,
-  Calendar,
-  CreditCard,
-  Settings,
-  Smile,
+import { 
+  Calculator, 
+  Calendar, 
+  CreditCard, 
+  Settings, 
+  Smile, 
   User,
   Home,
   FileText,
@@ -17,7 +17,7 @@ import {
   Search,
   Upload,
   Building,
-  Workflow,
+  Workflow
 } from "lucide-react";
 
 import {
@@ -68,7 +68,7 @@ export function CommandPalette() {
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-
+          
           <CommandGroup heading="Navigation">
             <CommandItem onSelect={() => handleNavigate("/")}>
               <Home className="mr-2 h-4 w-4" />
@@ -99,7 +99,7 @@ export function CommandPalette() {
           </CommandGroup>
 
           <CommandSeparator />
-
+          
           <CommandGroup heading="Quick Actions">
             <CommandItem onSelect={() => handleNavigate("/invoices?action=upload")}>
               <Upload className="mr-2 h-4 w-4" />

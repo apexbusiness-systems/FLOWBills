@@ -1,5 +1,6 @@
-import { UWIRegistry as UWIRegistryComponent } from "@/components/uwi/UWIRegistry";
-import { ContextualTooltip } from "@/components/help/ContextualTooltip";
+import { UWIRegistry as UWIRegistryComponent } from '@/components/uwi/UWIRegistry';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { ContextualTooltip } from '@/components/help/ContextualTooltip';
 
 const UWIRegistry = () => {
   return (

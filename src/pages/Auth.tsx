@@ -7,14 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Loader2, User, Mail, Lock, Eye, EyeOff, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import companyLogo from "@/assets/company-logo.png";
@@ -28,21 +21,21 @@ const Auth = () => {
   const [passwordChange, setPasswordChange] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: "",
+    confirmPassword: ""
   });
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     fullName: "",
     companyName: "",
-    phone: "",
+    phone: ""
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
     setError("");
   };
 
@@ -78,7 +71,7 @@ const Auth = () => {
 
       // Update password
       const { error: updateError } = await supabase.auth.updateUser({
-        password: passwordChange.newPassword,
+        password: passwordChange.newPassword
       });
 
       if (updateError) {
@@ -91,11 +84,11 @@ const Auth = () => {
         description: "Your password has been successfully changed.",
         variant: "default",
       });
-
+      
       setShowChangePassword(false);
       setPasswordChange({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err: any) {
-      setError("An unexpected error occurred. Please try again.");
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +101,7 @@ const Auth = () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth?type=recovery`,
+        redirectTo: `${window.location.origin}/auth?type=recovery`
       });
 
       if (error) {
@@ -121,11 +114,11 @@ const Auth = () => {
         description: "Check your email for password reset instructions.",
         variant: "default",
       });
-
+      
       setShowForgotPassword(false);
       setResetEmail("");
     } catch (err: any) {
-      setError("An unexpected error occurred. Please try again.");
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +126,7 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     setIsLoading(true);
     setError("");
 
@@ -143,9 +136,11 @@ const Auth = () => {
         password: formData.password,
       });
 
+      
+
       if (error) {
-        if (error.message === "Invalid login credentials") {
-          setError("Invalid email or password. Please check your credentials and try again.");
+        if (error.message === 'Invalid login credentials') {
+          setError('Invalid email or password. Please check your credentials and try again.');
         } else {
           setError(error.message);
         }
@@ -157,11 +152,11 @@ const Auth = () => {
         description: "Successfully signed in to Flow Billing Platform.",
         variant: "default",
       });
-
+      
       navigate("/");
     } catch (err: any) {
       console.error("Sign in error:", err);
-      setError("An unexpected error occurred. Please try again.");
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -173,6 +168,7 @@ const Auth = () => {
     setError("");
 
     if (!formData.fullName.trim()) {
+      
       setError("Full name is required");
       setIsLoading(false);
       return;
@@ -180,7 +176,8 @@ const Auth = () => {
 
     try {
       const redirectUrl = `${window.location.origin}/`;
-
+      
+      
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -189,14 +186,16 @@ const Auth = () => {
           data: {
             full_name: formData.fullName,
             company_name: formData.companyName,
-            phone: formData.phone,
-          },
-        },
+            phone: formData.phone
+          }
+        }
       });
 
+      
+
       if (error) {
-        if (error.message === "User already registered") {
-          setError("An account with this email already exists. Please sign in instead.");
+        if (error.message === 'User already registered') {
+          setError('An account with this email already exists. Please sign in instead.');
         } else {
           setError(error.message);
         }
@@ -208,11 +207,11 @@ const Auth = () => {
         description: "Welcome to Flow Billing Platform. You can now access your dashboard.",
         variant: "default",
       });
-
+      
       navigate("/");
     } catch (err: any) {
       console.error("Sign up error:", err);
-      setError("An unexpected error occurred. Please try again.");
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -224,7 +223,11 @@ const Auth = () => {
         <div className="text-center mb-12 animate-fade-in">
           <div className="flex items-center justify-center gap-5 mb-8 group">
             <div className="h-20 w-20 rounded-2xl flex items-center justify-center bg-muted shadow-2xl hover-scale group-hover:shadow-primary/20 transition-all duration-300 overflow-hidden">
-              <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-20 w-20 object-contain" />
+              <img 
+                src={companyLogo} 
+                alt="FLOWBills.ca Logo" 
+                className="h-20 w-20 object-contain"
+              />
             </div>
             <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent tracking-tight">
               FLOW Bills
@@ -238,7 +241,9 @@ const Auth = () => {
         <Card className="border-border shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Access Your Account</CardTitle>
-            <CardDescription>Sign in to manage your invoices and compliance</CardDescription>
+            <CardDescription>
+              Sign in to manage your invoices and compliance
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
@@ -249,7 +254,9 @@ const Auth = () => {
 
               {error && (
                 <Alert className="mb-4 border-destructive/50 bg-destructive/10">
-                  <AlertDescription className="text-destructive">{error}</AlertDescription>
+                  <AlertDescription className="text-destructive">
+                    {error}
+                  </AlertDescription>
                 </Alert>
               )}
 
@@ -270,7 +277,7 @@ const Auth = () => {
                       />
                     </div>
                   </div>
-
+                  
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
                     <div className="relative">
@@ -300,7 +307,11 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isLoading}
+                  >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign In
                   </Button>
@@ -317,8 +328,7 @@ const Auth = () => {
                           <DialogHeader>
                             <DialogTitle>Reset Password</DialogTitle>
                             <DialogDescription>
-                              Enter your email address and we'll send you a link to reset your
-                              password.
+                              Enter your email address and we'll send you a link to reset your password.
                             </DialogDescription>
                           </DialogHeader>
                           <form onSubmit={handlePasswordReset} className="space-y-4">
@@ -338,15 +348,19 @@ const Auth = () => {
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
+                              <Button 
+                                type="button" 
+                                variant="outline" 
                                 className="flex-1"
                                 onClick={() => setShowForgotPassword(false)}
                               >
                                 Cancel
                               </Button>
-                              <Button type="submit" className="flex-1" disabled={isLoading}>
+                              <Button 
+                                type="submit" 
+                                className="flex-1" 
+                                disabled={isLoading}
+                              >
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Send Reset Link
                               </Button>
@@ -394,12 +408,7 @@ const Auth = () => {
                                   placeholder="Enter current password"
                                   className="pl-10"
                                   value={passwordChange.currentPassword}
-                                  onChange={(e) =>
-                                    setPasswordChange((prev) => ({
-                                      ...prev,
-                                      currentPassword: e.target.value,
-                                    }))
-                                  }
+                                  onChange={(e) => setPasswordChange(prev => ({ ...prev, currentPassword: e.target.value }))}
                                   required
                                 />
                               </div>
@@ -414,14 +423,9 @@ const Auth = () => {
                                   placeholder="Enter a strong password (min 8 characters)"
                                   className="pl-10"
                                   value={passwordChange.newPassword}
-                                  onChange={(e) =>
-                                    setPasswordChange((prev) => ({
-                                      ...prev,
-                                      newPassword: e.target.value,
-                                    }))
-                                  }
-                                  required
-                                  minLength={8}
+                                  onChange={(e) => setPasswordChange(prev => ({ ...prev, newPassword: e.target.value }))}
+                  required
+                  minLength={8}
                                 />
                               </div>
                             </div>
@@ -435,26 +439,25 @@ const Auth = () => {
                                   placeholder="Confirm new password"
                                   className="pl-10"
                                   value={passwordChange.confirmPassword}
-                                  onChange={(e) =>
-                                    setPasswordChange((prev) => ({
-                                      ...prev,
-                                      confirmPassword: e.target.value,
-                                    }))
-                                  }
+                                  onChange={(e) => setPasswordChange(prev => ({ ...prev, confirmPassword: e.target.value }))}
                                   required
                                 />
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
+                              <Button 
+                                type="button" 
+                                variant="outline" 
                                 className="flex-1"
                                 onClick={() => setShowChangePassword(false)}
                               >
                                 Cancel
                               </Button>
-                              <Button type="submit" className="flex-1" disabled={isLoading}>
+                              <Button 
+                                type="submit" 
+                                className="flex-1" 
+                                disabled={isLoading}
+                              >
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Change Password
                               </Button>
@@ -485,22 +488,22 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signupEmail">Email *</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signupEmail"
-                        name="signupEmail"
-                        type="email"
-                        placeholder="john@oilcompany.com"
-                        className="pl-10"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        required
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="signupEmail">Email *</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="signupEmail"
+                          name="signupEmail"
+                          type="email"
+                          placeholder="john@oilcompany.com"
+                          className="pl-10"
+                          value={formData.email}
+                          onChange={(e) => handleInputChange("email", e.target.value)}
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="companyName">Company Name</Label>
@@ -547,7 +550,11 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isLoading}
+                  >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Account
                   </Button>

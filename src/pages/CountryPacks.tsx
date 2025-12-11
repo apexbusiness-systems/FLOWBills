@@ -14,7 +14,7 @@ interface CountryPack {
   name: string;
   format: string;
   mandatory_date: string;
-  status: "ready" | "testing" | "pending";
+  status: 'ready' | 'testing' | 'pending';
   enabled: boolean;
   readiness_score: number;
   description: string;
@@ -24,70 +24,65 @@ interface CountryPack {
 
 const countryPacks: CountryPack[] = [
   {
-    code: "PL",
-    name: "Poland",
-    format: "KSeF",
-    mandatory_date: "2026-02-01",
-    status: "testing",
+    code: 'PL',
+    name: 'Poland',
+    format: 'KSeF',
+    mandatory_date: '2026-02-01',
+    status: 'testing',
     enabled: false,
     readiness_score: 85,
-    description: "KSeF (Krajowy System e-Faktur) mandatory from 1 Feb 2026",
-    features: ["Serialize", "Validate", "Send", "Status Check"],
-    legal_deadline: "Royal Decree: 1 Feb 2026 (phased roll-in Apr 2026)",
+    description: 'KSeF (Krajowy System e-Faktur) mandatory from 1 Feb 2026',
+    features: ['Serialize', 'Validate', 'Send', 'Status Check'],
+    legal_deadline: 'Royal Decree: 1 Feb 2026 (phased roll-in Apr 2026)'
   },
   {
-    code: "ES",
-    name: "Spain",
-    format: "Veri*factu",
-    mandatory_date: "2026-01-01",
-    status: "testing",
+    code: 'ES',
+    name: 'Spain',
+    format: 'Veri*factu',
+    mandatory_date: '2026-01-01',
+    status: 'testing',
     enabled: false,
     readiness_score: 78,
-    description: "Veri*factu secure logging for corporates by 1 Jan 2026",
-    features: ["Tamper-evident logbook", "Hash chain", "QR generation", "AEAT integration"],
-    legal_deadline: "Royal Decree 254/2025: Corporates 1 Jan 2026, broader 1 Jul 2026",
+    description: 'Veri*factu secure logging for corporates by 1 Jan 2026',
+    features: ['Tamper-evident logbook', 'Hash chain', 'QR generation', 'AEAT integration'],
+    legal_deadline: 'Royal Decree 254/2025: Corporates 1 Jan 2026, broader 1 Jul 2026'
   },
   {
-    code: "FR",
-    name: "France",
-    format: "Factur-X",
-    mandatory_date: "2026-09-01",
-    status: "pending",
+    code: 'FR',
+    name: 'France',
+    format: 'Factur-X',
+    mandatory_date: '2026-09-01',
+    status: 'pending',
     enabled: false,
     readiness_score: 45,
-    description: "B2B e-invoicing/e-reporting from 1 Sep 2026",
-    features: ["Factur-X format", "E-reporting", "Receive-ready checks", "Size-based rules"],
-    legal_deadline: "Finance Ministry: Receive 1 Sep 2026, size-based issuance 2026-2027",
+    description: 'B2B e-invoicing/e-reporting from 1 Sep 2026',
+    features: ['Factur-X format', 'E-reporting', 'Receive-ready checks', 'Size-based rules'],
+    legal_deadline: 'Finance Ministry: Receive 1 Sep 2026, size-based issuance 2026-2027'
   },
   {
-    code: "DE",
-    name: "Germany",
-    format: "XRechnung",
-    mandatory_date: "2025-01-01",
-    status: "ready",
+    code: 'DE',
+    name: 'Germany',
+    format: 'XRechnung',
+    mandatory_date: '2025-01-01',
+    status: 'ready',
     enabled: true,
     readiness_score: 95,
-    description: "Must receive from 1 Jan 2025, issuance phases through 2028",
-    features: ["XRechnung format", "Strict mode", "Readiness scoring", "Timeline hints"],
-    legal_deadline: "EU Directive: Receive 1 Jan 2025, issuance phased to 2028",
+    description: 'Must receive from 1 Jan 2025, issuance phases through 2028',
+    features: ['XRechnung format', 'Strict mode', 'Readiness scoring', 'Timeline hints'],
+    legal_deadline: 'EU Directive: Receive 1 Jan 2025, issuance phased to 2028'
   },
   {
-    code: "PINT",
-    name: "PINT",
-    format: "OpenPeppol",
-    mandatory_date: "2025-12-31",
-    status: "testing",
+    code: 'PINT',
+    name: 'PINT',
+    format: 'OpenPeppol',
+    mandatory_date: '2025-12-31',
+    status: 'testing',
     enabled: false,
     readiness_score: 72,
-    description: "Pan-European Invoice Transaction standard",
-    features: [
-      "Multi-format conversion",
-      "UBL/CII support",
-      "Identifier validation",
-      "Cross-format mapping",
-    ],
-    legal_deadline: "OpenPeppol: PINT readiness by Q4 2025",
-  },
+    description: 'Pan-European Invoice Transaction standard',
+    features: ['Multi-format conversion', 'UBL/CII support', 'Identifier validation', 'Cross-format mapping'],
+    legal_deadline: 'OpenPeppol: PINT readiness by Q4 2025'
+  }
 ];
 
 const CountryPacks = () => {
@@ -95,34 +90,26 @@ const CountryPacks = () => {
   const [selectedPack, setSelectedPack] = useState<CountryPack | null>(null);
 
   const handleToggle = (code: string) => {
-    setPacks((prev) =>
-      prev.map((pack) => (pack.code === code ? { ...pack, enabled: !pack.enabled } : pack))
-    );
+    setPacks(prev => prev.map(pack => 
+      pack.code === code ? { ...pack, enabled: !pack.enabled } : pack
+    ));
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "ready":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case "testing":
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case "pending":
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      default:
-        return null;
+      case 'ready': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'testing': return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'pending': return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      default: return null;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "ready":
-        return "bg-green-100 text-green-800";
-      case "testing":
-        return "bg-yellow-100 text-yellow-800";
-      case "pending":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case 'ready': return 'bg-green-100 text-green-800';
+      case 'testing': return 'bg-yellow-100 text-yellow-800';
+      case 'pending': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -145,7 +132,7 @@ const CountryPacks = () => {
         <div className="flex items-center gap-2">
           <Globe className="h-5 w-5 text-primary" />
           <span className="text-sm text-muted-foreground">
-            {packs.filter((p) => p.enabled).length} of {packs.length} enabled
+            {packs.filter(p => p.enabled).length} of {packs.length} enabled
           </span>
         </div>
       </div>
@@ -153,8 +140,8 @@ const CountryPacks = () => {
       <Alert>
         <Shield className="h-4 w-4" />
         <AlertDescription>
-          Country packs ensure compliance with local e-invoicing regulations. Enable packs based on
-          your business operations and legal requirements.
+          Country packs ensure compliance with local e-invoicing regulations. 
+          Enable packs based on your business operations and legal requirements.
         </AlertDescription>
       </Alert>
 
@@ -186,9 +173,11 @@ const CountryPacks = () => {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Readiness</span>
-                    <Badge className={getStatusColor(pack.status)}>{pack.status}</Badge>
+                    <Badge className={getStatusColor(pack.status)}>
+                      {pack.status}
+                    </Badge>
                   </div>
-
+                  
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span>Progress</span>
@@ -217,9 +206,9 @@ const CountryPacks = () => {
                     </div>
                   </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
                     className="w-full"
                     onClick={() => setSelectedPack(pack)}
                   >
@@ -239,29 +228,27 @@ const CountryPacks = () => {
               <CardDescription>Test country-specific adapters and validate formats</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {packs
-                .filter((p) => p.enabled || p.status === "testing")
-                .map((pack) => (
-                  <div key={pack.code} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold">
-                        {pack.name} ({pack.code})
-                      </h3>
-                      <Badge className={getStatusColor(pack.status)}>{pack.status}</Badge>
-                    </div>
-                    <div className="grid gap-2 md:grid-cols-3">
-                      <Button variant="outline" size="sm">
-                        Test Serialize
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Test Validate
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Test Send
-                      </Button>
-                    </div>
+              {packs.filter(p => p.enabled || p.status === 'testing').map((pack) => (
+                <div key={pack.code} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold">{pack.name} ({pack.code})</h3>
+                    <Badge className={getStatusColor(pack.status)}>
+                      {pack.status}
+                    </Badge>
                   </div>
-                ))}
+                  <div className="grid gap-2 md:grid-cols-3">
+                    <Button variant="outline" size="sm">
+                      Test Serialize
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Test Validate
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Test Send
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
@@ -274,23 +261,18 @@ const CountryPacks = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {packs
-                  .sort(
-                    (a, b) =>
-                      new Date(a.mandatory_date).getTime() - new Date(b.mandatory_date).getTime()
-                  )
-                  .map((pack) => (
-                    <div key={pack.code} className="border-l-4 border-primary pl-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">{pack.name}</h3>
-                        <span className="text-sm text-muted-foreground">
-                          {new Date(pack.mandatory_date).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">{pack.legal_deadline}</p>
-                      <p className="text-sm">{pack.description}</p>
+                {packs.sort((a, b) => new Date(a.mandatory_date).getTime() - new Date(b.mandatory_date).getTime()).map((pack) => (
+                  <div key={pack.code} className="border-l-4 border-primary pl-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">{pack.name}</h3>
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(pack.mandatory_date).toLocaleDateString()}
+                      </span>
                     </div>
-                  ))}
+                    <p className="text-sm text-muted-foreground mb-2">{pack.legal_deadline}</p>
+                    <p className="text-sm">{pack.description}</p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
