@@ -439,18 +439,19 @@
         }
       })();
       
-      // Error detection - faster timeout since we've already cleared SW
+      // Error detection - fallback check if main.tsx doesn't remove the loading indicator
       window.addEventListener('load', () => {
-        // Single check at 5 seconds (SW already cleared above)
+        // Give React time to mount and remove the loading indicator
         setTimeout(() => {
           const loading = document.getElementById('app-loading');
-          if (!loading) return; // Already removed, app is working
+          if (!loading) return; // Already removed by main.tsx, app is working
           
           const moduleLoaded = window.__FLOWBILLS_LOADED__;
           const rootChildren = document.getElementById('root')?.children.length || 0;
           
-          // Check if React rendered (root should have more than just loading div)
-          if (rootChildren > 1 || moduleLoaded) {
+          // If module loaded OR root has content, app is working - remove loading
+          if (moduleLoaded || rootChildren >= 1) {
+            console.log('[FlowBills] App rendered successfully, removing loading indicator');
             loading.remove();
             return;
           }

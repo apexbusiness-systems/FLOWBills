@@ -172,6 +172,14 @@ if (!rootElement) {
   throw new Error(errorMsg);
 }
 
+// CRITICAL: Remove loading indicator IMMEDIATELY before React renders
+// This prevents the 5-second timeout check from showing the error
+const loadingElement = document.getElementById('app-loading');
+if (loadingElement) {
+  console.log('[FlowBills] Removing loading indicator');
+  loadingElement.remove();
+}
+
 try {
   console.log('[FlowBills] React render initiated');
   createRoot(rootElement).render(<App />);
