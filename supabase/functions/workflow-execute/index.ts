@@ -92,7 +92,7 @@ serve(async (req) => {
     // Execute workflow steps
     const steps = workflow.steps as WorkflowStep[];
     let currentStepIndex = 0;
-    let currentStep = steps[currentStepIndex];
+    let currentStep: WorkflowStep | null = steps[currentStepIndex] || null;
     const stepResults: any = {};
 
     while (currentStep) {
@@ -122,7 +122,7 @@ serve(async (req) => {
 
             // Move to next step
             if (currentStep.connections && currentStep.connections.length > 0) {
-              const nextStepIndex = steps.findIndex(s => s.id === currentStep.connections[0]);
+              const nextStepIndex = steps.findIndex(s => s.id === currentStep!.connections[0]);
               currentStepIndex = nextStepIndex >= 0 ? nextStepIndex : -1;
             } else {
               currentStepIndex = -1;
@@ -143,7 +143,7 @@ serve(async (req) => {
 
             // Move to next step
             if (currentStep.connections && currentStep.connections.length > 0) {
-              const nextStepIndex = steps.findIndex(s => s.id === currentStep.connections[0]);
+              const nextStepIndex = steps.findIndex(s => s.id === currentStep!.connections[0]);
               currentStepIndex = nextStepIndex >= 0 ? nextStepIndex : -1;
             } else {
               currentStepIndex = -1;
@@ -156,7 +156,7 @@ serve(async (req) => {
             
             // Move to next step
             if (currentStep.connections && currentStep.connections.length > 0) {
-              const nextStepIndex = steps.findIndex(s => s.id === currentStep.connections[0]);
+              const nextStepIndex = steps.findIndex(s => s.id === currentStep!.connections[0]);
               currentStepIndex = nextStepIndex >= 0 ? nextStepIndex : -1;
             } else {
               currentStepIndex = -1;
@@ -169,7 +169,7 @@ serve(async (req) => {
             
             // Move to next step
             if (currentStep.connections && currentStep.connections.length > 0) {
-              const nextStepIndex = steps.findIndex(s => s.id === currentStep.connections[0]);
+              const nextStepIndex = steps.findIndex(s => s.id === currentStep!.connections[0]);
               currentStepIndex = nextStepIndex >= 0 ? nextStepIndex : -1;
             } else {
               currentStepIndex = -1;

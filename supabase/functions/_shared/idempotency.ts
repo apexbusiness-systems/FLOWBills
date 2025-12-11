@@ -1,9 +1,9 @@
 // P4: Idempotency Middleware for Edge Functions
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 export interface IdempotentResponse {
   status: number;
-  body: any;
+  body: unknown;
   headers?: Record<string, string>;
 }
 
@@ -48,9 +48,16 @@ export async function withIdempotency(
     .eq('idempotency_key', idempotencyKey)
     .single();
 
-  if (existing) {
+  const record = existing as {
+    request_hash: string;
+    status: string;
+    response_body: unknown;
+    response_status: number;
+  } | null;
+
+  if (record) {
     // Check if request body matches
-    if (existing.request_hash !== requestHash) {
+    if (record.request_hash !== requestHash) {
       return new Response(
         JSON.stringify({ error: 'Request body mismatch for idempotency key' }),
         { status: 409, headers: { 'Content-Type': 'application/json' } }
@@ -58,7 +65,7 @@ export async function withIdempotency(
     }
 
     // If still processing, return 425 Too Early
-    if (existing.status === 'processing') {
+    if (record.status === 'processing') {
       return new Response(
         JSON.stringify({ error: 'Request still processing' }),
         { status: 425, headers: { 'Content-Type': 'application/json' } }
@@ -66,11 +73,11 @@ export async function withIdempotency(
     }
 
     // If completed, return stored response
-    if (existing.status === 'completed') {
+    if (record.status === 'completed') {
       return new Response(
-        JSON.stringify(existing.response_body),
+        JSON.stringify(record.response_body),
         {
-          status: existing.response_status || 200,
+          status: record.response_status || 200,
           headers: { 'Content-Type': 'application/json' },
         }
       );
@@ -123,11 +130,12 @@ export async function withIdempotency(
     });
   } catch (err) {
     // Mark as failed
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     await supabase
       .from('idempotency_keys')
       .update({
         status: 'failed',
-        response_body: { error: err.message },
+        response_body: { error: errorMessage },
         completed_at: new Date().toISOString(),
       })
       .eq('idempotency_key', idempotencyKey);

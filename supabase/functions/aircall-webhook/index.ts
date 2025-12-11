@@ -49,8 +49,9 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    return await withIdempotency(req, async (body: AircallEvent) => {
-      console.log('Aircall webhook received:', { event: body.event, resource: body.resource, ivr: body.data.ivr_selection });
+    // Parse body manually since withIdempotency passes Request
+    const body: AircallEvent = await req.json();
+    console.log('Aircall webhook received:', { event: body.event, resource: body.resource, ivr: body.data.ivr_selection });
 
       const ivrSelection = body.data.ivr_selection || '3'; // Default to platform
       const category = IVR_CATEGORIES[ivrSelection] || 'platform_ocr';
@@ -141,7 +142,6 @@ Deno.serve(async (req) => {
           status: 200 
         }
       );
-    });
   } catch (error) {
     console.error('Aircall webhook error:', error);
     return new Response(

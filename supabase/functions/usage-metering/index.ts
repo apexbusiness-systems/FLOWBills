@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
       try {
         const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
         const usageItem = stripeSubscription.items.data.find(
-          item => item.price.recurring?.usage_type === 'metered'
+          (item: { price: { recurring?: { usage_type?: string } } }) => item.price.recurring?.usage_type === 'metered'
         );
 
         if (usageItem) {
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
           customer_id: subscription.customer_id,
           quantity,
           reported: false,
-          error: stripeErr.message,
+          error: stripeErr instanceof Error ? stripeErr.message : 'Unknown error',
         });
       }
     }
@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error('Usage metering error:', err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : 'Unknown error' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });

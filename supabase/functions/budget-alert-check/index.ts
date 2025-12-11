@@ -1,8 +1,45 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Resend client - only initialize if API key is configured
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+
+interface ResendEmailParams {
+  from: string;
+  to: string[];
+  subject: string;
+  html: string;
+}
+
+// Simple Resend API wrapper using fetch
+async function sendEmail(params: ResendEmailParams): Promise<boolean> {
+  if (!RESEND_API_KEY) {
+    console.warn('[budget-alert-check] RESEND_API_KEY not configured, skipping email');
+    return false;
+  }
+  
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('[budget-alert-check] Resend API error:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('[budget-alert-check] Failed to send email:', error);
+    return false;
+  }
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -150,7 +187,7 @@ serve(async (req) => {
           // Send email notifications
           for (const recipient of rule.email_recipients) {
             try {
-              await resend.emails.send({
+              const sent = await sendEmail({
                 from: 'FlowBills Budget Alerts <alerts@flowbills.ca>',
                 to: [recipient],
                 subject: `${severity === 'critical' ? '🚨 CRITICAL' : '⚠️ WARNING'}: Budget Alert for AFE ${afe.afe_number}`,
@@ -186,7 +223,9 @@ serve(async (req) => {
                 `,
               });
 
-              console.log(`Email sent to ${recipient} for AFE ${afe.afe_number}`);
+              if (sent) {
+                console.log(`Email sent to ${recipient} for AFE ${afe.afe_number}`);
+              }
             } catch (emailError) {
               console.error(`Failed to send email to ${recipient}:`, emailError);
             }
