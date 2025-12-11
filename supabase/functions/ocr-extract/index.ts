@@ -2,24 +2,33 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { toMessage } from "../_shared/errors.ts";
 import { corsHeaders } from '../_shared/cors.ts';
 
-// Type definitions
 interface OCRRequest {
-  file_data: string;
+  file_data: string; // base64 encoded file or data URL
   file_type: string;
   invoice_id?: string;
 }
 
+interface ExtractedFields {
+  invoice_number: string | null;
+  amount: number | null;
+  currency: string | null;
+  vendor_name: string | null;
+  invoice_date: string | null;
+  due_date: string | null;
+  po_number: string | null;
+  afe_number: string | null;
+  uwi: string | null;
+  line_items: Array<{
+    description: string;
+    quantity: number;
+    unit_price: number;
+    amount: number;
+  }>;
+}
+
 interface OCRResponse {
   success: boolean;
-  extracted_data?: {
-    invoice_number: string | null;
-    amount: number | null;
-    currency: string | null;
-    vendor_name: string | null;
-    invoice_date: string | null;
-    due_date: string | null;
-    po_number: string | null;
-  };
+  extracted_data?: ExtractedFields;
   raw_text?: string;
   confidence_scores?: Record<string, number>;
   ocr_metadata?: {
@@ -30,92 +39,203 @@ interface OCRResponse {
   error?: string;
 }
 
-// Helper to handle undefined values
-const u = <T>(value: T | null | undefined): T | null => value ?? null;
+const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    );
+  const startTime = Date.now();
 
+  try {
     const { file_data, file_type, invoice_id }: OCRRequest = await req.json();
     
-    console.log(`Processing OCR for file type: ${file_type}`);
-    const startTime = Date.now();
+    console.log(`[OCR] Processing ${file_type} document${invoice_id ? ` for invoice ${invoice_id}` : ''}`);
 
-    // Simulate OCR processing with basic text extraction
-    // In production, integrate with Tesseract.js or cloud OCR service
-    const mockExtraction = await simulateOCRExtraction(file_data, file_type);
-    
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
+    }
+
+    // Prepare image URL for vision model
+    let imageUrl = file_data;
+    if (!file_data.startsWith('data:')) {
+      // Add data URL prefix if not present
+      const mimeType = file_type.includes('pdf') ? 'application/pdf' : 
+                       file_type.includes('png') ? 'image/png' : 'image/jpeg';
+      imageUrl = `data:${mimeType};base64,${file_data}`;
+    }
+
+    // Use Lovable AI with Gemini vision for OCR
+    const extractionPrompt = `You are an expert invoice OCR system for oil & gas industry invoices. Analyze this document image and extract ALL text and structured data.
+
+Extract the following fields (use null if not found):
+1. invoice_number - The invoice number/ID
+2. amount - Total amount (numeric only, no currency symbols)
+3. currency - Currency code (CAD, USD, etc.)
+4. vendor_name - Company/vendor name issuing the invoice
+5. invoice_date - Invoice date in YYYY-MM-DD format
+6. due_date - Payment due date in YYYY-MM-DD format
+7. po_number - Purchase order number
+8. afe_number - AFE (Authorization for Expenditure) number (oil & gas specific)
+9. uwi - UWI (Unique Well Identifier) if present
+10. line_items - Array of line items with description, quantity, unit_price, amount
+
+Also provide:
+- raw_text: All readable text from the document
+- confidence_scores: Your confidence (0-1) for each extracted field
+
+Respond in this exact JSON format:
+{
+  "invoice_number": "string or null",
+  "amount": number or null,
+  "currency": "string or null",
+  "vendor_name": "string or null",
+  "invoice_date": "YYYY-MM-DD or null",
+  "due_date": "YYYY-MM-DD or null",
+  "po_number": "string or null",
+  "afe_number": "string or null",
+  "uwi": "string or null",
+  "line_items": [{"description": "string", "quantity": number, "unit_price": number, "amount": number}],
+  "raw_text": "all text from document",
+  "confidence_scores": {"invoice_number": 0.95, "amount": 0.90, ...}
+}`;
+
+    console.log('[OCR] Calling Lovable AI vision model...');
+
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: extractionPrompt },
+              { type: 'image_url', image_url: { url: imageUrl } }
+            ]
+          }
+        ],
+        max_tokens: 4096,
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error('[OCR] AI API error:', aiResponse.status, errorText);
+      
+      if (aiResponse.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again later.');
+      }
+      if (aiResponse.status === 402) {
+        throw new Error('AI credits exhausted. Please add funds.');
+      }
+      throw new Error(`AI extraction failed: ${errorText}`);
+    }
+
+    const aiData = await aiResponse.json();
+    const content = aiData.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error('No response from AI model');
+    }
+
+    console.log('[OCR] AI response received, parsing...');
+
+    // Parse the JSON response from AI
+    let parsed: any;
+    try {
+      // Extract JSON from markdown code blocks if present
+      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+      const jsonStr = jsonMatch ? jsonMatch[1].trim() : content.trim();
+      parsed = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error('[OCR] Failed to parse AI response:', content);
+      throw new Error('Failed to parse extraction results');
+    }
+
     const processingTime = Date.now() - startTime;
     
-    const extracted_data = {
-      invoice_number: u(mockExtraction.fields.invoice_number),
-      amount: u(mockExtraction.fields.amount),
-      currency: u(mockExtraction.fields.currency),
-      vendor_name: u(mockExtraction.fields.vendor_name),
-      invoice_date: u(mockExtraction.fields.invoice_date),
-      due_date: u(mockExtraction.fields.due_date),
-      po_number: u(mockExtraction.fields.po_number),
-    };
-    
-    const ocr_metadata = {
-      processing_time: processingTime,
-      method: 'tesseract-simulation',
-      confidence_average: Object.values(mockExtraction.confidence_scores).reduce((a, b) => a + b, 0) / Object.values(mockExtraction.confidence_scores).length
-    };
-    
-    const response: OCRResponse = {
-      success: true,
-      extracted_data,
-      raw_text: mockExtraction.raw_text,
-      confidence_scores: mockExtraction.confidence_scores,
-      ocr_metadata
+    // Calculate average confidence
+    const confidenceScores = parsed.confidence_scores || {};
+    const confidenceValues = Object.values(confidenceScores).filter((v): v is number => typeof v === 'number');
+    const avgConfidence = confidenceValues.length > 0 
+      ? confidenceValues.reduce((a, b) => a + b, 0) / confidenceValues.length 
+      : 0.5;
+
+    const extracted_data: ExtractedFields = {
+      invoice_number: parsed.invoice_number || null,
+      amount: typeof parsed.amount === 'number' ? parsed.amount : null,
+      currency: parsed.currency || 'CAD',
+      vendor_name: parsed.vendor_name || null,
+      invoice_date: parsed.invoice_date || null,
+      due_date: parsed.due_date || null,
+      po_number: parsed.po_number || null,
+      afe_number: parsed.afe_number || null,
+      uwi: parsed.uwi || null,
+      line_items: Array.isArray(parsed.line_items) ? parsed.line_items : [],
     };
 
-    // Update invoice with OCR results if invoice_id provided  
+    const ocr_metadata = {
+      processing_time: processingTime,
+      method: 'lovable-ai-vision',
+      confidence_average: avgConfidence
+    };
+
+    console.log(`[OCR] Extraction complete in ${processingTime}ms, avg confidence: ${(avgConfidence * 100).toFixed(1)}%`);
+
+    // Update invoice if invoice_id provided
     if (invoice_id) {
-      const avg = response.ocr_metadata?.confidence_average ?? 0;
-      const confidence_score = Math.round(avg);
-      
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      );
+
       const { error: updateError } = await supabase
         .from('invoices')
         .update({
-          raw_text: mockExtraction.raw_text,
-          field_confidence_scores: mockExtraction.confidence_scores,
-          ocr_metadata: response.ocr_metadata,
-          extracted_data: mockExtraction.fields,
-          confidence_score
+          extracted_data,
+          confidence_score: Math.round(avgConfidence * 100),
         })
         .eq('id', invoice_id);
 
       if (updateError) {
-        console.error('Failed to update invoice:', updateError);
+        console.error('[OCR] Failed to update invoice:', updateError);
       }
+
+      // Log audit event
+      await supabase.from('audit_logs').insert({
+        action: 'OCR_EXTRACTION',
+        entity_type: 'invoice',
+        entity_id: invoice_id,
+        new_values: { 
+          ocr_confidence: avgConfidence,
+          method: 'lovable-ai-vision',
+          processing_time_ms: processingTime
+        },
+        user_id: null
+      });
     }
 
-    // Log audit event
-    const avg = response.ocr_metadata?.confidence_average ?? 0;
-    await supabase.from('audit_logs').insert({
-      action: 'OCR_EXTRACTION',
-      entity_type: 'invoice',
-      entity_id: invoice_id || crypto.randomUUID(),
-      new_values: { ocr_confidence: avg },
-      user_id: null // System action
-    });
+    const response: OCRResponse = {
+      success: true,
+      extracted_data,
+      raw_text: parsed.raw_text || '',
+      confidence_scores: confidenceScores,
+      ocr_metadata
+    };
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (err: unknown) {
-    console.error('OCR extraction error:', err);
+    const processingTime = Date.now() - startTime;
+    console.error(`[OCR] Error after ${processingTime}ms:`, err);
     
     const errorResponse: OCRResponse = {
       success: false,
@@ -128,66 +248,3 @@ Deno.serve(async (req) => {
     });
   }
 });
-
-async function simulateOCRExtraction(fileData: string, fileType: string) {
-  // Simulate processing delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-
-  // Mock OCR results based on common invoice patterns
-  const mockRawText = `
-    INVOICE
-    Invoice Number: INV-2024-001234
-    Date: 2024-01-15
-    Due Date: 2024-02-14
-    
-    Bill To:
-    FlowAi Energy Solutions
-    
-    From:
-    Oilfield Services Corp
-    Tax ID: 123456789
-    
-    Description: Drilling services and equipment rental
-    Amount: $12,500.00 CAD
-    Tax: $1,625.00
-    Total: $14,125.00
-    
-    Payment Terms: Net 30
-    PO Number: PO-2024-567
-  `;
-
-  // Extract structured data using simple regex patterns
-  const extractField = (pattern: RegExp, text: string): string | null => {
-    const match = text.match(pattern);
-    return match ? match[1].trim() : null;
-  };
-
-  const extractAmount = (text: string): number | null => {
-    const amountMatch = text.match(/(?:Amount|Total):\s*\$?([\d,]+\.?\d*)/i);
-    if (amountMatch) {
-      return parseFloat(amountMatch[1].replace(/,/g, ''));
-    }
-    return null;
-  };
-
-  return {
-    raw_text: mockRawText,
-    fields: {
-      invoice_number: extractField(/Invoice Number:\s*([^\n]+)/i, mockRawText),
-      amount: extractAmount(mockRawText),
-      currency: 'CAD',
-      vendor_name: extractField(/From:\s*([^\n]+)/i, mockRawText),
-      invoice_date: extractField(/Date:\s*([^\n]+)/i, mockRawText),
-      due_date: extractField(/Due Date:\s*([^\n]+)/i, mockRawText),
-      po_number: extractField(/PO Number:\s*([^\n]+)/i, mockRawText),
-    },
-    confidence_scores: {
-      invoice_number: 0.95,
-      amount: 0.90,
-      vendor_name: 0.88,
-      invoice_date: 0.92,
-      due_date: 0.89,
-      po_number: 0.85,
-    }
-  };
-}

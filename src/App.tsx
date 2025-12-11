@@ -54,6 +54,7 @@ const Reports = React.lazy(() => import("./pages/Reports"));
 const ThreeWayMatching = React.lazy(() => import("./pages/ThreeWayMatching"));
 const PerformanceMonitoring = React.lazy(() => import("./pages/PerformanceMonitoring"));
 const Invoices = React.lazy(() => import("./pages/Invoices"));
+const ExtractionTest = React.lazy(() => import("./pages/ExtractionTest"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -278,6 +279,14 @@ const AuthRoutes = () => {
           element={
             <ProtectedRoute>
               <PerformanceMonitoring />
+            </ProtectedRoute>
+          } 
+        />
+        <Route
+          path="/extraction-test"
+          element={
+            <ProtectedRoute>
+              <ExtractionTest />
             </ProtectedRoute>
           } 
         />
