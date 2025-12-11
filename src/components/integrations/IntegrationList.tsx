@@ -146,7 +146,7 @@ const IntegrationList = ({
                   
                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
                      <span>
-                       Last sync: {formatLastSync(integration.last_sync)}
+                       Last sync: {formatLastSync(integration.last_sync_at ?? undefined)}
                      </span>
                      <span>
                        Type: {integration.integration_type}

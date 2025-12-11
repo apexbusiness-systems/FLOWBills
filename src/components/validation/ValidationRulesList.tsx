@@ -196,34 +196,34 @@ const ValidationRulesList = () => {
                   <div className="text-sm text-muted-foreground">
                     {rule.rule_type === 'amount_range' && (
                       <div>
-                        {rule.rule_config.min_amount && <span>Min: ${rule.rule_config.min_amount} </span>}
-                        {rule.rule_config.max_amount && <span>Max: ${rule.rule_config.max_amount}</span>}
+                        {rule.rule_config.min_amount && <span>Min: ${String(rule.rule_config.min_amount)} </span>}
+                        {rule.rule_config.max_amount && <span>Max: ${String(rule.rule_config.max_amount)}</span>}
                       </div>
                     )}
                     {rule.rule_type === 'required_fields' && (
                       <div>
-                        Required: {(rule.rule_config.required_fields || []).join(', ')}
+                        Required: {(Array.isArray(rule.rule_config.required_fields) ? rule.rule_config.required_fields : []).join(', ')}
                       </div>
                     )}
                     {rule.rule_type === 'date_validation' && (
                       <div>
                         {rule.rule_config.check_future_dates && <span>No future dates </span>}
-                        {rule.rule_config.max_days_old && <span>Max age: {rule.rule_config.max_days_old} days</span>}
+                        {rule.rule_config.max_days_old && <span>Max age: {String(rule.rule_config.max_days_old)} days</span>}
                       </div>
                     )}
                     {rule.rule_type === 'vendor_validation' && (
                       <div>
-                        {rule.rule_config.approved_vendors && (
+                        {Array.isArray(rule.rule_config.approved_vendors) && (
                           <span>Approved: {rule.rule_config.approved_vendors.length} vendors </span>
                         )}
-                        {rule.rule_config.blocked_vendors && (
+                        {Array.isArray(rule.rule_config.blocked_vendors) && (
                           <span>Blocked: {rule.rule_config.blocked_vendors.length} vendors</span>
                         )}
                       </div>
                     )}
                     {rule.rule_type === 'duplicate_check' && (
                       <div>
-                        Check fields: {(rule.rule_config.check_fields || ['invoice_number']).join(', ')}
+                        Check fields: {(Array.isArray(rule.rule_config.check_fields) ? rule.rule_config.check_fields : ['invoice_number']).join(', ')}
                       </div>
                     )}
                     {rule.rule_type === 'format_validation' && (

@@ -92,3 +92,6 @@ verify_jwt = false
 
 [functions.invoice-intake]
 verify_jwt = true
+
+[functions.health-omnilink]
+verify_jwt = false
