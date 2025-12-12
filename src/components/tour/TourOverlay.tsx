@@ -35,47 +35,16 @@ export const TourOverlay = () => {
 
     const updatePosition = () => {
       const target = document.querySelector(currentStepData.target);
-      if (target) {
-        const rect = target.getBoundingClientRect();
-        setTargetRect(rect);
-
-        // Calculate card position based on placement
-        const placement = currentStepData.placement || 'bottom';
-        const cardWidth = 400;
-        const cardHeight = 200;
-        const gap = 20;
-
-        let top = 0;
-        let left = 0;
-
-        switch (placement) {
-          case 'top':
-            top = rect.top - cardHeight - gap;
-            left = rect.left + rect.width / 2 - cardWidth / 2;
-            break;
-          case 'bottom':
-            top = rect.bottom + gap;
-            left = rect.left + rect.width / 2 - cardWidth / 2;
-            break;
-          case 'left':
-            top = rect.top + rect.height / 2 - cardHeight / 2;
-            left = rect.left - cardWidth - gap;
-            break;
-          case 'right':
-            top = rect.top + rect.height / 2 - cardHeight / 2;
-            left = rect.right + gap;
-            break;
-        }
-
-        // Ensure card stays within viewport
-        const padding = 20;
-        top = Math.max(padding, Math.min(top, window.innerHeight - cardHeight - padding));
-        left = Math.max(padding, Math.min(left, window.innerWidth - cardWidth - padding));
-
-        setCardPosition({ top, left });
-
-        // Scroll target into view
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // If target is body or not found, center the card
+      if (!target || currentStepData.target === 'body') {
+        setIsCentered(true);
+        setTargetRect(null);
+        setCardPosition({
+          top: window.innerHeight / 2 - 100,
+          left: window.innerWidth / 2 - 200,
+        });
+        return;
       }
 
       setIsCentered(false);
@@ -83,7 +52,7 @@ export const TourOverlay = () => {
       setTargetRect(rect);
 
       // Calculate card position based on placement
-      const placement = currentStepData.placement || "bottom";
+      const placement = currentStepData.placement || 'bottom';
       const cardWidth = 400;
       const cardHeight = 200;
       const gap = 20;
@@ -92,19 +61,19 @@ export const TourOverlay = () => {
       let left = 0;
 
       switch (placement) {
-        case "top":
+        case 'top':
           top = rect.top - cardHeight - gap;
           left = rect.left + rect.width / 2 - cardWidth / 2;
           break;
-        case "bottom":
+        case 'bottom':
           top = rect.bottom + gap;
           left = rect.left + rect.width / 2 - cardWidth / 2;
           break;
-        case "left":
+        case 'left':
           top = rect.top + rect.height / 2 - cardHeight / 2;
           left = rect.left - cardWidth - gap;
           break;
-        case "right":
+        case 'right':
           top = rect.top + rect.height / 2 - cardHeight / 2;
           left = rect.right + gap;
           break;
@@ -117,8 +86,8 @@ export const TourOverlay = () => {
 
       setCardPosition({ top, left });
 
-      // Scroll target into view only for non-body targets
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Scroll target into view
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
 
     updatePosition();
