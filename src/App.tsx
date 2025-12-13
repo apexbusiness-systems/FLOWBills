@@ -116,7 +116,7 @@ const AuthRoutes = () => {
         <Routes>
         <Route 
           path="/auth" 
-          element={user ? <Navigate to="/" replace /> : <Auth />} 
+          element={user ? <Navigate to="/dashboard" replace /> : <Auth />} 
         />
         <Route 
           path="/change-password" 

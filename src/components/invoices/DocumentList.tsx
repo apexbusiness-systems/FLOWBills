@@ -35,7 +35,7 @@ interface DocumentListProps {
 }
 
 const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
-  const [documents, setDocuments] = useState<InvoiceDocument[]>([]);
+  const [localDocuments, setLocalDocuments] = useState<InvoiceDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<InvoiceDocument | null>(null);
@@ -44,7 +44,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   const { hasRole } = useAuth();
-  const { getDocuments, deleteDocument, downloadDocument, getFilePreviewUrl } = useFileUpload();
+  const { documents, fetchDocuments, deleteDocument, downloadDocument, getFilePreviewUrl } = useFileUpload();
 
   const canDelete = hasRole('operator') || hasRole('admin');
 
@@ -52,12 +52,16 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
     loadDocuments();
   }, [invoiceId]);
 
+  // Sync local state with hook state
+  useEffect(() => {
+    setLocalDocuments(documents);
+    onDocumentsChange?.(documents);
+  }, [documents, onDocumentsChange]);
+
   const loadDocuments = async () => {
     setLoading(true);
     try {
-      await getDocuments(invoiceId);
-      setDocuments([]);
-      onDocumentsChange?.([]);
+      await fetchDocuments(invoiceId);
     } catch (error) {
       console.error('Error loading documents:', error);
     } finally {
@@ -68,13 +72,13 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   const handleDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
     
-    const items = Array.from(documents);
+    const items = Array.from(localDocuments);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
     
-    setDocuments(items);
+    setLocalDocuments(items);
     onDocumentsChange?.(items);
-  }, [documents, onDocumentsChange]);
+  }, [localDocuments, onDocumentsChange]);
 
   const handleDeleteClick = (doc: InvoiceDocument) => {
     setDocumentToDelete(doc);
@@ -156,7 +160,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
     );
   }
 
-  if (documents.length === 0) {
+  if (localDocuments.length === 0) {
     return (
       <div className="text-center py-8">
         <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -173,7 +177,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
           <HardDrive className="h-4 w-4" />
-          {documents.length} Document{documents.length > 1 ? 's' : ''} Attached
+          {localDocuments.length} Document{localDocuments.length > 1 ? 's' : ''} Attached
           <span className="text-xs">(drag to reorder)</span>
         </div>
 
@@ -185,7 +189,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
                 ref={provided.innerRef}
                 className="space-y-3"
               >
-                {documents.map((doc, index) => (
+                {localDocuments.map((doc, index) => (
                   <Draggable key={doc.id} draggableId={doc.id} index={index}>
                     {(provided, snapshot) => (
                       <div

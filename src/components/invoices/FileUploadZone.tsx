@@ -169,7 +169,10 @@ const FileUploadZone = ({
           <div className="space-y-2">
             {pendingFiles.map((file) => {
               const validation = getFileValidation(file);
-              const progress = uploadProgress[file.id];
+              const progress = uploadProgress.find(p => p.fileName === file.name);
+              const progressValue = progress?.progress || 0;
+              const isUploading = uploading && progressValue > 0 && progressValue < 100;
+              const isCompleted = progressValue === 100;
               
               return (
                 <div 
@@ -188,15 +191,14 @@ const FileUploadZone = ({
                           Invalid
                         </Badge>
                       )}
-                      {progress && (
-                        <Badge 
-                          variant={
-                            progress.status === 'completed' ? 'default' :
-                            progress.status === 'error' ? 'destructive' : 'secondary'
-                          }
-                          className="text-xs"
-                        >
-                          {progress.status}
+                      {isUploading && (
+                        <Badge variant="secondary" className="text-xs">
+                          Uploading
+                        </Badge>
+                      )}
+                      {isCompleted && (
+                        <Badge variant="default" className="text-xs">
+                          Completed
                         </Badge>
                       )}
                     </div>
@@ -214,26 +216,16 @@ const FileUploadZone = ({
                       </div>
                     )}
 
-                    {progress && progress.status === 'uploading' && (
-                      <Progress value={progress.progress} className="mt-2 h-1" />
-                    )}
-
-                    {progress && progress.status === 'error' && progress.error && (
-                      <div className="flex items-center gap-1 mt-1 text-xs text-destructive">
-                        <AlertCircle className="h-3 w-3" />
-                        {progress.error}
-                      </div>
+                    {isUploading && (
+                      <Progress value={progressValue} className="mt-2 h-1" />
                     )}
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {progress?.status === 'completed' && (
+                    {isCompleted && (
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     )}
-                    {progress?.status === 'error' && (
-                      <AlertCircle className="h-4 w-4 text-destructive" />
-                    )}
-                    {!progress && (
+                    {!isUploading && !isCompleted && (
                       <Button
                         size="sm"
                         variant="ghost"

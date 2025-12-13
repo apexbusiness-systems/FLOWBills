@@ -34,8 +34,8 @@ const navigationItems = [
   { name: "Three-Way Matching", href: "/three-way-matching", icon: CheckCircle2 },
   { name: "Reports", href: "/reports", icon: BarChart3 },
   { name: "Integrations", href: "/integrations", icon: Plug },
-  { name: "Performance", href: "/performance-monitoring", icon: Activity },
-  { name: "Help Center", href: "/help-center", icon: HelpCircle },
+  { name: "Performance", href: "/performance", icon: Activity },
+  { name: "Help Center", href: "/help", icon: HelpCircle },
 ];
 
 const DashboardHeader = () => {

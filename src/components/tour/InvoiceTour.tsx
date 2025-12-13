@@ -81,7 +81,7 @@ export const InvoiceTour = () => {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [setSteps, startTour, hasCompletedTour]);
 
   return null;
 };
