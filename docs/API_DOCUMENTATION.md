@@ -882,6 +882,301 @@ if (error) {
 
 ---
 
+## ERP Integration
+
+FLOWBills provides webhook-based integration with major ERP systems for seamless invoice data synchronization.
+
+---
+
+### Webhook Configuration
+
+#### Outgoing Webhooks
+
+FLOWBills can send invoice events to your ERP system via webhooks.
+
+**Supported Events**:
+| Event | Description |
+|-------|-------------|
+| `invoice.created` | New invoice uploaded and extracted |
+| `invoice.approved` | Invoice approved (manual or auto) |
+| `invoice.rejected` | Invoice rejected |
+| `invoice.paid` | Invoice marked as paid |
+| `invoice.exception` | Invoice flagged for review |
+| `duplicate.detected` | Duplicate invoice detected |
+
+**Webhook Payload Structure**:
+```json
+{
+  "event": "invoice.approved",
+  "timestamp": "2025-12-13T14:30:00Z",
+  "data": {
+    "invoice_id": "uuid-here",
+    "invoice_number": "INV-2025-001",
+    "vendor_name": "Acme Oilfield Services",
+    "amount": 15000.00,
+    "currency": "CAD",
+    "invoice_date": "2025-12-10",
+    "due_date": "2025-01-10",
+    "afe_number": "AFE-2025-0042",
+    "uwi": "100/06-12-045-05W5/0",
+    "status": "approved",
+    "approved_by": "user-uuid",
+    "approved_at": "2025-12-13T14:30:00Z",
+    "line_items": [
+      {
+        "description": "Drilling Services",
+        "quantity": 24,
+        "unit_price": 500.00,
+        "amount": 12000.00,
+        "service_code": "DRILL-001"
+      }
+    ]
+  },
+  "metadata": {
+    "source": "flowbills",
+    "version": "1.1.0",
+    "environment": "production"
+  }
+}
+```
+
+**Webhook Security**:
+- All webhooks are signed using HMAC-SHA256
+- Signature header: `X-FlowBills-Signature`
+- Verify signature before processing:
+
+```typescript
+import { createHmac } from 'crypto';
+
+function verifyWebhookSignature(
+  payload: string,
+  signature: string,
+  secret: string
+): boolean {
+  const expectedSignature = createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  return signature === `sha256=${expectedSignature}`;
+}
+```
+
+---
+
+### SAP Integration
+
+#### Configuration
+
+**Endpoint**: Configure in FlowBills Settings → Integrations → SAP
+
+| Setting | Description | Example |
+|---------|-------------|---------|
+| SAP Host | SAP Gateway URL | `https://sap.company.com/sap/opu/odata/` |
+| Client ID | SAP client number | `100` |
+| Username | SAP service account | `FLOWBILLS_SVC` |
+| Password | Service account password | Stored encrypted |
+| Company Code | SAP company code | `1000` |
+
+#### Invoice Sync Mapping
+
+| FlowBills Field | SAP Field | Description |
+|-----------------|-----------|-------------|
+| `invoice_number` | `BELNR` | Document number |
+| `vendor_name` | `LIFNR` | Vendor number (lookup) |
+| `amount` | `WRBTR` | Amount in document currency |
+| `invoice_date` | `BLDAT` | Document date |
+| `due_date` | `ZFBDT` | Baseline date for payment |
+| `afe_number` | `KOSTL` | Cost center |
+| `uwi` | `AUFNR` | Order number |
+
+#### Webhook to SAP IDoc
+
+```json
+{
+  "webhook_url": "https://sap.company.com/sap/bc/srt/idoc",
+  "events": ["invoice.approved", "invoice.paid"],
+  "transform": {
+    "idoc_type": "INVOIC02",
+    "mapping": {
+      "BELNR": "{{invoice_number}}",
+      "LIFNR": "{{vendor_lookup(vendor_name)}}",
+      "WRBTR": "{{amount}}",
+      "WAERS": "{{currency}}"
+    }
+  }
+}
+```
+
+---
+
+### Oracle Financials Integration
+
+#### Configuration
+
+**Endpoint**: Configure in FlowBills Settings → Integrations → Oracle
+
+| Setting | Description | Example |
+|---------|-------------|---------|
+| Oracle Host | Oracle Cloud URL | `https://fa-xxxx.oraclecloud.com` |
+| Username | Integration user | `flowbills_integration` |
+| Password | Integration password | Stored encrypted |
+| Business Unit | Oracle BU ID | `300000001234567` |
+
+#### Invoice Sync Mapping
+
+| FlowBills Field | Oracle Field | Description |
+|-----------------|--------------|-------------|
+| `invoice_number` | `InvoiceNumber` | Supplier invoice number |
+| `vendor_name` | `VendorName` | Supplier name |
+| `amount` | `InvoiceAmount` | Total invoice amount |
+| `invoice_date` | `InvoiceDate` | Invoice date |
+| `due_date` | `PaymentDueDate` | Payment due date |
+| `afe_number` | `ProjectNumber` | Project allocation |
+
+#### REST API Payload
+
+```json
+{
+  "webhook_url": "https://fa-xxxx.oraclecloud.com/fscmRestApi/resources/invoices",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer {{oauth_token}}"
+  },
+  "body": {
+    "InvoiceNumber": "{{invoice_number}}",
+    "VendorName": "{{vendor_name}}",
+    "InvoiceAmount": "{{amount}}",
+    "InvoiceCurrencyCode": "{{currency}}",
+    "InvoiceDate": "{{invoice_date}}",
+    "BusinessUnit": "{{business_unit}}",
+    "PaymentTerms": "Net 30"
+  }
+}
+```
+
+---
+
+### QuickBooks Online Integration
+
+#### Configuration
+
+**Endpoint**: Configure in FlowBills Settings → Integrations → QuickBooks
+
+| Setting | Description | Example |
+|---------|-------------|---------|
+| Realm ID | QuickBooks company ID | `1234567890` |
+| OAuth Client ID | App client ID | `ABcd1234...` |
+| OAuth Client Secret | App secret | Stored encrypted |
+| Refresh Token | OAuth refresh token | Auto-managed |
+
+#### Invoice Sync Mapping
+
+| FlowBills Field | QuickBooks Field | Description |
+|-----------------|------------------|-------------|
+| `invoice_number` | `DocNumber` | Bill reference number |
+| `vendor_name` | `VendorRef.name` | Vendor display name |
+| `amount` | `TotalAmt` | Total amount |
+| `invoice_date` | `TxnDate` | Transaction date |
+| `due_date` | `DueDate` | Payment due date |
+| `line_items` | `Line[]` | Bill line items |
+
+#### REST API Payload
+
+```json
+{
+  "webhook_url": "https://quickbooks.api.intuit.com/v3/company/{{realm_id}}/bill",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer {{access_token}}"
+  },
+  "body": {
+    "VendorRef": {
+      "name": "{{vendor_name}}"
+    },
+    "DocNumber": "{{invoice_number}}",
+    "TxnDate": "{{invoice_date}}",
+    "DueDate": "{{due_date}}",
+    "TotalAmt": "{{amount}}",
+    "Line": [
+      {
+        "Amount": "{{line_items[0].amount}}",
+        "DetailType": "AccountBasedExpenseLineDetail",
+        "AccountBasedExpenseLineDetail": {
+          "AccountRef": {
+            "name": "{{expense_account}}"
+          }
+        },
+        "Description": "{{line_items[0].description}}"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### Microsoft Dynamics 365 Integration
+
+#### Configuration
+
+| Setting | Description | Example |
+|---------|-------------|---------|
+| Dynamics URL | D365 environment URL | `https://org.crm.dynamics.com` |
+| Tenant ID | Azure AD tenant | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
+| Client ID | App registration ID | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
+| Client Secret | App secret | Stored encrypted |
+
+#### Invoice Sync Mapping
+
+| FlowBills Field | D365 Field | Description |
+|-----------------|------------|-------------|
+| `invoice_number` | `msdyn_invoicenumber` | Vendor invoice number |
+| `vendor_name` | `msdyn_vendor` | Vendor lookup |
+| `amount` | `msdyn_totalamount` | Invoice total |
+| `invoice_date` | `msdyn_invoicedate` | Invoice date |
+
+---
+
+### Webhook Retry Policy
+
+FLOWBills implements automatic retry for failed webhook deliveries:
+
+| Attempt | Delay | Max Attempts |
+|---------|-------|--------------|
+| 1 | Immediate | - |
+| 2 | 1 minute | - |
+| 3 | 5 minutes | - |
+| 4 | 30 minutes | - |
+| 5 | 2 hours | Final |
+
+**Failure Handling**:
+- Failed webhooks are logged to `integration_status` table
+- Admin notifications sent after 3 consecutive failures
+- Manual retry available via dashboard
+
+---
+
+### Testing Webhooks
+
+Use the webhook test endpoint to validate your integration:
+
+```bash
+curl -X POST https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/webhook-test \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "webhook_url": "https://your-erp.com/webhook",
+    "event": "invoice.approved",
+    "test_data": {
+      "invoice_number": "TEST-001",
+      "amount": 100.00
+    }
+  }'
+```
+
+---
+
 ## Security Best Practices
 
 1. **Never expose service role keys** in client code
@@ -890,6 +1185,9 @@ if (error) {
 4. **Log security events** to `security_events` table
 5. **Rotate secrets regularly** via Supabase dashboard
 6. **Monitor for anomalies** in audit logs
+7. **Verify webhook signatures** before processing ERP callbacks
+8. **Use OAuth 2.0** for ERP authentication where supported
+9. **Encrypt credentials at rest** using Supabase secrets management
 
 ---
 
@@ -899,6 +1197,7 @@ For API issues or questions:
 - **Email**: api-support@flowbills.ca
 - **Documentation**: https://flowbills.ca/docs
 - **Status Page**: https://status.flowbills.ca
+- **ERP Integration Support**: integrations@flowbills.ca
 
 ---
 
