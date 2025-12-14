@@ -118,13 +118,13 @@ class ProductionOptimizer {
     // Preconnect to Supabase
     const preconnectLink = document.createElement('link');
     preconnectLink.rel = 'preconnect';
-    preconnectLink.href = 'https://yvyjzlbosmtesldczhnm.supabase.co';
+    preconnectLink.href = 'https://ullqluvzkgnwwqijhvjr.supabase.co';
     document.head.appendChild(preconnectLink);
 
     // DNS prefetch for external resources
     const dnsPrefetch = document.createElement('link');
     dnsPrefetch.rel = 'dns-prefetch';
-    dnsPrefetch.href = 'https://yvyjzlbosmtesldczhnm.supabase.co';
+    dnsPrefetch.href = 'https://ullqluvzkgnwwqijhvjr.supabase.co';
     document.head.appendChild(dnsPrefetch);
   }
 
