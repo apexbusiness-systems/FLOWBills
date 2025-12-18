@@ -158,6 +158,8 @@ const rootElement = document.getElementById("root");
 if (!rootElement) {
   const errorMsg = "Root element not found - DOM may not be ready";
   console.error(errorMsg);
+  // Remove loader and show error
+  document.getElementById('flowbills-loader')?.remove();
   document.body.innerHTML = `
     <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: #f9fafb; font-family: system-ui, -apple-system, sans-serif;">
       <div style="max-width: 400px; text-align: center; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
@@ -172,24 +174,61 @@ if (!rootElement) {
   throw new Error(errorMsg);
 }
 
-// CRITICAL: Remove loading indicator IMMEDIATELY before React renders
-// This prevents the 5-second timeout check from showing the error
-const loadingElement = document.getElementById('app-loading');
-if (loadingElement) {
-  console.log('[FlowBills] Removing loading indicator');
-  loadingElement.remove();
-}
+// Helper to safely remove loader after verifying content
+const removeLoaderAfterRender = () => {
+  requestAnimationFrame(() => {
+    // Double-check React has rendered content
+    const hasContent = rootElement.innerHTML.trim().length > 0;
+    
+    if (hasContent) {
+      const loader = document.getElementById('flowbills-loader');
+      if (loader) {
+        console.log('[FlowBills] App rendered successfully, removing loading indicator');
+        loader.remove();
+      }
+    } else {
+      console.error('[FlowBills] Root rendered empty – likely auth/route or loader issue');
+      // Show inline error instead of white screen
+      rootElement.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: #0f0f0f; font-family: system-ui, -apple-system, sans-serif;">
+          <div style="max-width: 400px; text-align: center; color: #fff;">
+            <h1 style="color: #ef4444; margin-bottom: 16px;">Render Issue</h1>
+            <p style="color: #888; margin-bottom: 24px;">The application rendered but no content was displayed. This may be a routing or authentication issue.</p>
+            <button onclick="window.location.reload()" style="background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">
+              Reload Page
+            </button>
+          </div>
+        </div>
+      `;
+      document.getElementById('flowbills-loader')?.remove();
+    }
+  });
+};
 
 try {
   console.log('[FlowBills] React render initiated');
   createRoot(rootElement).render(<App />);
+  
+  // Remove loader AFTER React commits to DOM (not before)
+  removeLoaderAfterRender();
+  
+  // Safety timeout - if somehow the loader is still there after 3s, remove it
+  setTimeout(() => {
+    const loader = document.getElementById('flowbills-loader');
+    if (loader && rootElement.innerHTML.trim().length > 0) {
+      console.log('[FlowBills] Safety timeout: removing loader');
+      loader.remove();
+    }
+  }, 3000);
+  
 } catch (error) {
   console.error('============================================');
   console.error('[FlowBills] Failed to render React app!');
   console.error('Error:', error);
   console.error('============================================');
   
-  // Display user-friendly error
+  // Remove loader and display user-friendly error
+  document.getElementById('flowbills-loader')?.remove();
   rootElement.innerHTML = `
     <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: #f9fafb; font-family: system-ui, -apple-system, sans-serif;">
       <div style="max-width: 400px; text-align: center; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">

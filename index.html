@@ -395,22 +395,23 @@
   </head>
 
   <body>
-    <div id="root">
-      <div id="app-loading" style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #0f0f0f; color: #fff; font-family: system-ui, -apple-system, sans-serif; z-index: 9999;">
-        <div style="text-align: center;">
-          <div style="width: 48px; height: 48px; border: 4px solid #333; border-top-color: #D4AF37; border-radius: 50%; margin: 0 auto 16px; animation: spin 1s linear infinite;"></div>
-          <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Loading FlowBills...</div>
-          <div style="font-size: 14px; color: #888;">Initializing application</div>
-        </div>
+    <!-- Loading indicator OUTSIDE #root to prevent React from interfering -->
+    <div id="flowbills-loader" style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #0f0f0f; color: #fff; font-family: system-ui, -apple-system, sans-serif; z-index: 9999;">
+      <div style="text-align: center;">
+        <div style="width: 48px; height: 48px; border: 4px solid #333; border-top-color: #D4AF37; border-radius: 50%; margin: 0 auto 16px; animation: spin 1s linear infinite;"></div>
+        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Loading FlowBills...</div>
+        <div style="font-size: 14px; color: #888;">Initializing application</div>
       </div>
     </div>
+    
+    <!-- React app container - separate from loader -->
+    <div id="root"></div>
+    
     <script>
       // ALWAYS clear service workers on every load to prevent stale cache issues
-      // This is critical for production stability after deployment
       (function() {
         console.log('[FlowBills] Clearing service workers on load...');
         
-        // Always unregister ALL service workers - no exceptions
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then(registrations => {
             registrations.forEach(registration => {
@@ -420,7 +421,6 @@
           });
         }
         
-        // Always clear all caches
         if ('caches' in window) {
           caches.keys().then(names => {
             names.forEach(name => {
@@ -430,7 +430,6 @@
           });
         }
         
-        // Only clear storage on previous failure
         const hadPreviousFailure = localStorage.getItem('flowbills_load_failed') === 'true';
         if (hadPreviousFailure) {
           console.log('[Recovery] Previous load failure detected');
@@ -438,66 +437,65 @@
         }
       })();
       
-      // Error detection - fallback check if main.tsx doesn't remove the loading indicator
+      // Fallback error detection - only triggers if main.tsx fails to remove the loader
       window.addEventListener('load', () => {
-        // Give React time to mount and remove the loading indicator
         setTimeout(() => {
-          const loading = document.getElementById('app-loading');
-          if (!loading) return; // Already removed by main.tsx, app is working
+          const loader = document.getElementById('flowbills-loader');
+          if (!loader) return; // Already removed by main.tsx - app is working
           
           const moduleLoaded = window.__FLOWBILLS_LOADED__;
-          const rootChildren = document.getElementById('root')?.children.length || 0;
+          const root = document.getElementById('root');
+          const hasContent = root && root.innerHTML.trim().length > 0;
           
-          // If module loaded OR root has content, app is working - remove loading
-          if (moduleLoaded || rootChildren >= 1) {
+          // If React rendered content, remove loader and we're done
+          if (hasContent) {
             console.log('[FlowBills] App rendered successfully, removing loading indicator');
-            loading.remove();
+            loader.remove();
             return;
           }
           
-          // App failed - mark for next load recovery and show error
+          // App failed - mark for recovery and show error
           console.error('[FlowBills] App failed to load after 5s');
           localStorage.setItem('flowbills_load_failed', 'true');
             
-          // Show error with hard refresh instruction
-          loading.innerHTML = `
-              <div style="text-align: center; max-width: 500px; padding: 24px;">
-                <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ef4444;">
-                  ⚠️ Application Loading Error
-                </div>
-                <div style="font-size: 14px; color: #ccc; margin-bottom: 16px; line-height: 1.6;">
-                  ${moduleLoaded 
-                    ? 'The application loaded but failed to render.' 
-                    : 'The application bundle failed to load.'}
-                </div>
-                <div style="font-size: 12px; color: #888; margin-bottom: 16px; font-family: monospace;">
-                  Diagnostic: Module ${moduleLoaded ? '✓' : '✗'} | Root children: ${rootChildren}
-                </div>
-                <div style="font-size: 12px; color: #10b981; margin-bottom: 24px;">
-                  ✓ Caches cleared. Try reloading.
-                </div>
-                <button 
-                  onclick="window.location.reload(true);"
-                  style="
-                    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-                    color: white;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-                  "
-                >
-                  Reload Application
-                </button>
-                <div style="font-size: 11px; color: #666; margin-top: 16px;">
-                  If this persists, try: <strong>Ctrl+Shift+R</strong> (Windows) or <strong>Cmd+Shift+R</strong> (Mac)
-                </div>
+          loader.innerHTML = `
+            <div style="text-align: center; max-width: 500px; padding: 24px;">
+              <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ef4444;">
+                ⚠️ Application Loading Error
               </div>
-            `;
-        }, 5000); // Single 5 second timeout
+              <div style="font-size: 14px; color: #ccc; margin-bottom: 16px; line-height: 1.6;">
+                ${moduleLoaded 
+                  ? 'The application loaded but failed to render.' 
+                  : 'The application bundle failed to load.'}
+              </div>
+              <div style="font-size: 12px; color: #888; margin-bottom: 16px; font-family: monospace;">
+                Diagnostic: Module ${moduleLoaded ? '✓' : '✗'} | Content: ${hasContent ? '✓' : '✗'}
+              </div>
+              <div style="font-size: 12px; color: #10b981; margin-bottom: 24px;">
+                ✓ Caches cleared. Try reloading.
+              </div>
+              <button 
+                onclick="window.location.reload(true);"
+                style="
+                  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+                  color: white;
+                  border: none;
+                  padding: 12px 24px;
+                  border-radius: 8px;
+                  font-size: 14px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+                "
+              >
+                Reload Application
+              </button>
+              <div style="font-size: 11px; color: #666; margin-top: 16px;">
+                If this persists, try: <strong>Ctrl+Shift+R</strong> (Windows) or <strong>Cmd+Shift+R</strong> (Mac)
+              </div>
+            </div>
+          `;
+        }, 5000);
       });
     </script>
     <style>
