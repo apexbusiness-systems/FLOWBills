@@ -22,8 +22,10 @@ class ServiceWorkerHealthMonitor {
   };
 
   private checkInterval: number | null = null;
+  private recoveryStartTime: number | null = null;
   private readonly MAX_FAILURES = 3;
   private readonly CHECK_INTERVAL = 60000; // 1 minute
+  private readonly RECOVERY_TIMEOUT_MS = 30000; // 30 seconds max recovery time
 
   /**
    * Register service worker with health monitoring
@@ -60,6 +62,7 @@ class ServiceWorkerHealthMonitor {
       this.status.registered = true;
       this.status.failureCount = 0;
       this.status.error = undefined;
+      this.recoveryStartTime = null; // Reset recovery timer on success
 
       // Check if SW is active
       if (registration.active) {
@@ -92,13 +95,27 @@ class ServiceWorkerHealthMonitor {
     this.status.error = error instanceof Error ? error.message : 'Unknown error';
     this.status.failureCount++;
 
+    // Check if recovery has been running too long
+    if (this.recoveryStartTime && Date.now() - this.recoveryStartTime > this.RECOVERY_TIMEOUT_MS) {
+      logger.error('Service Worker recovery timeout - forcing full page reload');
+      await this.unregisterAll();
+      // Force full page reload to break out of any recovery loop
+      window.location.reload();
+      return;
+    }
+
     // Attempt recovery if under failure threshold
     if (this.status.failureCount < this.MAX_FAILURES) {
       logger.debug(`Attempting recovery (${this.status.failureCount}/${this.MAX_FAILURES})...`);
+      if (!this.recoveryStartTime) {
+        this.recoveryStartTime = Date.now();
+      }
       await this.recover();
     } else {
-      logger.error('Service Worker recovery failed after max attempts');
+      logger.error('Service Worker recovery failed after max attempts - forcing full page reload');
       await this.unregisterAll();
+      // Force full page reload to break out of any recovery loop
+      window.location.reload();
     }
   }
 
@@ -106,6 +123,19 @@ class ServiceWorkerHealthMonitor {
    * Attempt to recover from failed registration
    */
   async recover(): Promise<void> {
+    // Check timeout before starting recovery
+    if (this.recoveryStartTime && Date.now() - this.recoveryStartTime > this.RECOVERY_TIMEOUT_MS) {
+      logger.error('Service Worker recovery timeout exceeded - forcing full page reload');
+      await this.unregisterAll();
+      window.location.reload();
+      return;
+    }
+
+    // Set recovery start time if not already set
+    if (!this.recoveryStartTime) {
+      this.recoveryStartTime = Date.now();
+    }
+
     try {
       // Unregister existing service workers
       const registrations = await navigator.serviceWorker.getRegistrations();
@@ -122,11 +152,26 @@ class ServiceWorkerHealthMonitor {
       // Wait a bit before re-registering
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      // Check timeout again before retrying registration
+      if (this.recoveryStartTime && Date.now() - this.recoveryStartTime > this.RECOVERY_TIMEOUT_MS) {
+        logger.error('Service Worker recovery timeout during cleanup - forcing full page reload');
+        window.location.reload();
+        return;
+      }
+
       // Retry registration
       await this.register();
     } catch (error) {
       logger.error('Recovery failed', error);
       this.status.failureCount++;
+      
+      // Check timeout after error
+      if (this.recoveryStartTime && Date.now() - this.recoveryStartTime > this.RECOVERY_TIMEOUT_MS) {
+        logger.error('Service Worker recovery timeout after error - forcing full page reload');
+        await this.unregisterAll();
+        window.location.reload();
+        return;
+      }
     }
   }
 
