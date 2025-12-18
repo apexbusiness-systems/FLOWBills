@@ -1,33 +1,3 @@
-// Startup diagnostic - verify module loaded
-console.log('[FlowBills] Module loaded at', new Date().toISOString());
-
-// Emergency recovery: if we previously failed to load, clear everything
-const lastLoadFailed = localStorage.getItem('flowbills_load_failed') === 'true';
-if (lastLoadFailed) {
-  console.warn('[FlowBills] Previous load failed - clearing caches and service workers...');
-  localStorage.removeItem('flowbills_load_failed');
-  
-  // Clear all caches
-  if ('caches' in window) {
-    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
-  }
-  
-  // Unregister all service workers
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(reg => reg.unregister());
-    });
-  }
-}
-
-// Declare global flag
-declare global {
-  interface Window {
-    __FLOWBILLS_LOADED__?: boolean;
-  }
-}
-window.__FLOWBILLS_LOADED__ = true;
-
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
@@ -38,82 +8,28 @@ import { performanceMonitor } from "./lib/performance-monitor";
 import { queryOptimizer } from "./lib/query-optimizer";
 import { startPersistenceCleanup } from "./lib/persistence";
 
-// Global error handlers to catch errors before React renders
-window.addEventListener('error', (event) => {
-  console.error('============================================');
-  console.error('[FlowBills Global Error Handler] Uncaught error!');
-  console.error('Error:', event.error);
-  console.error('Message:', event.message);
-  console.error('Filename:', event.filename);
-  console.error('Line:', event.lineno);
-  console.error('Column:', event.colno);
-  console.error('Timestamp:', new Date().toISOString());
-  console.error('============================================');
-  
-  // Store in localStorage for debugging
-  try {
-    const errorReport = {
-      type: 'global_error',
-      message: event.message,
-      filename: event.filename,
-      lineno: event.lineno,
-      colno: event.colno,
-      error: event.error ? {
-        name: event.error.name,
-        message: event.error.message,
-        stack: event.error.stack
-      } : null,
-      timestamp: new Date().toISOString(),
-      url: window.location.href
-    };
-    
-    const existingErrors = JSON.parse(localStorage.getItem('global_errors') || '[]');
-    existingErrors.push(errorReport);
-    
-    if (existingErrors.length > 10) {
-      existingErrors.splice(0, existingErrors.length - 10);
-    }
-    
-    localStorage.setItem('global_errors', JSON.stringify(existingErrors));
-  } catch (storageError) {
-    console.error('Failed to store global error:', storageError);
+// Mark module as loaded immediately
+declare global {
+  interface Window {
+    __FLOWBILLS_LOADED__?: boolean;
   }
+}
+window.__FLOWBILLS_LOADED__ = true;
+console.log('[FlowBills] Module loaded');
+
+// Global error handlers
+window.addEventListener('error', (event) => {
+  console.error('[FlowBills] Uncaught error:', event.message, event.filename, event.lineno);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('============================================');
-  console.error('[FlowBills Global Error Handler] Unhandled promise rejection!');
-  console.error('Reason:', event.reason);
-  console.error('Promise:', event.promise);
-  console.error('Timestamp:', new Date().toISOString());
-  console.error('============================================');
-  
-  // Store in localStorage for debugging
-  try {
-    const errorReport = {
-      type: 'unhandled_rejection',
-      reason: event.reason ? String(event.reason) : 'Unknown',
-      timestamp: new Date().toISOString(),
-      url: window.location.href
-    };
-    
-    const existingErrors = JSON.parse(localStorage.getItem('global_errors') || '[]');
-    existingErrors.push(errorReport);
-    
-    if (existingErrors.length > 10) {
-      existingErrors.splice(0, existingErrors.length - 10);
-    }
-    
-    localStorage.setItem('global_errors', JSON.stringify(existingErrors));
-  } catch (storageError) {
-    console.error('Failed to store unhandled rejection:', storageError);
-  }
+  console.error('[FlowBills] Unhandled rejection:', event.reason);
 });
 
 // Apply CSP nonce at runtime
 applySPNonce();
 
-// Initialize performance monitoring and persistence - only in production
+// Initialize performance monitoring - only in production
 if (!import.meta.env.DEV) {
   const initPerformance = () => {
     performanceMonitor.initializeWebVitals();
@@ -122,123 +38,32 @@ if (!import.meta.env.DEV) {
     startPersistenceCleanup();
   };
   
-  // Defer initialization to avoid blocking initial render
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPerformance);
   } else {
     initPerformance();
   }
 } else {
-  // Always start cleanup in dev too
   startPersistenceCleanup();
 }
 
-// TEMPORARILY DISABLED: Service worker registration
-// The SW was causing production issues by serving stale bundles.
-// App will run as plain SPA until SW strategy is refined.
-// See: P0 incident - "Application Loading Error"
-//
-// import('./lib/sw-health-monitor').then(({ swHealthMonitor }) => {
-//   window.addEventListener('load', () => {
-//     swHealthMonitor.register();
-//   });
-// });
-
-// Clear any existing service workers on startup to fix stuck users
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(registrations => {
-    registrations.forEach(reg => {
-      console.log('[FlowBills] Unregistering stale SW:', reg.scope);
-      reg.unregister();
-    });
-  });
-}
-
+// Get root element
 const rootElement = document.getElementById("root");
 if (!rootElement) {
-  const errorMsg = "Root element not found - DOM may not be ready";
-  console.error(errorMsg);
-  // Remove loader and show error
-  document.getElementById('flowbills-loader')?.remove();
-  document.body.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: #f9fafb; font-family: system-ui, -apple-system, sans-serif;">
-      <div style="max-width: 400px; text-align: center; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <h1 style="color: #ef4444; margin-bottom: 16px;">Application Error</h1>
-        <p style="color: #6b7280; margin-bottom: 24px;">Failed to initialize the application. Please refresh the page or contact support if the issue persists.</p>
-        <button onclick="window.location.reload()" style="background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">
-          Reload Page
-        </button>
-      </div>
-    </div>
-  `;
-  throw new Error(errorMsg);
+  throw new Error("Root element not found");
 }
 
-// Helper to safely remove loader after verifying content
-const removeLoaderAfterRender = () => {
-  requestAnimationFrame(() => {
-    // Double-check React has rendered content
-    const hasContent = rootElement.innerHTML.trim().length > 0;
-    
-    if (hasContent) {
-      const loader = document.getElementById('flowbills-loader');
-      if (loader) {
-        console.log('[FlowBills] App rendered successfully, removing loading indicator');
-        loader.remove();
-      }
-    } else {
-      console.error('[FlowBills] Root rendered empty – likely auth/route or loader issue');
-      // Show inline error instead of white screen
-      rootElement.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: #0f0f0f; font-family: system-ui, -apple-system, sans-serif;">
-          <div style="max-width: 400px; text-align: center; color: #fff;">
-            <h1 style="color: #ef4444; margin-bottom: 16px;">Render Issue</h1>
-            <p style="color: #888; margin-bottom: 24px;">The application rendered but no content was displayed. This may be a routing or authentication issue.</p>
-            <button onclick="window.location.reload()" style="background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">
-              Reload Page
-            </button>
-          </div>
-        </div>
-      `;
-      document.getElementById('flowbills-loader')?.remove();
-    }
-  });
-};
+// Render the app
+console.log('[FlowBills] Starting React render');
+createRoot(rootElement).render(<App />);
 
-try {
-  console.log('[FlowBills] React render initiated');
-  createRoot(rootElement).render(<App />);
-  
-  // Remove loader AFTER React commits to DOM (not before)
-  removeLoaderAfterRender();
-  
-  // Safety timeout - if somehow the loader is still there after 3s, remove it
-  setTimeout(() => {
+// Remove loader after React renders - simple approach
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
     const loader = document.getElementById('flowbills-loader');
-    if (loader && rootElement.innerHTML.trim().length > 0) {
-      console.log('[FlowBills] Safety timeout: removing loader');
+    if (loader) {
+      console.log('[FlowBills] App rendered, removing loader');
       loader.remove();
     }
-  }, 3000);
-  
-} catch (error) {
-  console.error('============================================');
-  console.error('[FlowBills] Failed to render React app!');
-  console.error('Error:', error);
-  console.error('============================================');
-  
-  // Remove loader and display user-friendly error
-  document.getElementById('flowbills-loader')?.remove();
-  rootElement.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: #f9fafb; font-family: system-ui, -apple-system, sans-serif;">
-      <div style="max-width: 400px; text-align: center; background: white; padding: 32px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <h1 style="color: #ef4444; margin-bottom: 16px;">Render Error</h1>
-        <p style="color: #6b7280; margin-bottom: 24px;">Failed to render the application. Please refresh the page or contact support if the issue persists.</p>
-        <button onclick="window.location.reload()" style="background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">
-          Reload Page
-        </button>
-        ${import.meta.env.DEV ? `<pre style="margin-top: 16px; padding: 12px; background: #f3f4f6; border-radius: 4px; text-align: left; font-size: 12px; overflow-x: auto;">${error}</pre>` : ''}
-      </div>
-    </div>
-  `;
-}
+  });
+});
