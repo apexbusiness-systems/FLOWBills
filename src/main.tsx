@@ -7,6 +7,7 @@ import { applySPNonce } from "./lib/security";
 import { performanceMonitor } from "./lib/performance-monitor";
 import { queryOptimizer } from "./lib/query-optimizer";
 import { startPersistenceCleanup } from "./lib/persistence";
+import { logger } from "./lib/logger";
 
 // Mark module as loaded immediately
 declare global {
@@ -15,15 +16,19 @@ declare global {
   }
 }
 window.__FLOWBILLS_LOADED__ = true;
-console.log('[FlowBills] Module loaded');
+logger.debug('[FlowBills] Module loaded');
 
 // Global error handlers
 window.addEventListener('error', (event) => {
-  console.error('[FlowBills] Uncaught error:', event.message, event.filename, event.lineno);
+  logger.error('[FlowBills] Uncaught error', new Error(event.message), {
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+  });
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('[FlowBills] Unhandled rejection:', event.reason);
+  logger.error('[FlowBills] Unhandled rejection', event.reason instanceof Error ? event.reason : new Error(String(event.reason)));
 });
 
 // Apply CSP nonce at runtime
@@ -54,7 +59,7 @@ if (!rootElement) {
 }
 
 // Render the app
-console.log('[FlowBills] Starting React render');
+logger.debug('[FlowBills] Starting React render');
 createRoot(rootElement).render(<App />);
 
 // Remove loader after React renders - simple approach
@@ -62,7 +67,7 @@ requestAnimationFrame(() => {
   requestAnimationFrame(() => {
     const loader = document.getElementById('flowbills-loader');
     if (loader) {
-      console.log('[FlowBills] App rendered, removing loader');
+      logger.debug('[FlowBills] App rendered, removing loader');
       loader.remove();
     }
   });

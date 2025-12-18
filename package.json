@@ -18,6 +18,7 @@
     "test:prod": "vitest run --coverage",
     "test:watch": "vitest",
     "preview": "vite preview",
+    "analyze:bundle": "node scripts/analyze-bundle.js",
     "ci": "npm run lint:check && npm run type-check && npm run test:unit && npm run build"
   },
   "dependencies": {
