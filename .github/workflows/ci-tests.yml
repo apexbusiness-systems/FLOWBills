@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20.x'
   VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
   VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
@@ -145,11 +145,12 @@ jobs:
           exit 1
         fi
         
-        # Check JS bundles exist
-        if ls dist/assets/*.js 1> /dev/null 2>&1; then
+        # Check JS bundles exist (Vite outputs to dist/assets/js/*.js)
+        if ls dist/assets/js/*.js 1> /dev/null 2>&1 || ls dist/assets/*.js 1> /dev/null 2>&1; then
           echo "✅ JavaScript bundles exist"
         else
           echo "❌ JavaScript bundles missing"
+          echo "Expected bundles in dist/assets/js/*.js or dist/assets/*.js"
           exit 1
         fi
         

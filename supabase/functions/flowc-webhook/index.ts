@@ -108,7 +108,7 @@ async function handleHold(
         .from('review_queue')
         .insert({
           invoice_id: invoiceId,
-          assigned_to: invoice.user_id,
+          user_id: invoice.user_id,
           priority: 1, // High priority for compliance holds
           reason: `FlowC compliance hold: ${complianceCode}`,
           flagged_fields: ['compliance_hold']
@@ -160,7 +160,7 @@ async function handleRouteToReview(
       .from('review_queue')
       .insert({
         invoice_id: invoiceId,
-        assigned_to: invoice.user_id,
+        user_id: invoice.user_id,
         priority: 2, // Medium priority
         reason: `FlowC compliance review: ${complianceCode}`,
         flagged_fields: ['compliance_review']
