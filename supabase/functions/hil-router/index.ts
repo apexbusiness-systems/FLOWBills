@@ -214,10 +214,10 @@ Deno.serve(async (req) => {
           .from('review_queue')
           .insert({
             invoice_id: invoice.invoice_id,
-            user_id: invoiceData.user_id,
+            assigned_to: invoiceData.user_id, // Use assigned_to instead of user_id
             reason: reason,
             confidence_score: invoice.confidence_score,
-            risk_factors: flaggedFields.length > 0 ? flaggedFields : []
+            flagged_fields: flaggedFields.length > 0 ? flaggedFields : [] // Use flagged_fields instead of risk_factors
           });
 
         if (queueError) {
@@ -253,8 +253,8 @@ Deno.serve(async (req) => {
           .from('approvals')
           .insert({
             invoice_id: invoice.invoice_id,
-            user_id: invData.user_id,
-            approval_status: 'approved',
+            approver_id: invData.user_id, // Use approver_id instead of user_id
+            status: 'approved', // Use status instead of approval_status
             amount_approved: invoice.amount,
             approval_date: new Date().toISOString(),
             comments: 'Auto-approved by HIL router',
