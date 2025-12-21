@@ -41,9 +41,7 @@ import { queryOptimizer } from "./lib/query-optimizer";
 fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:21',message:'Query optimizer import completed',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
 // #endregion
 import { startPersistenceCleanup } from "./lib/persistence";
-// #region agent log
-fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:23',message:'Persistence import completed',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-// #endregion
+import { logger } from "./lib/logger";
 
 // Mark module as loaded immediately
 declare global {
@@ -52,24 +50,19 @@ declare global {
   }
 }
 window.__FLOWBILLS_LOADED__ = true;
-console.log('[FlowBills] Module loaded');
-// #region agent log
-fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:35',message:'Module loaded flag set',data:{moduleLoaded:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-// #endregion
+logger.debug('[FlowBills] Module loaded');
 
 // Global error handlers
 window.addEventListener('error', (event) => {
-  console.error('[FlowBills] Uncaught error:', event.message, event.filename, event.lineno);
-  // #region agent log
-  fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:40',message:'Uncaught error detected',data:{message:event.message,filename:event.filename,lineno:event.lineno,error:event.error?.toString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  // #endregion
+  logger.error('[FlowBills] Uncaught error', new Error(event.message), {
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+  });
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('[FlowBills] Unhandled rejection:', event.reason);
-  // #region agent log
-  fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:46',message:'Unhandled rejection detected',data:{reason:event.reason?.toString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  // #endregion
+  logger.error('[FlowBills] Unhandled rejection', event.reason instanceof Error ? event.reason : new Error(String(event.reason)));
 });
 
 // Apply CSP nonce at runtime
@@ -127,61 +120,8 @@ fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{metho
 // #endregion
 
 // Render the app
-console.log('[FlowBills] Starting React render');
-// #region agent log
-fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:86',message:'About to create React root',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-// #endregion
-try {
-  console.log('[DEBUG] main.tsx:130 - Creating React root, rootElement type:', rootElement.constructor.name);
-  console.log('[DEBUG] main.tsx:131 - Root element is:', rootElement);
-  console.log('[DEBUG] main.tsx:132 - createRoot function:', typeof createRoot);
-  
-  const root = createRoot(rootElement);
-  console.log('[DEBUG] main.tsx:135 - React root created successfully');
-  // #region agent log
-  fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:90',message:'React root created',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  // #endregion
-  
-  // Verify App is a valid React component
-  console.log('[DEBUG] main.tsx:139 - App component type:', typeof App);
-  console.log('[DEBUG] main.tsx:140 - App is function:', typeof App === 'function');
-  
-  // #region agent log
-  fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:92',message:'About to render App component',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  // #endregion
-  
-  console.log('[DEBUG] main.tsx:145 - About to call root.render(<App />)');
-  console.log('[DEBUG] main.tsx:146 - Root element before render (should be empty):', rootElement.innerHTML);
-  
-  // CRITICAL FIX: Use JSX directly (same as React.createElement but more reliable)
-  // The issue might be that we need to ensure React is fully initialized
-  if (!React || typeof React.createElement !== 'function') {
-    throw new Error('React is not properly initialized');
-  }
-  
-  console.log('[DEBUG] main.tsx:151 - React is valid, rendering App component');
-  root.render(<App />);
-  console.log('[DEBUG] main.tsx:153 - root.render() completed without throwing');
-  // #region agent log
-  fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:94',message:'App component render called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  // #endregion
-  
-  // Check if React actually rendered after a short delay
-  setTimeout(() => {
-    const rootCheck = document.getElementById('root');
-    const contentLength = rootCheck?.innerHTML.trim().length || 0;
-    console.log('[DEBUG] main.tsx:145 - Post-render check:', { contentLength, hasContent: contentLength > 0 });
-    if (contentLength === 0) {
-      console.error('[DEBUG] main.tsx:147 - WARNING: React render called but root element is still empty!');
-    }
-  }, 500);
-} catch (error) {
-  console.error('[DEBUG] main.tsx:150 - React render FAILED:', error);
-  // #region agent log
-  fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:97',message:'React render failed',data:{error:error?.toString(),stack:error?.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  // #endregion
-  throw error;
-}
+logger.debug('[FlowBills] Starting React render');
+createRoot(rootElement).render(<App />);
 
 // Remove loader after React renders - simple approach
 requestAnimationFrame(() => {
@@ -193,7 +133,7 @@ requestAnimationFrame(() => {
     fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:105',message:'Checking render result',data:{loaderExists:!!loader,rootContentLength:rootContent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
     // #endregion
     if (loader) {
-      console.log('[FlowBills] App rendered, removing loader');
+      logger.debug('[FlowBills] App rendered, removing loader');
       loader.remove();
       // #region agent log
       fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'main.tsx:109',message:'Loader removed',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});

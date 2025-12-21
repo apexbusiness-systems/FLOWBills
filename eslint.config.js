@@ -26,4 +26,18 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  // Override for edge functions - allow any for raw payloads, relax some rules
+  {
+    files: ["supabase/functions/**/*.ts"],
+    languageOptions: {
+      globals: {
+        ...globals.deno,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off", // Edge functions handle raw payloads
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-empty": ["warn", { allowEmptyCatch: true }], // Allow empty catch blocks for error handling
+    },
+  },
 );

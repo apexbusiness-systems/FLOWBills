@@ -11,7 +11,7 @@ permissions:
   issues: write
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20.x'
   LIGHTHOUSE_BUDGET_FCP: 1800
   LIGHTHOUSE_BUDGET_TTI: 3800
   LIGHTHOUSE_BUDGET_JS_SIZE: 76800  # 75KB gzip limit
@@ -206,10 +206,19 @@ jobs:
         id: bundle-analysis
         run: |
           # Get main route bundle size (gzipped)
-          if ls dist/assets/index-*.js 1> /dev/null 2>&1; then
+          # Vite outputs to dist/assets/js/index-*.js, but also check dist/assets/index-*.js for compatibility
+          if ls dist/assets/js/index-*.js 1> /dev/null 2>&1; then
+            MAIN_BUNDLE=$(find dist/assets/js -name "index-*.js" -type f -exec gzip -c {} \; | wc -c)
+          elif ls dist/assets/index-*.js 1> /dev/null 2>&1; then
             MAIN_BUNDLE=$(find dist/assets -name "index-*.js" -type f -exec gzip -c {} \; | wc -c)
           else
-            MAIN_BUNDLE=0
+            echo "⚠️ No index bundle found, checking for any JS bundle..."
+            if ls dist/assets/js/*.js 1> /dev/null 2>&1; then
+              # Use first JS file as fallback
+              MAIN_BUNDLE=$(find dist/assets/js -name "*.js" -type f | head -1 | xargs gzip -c | wc -c)
+            else
+              MAIN_BUNDLE=0
+            fi
           fi
           echo "main_bundle_size=$MAIN_BUNDLE" >> $GITHUB_OUTPUT
           
