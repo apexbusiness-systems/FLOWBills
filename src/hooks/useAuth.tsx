@@ -15,11 +15,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  console.log('[DEBUG] useAuth.tsx:17 - AuthProvider render starting');
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
+  console.log('[DEBUG] useAuth.tsx:23 - About to call useNavigate()');
   const navigate = useNavigate();
+  console.log('[DEBUG] useAuth.tsx:25 - useNavigate() completed successfully');
 
   const fetchUserRole = async (userId: string) => {
     try {
