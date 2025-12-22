@@ -7,6 +7,16 @@ import { AuthProvider } from '@/hooks/useAuth';
 import ErrorBoundary from '@/components/error-boundary/ErrorBoundary';
 import App from '@/App';
 import { healthChecker } from '@/lib/health-check';
+import React from 'react';
+
+// Mock BrowserRouter to be a pass-through component to avoid nested routers
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    BrowserRouter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  };
+});
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
