@@ -77,7 +77,7 @@ requestAnimationFrame(() => {
   requestAnimationFrame(() => {
     const loader = document.getElementById('flowbills-loader');
     if (loader) {
-      console.log('[FlowBills] App rendered, removing loader');
+      logger.debug('[FlowBills] App rendered, removing loader');
       loader.remove();
     }
   });
