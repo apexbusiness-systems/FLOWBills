@@ -73,7 +73,7 @@ jobs:
       continue-on-error: true
 
     - name: Upload SBOM Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       continue-on-error: true
       with:
         name: sbom-files
@@ -102,7 +102,7 @@ jobs:
         echo "✅ Security check completed"
 
     - name: Upload Security Reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       continue-on-error: true
       with:
         name: security-reports
@@ -250,7 +250,7 @@ jobs:
         tar -czf flowai-build-${{ github.sha }}.tar.gz dist/
         
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: application-build
         path: flowai-build-${{ github.sha }}.tar.gz
@@ -266,7 +266,7 @@ jobs:
     
     steps:
     - name: Download Build Artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: application-build
 

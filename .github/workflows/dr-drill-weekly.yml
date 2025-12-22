@@ -71,7 +71,7 @@ jobs:
       
       - name: Upload DR drill report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dr-drill-report-${{ steps.timestamp.outputs.timestamp }}
           path: dr-drill-report-*.json
