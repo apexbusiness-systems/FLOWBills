@@ -1,9 +1,10 @@
 import { toast } from "@/hooks/use-toast";
+import { logger } from "./logger";
 
 export interface AppError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
   severity: 'info' | 'warning' | 'error' | 'critical';
 }
 
@@ -46,25 +47,38 @@ export class ErrorHandler {
     this.reportError(appError);
   }
 
-  private isAppError(error: any): error is AppError {
-    return error && 
-           typeof error.code === 'string' && 
-           typeof error.message === 'string' &&
-           typeof error.severity === 'string';
+  private isAppError(error: unknown): error is AppError {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      'message' in error &&
+      'severity' in error &&
+      typeof (error as AppError).code === 'string' &&
+      typeof (error as AppError).message === 'string' &&
+      typeof (error as AppError).severity === 'string'
+    );
   }
 
   private logError(error: AppError) {
-    this.errorLog.push({
+    const errorWithTimestamp = {
       ...error,
-      timestamp: new Date().toISOString()
-    } as any);
+      timestamp: new Date().toISOString(),
+    };
+    
+    this.errorLog.push(errorWithTimestamp);
 
     // Keep only last 100 errors
     if (this.errorLog.length > 100) {
       this.errorLog = this.errorLog.slice(-100);
     }
 
-    console.error(`[${error.severity.toUpperCase()}] ${error.code}: ${error.message}`, error.details);
+    // Log error using logger
+    logger.error(
+      `[${error.severity.toUpperCase()}] ${error.code}: ${error.message}`,
+      undefined,
+      { details: error.details }
+    );
   }
 
   private notifyUser(error: AppError) {
@@ -146,7 +160,7 @@ export class ErrorHandler {
     };
   }
 
-  private async sendToMonitoringService(errorReport: any) {
+  private async sendToMonitoringService(errorReport: Record<string, unknown>) {
     try {
       // In production, replace with actual monitoring service endpoint
       const response = await fetch('/api/errors', {
@@ -156,17 +170,21 @@ export class ErrorHandler {
       });
       
       if (!response.ok) {
-        console.error('Failed to send error report to monitoring service');
+        logger.error('Failed to send error report to monitoring service');
       }
     } catch (error) {
-      console.error('Error reporting failed:', error);
+      logger.error('Error reporting failed', error);
     }
   }
 
   // Get stored error reports
-  getStoredErrors(): any[] {
+  getStoredErrors(): AppError[] {
     if (typeof window === 'undefined') return [];
-    return JSON.parse(localStorage.getItem('error_reports') || '[]');
+    try {
+      return JSON.parse(localStorage.getItem('error_reports') || '[]') as AppError[];
+    } catch {
+      return [];
+    }
   }
 
   // Clear stored errors
@@ -187,21 +205,21 @@ export class ErrorHandler {
 
 // Predefined error types for consistency
 export const ErrorTypes = {
-  VALIDATION: (message: string, details?: any): AppError => ({
+  VALIDATION: (message: string, details?: unknown): AppError => ({
     code: 'VALIDATION_ERROR',
     message,
     details,
     severity: 'error'
   }),
 
-  NETWORK: (message: string, details?: any): AppError => ({
+  NETWORK: (message: string, details?: unknown): AppError => ({
     code: 'NETWORK_ERROR',
     message,
     details,
     severity: 'error'
   }),
 
-  FILE_UPLOAD: (message: string, details?: any): AppError => ({
+  FILE_UPLOAD: (message: string, details?: unknown): AppError => ({
     code: 'FILE_UPLOAD_ERROR',
     message,
     details,
@@ -220,7 +238,7 @@ export const ErrorTypes = {
     severity: 'error'
   }),
 
-  DATA_CORRUPTION: (message: string, details?: any): AppError => ({
+  DATA_CORRUPTION: (message: string, details?: unknown): AppError => ({
     code: 'DATA_CORRUPTION',
     message,
     details,

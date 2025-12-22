@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    /* Phase 1: Enable noImplicitAny - catches implicit any types */
+    "noImplicitAny": true,
+    
+    /* Phase 2: Enable strictNullChecks - better null/undefined safety */
+    "strictNullChecks": true,
+    
+    /* Phase 3: Enable other strict checks gradually */
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false, // Disable for now - requires class property initialization
+    
+    /* Keep existing settings */
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
+  }
+}
+
