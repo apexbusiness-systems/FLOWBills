@@ -17,7 +17,9 @@ export function TrackLink({ to, children, source = "unknown", onClick, ...rest }
       supabase.functions.invoke('track-click', {
         body: { href, source, ts: Date.now() }
       }).catch(() => {}); // Silent fail
-    } catch {}
+    } catch {
+      // Silent fail - tracking errors should not break the app
+    }
     
     if (onClick) onClick(e);
   }, [to, source, onClick]);

@@ -106,16 +106,16 @@ class LoadTester {
 
     } finally {
       this.isRunning = false;
-      
-      const metrics = this.calculateMetrics(config);
-      
-      toast({
-        title: "Load Test Completed",
-        description: `${metrics.totalRequests} requests completed with ${metrics.errorRate}% error rate`
-      });
-
-      return metrics;
     }
+    
+    const metrics = this.calculateMetrics(config);
+    
+    toast({
+      title: "Load Test Completed",
+      description: `${metrics.totalRequests} requests completed with ${metrics.errorRate}% error rate`
+    });
+
+    return metrics;
   }
 
   // Simulate individual user behavior

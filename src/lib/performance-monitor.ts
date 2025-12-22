@@ -106,7 +106,9 @@ class PerformanceMonitor {
     window.addEventListener("pagehide", () => {
       try {
         navigator.sendBeacon("/api/metrics", new Blob([JSON.stringify({ events: queue.splice(0) })], { type: "application/json" }));
-      } catch {}
+      } catch {
+        // Silent fail - metrics collection errors should not break the app
+      }
     });
   }
 
