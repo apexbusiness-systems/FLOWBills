@@ -1,3 +1,14 @@
+import { vi } from 'vitest';
+
+// Mock BrowserRouter to pass children through, allowing the test-utils router to handle navigation
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    BrowserRouter: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
+
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@/lib/test-utils';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
