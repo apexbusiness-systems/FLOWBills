@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/hooks/useAuth';
 import ErrorBoundary from '@/components/error-boundary/ErrorBoundary';
 import App from '@/App';
+import { healthChecker } from '@/lib/health-check';
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
@@ -109,8 +110,6 @@ describe('Application Integration Tests', () => {
   });
 
   it('should initialize health monitoring every 5 minutes', () => {
-    const { healthChecker } = require('@/lib/health-check');
-    
     renderWithProviders(<App />);
     
     // Health check runs every 5 minutes (300000ms)

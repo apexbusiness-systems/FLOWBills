@@ -60,7 +60,7 @@ export const ApprovalWorkflowStatus = () => {
 
     const fetchPendingApprovals = async () => {
       try {
-        let query = supabase
+        const query = supabase
           .from('approvals')
           .select(`
             id,

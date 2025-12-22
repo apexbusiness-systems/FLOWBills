@@ -12,7 +12,7 @@ export const sanitizeInput = (input: string): string => {
     .replace(/on\w+=/gi, '') // Remove event handlers
     .replace(/data:/gi, '') // Remove data URIs
     .replace(/\0/g, '') // Remove null bytes
-    .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+    .replace(/[\u0000-\u001F\u007F]/g, '') // Remove control characters
     .trim();
 };
 
