@@ -24,7 +24,10 @@ function validateOilGasQuery(query: string): void {
 }
 
 // Industry-specific RAG retrieval
-async function retrieveOilGasContext(query: string, supabase: any): Promise<string[]> {
+async function retrieveOilGasContext(
+  query: string, 
+  supabase: ReturnType<typeof createClient>
+): Promise<string[]> {
   console.log("📚 Retrieving O&G industry context...");
   
   try {
