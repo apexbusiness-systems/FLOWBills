@@ -12,6 +12,7 @@ vi.mock('react-router-dom', async () => {
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/hooks/useAuth';
 import ErrorBoundary from '@/components/error-boundary/ErrorBoundary';
@@ -78,13 +79,13 @@ const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <BrowserRouter>
+        <MemoryRouter>
           <AuthProvider>
             <ErrorBoundary>
               {component}
             </ErrorBoundary>
           </AuthProvider>
-        </BrowserRouter>
+        </MemoryRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );
