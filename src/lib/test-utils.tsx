@@ -1,3 +1,18 @@
+// Polyfill matchMedia for jsdom environment
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(), // Deprecated
+    removeListener: vi.fn(), // Deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 import React, { ReactElement } from 'react';
 import { render, RenderOptions, renderHook as rtlRenderHook } from '@testing-library/react';
 import { screen, waitFor } from '@testing-library/dom';
