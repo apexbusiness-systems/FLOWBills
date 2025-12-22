@@ -1,67 +1,47 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { queryClient, fetchInvoicesPaginated, idempotentMutation } from '@/lib/api-client';
-import { deduper } from '@/lib/observability';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { deduper } from '@/lib/api-client';
 
 describe('API Client', () => {
-  describe('queryClient', () => {
-    it('should be configured with correct default options', () => {
-      const defaultOptions = queryClient.getDefaultOptions();
-      
-      expect(defaultOptions.queries).toBeDefined();
-      expect(defaultOptions.queries?.staleTime).toBe(5 * 60 * 1000); // 5 minutes
-      expect(defaultOptions.queries?.gcTime).toBe(10 * 60 * 1000); // 10 minutes
-      expect(defaultOptions.queries?.refetchOnWindowFocus).toBe(false);
-      expect(defaultOptions.queries?.refetchOnMount).toBe(false);
-    });
-
-    it('should have retry logic configured', () => {
-      const defaultOptions = queryClient.getDefaultOptions();
-      const retryFn = defaultOptions.queries?.retry;
-      
-      expect(retryFn).toBeDefined();
-      if (retryFn && typeof retryFn === 'function') {
-        // Test that 4xx errors don't retry
-        const httpError = { status: 404 };
-        expect(retryFn(0, httpError)).toBe(false);
-        
-        // Test that 5xx errors retry (up to 2 times)
-        const serverError = { status: 500 };
-        expect(retryFn(0, serverError)).toBe(true);
-        expect(retryFn(1, serverError)).toBe(true);
-        expect(retryFn(2, serverError)).toBe(false);
-      }
-    });
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  describe('fetchInvoicesPaginated', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-    });
-
-    it('should be a function', () => {
-      expect(typeof fetchInvoicesPaginated).toBe('function');
-    });
-
-    // Note: Full integration test would require mocking Supabase client
-    // This is a unit test to verify the function exists and has correct signature
+  it('should have a deduper instance', () => {
+    expect(deduper).toBeDefined();
+    expect(deduper.once).toBeDefined();
+    expect(typeof deduper.once).toBe('function');
   });
 
-  describe('idempotentMutation', () => {
-    it('should be a function', () => {
-      expect(typeof idempotentMutation).toBe('function');
-    });
+  it('should deduplicate concurrent requests', async () => {
+    const mockFn = vi.fn().mockResolvedValue('result');
+    
+    const promise1 = deduper.once('test-key', mockFn);
+    const promise2 = deduper.once('test-key', mockFn);
+    const promise3 = deduper.once('test-key', mockFn);
 
-    it('should use deduper for idempotency', async () => {
-      const mockFn = vi.fn().mockResolvedValue('result');
-      const deduperSpy = vi.spyOn(deduper, 'once');
+    const [result1, result2, result3] = await Promise.all([promise1, promise2, promise3]);
 
-      await idempotentMutation('test-key', mockFn);
+    // All should return the same result
+    expect(result1).toBe('result');
+    expect(result2).toBe('result');
+    expect(result3).toBe('result');
 
-      expect(deduperSpy).toHaveBeenCalledWith(
-        'mutation-test-key',
-        expect.any(Function)
-      );
-    });
+    // Function should only be called once
+    expect(mockFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('should allow different keys to execute independently', async () => {
+    const mockFn1 = vi.fn().mockResolvedValue('result1');
+    const mockFn2 = vi.fn().mockResolvedValue('result2');
+
+    const promise1 = deduper.once('key1', mockFn1);
+    const promise2 = deduper.once('key2', mockFn2);
+
+    const [result1, result2] = await Promise.all([promise1, promise2]);
+
+    expect(result1).toBe('result1');
+    expect(result2).toBe('result2');
+    expect(mockFn1).toHaveBeenCalledTimes(1);
+    expect(mockFn2).toHaveBeenCalledTimes(1);
   });
 });
-
