@@ -1,6 +1,16 @@
+import { vi } from 'vitest';
+
+// Mock BrowserRouter to pass children through, allowing the test-utils router to handle navigation
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    BrowserRouter: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
+
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { BrowserRouter } from 'react-router-dom';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/hooks/useAuth';
@@ -8,15 +18,6 @@ import ErrorBoundary from '@/components/error-boundary/ErrorBoundary';
 import App from '@/App';
 import { healthChecker } from '@/lib/health-check';
 import React from 'react';
-
-// Mock BrowserRouter to be a pass-through component to avoid nested routers
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    BrowserRouter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  };
-});
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({

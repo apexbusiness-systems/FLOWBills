@@ -1,9 +1,9 @@
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, renderHook as rtlRenderHook } from '@testing-library/react';
 import { screen, waitFor } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/hooks/useAuth';
 import { vi } from 'vitest';
@@ -26,16 +26,16 @@ const createTestQueryClient = () =>
 // Test providers wrapper
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   const testQueryClient = createTestQueryClient();
-  
+
   return (
     <QueryClientProvider client={testQueryClient}>
-      <BrowserRouter>
+      <MemoryRouter initialEntries={['/']}>
         <TooltipProvider>
           <AuthProvider>
             {children}
           </AuthProvider>
         </TooltipProvider>
-      </BrowserRouter>
+      </MemoryRouter>
     </QueryClientProvider>
   );
 };
@@ -45,6 +45,12 @@ const customRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>,
 ) => render(ui, { wrapper: AllTheProviders, ...options });
+
+// Custom renderHook function
+const customRenderHook = <Result, Props>(
+  render: (initialProps: Props) => Result,
+  options?: Omit<RenderOptions, 'wrapper'>,
+) => rtlRenderHook(render, { wrapper: AllTheProviders, ...options });
 
 // Mock user data for testing
 export const mockUser = {
@@ -163,4 +169,5 @@ export const setupTestEnvironment = () => {
 // Re-export everything
 export { screen, waitFor, userEvent };
 export { customRender as render };
+export { customRenderHook as renderHook };
 export { createTestQueryClient };

@@ -212,7 +212,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center">
+          <div className="text-center" data-testid="loading-skeleton">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading invoices...</p>
           </div>
