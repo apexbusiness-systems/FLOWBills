@@ -3,6 +3,8 @@
  * Monitors service worker health and implements automatic recovery
  */
 
+import { logger } from './logger';
+
 interface SWHealthStatus {
   registered: boolean;
   active: boolean;
@@ -20,8 +22,10 @@ class ServiceWorkerHealthMonitor {
   };
 
   private checkInterval: number | null = null;
+  private recoveryStartTime: number | null = null;
   private readonly MAX_FAILURES = 3;
   private readonly CHECK_INTERVAL = 60000; // 1 minute
+  private readonly RECOVERY_TIMEOUT_MS = 30000; // 30 seconds max recovery time
 
   /**
    * Register service worker with health monitoring
@@ -29,7 +33,7 @@ class ServiceWorkerHealthMonitor {
    */
   async register(): Promise<void> {
     if (!('serviceWorker' in navigator)) {
-      console.warn('Service Worker not supported');
+      logger.warn('Service Worker not supported');
       return;
     }
 
@@ -37,14 +41,14 @@ class ServiceWorkerHealthMonitor {
       // STEP 1: Clear all existing registrations to ensure clean state
       const existingRegs = await navigator.serviceWorker.getRegistrations();
       if (existingRegs.length > 0) {
-        console.log(`Clearing ${existingRegs.length} existing service worker(s)...`);
+        logger.debug(`Clearing ${existingRegs.length} existing service worker(s)...`);
         await Promise.all(existingRegs.map(reg => reg.unregister()));
       }
 
       // STEP 2: Clear all caches
       const cacheKeys = await caches.keys();
       if (cacheKeys.length > 0) {
-        console.log(`Clearing ${cacheKeys.length} cache(s)...`);
+        logger.debug(`Clearing ${cacheKeys.length} cache(s)...`);
         await Promise.all(cacheKeys.map(key => caches.delete(key)));
       }
 
@@ -54,27 +58,28 @@ class ServiceWorkerHealthMonitor {
         updateViaCache: 'none', // Always fetch fresh SW
       });
 
-      console.log('✓ Service Worker registered (clean state)');
+      logger.info('Service Worker registered (clean state)');
       this.status.registered = true;
       this.status.failureCount = 0;
       this.status.error = undefined;
+      this.recoveryStartTime = null; // Reset recovery timer on success
 
       // Check if SW is active
       if (registration.active) {
         this.status.active = true;
-        console.log('✓ Service Worker is active');
+        logger.debug('Service Worker is active');
       }
 
       // Monitor for updates (but don't prompt aggressively)
       registration.addEventListener('updatefound', () => {
-        console.log('→ Service Worker update found');
+        logger.debug('Service Worker update found');
       });
 
       // Start health monitoring
       this.startHealthChecks();
 
     } catch (error) {
-      console.warn('SW registration skipped:', error);
+      logger.warn('SW registration skipped', error);
       // Don't retry aggressively - let the app work without SW
       this.status.registered = false;
       this.status.error = error instanceof Error ? error.message : 'Unknown error';
@@ -84,19 +89,33 @@ class ServiceWorkerHealthMonitor {
   /**
    * Handle registration errors with automatic recovery
    */
-  private async handleRegistrationError(error: any): Promise<void> {
-    console.error('✗ Service Worker registration failed:', error);
+  private async handleRegistrationError(error: unknown): Promise<void> {
+    logger.error('Service Worker registration failed', error);
     this.status.registered = false;
-    this.status.error = error.message || 'Unknown error';
+    this.status.error = error instanceof Error ? error.message : 'Unknown error';
     this.status.failureCount++;
+
+    // Check if recovery has been running too long
+    if (this.recoveryStartTime && Date.now() - this.recoveryStartTime > this.RECOVERY_TIMEOUT_MS) {
+      logger.error('Service Worker recovery timeout - forcing full page reload');
+      await this.unregisterAll();
+      // Force full page reload to break out of any recovery loop
+      window.location.reload();
+      return;
+    }
 
     // Attempt recovery if under failure threshold
     if (this.status.failureCount < this.MAX_FAILURES) {
-      console.log(`→ Attempting recovery (${this.status.failureCount}/${this.MAX_FAILURES})...`);
+      logger.debug(`Attempting recovery (${this.status.failureCount}/${this.MAX_FAILURES})...`);
+      if (!this.recoveryStartTime) {
+        this.recoveryStartTime = Date.now();
+      }
       await this.recover();
     } else {
-      console.error('✗ Service Worker recovery failed after max attempts');
+      logger.error('Service Worker recovery failed after max attempts - forcing full page reload');
       await this.unregisterAll();
+      // Force full page reload to break out of any recovery loop
+      window.location.reload();
     }
   }
 
@@ -104,27 +123,55 @@ class ServiceWorkerHealthMonitor {
    * Attempt to recover from failed registration
    */
   async recover(): Promise<void> {
+    // Check timeout before starting recovery
+    if (this.recoveryStartTime && Date.now() - this.recoveryStartTime > this.RECOVERY_TIMEOUT_MS) {
+      logger.error('Service Worker recovery timeout exceeded - forcing full page reload');
+      await this.unregisterAll();
+      window.location.reload();
+      return;
+    }
+
+    // Set recovery start time if not already set
+    if (!this.recoveryStartTime) {
+      this.recoveryStartTime = Date.now();
+    }
+
     try {
       // Unregister existing service workers
       const registrations = await navigator.serviceWorker.getRegistrations();
       await Promise.all(registrations.map(reg => reg.unregister()));
       
-      console.log('✓ Cleared old service workers');
+      logger.debug('Cleared old service workers');
 
       // Clear all caches
       const cacheKeys = await caches.keys();
       await Promise.all(cacheKeys.map(key => caches.delete(key)));
       
-      console.log('✓ Cleared all caches');
+      logger.debug('Cleared all caches');
 
       // Wait a bit before re-registering
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      // Check timeout again before retrying registration
+      if (this.recoveryStartTime && Date.now() - this.recoveryStartTime > this.RECOVERY_TIMEOUT_MS) {
+        logger.error('Service Worker recovery timeout during cleanup - forcing full page reload');
+        window.location.reload();
+        return;
+      }
+
       // Retry registration
       await this.register();
     } catch (error) {
-      console.error('✗ Recovery failed:', error);
+      logger.error('Recovery failed', error);
       this.status.failureCount++;
+      
+      // Check timeout after error
+      if (this.recoveryStartTime && Date.now() - this.recoveryStartTime > this.RECOVERY_TIMEOUT_MS) {
+        logger.error('Service Worker recovery timeout after error - forcing full page reload');
+        await this.unregisterAll();
+        window.location.reload();
+        return;
+      }
     }
   }
 
@@ -135,11 +182,11 @@ class ServiceWorkerHealthMonitor {
     try {
       const registrations = await navigator.serviceWorker.getRegistrations();
       await Promise.all(registrations.map(reg => reg.unregister()));
-      console.log('✓ All service workers unregistered');
+      logger.info('All service workers unregistered');
       this.status.registered = false;
       this.status.active = false;
     } catch (error) {
-      console.error('✗ Failed to unregister service workers:', error);
+      logger.error('Failed to unregister service workers', error);
     }
   }
 
@@ -174,7 +221,7 @@ class ServiceWorkerHealthMonitor {
       const registration = await navigator.serviceWorker.getRegistration();
 
       if (!registration) {
-        console.warn('⚠ Service Worker not registered, attempting recovery...');
+        logger.warn('Service Worker not registered, attempting recovery...');
         await this.recover();
         return;
       }
@@ -184,9 +231,9 @@ class ServiceWorkerHealthMonitor {
 
       // Check if SW is stuck in installing/waiting
       if (registration.installing) {
-        console.log('→ Service Worker installing...');
+        logger.debug('Service Worker installing...');
       } else if (registration.waiting) {
-        console.log('→ Service Worker waiting...');
+        logger.debug('Service Worker waiting...');
         // Prompt user to activate new SW
         if (confirm('Update available! Activate now?')) {
           registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -194,7 +241,7 @@ class ServiceWorkerHealthMonitor {
       }
 
     } catch (error) {
-      console.error('✗ Health check failed:', error);
+      logger.error('Health check failed', error);
       this.status.error = error instanceof Error ? error.message : 'Unknown error';
     }
   }
@@ -214,10 +261,10 @@ class ServiceWorkerHealthMonitor {
       const registration = await navigator.serviceWorker.getRegistration();
       if (registration) {
         await registration.update();
-        console.log('✓ Service Worker update check triggered');
+        logger.debug('Service Worker update check triggered');
       }
     } catch (error) {
-      console.error('✗ Force update failed:', error);
+      logger.error('Force update failed', error);
     }
   }
 }
@@ -227,7 +274,14 @@ export const swHealthMonitor = new ServiceWorkerHealthMonitor();
 
 // Expose to window for debugging
 if (typeof window !== 'undefined') {
-  (window as any).swHealth = {
+  interface SWHealthDebug {
+    status: () => SWHealthStatus;
+    recover: () => Promise<void>;
+    unregister: () => Promise<void>;
+    update: () => Promise<void>;
+  }
+  
+  (window as Window & { swHealth?: SWHealthDebug }).swHealth = {
     status: () => swHealthMonitor.getStatus(),
     recover: () => swHealthMonitor.recover(),
     unregister: () => swHealthMonitor.unregisterAll(),
