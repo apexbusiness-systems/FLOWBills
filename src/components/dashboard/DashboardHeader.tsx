@@ -111,6 +111,18 @@ const DashboardHeader = () => {
           </div>
         </div>
 
+        {/* Welcome Message */}
+        <div className="hidden md:flex flex-1 items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-foreground">
+              Welcome back, {getDisplayName()}!
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Oil & Gas Billing Platform
+            </p>
+          </div>
+        </div>
+
         {/* Navigation Menu */}
         <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
           <SheetTrigger asChild>
