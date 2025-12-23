@@ -1,5 +1,5 @@
-# Reusable Notifications Workflow
-# Uses proper heredoc syntax to avoid shell quoting issues
+# Reusable Notifications Workflow - Elite DevOps Protocol
+# Fixes: Heredoc syntax errors with literal INNEREOF marker + sed replacement
 name: Notifications
 
 on:
@@ -23,16 +23,6 @@ on:
         required: false
         type: string
         default: 'unknown'
-      notify_slack:
-        description: 'Send Slack notification'
-        required: false
-        type: boolean
-        default: true
-      notify_email:
-        description: 'Send email notification (requires email secrets)'
-        required: false
-        type: boolean
-        default: false
       severity:
         description: 'Severity level (info, warning, error, critical)'
         required: false
@@ -41,18 +31,11 @@ on:
     secrets:
       SLACK_WEBHOOK_URL:
         required: false
-      EMAIL_SMTP_SERVER:
-        required: false
-      EMAIL_SMTP_USER:
-        required: false
-      EMAIL_SMTP_PASSWORD:
-        required: false
-      EMAIL_RECIPIENTS:
+      DISCORD_WEBHOOK_URL:
         required: false
       PAGERDUTY_KEY:
         required: false
 
-  # Also allow direct workflow dispatch for testing
   workflow_dispatch:
     inputs:
       status:
@@ -71,7 +54,7 @@ on:
       message:
         description: 'Notification message'
         required: false
-        default: 'This is a test notification from GitHub Actions'
+        default: 'This is a test notification'
       environment:
         description: 'Environment'
         required: false
@@ -88,22 +71,21 @@ on:
           - critical
 
 jobs:
-  prepare-notification:
+  prepare:
     runs-on: ubuntu-latest
-    name: Prepare Notification Content
+    name: Prepare Notification
     outputs:
-      emoji: ${{ steps.emoji.outputs.emoji }}
-      color: ${{ steps.emoji.outputs.color }}
-      slack_color: ${{ steps.emoji.outputs.slack_color }}
+      emoji: ${{ steps.style.outputs.emoji }}
+      color: ${{ steps.style.outputs.color }}
+      slack_color: ${{ steps.style.outputs.slack_color }}
 
     steps:
-      - name: Determine notification styling
-        id: emoji
+      - name: Determine Styling
+        id: style
         run: |
           STATUS="${{ inputs.status }}"
           SEVERITY="${{ inputs.severity }}"
 
-          # Determine emoji based on status
           case "$STATUS" in
             success)
               EMOJI="white_check_mark"
@@ -127,7 +109,7 @@ jobs:
               ;;
           esac
 
-          # Override color for critical severity
+          # Override for critical severity
           if [ "$SEVERITY" = "critical" ]; then
             EMOJI="rotating_light"
             SLACK_COLOR="#ff0000"
@@ -137,241 +119,298 @@ jobs:
           echo "color=$COLOR" >> $GITHUB_OUTPUT
           echo "slack_color=$SLACK_COLOR" >> $GITHUB_OUTPUT
 
-  slack-notification:
+  slack:
     runs-on: ubuntu-latest
     name: Slack Notification
-    needs: prepare-notification
-    if: inputs.notify_slack != false
+    needs: prepare
 
     steps:
-      - name: Send Slack notification
+      - name: Send Slack Notification
         continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
-            echo "SLACK_WEBHOOK_URL not configured - skipping Slack notification"
+            echo "SLACK_WEBHOOK_URL not configured - skipping"
             exit 0
           fi
 
-          # Build message using heredoc with proper quoting
-          # This avoids shell interpolation issues with special characters
-          MESSAGE="${{ inputs.message }}"
-          if [ -z "$MESSAGE" ]; then
-            MESSAGE="No additional details provided"
-          fi
-
-          # Use cat with heredoc for complex JSON - proper syntax
-          PAYLOAD=$(cat <<'HEREDOC_EOF'
+          # Use literal heredoc to prevent shell interpolation issues
+          # This is the critical fix for heredoc syntax errors
+          PAYLOAD_TEMPLATE=$(cat <<'INNEREOF'
           {
             "attachments": [
               {
-                "color": "${{ needs.prepare-notification.outputs.slack_color }}",
+                "color": "__SLACK_COLOR__",
                 "blocks": [
                   {
                     "type": "header",
                     "text": {
                       "type": "plain_text",
-                      "text": "${{ inputs.title }}",
+                      "text": ":__EMOJI__: __TITLE__",
                       "emoji": true
                     }
                   },
                   {
                     "type": "section",
                     "fields": [
-                      {
-                        "type": "mrkdwn",
-                        "text": "*Status:*\n:${{ needs.prepare-notification.outputs.emoji }}: ${{ inputs.status }}"
-                      },
-                      {
-                        "type": "mrkdwn",
-                        "text": "*Environment:*\n${{ inputs.environment }}"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "section",
-                    "fields": [
-                      {
-                        "type": "mrkdwn",
-                        "text": "*Repository:*\n${{ github.repository }}"
-                      },
-                      {
-                        "type": "mrkdwn",
-                        "text": "*Triggered by:*\n${{ github.actor }}"
-                      }
+                      {"type": "mrkdwn", "text": "*Status:*\n__STATUS__"},
+                      {"type": "mrkdwn", "text": "*Environment:*\n__ENVIRONMENT__"},
+                      {"type": "mrkdwn", "text": "*Severity:*\n__SEVERITY__"},
+                      {"type": "mrkdwn", "text": "*Triggered by:*\n__ACTOR__"}
                     ]
                   },
                   {
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": "*Details:*\n${{ inputs.message }}"
+                      "text": "*Details:*\n__MESSAGE__"
                     }
                   },
                   {
                     "type": "context",
                     "elements": [
-                      {
-                        "type": "mrkdwn",
-                        "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
-                      }
+                      {"type": "mrkdwn", "text": "<__RUN_URL__|View Workflow> | __TIMESTAMP__"}
                     ]
                   }
                 ]
               }
             ]
           }
-          HEREDOC_EOF
+INNEREOF
           )
 
-          # Send the notification
-          HTTP_CODE=$(curl -s -o /tmp/slack_response.txt -w "%{http_code}" \
-            -X POST "$SLACK_WEBHOOK_URL" \
-            -H "Content-Type: application/json" \
-            -d "$PAYLOAD")
+          # Use sed for safe variable replacement (avoids shell quoting issues)
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          if [ "$HTTP_CODE" -eq 200 ]; then
-            echo "Slack notification sent successfully"
-          else
-            echo "::warning::Slack notification failed with HTTP $HTTP_CODE"
-            cat /tmp/slack_response.txt
+          PAYLOAD=$(echo "$PAYLOAD_TEMPLATE" | \
+            sed "s|__SLACK_COLOR__|${{ needs.prepare.outputs.slack_color }}|g" | \
+            sed "s|__EMOJI__|${{ needs.prepare.outputs.emoji }}|g" | \
+            sed "s|__TITLE__|${{ inputs.title }}|g" | \
+            sed "s|__STATUS__|${{ inputs.status }}|g" | \
+            sed "s|__ENVIRONMENT__|${{ inputs.environment }}|g" | \
+            sed "s|__SEVERITY__|${{ inputs.severity }}|g" | \
+            sed "s|__ACTOR__|${{ github.actor }}|g" | \
+            sed "s|__MESSAGE__|${{ inputs.message }}|g" | \
+            sed "s|__RUN_URL__|${RUN_URL}|g" | \
+            sed "s|__TIMESTAMP__|${TIMESTAMP}|g")
+
+          # Retry logic (3 attempts with exponential backoff)
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          RETRY_DELAY=2
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            HTTP_CODE=$(curl -s -o /tmp/slack_response.txt -w "%{http_code}" \
+              -X POST "$SLACK_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD")
+
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Slack notification sent successfully"
+              exit 0
+            fi
+
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+              echo "Attempt $RETRY_COUNT failed (HTTP $HTTP_CODE), retrying in ${RETRY_DELAY}s..."
+              sleep $RETRY_DELAY
+              RETRY_DELAY=$((RETRY_DELAY * 2))
+            fi
+          done
+
+          echo "::warning::Slack notification failed after $MAX_RETRIES attempts (HTTP $HTTP_CODE)"
+          cat /tmp/slack_response.txt 2>/dev/null || true
+
+          # Non-blocking exit to prevent CI failures
+          exit 0
+
+  discord:
+    runs-on: ubuntu-latest
+    name: Discord Fallback
+    needs: prepare
+    if: inputs.status == 'failure' || inputs.severity == 'critical'
+
+    steps:
+      - name: Send Discord Notification
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL not configured - skipping"
+            exit 0
           fi
 
-  pagerduty-notification:
+          # Determine Discord color (decimal format)
+          case "${{ inputs.status }}" in
+            success) DISCORD_COLOR=3066993 ;;  # Green
+            failure) DISCORD_COLOR=16711680 ;; # Red
+            *) DISCORD_COLOR=16776960 ;;       # Yellow
+          esac
+
+          # Use literal heredoc for Discord payload
+          PAYLOAD_TEMPLATE=$(cat <<'INNEREOF'
+          {
+            "content": ":__EMOJI__: **__TITLE__**",
+            "embeds": [
+              {
+                "title": "__TITLE__",
+                "description": "__MESSAGE__",
+                "color": __DISCORD_COLOR__,
+                "fields": [
+                  {"name": "Status", "value": "__STATUS__", "inline": true},
+                  {"name": "Environment", "value": "__ENVIRONMENT__", "inline": true},
+                  {"name": "Severity", "value": "__SEVERITY__", "inline": true},
+                  {"name": "Repository", "value": "__REPO__", "inline": true},
+                  {"name": "Actor", "value": "__ACTOR__", "inline": true}
+                ],
+                "footer": {"text": "FLOWBills Notifications"},
+                "timestamp": "__ISO_TIMESTAMP__"
+              }
+            ]
+          }
+INNEREOF
+          )
+
+          ISO_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          PAYLOAD=$(echo "$PAYLOAD_TEMPLATE" | \
+            sed "s|__EMOJI__|${{ needs.prepare.outputs.emoji }}|g" | \
+            sed "s|__TITLE__|${{ inputs.title }}|g" | \
+            sed "s|__MESSAGE__|${{ inputs.message }}|g" | \
+            sed "s|__DISCORD_COLOR__|${DISCORD_COLOR}|g" | \
+            sed "s|__STATUS__|${{ inputs.status }}|g" | \
+            sed "s|__ENVIRONMENT__|${{ inputs.environment }}|g" | \
+            sed "s|__SEVERITY__|${{ inputs.severity }}|g" | \
+            sed "s|__REPO__|${{ github.repository }}|g" | \
+            sed "s|__ACTOR__|${{ github.actor }}|g" | \
+            sed "s|__ISO_TIMESTAMP__|${ISO_TIMESTAMP}|g")
+
+          # Retry logic
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            HTTP_CODE=$(curl -s -o /tmp/discord_response.txt -w "%{http_code}" \
+              -X POST "$DISCORD_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD")
+
+            if [ "$HTTP_CODE" = "204" ] || [ "$HTTP_CODE" = "200" ]; then
+              echo "Discord notification sent successfully"
+              exit 0
+            fi
+
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "Attempt $RETRY_COUNT failed (HTTP $HTTP_CODE), retrying..."
+            sleep 2
+          done
+
+          echo "::warning::Discord notification failed after $MAX_RETRIES attempts"
+          # Non-blocking exit
+          exit 0
+
+  pagerduty:
     runs-on: ubuntu-latest
     name: PagerDuty Alert
-    needs: prepare-notification
+    needs: prepare
     if: inputs.severity == 'critical' || inputs.severity == 'error'
 
     steps:
-      - name: Send PagerDuty alert
+      - name: Send PagerDuty Alert
         continue-on-error: true
         env:
           PAGERDUTY_KEY: ${{ secrets.PAGERDUTY_KEY }}
         run: |
           if [ -z "$PAGERDUTY_KEY" ]; then
-            echo "PAGERDUTY_KEY not configured - skipping PagerDuty alert"
+            echo "PAGERDUTY_KEY not configured - skipping"
             exit 0
           fi
 
-          # Determine event action based on status
+          # Determine event action
           EVENT_ACTION="trigger"
           if [ "${{ inputs.status }}" = "success" ]; then
             EVENT_ACTION="resolve"
           fi
 
-          # Build PagerDuty payload using heredoc
-          PAYLOAD=$(cat <<'PD_EOF'
+          # Use literal heredoc for PagerDuty payload
+          PAYLOAD_TEMPLATE=$(cat <<'INNEREOF'
           {
-            "routing_key": "${{ secrets.PAGERDUTY_KEY }}",
-            "event_action": "EVENT_ACTION_PLACEHOLDER",
-            "dedup_key": "${{ github.repository }}-${{ github.workflow }}-${{ github.run_id }}",
+            "routing_key": "__ROUTING_KEY__",
+            "event_action": "__EVENT_ACTION__",
+            "dedup_key": "__DEDUP_KEY__",
             "payload": {
-              "summary": "${{ inputs.title }}",
-              "severity": "${{ inputs.severity }}",
-              "source": "${{ github.repository }}",
-              "component": "${{ github.workflow }}",
-              "group": "${{ inputs.environment }}",
+              "summary": "__TITLE__",
+              "severity": "__SEVERITY__",
+              "source": "__REPO__",
+              "component": "__WORKFLOW__",
+              "group": "__ENVIRONMENT__",
               "class": "github-actions",
               "custom_details": {
-                "status": "${{ inputs.status }}",
-                "environment": "${{ inputs.environment }}",
-                "actor": "${{ github.actor }}",
-                "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                "message": "${{ inputs.message }}"
+                "status": "__STATUS__",
+                "actor": "__ACTOR__",
+                "message": "__MESSAGE__",
+                "run_url": "__RUN_URL__"
               }
             }
           }
-          PD_EOF
+INNEREOF
           )
 
-          # Replace placeholder with actual event action
-          PAYLOAD=$(echo "$PAYLOAD" | sed "s/EVENT_ACTION_PLACEHOLDER/$EVENT_ACTION/")
+          DEDUP_KEY="${{ github.repository }}-${{ github.workflow }}-${{ github.run_id }}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          PAYLOAD=$(echo "$PAYLOAD_TEMPLATE" | \
+            sed "s|__ROUTING_KEY__|${{ secrets.PAGERDUTY_KEY }}|g" | \
+            sed "s|__EVENT_ACTION__|${EVENT_ACTION}|g" | \
+            sed "s|__DEDUP_KEY__|${DEDUP_KEY}|g" | \
+            sed "s|__TITLE__|${{ inputs.title }}|g" | \
+            sed "s|__SEVERITY__|${{ inputs.severity }}|g" | \
+            sed "s|__REPO__|${{ github.repository }}|g" | \
+            sed "s|__WORKFLOW__|${{ github.workflow }}|g" | \
+            sed "s|__ENVIRONMENT__|${{ inputs.environment }}|g" | \
+            sed "s|__STATUS__|${{ inputs.status }}|g" | \
+            sed "s|__ACTOR__|${{ github.actor }}|g" | \
+            sed "s|__MESSAGE__|${{ inputs.message }}|g" | \
+            sed "s|__RUN_URL__|${RUN_URL}|g")
 
           HTTP_CODE=$(curl -s -o /tmp/pd_response.txt -w "%{http_code}" \
             -X POST "https://events.pagerduty.com/v2/enqueue" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD")
 
-          if [ "$HTTP_CODE" -eq 202 ]; then
+          if [ "$HTTP_CODE" = "202" ]; then
             echo "PagerDuty alert sent successfully"
           else
-            echo "::warning::PagerDuty alert failed with HTTP $HTTP_CODE"
-            cat /tmp/pd_response.txt
+            echo "::warning::PagerDuty alert failed (HTTP $HTTP_CODE)"
+            cat /tmp/pd_response.txt 2>/dev/null || true
           fi
 
-  email-notification:
-    runs-on: ubuntu-latest
-    name: Email Notification
-    needs: prepare-notification
-    if: inputs.notify_email == true
-
-    steps:
-      - name: Send email notification
-        continue-on-error: true
-        env:
-          EMAIL_SMTP_SERVER: ${{ secrets.EMAIL_SMTP_SERVER }}
-          EMAIL_SMTP_USER: ${{ secrets.EMAIL_SMTP_USER }}
-          EMAIL_SMTP_PASSWORD: ${{ secrets.EMAIL_SMTP_PASSWORD }}
-          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
-        run: |
-          if [ -z "$EMAIL_SMTP_SERVER" ] || [ -z "$EMAIL_RECIPIENTS" ]; then
-            echo "Email configuration incomplete - skipping email notification"
-            exit 0
-          fi
-
-          # Install mailx if not available
-          sudo apt-get update -qq && sudo apt-get install -y -qq mailutils
-
-          # Create email body using heredoc
-          EMAIL_BODY=$(cat <<'EMAIL_EOF'
-          GitHub Actions Notification
-
-          Title: ${{ inputs.title }}
-          Status: ${{ inputs.status }}
-          Environment: ${{ inputs.environment }}
-          Severity: ${{ inputs.severity }}
-
-          Repository: ${{ github.repository }}
-          Triggered by: ${{ github.actor }}
-          Workflow: ${{ github.workflow }}
-
-          Details:
-          ${{ inputs.message }}
-
-          View workflow run:
-          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-          --
-          This is an automated notification from GitHub Actions
-          EMAIL_EOF
-          )
-
-          echo "Email notification would be sent (requires SMTP configuration)"
-          echo "Subject: [${{ inputs.status }}] ${{ inputs.title }}"
-          echo "Body preview:"
-          echo "$EMAIL_BODY" | head -20
+          # Non-blocking exit
+          exit 0
 
   summary:
     runs-on: ubuntu-latest
-    name: Notification Summary
-    needs: [slack-notification, pagerduty-notification, email-notification]
+    name: Summary
+    needs: [slack, discord, pagerduty]
     if: always()
 
     steps:
-      - name: Generate summary
+      - name: Generate Summary
         run: |
           echo "## Notification Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Channel | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Slack | ${{ needs.slack-notification.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| PagerDuty | ${{ needs.pagerduty-notification.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Email | ${{ needs.email-notification.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Slack | ${{ needs.slack.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Discord | ${{ needs.discord.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PagerDuty | ${{ needs.pagerduty.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Notification Details" >> $GITHUB_STEP_SUMMARY
+          echo "### Details" >> $GITHUB_STEP_SUMMARY
           echo "- **Title:** ${{ inputs.title }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Status:** ${{ inputs.status }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Severity:** ${{ inputs.severity }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
