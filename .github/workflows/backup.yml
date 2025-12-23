@@ -39,16 +39,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🛡️ Pre-flight Secret Check
+      - name: 🛡️ Pre-flight Secret Validation
         run: |
-          missing_secrets=0
-          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then echo "::error::Missing Secret: AWS_ACCESS_KEY_ID"; missing_secrets=1; fi
-          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then echo "::error::Missing Secret: AWS_SECRET_ACCESS_KEY"; missing_secrets=1; fi
-          if [ -z "${{ secrets.SUPABASE_DB_URL }}" ]; then echo "::error::Missing Secret: SUPABASE_DB_URL"; missing_secrets=1; fi
-          if [ -z "${{ secrets.BACKUP_BUCKET }}" ]; then echo "::error::Missing Secret: BACKUP_BUCKET"; missing_secrets=1; fi
+          missing=0
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then echo "::error::Missing Secret: AWS_ACCESS_KEY_ID"; missing=1; fi
+          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then echo "::error::Missing Secret: AWS_SECRET_ACCESS_KEY"; missing=1; fi
+          if [ -z "${{ secrets.SUPABASE_DB_URL }}" ]; then echo "::error::Missing Secret: SUPABASE_DB_URL"; missing=1; fi
+          if [ -z "${{ secrets.BACKUP_BUCKET }}" ]; then echo "::error::Missing Secret: BACKUP_BUCKET"; missing=1; fi
           
-          if [ $missing_secrets -eq 1 ]; then
-            echo "::error::Critical secrets are missing. Please run 'scripts/init-secrets.sh' locally to configure them."
+          if [ $missing -eq 1 ]; then
+            echo "::error::Production secrets are missing. Please run 'scripts/setup-production-secrets.sh' locally to configure them."
             exit 1
           fi
 
