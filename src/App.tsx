@@ -291,10 +291,35 @@ const AuthRoutes = () => {
 };
 
 function App() {
+  console.log('[DEBUG] App.tsx:317 - App component function called (render starting)');
+  // #region agent log
+  useEffect(() => {
+    console.log('[DEBUG] App.tsx:320 - App component useEffect (mounted)');
+    fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:317',message:'App component mounted',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+  }, []);
+  // #endregion
+  
   useEffect(() => {
     // Start health monitoring less frequently
     healthChecker.monitorHealth(300000); // Check every 5 minutes
   }, []);
+
+  // #region agent log
+  useEffect(() => {
+    const root = document.getElementById('root');
+    const rootContent = root?.innerHTML.trim().length || 0;
+    fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:325',message:'App component render started',data:{rootContentLength:rootContent},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    
+    // Check again after a short delay to see if content appeared
+    setTimeout(() => {
+      const rootAfter = document.getElementById('root');
+      const rootContentAfter = rootAfter?.innerHTML.trim().length || 0;
+      fetch('http://127.0.0.1:7247/ingest/b2b4d03c-5e29-4823-8db6-62be0d831805',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:330',message:'App component render check after delay',data:{rootContentLength:rootContentAfter},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    }, 100);
+  }, []);
+  // #endregion
+
+  console.log('[DEBUG] App.tsx:344 - About to return JSX');
   try {
     return (
       <QueryClientProvider client={queryClient}>

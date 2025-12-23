@@ -4,15 +4,12 @@ import InvoiceList from '@/components/invoices/InvoiceList';
 import { EditInvoiceDialog } from '@/components/invoices/EditInvoiceDialog';
 import FileUploadZone from '@/components/invoices/FileUploadZone';
 import { useInvoices, Invoice } from '@/hooks/useInvoices';
-import { useInvoiceExtraction } from '@/hooks/useInvoiceExtraction';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, List, Workflow } from 'lucide-react';
 import WorkflowPipeline from '@/components/dashboard/WorkflowPipeline';
-import { supabase } from '@/integrations/supabase/client';
 
 const Invoices = () => {
   const { invoices, loading, createInvoice, updateInvoice, deleteInvoice } = useInvoices();
-  const { extractInvoiceData } = useInvoiceExtraction();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
 
@@ -34,53 +31,6 @@ const Invoices = () => {
       await createInvoice(updates as any);
     }
     setEditDialogOpen(false);
-  };
-
-  const handleUploadComplete = async (documents: any[]) => {
-    // Create a new invoice for the uploaded documents
-    try {
-      const newInvoice = await createInvoice({
-        vendor_name: 'Unknown Vendor',
-        amount: 0,
-        invoice_date: new Date().toISOString().split('T')[0],
-        status: 'pending'
-      });
-
-      if (newInvoice && newInvoice.id) {
-        // Move documents to the new invoice
-        for (const doc of documents) {
-          await supabase
-            .from('invoice_documents')
-            .update({ invoice_id: newInvoice.id })
-            .eq('id', doc.id);
-        }
-
-        // Trigger extraction for each document
-        for (const doc of documents) {
-          try {
-            // Get the file content from storage
-            const { data: fileBlob, error: downloadError } = await supabase.storage
-              .from('invoice-documents')
-              .download(doc.file_path);
-
-            if (downloadError) {
-              console.error('Error downloading file for extraction:', downloadError);
-              continue;
-            }
-
-            // Convert blob to base64
-            const fileContent = await fileBlob.text();
-
-            // Trigger extraction
-            await extractInvoiceData(newInvoice.id, fileContent);
-          } catch (error) {
-            console.error(`Failed to extract data from ${doc.file_name}:`, error);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error creating invoice for uploaded documents:', error);
-    }
   };
 
   return (
@@ -111,10 +61,7 @@ const Invoices = () => {
         </TabsList>
 
         <TabsContent value="upload" className="space-y-6">
-          <FileUploadZone
-            onUploadComplete={handleUploadComplete}
-            allowUploadWithoutInvoice={true}
-          />
+          <FileUploadZone />
         </TabsContent>
 
         <TabsContent value="list" className="space-y-6">

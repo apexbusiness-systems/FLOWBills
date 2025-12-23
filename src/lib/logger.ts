@@ -15,9 +15,9 @@ class Logger {
   }
 
   private shouldLog(level: LogLevel): boolean {
-    // Always check the live environment at call time
-    if (import.meta.env.DEV) return true;
-
+    // Always trust the live environment
+    if (this.isDevelopment) return true;
+    
     const levels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
     const currentIndex = levels.indexOf(this.logLevel);
     const messageIndex = levels.indexOf(level);
@@ -26,25 +26,25 @@ class Logger {
 
   debug(message: string, ...args: any[]): void {
     if (this.shouldLog('debug')) {
-      console.debug(`[DEBUG] ${message}`, ...args);
+      console.debug(message, ...args);
     }
   }
 
   info(message: string, ...args: any[]): void {
     if (this.shouldLog('info')) {
-      console.info(`[INFO] ${message}`, ...args);
+      console.info(message, ...args);
     }
   }
 
   warn(message: string, ...args: any[]): void {
     if (this.shouldLog('warn')) {
-      console.warn(`[WARN] ${message}`, ...args);
+      console.warn(message, ...args);
     }
   }
 
   error(message: string, ...args: any[]): void {
     if (this.shouldLog('error')) {
-      console.error(`[ERROR] ${message}`, ...args);
+      console.error(message, ...args);
     }
   }
 }
