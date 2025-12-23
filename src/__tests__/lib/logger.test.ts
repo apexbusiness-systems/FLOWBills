@@ -31,10 +31,10 @@ describe('Logger', () => {
       logger.warn('warn message');
       logger.error('error message');
 
-      expect(consoleSpy.debug).toHaveBeenCalledWith('debug message');
-      expect(consoleSpy.info).toHaveBeenCalledWith('info message');
-      expect(consoleSpy.warn).toHaveBeenCalledWith('warn message');
-      expect(consoleSpy.error).toHaveBeenCalledWith('error message');
+      expect(consoleSpy.debug).toHaveBeenCalledWith('[DEBUG] debug message');
+      expect(consoleSpy.info).toHaveBeenCalledWith('[INFO] info message');
+      expect(consoleSpy.warn).toHaveBeenCalledWith('[WARN] warn message');
+      expect(consoleSpy.error).toHaveBeenCalledWith('[ERROR] error message');
 
       Object.values(consoleSpy).forEach(spy => spy.mockRestore());
     });
@@ -42,12 +42,9 @@ describe('Logger', () => {
 
   describe('Production mode', () => {
     beforeEach(() => {
+      vi.clearAllMocks();
       // 1. Mock the environment to production
-      Object.defineProperty(import.meta, 'env', {
-        value: { DEV: false },
-        writable: true,
-        configurable: true,
-      });
+      vi.stubEnv('DEV', false);
       // 2. FORCE the log level to error (since the singleton was created with 'debug')
       logger.setLogLevel('error');
     });
@@ -68,7 +65,7 @@ describe('Logger', () => {
       expect(consoleSpy.debug).not.toHaveBeenCalled();
       expect(consoleSpy.info).not.toHaveBeenCalled();
       expect(consoleSpy.warn).not.toHaveBeenCalled();
-      expect(consoleSpy.error).toHaveBeenCalledWith('error message');
+      expect(consoleSpy.error).toHaveBeenCalledWith('[ERROR] error message');
 
       Object.values(consoleSpy).forEach(spy => spy.mockRestore());
     });
@@ -87,8 +84,8 @@ describe('Logger', () => {
       logger.error('error message');
 
       expect(consoleSpy.info).not.toHaveBeenCalled();
-      expect(consoleSpy.warn).toHaveBeenCalledWith('warn message');
-      expect(consoleSpy.error).toHaveBeenCalledWith('error message');
+      expect(consoleSpy.warn).toHaveBeenCalledWith('[WARN] warn message');
+      expect(consoleSpy.error).toHaveBeenCalledWith('[ERROR] error message');
 
       Object.values(consoleSpy).forEach(spy => spy.mockRestore());
     });
