@@ -15,22 +15,20 @@ declare global {
   }
 }
 window.__FLOWBILLS_LOADED__ = true;
-console.log('[FlowBills] Module loaded');
 
 // Global error handlers
 window.addEventListener('error', (event) => {
-  console.error('[FlowBills] Uncaught error:', event.message, event.filename, event.lineno);
+  console.error('Uncaught error:', event.message, event.filename, event.lineno);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('[FlowBills] Unhandled rejection:', event.reason);
+  console.error('Unhandled rejection:', event.reason);
 });
 
 // Apply CSP nonce at runtime
 try {
   applySPNonce();
 } catch (error) {
-  console.error('[FlowBills] Failed to apply CSP nonce:', error);
   throw error;
 }
 
@@ -63,12 +61,10 @@ if (!rootElement) {
 rootElement.innerHTML = '';
 
 // Render the app
-console.log('[FlowBills] Starting React render');
 try {
   const root = createRoot(rootElement);
   root.render(<App />);
 } catch (error) {
-  console.error('[FlowBills] React render failed:', error);
   throw error;
 }
 
@@ -77,7 +73,6 @@ requestAnimationFrame(() => {
   requestAnimationFrame(() => {
     const loader = document.getElementById('flowbills-loader');
     if (loader) {
-      logger.debug('[FlowBills] App rendered, removing loader');
       loader.remove();
     }
   });
