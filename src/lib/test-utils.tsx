@@ -24,48 +24,73 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 
+// Polyfill ResizeObserver for components that rely on it (e.g., Radix UI)
+if (typeof global.ResizeObserver === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - assign to global for test environment
+  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }));
+}
+
 // Create a test query client
 const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: {
-      queries: {
-        retry: false,
-        staleTime: 1000 * 60 * 5,
-      },
-      mutations: {
-        retry: false,
-      },
+      queries: { retry: false, staleTime: 0 },
+      mutations: { retry: false },
     },
   });
 
-// Test providers wrapper
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-  const testQueryClient = createTestQueryClient();
+interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  route?: string;
+}
 
-  return (
-    <QueryClientProvider client={testQueryClient}>
-      <MemoryRouter initialEntries={['/']}>
-        <TooltipProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </TooltipProvider>
-      </MemoryRouter>
-    </QueryClientProvider>
-  );
-};
-
-// Custom render function
 const customRender = (
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>,
-) => render(ui, { wrapper: AllTheProviders, ...options });
+  { route = '/', ...options }: CustomRenderOptions = {},
+) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
+    const testQueryClient = createTestQueryClient();
+    return (
+      <QueryClientProvider client={testQueryClient}>
+        <MemoryRouter initialEntries={[route]}>
+          <TooltipProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </TooltipProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+  };
 
-// Custom renderHook function
+  return render(ui, { wrapper: Wrapper, ...options });
+};
+
 const customRenderHook = <Result, Props>(
   render: (initialProps: Props) => Result,
-  options?: Omit<RenderOptions, 'wrapper'>,
-) => rtlRenderHook(render, { wrapper: AllTheProviders, ...options });
+  { route = '/', ...options }: CustomRenderOptions = {},
+) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
+    const testQueryClient = createTestQueryClient();
+    return (
+      <QueryClientProvider client={testQueryClient}>
+        <MemoryRouter initialEntries={[route]}>
+          <TooltipProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </TooltipProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+  };
+
+  return rtlRenderHook(render, { wrapper: Wrapper, ...options });
+};
 
 // Mock user data for testing
 export const mockUser = {
