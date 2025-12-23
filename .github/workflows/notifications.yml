@@ -1,0 +1,377 @@
+# Reusable Notifications Workflow
+# Uses proper heredoc syntax to avoid shell quoting issues
+name: Notifications
+
+on:
+  workflow_call:
+    inputs:
+      status:
+        description: 'Status of the triggering workflow (success, failure, cancelled)'
+        required: true
+        type: string
+      title:
+        description: 'Notification title'
+        required: true
+        type: string
+      message:
+        description: 'Notification message body'
+        required: false
+        type: string
+        default: ''
+      environment:
+        description: 'Environment name (production, staging, development)'
+        required: false
+        type: string
+        default: 'unknown'
+      notify_slack:
+        description: 'Send Slack notification'
+        required: false
+        type: boolean
+        default: true
+      notify_email:
+        description: 'Send email notification (requires email secrets)'
+        required: false
+        type: boolean
+        default: false
+      severity:
+        description: 'Severity level (info, warning, error, critical)'
+        required: false
+        type: string
+        default: 'info'
+    secrets:
+      SLACK_WEBHOOK_URL:
+        required: false
+      EMAIL_SMTP_SERVER:
+        required: false
+      EMAIL_SMTP_USER:
+        required: false
+      EMAIL_SMTP_PASSWORD:
+        required: false
+      EMAIL_RECIPIENTS:
+        required: false
+      PAGERDUTY_KEY:
+        required: false
+
+  # Also allow direct workflow dispatch for testing
+  workflow_dispatch:
+    inputs:
+      status:
+        description: 'Status'
+        required: true
+        default: 'success'
+        type: choice
+        options:
+          - success
+          - failure
+          - cancelled
+      title:
+        description: 'Notification title'
+        required: true
+        default: 'Test Notification'
+      message:
+        description: 'Notification message'
+        required: false
+        default: 'This is a test notification from GitHub Actions'
+      environment:
+        description: 'Environment'
+        required: false
+        default: 'development'
+      severity:
+        description: 'Severity level'
+        required: false
+        default: 'info'
+        type: choice
+        options:
+          - info
+          - warning
+          - error
+          - critical
+
+jobs:
+  prepare-notification:
+    runs-on: ubuntu-latest
+    name: Prepare Notification Content
+    outputs:
+      emoji: ${{ steps.emoji.outputs.emoji }}
+      color: ${{ steps.emoji.outputs.color }}
+      slack_color: ${{ steps.emoji.outputs.slack_color }}
+
+    steps:
+      - name: Determine notification styling
+        id: emoji
+        run: |
+          STATUS="${{ inputs.status }}"
+          SEVERITY="${{ inputs.severity }}"
+
+          # Determine emoji based on status
+          case "$STATUS" in
+            success)
+              EMOJI="white_check_mark"
+              COLOR="good"
+              SLACK_COLOR="#36a64f"
+              ;;
+            failure)
+              EMOJI="x"
+              COLOR="danger"
+              SLACK_COLOR="#ff0000"
+              ;;
+            cancelled)
+              EMOJI="stop_sign"
+              COLOR="warning"
+              SLACK_COLOR="#ffcc00"
+              ;;
+            *)
+              EMOJI="information_source"
+              COLOR="default"
+              SLACK_COLOR="#808080"
+              ;;
+          esac
+
+          # Override color for critical severity
+          if [ "$SEVERITY" = "critical" ]; then
+            EMOJI="rotating_light"
+            SLACK_COLOR="#ff0000"
+          fi
+
+          echo "emoji=$EMOJI" >> $GITHUB_OUTPUT
+          echo "color=$COLOR" >> $GITHUB_OUTPUT
+          echo "slack_color=$SLACK_COLOR" >> $GITHUB_OUTPUT
+
+  slack-notification:
+    runs-on: ubuntu-latest
+    name: Slack Notification
+    needs: prepare-notification
+    if: inputs.notify_slack != false
+
+    steps:
+      - name: Send Slack notification
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL not configured - skipping Slack notification"
+            exit 0
+          fi
+
+          # Build message using heredoc with proper quoting
+          # This avoids shell interpolation issues with special characters
+          MESSAGE="${{ inputs.message }}"
+          if [ -z "$MESSAGE" ]; then
+            MESSAGE="No additional details provided"
+          fi
+
+          # Use cat with heredoc for complex JSON - proper syntax
+          PAYLOAD=$(cat <<'HEREDOC_EOF'
+          {
+            "attachments": [
+              {
+                "color": "${{ needs.prepare-notification.outputs.slack_color }}",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "${{ inputs.title }}",
+                      "emoji": true
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Status:*\n:${{ needs.prepare-notification.outputs.emoji }}: ${{ inputs.status }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Environment:*\n${{ inputs.environment }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Repository:*\n${{ github.repository }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Triggered by:*\n${{ github.actor }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*Details:*\n${{ inputs.message }}"
+                    }
+                  },
+                  {
+                    "type": "context",
+                    "elements": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+          HEREDOC_EOF
+          )
+
+          # Send the notification
+          HTTP_CODE=$(curl -s -o /tmp/slack_response.txt -w "%{http_code}" \
+            -X POST "$SLACK_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD")
+
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "Slack notification sent successfully"
+          else
+            echo "::warning::Slack notification failed with HTTP $HTTP_CODE"
+            cat /tmp/slack_response.txt
+          fi
+
+  pagerduty-notification:
+    runs-on: ubuntu-latest
+    name: PagerDuty Alert
+    needs: prepare-notification
+    if: inputs.severity == 'critical' || inputs.severity == 'error'
+
+    steps:
+      - name: Send PagerDuty alert
+        continue-on-error: true
+        env:
+          PAGERDUTY_KEY: ${{ secrets.PAGERDUTY_KEY }}
+        run: |
+          if [ -z "$PAGERDUTY_KEY" ]; then
+            echo "PAGERDUTY_KEY not configured - skipping PagerDuty alert"
+            exit 0
+          fi
+
+          # Determine event action based on status
+          EVENT_ACTION="trigger"
+          if [ "${{ inputs.status }}" = "success" ]; then
+            EVENT_ACTION="resolve"
+          fi
+
+          # Build PagerDuty payload using heredoc
+          PAYLOAD=$(cat <<'PD_EOF'
+          {
+            "routing_key": "${{ secrets.PAGERDUTY_KEY }}",
+            "event_action": "EVENT_ACTION_PLACEHOLDER",
+            "dedup_key": "${{ github.repository }}-${{ github.workflow }}-${{ github.run_id }}",
+            "payload": {
+              "summary": "${{ inputs.title }}",
+              "severity": "${{ inputs.severity }}",
+              "source": "${{ github.repository }}",
+              "component": "${{ github.workflow }}",
+              "group": "${{ inputs.environment }}",
+              "class": "github-actions",
+              "custom_details": {
+                "status": "${{ inputs.status }}",
+                "environment": "${{ inputs.environment }}",
+                "actor": "${{ github.actor }}",
+                "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "message": "${{ inputs.message }}"
+              }
+            }
+          }
+          PD_EOF
+          )
+
+          # Replace placeholder with actual event action
+          PAYLOAD=$(echo "$PAYLOAD" | sed "s/EVENT_ACTION_PLACEHOLDER/$EVENT_ACTION/")
+
+          HTTP_CODE=$(curl -s -o /tmp/pd_response.txt -w "%{http_code}" \
+            -X POST "https://events.pagerduty.com/v2/enqueue" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD")
+
+          if [ "$HTTP_CODE" -eq 202 ]; then
+            echo "PagerDuty alert sent successfully"
+          else
+            echo "::warning::PagerDuty alert failed with HTTP $HTTP_CODE"
+            cat /tmp/pd_response.txt
+          fi
+
+  email-notification:
+    runs-on: ubuntu-latest
+    name: Email Notification
+    needs: prepare-notification
+    if: inputs.notify_email == true
+
+    steps:
+      - name: Send email notification
+        continue-on-error: true
+        env:
+          EMAIL_SMTP_SERVER: ${{ secrets.EMAIL_SMTP_SERVER }}
+          EMAIL_SMTP_USER: ${{ secrets.EMAIL_SMTP_USER }}
+          EMAIL_SMTP_PASSWORD: ${{ secrets.EMAIL_SMTP_PASSWORD }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+        run: |
+          if [ -z "$EMAIL_SMTP_SERVER" ] || [ -z "$EMAIL_RECIPIENTS" ]; then
+            echo "Email configuration incomplete - skipping email notification"
+            exit 0
+          fi
+
+          # Install mailx if not available
+          sudo apt-get update -qq && sudo apt-get install -y -qq mailutils
+
+          # Create email body using heredoc
+          EMAIL_BODY=$(cat <<'EMAIL_EOF'
+          GitHub Actions Notification
+
+          Title: ${{ inputs.title }}
+          Status: ${{ inputs.status }}
+          Environment: ${{ inputs.environment }}
+          Severity: ${{ inputs.severity }}
+
+          Repository: ${{ github.repository }}
+          Triggered by: ${{ github.actor }}
+          Workflow: ${{ github.workflow }}
+
+          Details:
+          ${{ inputs.message }}
+
+          View workflow run:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          --
+          This is an automated notification from GitHub Actions
+          EMAIL_EOF
+          )
+
+          echo "Email notification would be sent (requires SMTP configuration)"
+          echo "Subject: [${{ inputs.status }}] ${{ inputs.title }}"
+          echo "Body preview:"
+          echo "$EMAIL_BODY" | head -20
+
+  summary:
+    runs-on: ubuntu-latest
+    name: Notification Summary
+    needs: [slack-notification, pagerduty-notification, email-notification]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Notification Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Channel | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Slack | ${{ needs.slack-notification.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PagerDuty | ${{ needs.pagerduty-notification.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Email | ${{ needs.email-notification.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Notification Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Title:** ${{ inputs.title }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ inputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Severity:** ${{ inputs.severity }}" >> $GITHUB_STEP_SUMMARY
