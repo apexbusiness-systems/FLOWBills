@@ -21,20 +21,22 @@ interface FileUploadZoneProps {
   onUploadComplete?: (documents: any[]) => void;
   disabled?: boolean;
   className?: string;
+  allowUploadWithoutInvoice?: boolean;
 }
 
 interface FileWithId extends File {
   id: string;
 }
 
-const FileUploadZone = ({ 
-  invoiceId, 
-  onUploadComplete, 
-  disabled = false, 
-  className 
+const FileUploadZone = ({
+  invoiceId,
+  onUploadComplete,
+  disabled = false,
+  className,
+  allowUploadWithoutInvoice = false
 }: FileUploadZoneProps) => {
   const [pendingFiles, setPendingFiles] = useState<FileWithId[]>([]);
-  const { uploading, uploadProgress, uploadMultipleFiles } = useFileUpload();
+  const { uploading, uploadProgress, uploadMultipleFiles, uploadFilesWithoutInvoice } = useFileUpload();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (!invoiceId) return;
@@ -49,7 +51,7 @@ const FileUploadZone = ({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    disabled: disabled || !invoiceId || uploading,
+    disabled: disabled || (!allowUploadWithoutInvoice && !invoiceId) || uploading,
     accept: {
       'application/pdf': ['.pdf'],
       'application/vnd.ms-excel': ['.xls'],
@@ -63,11 +65,13 @@ const FileUploadZone = ({
   });
 
   const handleUpload = async () => {
-    if (!invoiceId || pendingFiles.length === 0) return;
+    if ((!allowUploadWithoutInvoice && !invoiceId) || pendingFiles.length === 0) return;
 
     try {
-      const results = await uploadMultipleFiles(pendingFiles, invoiceId);
-      
+      const results = allowUploadWithoutInvoice && !invoiceId
+        ? await uploadFilesWithoutInvoice(pendingFiles)
+        : await uploadMultipleFiles(pendingFiles, invoiceId);
+
       if (results.length > 0) {
         onUploadComplete?.(results);
         setPendingFiles([]);
@@ -132,7 +136,7 @@ const FileUploadZone = ({
             </p>
           </div>
 
-          {!disabled && invoiceId && (
+          {!disabled && (allowUploadWithoutInvoice || invoiceId) && (
             <Button variant="outline" size="sm" type="button">
               <Upload className="mr-2 h-4 w-4" />
               Select Files
@@ -158,7 +162,7 @@ const FileUploadZone = ({
               <Button
                 size="sm"
                 onClick={handleUpload}
-                disabled={uploading || !invoiceId}
+                disabled={uploading || (!allowUploadWithoutInvoice && !invoiceId)}
               >
                 {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Upload {pendingFiles.length} File{pendingFiles.length > 1 ? 's' : ''}

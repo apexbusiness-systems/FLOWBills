@@ -1,63 +1,84 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  DollarSign, 
-  FileText, 
-  AlertTriangle,
-  Loader2
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { formatDistance } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
+import { CheckCircle2, XCircle, AlertCircle, Loader2, Filter, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 
-interface ApprovalItem {
+interface ReviewQueueItem {
   id: string;
   invoice_id: string;
-  approval_status: string;
-  approval_method: string | null;
-  notes: string | null;
+  priority: number;
+  reason: string;
+  confidence_score: number;
+  flagged_fields: string[];
   created_at: string;
   invoice: {
     invoice_number: string;
     vendor_name: string;
     amount: number;
     invoice_date: string;
-    status: string;
   };
 }
 
 const ApprovalQueue = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [approvals, setApprovals] = useState<ApprovalItem[]>([]);
+  const [items, setItems] = useState<ReviewQueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const { user } = useAuth();
+
+  const fetchQueue = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('review_queue')
+        .select(`
+          *,
+          invoice:invoices (
+            invoice_number,
+            vendor_name,
+            amount,
+            invoice_date
+          )
+        `)
+        .eq('user_id', user.id)
+        .is('reviewed_at', null)
+        .order('priority', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setItems(data || []);
+    } catch (error) {
+      console.error('Error fetching approval queue:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!user) return;
-    fetchApprovals();
+    fetchQueue();
 
-    // Set up real-time subscription
+    // Subscribe to real-time updates
     const channel = supabase
-      .channel('approvals-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'approvals',
-        },
-        () => {
-          fetchApprovals();
-        }
-      )
+      .channel('review-queue-updates')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'review_queue',
+        filter: `user_id=eq.${user?.id}`
+      }, () => {
+        fetchQueue();
+      })
       .subscribe();
 
     return () => {
@@ -65,385 +86,472 @@ const ApprovalQueue = () => {
     };
   }, [user]);
 
-  const fetchApprovals = async () => {
+  const handleApprove = async (item: ReviewQueueItem) => {
     if (!user) return;
 
+    setProcessing(item.id);
     try {
-      // Fetch approvals with invoice details
-      const { data, error } = await supabase
-        .from('approvals')
-        .select(`
-          *,
-          invoices (
-            invoice_number,
-            vendor_name,
-            amount,
-            invoice_date,
-            status
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      setApprovals(data as any || []);
-    } catch (error: any) {
-      console.error('Error fetching approvals:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch approvals",
-        variant: "destructive",
+      // Create approval record
+      await supabase.from('approvals').insert({
+        invoice_id: item.invoice_id,
+        user_id: user.id,
+        status: 'approved',
+        amount_approved: item.invoice.amount,
+        approval_date: new Date().toISOString(),
+        approved_by: user.id,
+        comments: 'Manually approved from review queue',
+        auto_approved: false
       });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleApprove = async (approvalId: string, invoiceId: string) => {
-    if (!user) return;
-
-    setProcessing(approvalId);
-    try {
-      // Update approval status
-      const { error: approvalError } = await supabase
-        .from('approvals')
-        .update({
-          approval_status: 'approved',
-          approved_by: user.id,
-          approval_date: new Date().toISOString(),
-        })
-        .eq('id', approvalId);
-
-      if (approvalError) throw approvalError;
 
       // Update invoice status
-      const { error: invoiceError } = await supabase
+      await supabase
         .from('invoices')
         .update({ status: 'approved' })
-        .eq('id', invoiceId);
+        .eq('id', item.invoice_id);
 
-      if (invoiceError) throw invoiceError;
+      // Mark as reviewed
+      await supabase
+        .from('review_queue')
+        .update({
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+          review_decision: 'approved'
+        })
+        .eq('id', item.id);
 
-      toast({
-        title: "Invoice Approved",
-        description: "The invoice has been approved successfully",
-      });
-
-      fetchApprovals();
-    } catch (error: any) {
-      console.error('Approval error:', error);
-      toast({
-        title: "Approval Failed",
-        description: error.message || "Failed to approve invoice",
-        variant: "destructive",
-      });
+      // Refresh queue
+      fetchQueue();
+    } catch (error) {
+      console.error('Error approving invoice:', error);
     } finally {
       setProcessing(null);
     }
   };
 
-  const handleReject = async (approvalId: string, invoiceId: string) => {
+  const handleReject = async (item: ReviewQueueItem) => {
     if (!user) return;
 
-    setProcessing(approvalId);
+    setProcessing(item.id);
     try {
-      // Update approval status
-      const { error: approvalError } = await supabase
-        .from('approvals')
-        .update({
-          approval_status: 'rejected',
-          approved_by: user.id,
-          approval_date: new Date().toISOString(),
-        })
-        .eq('id', approvalId);
-
-      if (approvalError) throw approvalError;
-
       // Update invoice status
-      const { error: invoiceError } = await supabase
+      await supabase
         .from('invoices')
         .update({ status: 'rejected' })
-        .eq('id', invoiceId);
+        .eq('id', item.invoice_id);
 
-      if (invoiceError) throw invoiceError;
+      // Mark as reviewed
+      await supabase
+        .from('review_queue')
+        .update({
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+          review_decision: 'rejected'
+        })
+        .eq('id', item.id);
 
-      toast({
-        title: "Invoice Rejected",
-        description: "The invoice has been rejected",
-      });
-
-      fetchApprovals();
-    } catch (error: any) {
-      console.error('Rejection error:', error);
-      toast({
-        title: "Rejection Failed",
-        description: error.message || "Failed to reject invoice",
-        variant: "destructive",
-      });
+      // Refresh queue
+      fetchQueue();
+    } catch (error) {
+      console.error('Error rejecting invoice:', error);
     } finally {
       setProcessing(null);
     }
   };
 
-  const getApprovalLevelBadge = (method: string | null) => {
-    if (!method) return null;
-    
-    if (method === 'manager_approval') {
-      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Manager</Badge>;
-    } else if (method === 'cfo_approval') {
-      return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">CFO</Badge>;
-    }
-    return <Badge variant="outline">Standard</Badge>;
+  const getPriorityBadge = (priority: number) => {
+    if (priority === 1) return <Badge variant="destructive">High Priority</Badge>;
+    if (priority === 2) return <Badge variant="default">Medium Priority</Badge>;
+    return <Badge variant="secondary">Low Priority</Badge>;
   };
 
-  const pendingApprovals = approvals.filter(a => a.approval_status === 'pending');
-  const approvedApprovals = approvals.filter(a => a.approval_status === 'approved');
-  const rejectedApprovals = approvals.filter(a => a.approval_status === 'rejected');
+  const getConfidenceColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  // Filter items based on search and priority
+  const filteredItems = items.filter(item => {
+    const matchesSearch = searchTerm === '' ||
+      item.invoice.vendor_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.reason.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesPriority = priorityFilter === 'all' || item.priority.toString() === priorityFilter;
+
+    return matchesSearch && matchesPriority;
+  });
+
+  const highPriority = filteredItems.filter(i => i.priority === 1);
+  const mediumPriority = filteredItems.filter(i => i.priority === 2);
+  const lowPriority = filteredItems.filter(i => i.priority === 3);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Approval Queue</h1>
-        <p className="text-muted-foreground mt-2">
-          Review and approve invoices pending your approval
+    <div className="container mx-auto px-4 py-8">
+      <BreadcrumbNav className="mb-4" />
+
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Approval Queue</h1>
+        <p className="text-muted-foreground">
+          {items.length} invoice{items.length !== 1 ? 's' : ''} requiring review
         </p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4 text-orange-500" />
-              Pending
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingApprovals.length}</div>
-            <p className="text-xs text-muted-foreground">Awaiting approval</p>
-          </CardContent>
-        </Card>
+      {/* Filters */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search by vendor, invoice number, or reason..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="sm:w-48">
+              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Priorities</SelectItem>
+                  <SelectItem value="1">High Priority</SelectItem>
+                  <SelectItem value="2">Medium Priority</SelectItem>
+                  <SelectItem value="3">Low Priority</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              Approved
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{approvedApprovals.length}</div>
-            <p className="text-xs text-muted-foreground">This period</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <XCircle className="h-4 w-4 text-red-500" />
-              Rejected
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{rejectedApprovals.length}</div>
-            <p className="text-xs text-muted-foreground">This period</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Approval Tabs */}
-      <Tabs defaultValue="pending" className="w-full">
-        <TabsList>
-          <TabsTrigger value="pending">
-            Pending ({pendingApprovals.length})
-          </TabsTrigger>
-          <TabsTrigger value="approved">
-            Approved ({approvedApprovals.length})
-          </TabsTrigger>
-          <TabsTrigger value="rejected">
-            Rejected ({rejectedApprovals.length})
-          </TabsTrigger>
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">All ({filteredItems.length})</TabsTrigger>
+          <TabsTrigger value="high">High Priority ({highPriority.length})</TabsTrigger>
+          <TabsTrigger value="medium">Medium ({mediumPriority.length})</TabsTrigger>
+          <TabsTrigger value="low">Low ({lowPriority.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="pending" className="mt-6">
-          {pendingApprovals.length === 0 ? (
+        <TabsContent value="all" className="space-y-4 mt-6">
+          {filteredItems.length === 0 ? (
             <Card>
-              <CardContent className="py-12 text-center">
-                <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">All caught up!</h3>
-                <p className="text-muted-foreground">No invoices pending approval</p>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">All Clear!</h3>
+                <p className="text-muted-foreground">No invoices require review at this time.</p>
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
-              {pendingApprovals.map((approval) => (
-                <Card key={approval.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-primary" />
-                        <div>
-                          <CardTitle className="text-lg">
-                            {approval.invoice?.invoice_number || 'N/A'}
-                          </CardTitle>
-                          <CardDescription>
-                            {approval.invoice?.vendor_name || 'Unknown Vendor'}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      {getApprovalLevelBadge(approval.approval_method)}
+            filteredItems.map(item => (
+              <Card key={item.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg">
+                        {item.invoice.vendor_name} • ${item.invoice.amount.toLocaleString()}
+                      </CardTitle>
+                      <CardDescription>
+                        Invoice #{item.invoice.invoice_number} • {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                      </CardDescription>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Amount</p>
-                        <p className="text-2xl font-bold flex items-center gap-1">
-                          <DollarSign className="h-5 w-5" />
-                          {approval.invoice?.amount?.toLocaleString('en-CA', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          })}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Invoice Date</p>
-                        <p className="text-lg font-medium">
-                          {approval.invoice?.invoice_date 
-                            ? new Date(approval.invoice.invoice_date).toLocaleDateString('en-CA')
-                            : 'N/A'
-                          }
-                        </p>
-                      </div>
+                    {getPriorityBadge(item.priority)}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-foreground">Review Reason</p>
+                      <p className="text-sm text-muted-foreground">{item.reason}</p>
                     </div>
+                  </div>
 
-                    {approval.notes && (
-                      <div className="mb-4 p-3 bg-muted rounded-lg">
-                        <p className="text-sm flex items-start gap-2">
-                          <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                          <span>{approval.notes}</span>
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">
-                        Submitted {formatDistance(new Date(approval.created_at), new Date(), { addSuffix: true })}
+                  {item.confidence_score && (
+                    <div>
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        Confidence Score: <span className={getConfidenceColor(item.confidence_score)}>
+                          {item.confidence_score.toFixed(1)}%
+                        </span>
                       </p>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => handleReject(approval.id, approval.invoice_id)}
-                          disabled={processing === approval.id}
-                        >
-                          {processing === approval.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <XCircle className="h-4 w-4 mr-2" />
-                          )}
-                          Reject
-                        </Button>
-                        <Button
-                          onClick={() => handleApprove(approval.id, approval.invoice_id)}
-                          disabled={processing === approval.id}
-                        >
-                          {processing === approval.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                          )}
-                          Approve
-                        </Button>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all"
+                          style={{ width: `${item.confidence_score}%` }}
+                        />
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  )}
+
+                  {item.flagged_fields && item.flagged_fields.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-foreground mb-2">Flagged Fields</p>
+                      <div className="flex flex-wrap gap-2">
+                        {item.flagged_fields.map(field => (
+                          <Badge key={field} variant="outline">{field}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button
+                      onClick={() => handleApprove(item)}
+                      disabled={processing === item.id}
+                      className="flex-1"
+                    >
+                      {processing === item.id ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                      )}
+                      Approve
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleReject(item)}
+                      disabled={processing === item.id}
+                      className="flex-1"
+                    >
+                      <XCircle className="mr-2 h-4 w-4" />
+                      Reject
+                    </Button>
+                    <Button variant="outline" asChild>
+                      <a href={`/invoices?id=${item.invoice_id}`}>View Details</a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
           )}
         </TabsContent>
 
-        <TabsContent value="approved" className="mt-6">
-          {approvedApprovals.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No approved invoices yet</p>
+        <TabsContent value="high" className="space-y-4 mt-6">
+          {highPriority.map(item => (
+            <Card key={item.id}>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">
+                      {item.invoice.vendor_name} • ${item.invoice.amount.toLocaleString()}
+                    </CardTitle>
+                    <CardDescription>
+                      Invoice #{item.invoice.invoice_number} • {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                    </CardDescription>
+                  </div>
+                  {getPriorityBadge(item.priority)}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">Review Reason</p>
+                    <p className="text-sm text-muted-foreground">{item.reason}</p>
+                  </div>
+                </div>
+
+                {item.confidence_score && (
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-1">
+                      Confidence Score: <span className={getConfidenceColor(item.confidence_score)}>
+                        {item.confidence_score.toFixed(1)}%
+                      </span>
+                    </p>
+                    <div className="w-full bg-secondary rounded-full h-2">
+                      <div
+                        className="bg-primary h-2 rounded-full transition-all"
+                        style={{ width: `${item.confidence_score}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    onClick={() => handleApprove(item)}
+                    disabled={processing === item.id}
+                    className="flex-1"
+                  >
+                    {processing === item.id ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                    )}
+                    Approve
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleReject(item)}
+                    disabled={processing === item.id}
+                    className="flex-1"
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Reject
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <a href={`/invoices?id=${item.invoice_id}`}>View Details</a>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-4">
-              {approvedApprovals.map((approval) => (
-                <Card key={approval.id} className="border-green-200">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                        <div>
-                          <CardTitle className="text-lg">
-                            {approval.invoice?.invoice_number || 'N/A'}
-                          </CardTitle>
-                          <CardDescription>
-                            {approval.invoice?.vendor_name || 'Unknown Vendor'} • 
-                            ${approval.invoice?.amount?.toLocaleString('en-CA') || '0.00'}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <Badge className="bg-green-50 text-green-700 border-green-200">
-                        Approved
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
-          )}
+          ))}
         </TabsContent>
 
-        <TabsContent value="rejected" className="mt-6">
-          {rejectedApprovals.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <XCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No rejected invoices</p>
+        <TabsContent value="medium" className="space-y-4 mt-6">
+          {mediumPriority.map(item => (
+            <Card key={item.id}>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">
+                      {item.invoice.vendor_name} • ${item.invoice.amount.toLocaleString()}
+                    </CardTitle>
+                    <CardDescription>
+                      Invoice #{item.invoice.invoice_number} • {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                    </CardDescription>
+                  </div>
+                  {getPriorityBadge(item.priority)}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">Review Reason</p>
+                    <p className="text-sm text-muted-foreground">{item.reason}</p>
+                  </div>
+                </div>
+
+                {item.confidence_score && (
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-1">
+                      Confidence Score: <span className={getConfidenceColor(item.confidence_score)}>
+                        {item.confidence_score.toFixed(1)}%
+                      </span>
+                    </p>
+                    <div className="w-full bg-secondary rounded-full h-2">
+                      <div
+                        className="bg-primary h-2 rounded-full transition-all"
+                        style={{ width: `${item.confidence_score}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    onClick={() => handleApprove(item)}
+                    disabled={processing === item.id}
+                    className="flex-1"
+                  >
+                    {processing === item.id ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                    )}
+                    Approve
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleReject(item)}
+                    disabled={processing === item.id}
+                    className="flex-1"
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Reject
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <a href={`/invoices?id=${item.invoice_id}`}>View Details</a>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-4">
-              {rejectedApprovals.map((approval) => (
-                <Card key={approval.id} className="border-red-200">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <XCircle className="h-5 w-5 text-red-500" />
-                        <div>
-                          <CardTitle className="text-lg">
-                            {approval.invoice?.invoice_number || 'N/A'}
-                          </CardTitle>
-                          <CardDescription>
-                            {approval.invoice?.vendor_name || 'Unknown Vendor'} • 
-                            ${approval.invoice?.amount?.toLocaleString('en-CA') || '0.00'}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <Badge className="bg-red-50 text-red-700 border-red-200">
-                        Rejected
-                      </Badge>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="low" className="space-y-4 mt-6">
+          {lowPriority.map(item => (
+            <Card key={item.id}>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">
+                      {item.invoice.vendor_name} • ${item.invoice.amount.toLocaleString()}
+                    </CardTitle>
+                    <CardDescription>
+                      Invoice #{item.invoice.invoice_number} • {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                    </CardDescription>
+                  </div>
+                  {getPriorityBadge(item.priority)}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground">Review Reason</p>
+                    <p className="text-sm text-muted-foreground">{item.reason}</p>
+                  </div>
+                </div>
+
+                {item.confidence_score && (
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-1">
+                      Confidence Score: <span className={getConfidenceColor(item.confidence_score)}>
+                        {item.confidence_score.toFixed(1)}%
+                      </span>
+                    </p>
+                    <div className="w-full bg-secondary rounded-full h-2">
+                      <div
+                        className="bg-primary h-2 rounded-full transition-all"
+                        style={{ width: `${item.confidence_score}%` }}
+                      />
                     </div>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
-          )}
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    onClick={() => handleApprove(item)}
+                    disabled={processing === item.id}
+                    className="flex-1"
+                  >
+                    {processing === item.id ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                    )}
+                    Approve
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleReject(item)}
+                    disabled={processing === item.id}
+                    className="flex-1"
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Reject
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <a href={`/invoices?id=${item.invoice_id}`}>View Details</a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </TabsContent>
       </Tabs>
     </div>
