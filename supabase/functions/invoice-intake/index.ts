@@ -110,103 +110,122 @@ Deno.serve(async (req) => {
     console.log('Duplicate check result:', dupResult);
 
     // ==================================================================
-    // STEP 3: Determine routing based on business rules
+    // STEP 3: Run HIL Router for intelligent routing
     // ==================================================================
-    console.log('Step 3: Determining approval routing...');
+    console.log('Step 3: Running HIL router for intelligent routing...');
     
-    let finalStatus = 'validated';
+    // Get confidence score from extraction
+    const confidenceScore = extractResult.extracted_data?.confidence_scores?.overall || 
+                           extractResult.extracted_data?.confidence_score || 
+                           85; // Default to high confidence if not provided
+    
+    // Prepare risk factors for HIL router
+    const riskFactors: string[] = [];
+    if (dupResult?.is_exact_duplicate) {
+      riskFactors.push('duplicate_detected');
+    }
+    if (extractResult.validation_errors?.length > 0) {
+      riskFactors.push('validation_errors');
+    }
+    if (extractResult.budget_status === 'over_budget') {
+      riskFactors.push('budget_exceeded');
+    }
+    
+    // Call HIL router for intelligent routing decision
+    let routingDecision = 'auto_approve';
     let requiresReview = false;
     let reviewReason = '';
+    let hilResult: any = null;
+    let hilError: any = null;
     
-    // Check for duplicates
-    if (dupResult?.is_exact_duplicate) {
-      finalStatus = 'duplicate_suspected';
-      requiresReview = true;
-      reviewReason = 'Exact duplicate detected';
-    } else if (dupResult?.potential_duplicates?.length > 0) {
-      requiresReview = true;
-      reviewReason = 'Potential duplicate matches found';
+    try {
+      const { data: result, error: error } = await supabase.functions.invoke('hil-router', {
+        body: {
+          invoice: {
+            invoice_id,
+            confidence_score: confidenceScore,
+            amount: invoice.amount,
+            risk_factors: riskFactors,
+            extracted_data: extractResult.extracted_data
+          }
+        }
+      });
+      
+      hilResult = result;
+      hilError = error;
+      
+      if (hilError) {
+        console.warn('HIL router error (continuing with fallback logic):', hilError);
+        // Fall back to simple logic if HIL router fails
+      } else if (hilResult) {
+        routingDecision = hilResult.routing_decision || 'auto_approve';
+        requiresReview = hilResult.requires_human_review || false;
+        reviewReason = hilResult.reason || '';
+        console.log('HIL router decision:', routingDecision, 'requiresReview:', requiresReview);
+      }
+    } catch (error) {
+      hilError = error;
+      console.warn('HIL router call failed (continuing with fallback logic):', error);
+      // Fall back to simple logic if HIL router fails
     }
     
-    // Check for validation errors
-    if (extractResult.validation_errors?.length > 0) {
-      finalStatus = 'validation_failed';
-      requiresReview = true;
-      reviewReason = reviewReason || extractResult.validation_errors.join('; ');
-    }
-    
-    // Check for budget issues
-    if (extractResult.budget_status === 'over_budget') {
-      requiresReview = true;
-      reviewReason = reviewReason || 'Invoice exceeds AFE budget';
-    }
-
-    // ==================================================================
-    // STEP 4: Create approval records based on amount thresholds
-    // ==================================================================
-    console.log('Step 4: Creating approval records...');
-    
-    const THRESHOLD_AUTO_APPROVE = 5000;
-    const THRESHOLD_MANAGER = 25000;
-    
-    if (!requiresReview) {
-      if (invoice.amount < THRESHOLD_AUTO_APPROVE) {
-        // Auto-approve
-        finalStatus = 'approved_auto';
-        
-        await supabase.from('approvals').insert({
-          invoice_id,
-          user_id: user.id,
-          approval_status: 'approved',
-          amount_approved: invoice.amount,
-          approval_date: new Date().toISOString(),
-          comments: 'Auto-approved: amount under $5,000 threshold',
-          auto_approved: true,
-        });
-        
-      } else if (invoice.amount < THRESHOLD_MANAGER) {
-        // Manager approval required
-        finalStatus = 'pending_approval';
-        
-        await supabase.from('approvals').insert({
-          invoice_id,
-          user_id: user.id,
-          approval_status: 'pending',
-          approval_method: 'manager_approval',
-          notes: 'Requires manager approval: $5K-$25K range',
-        });
-        
-      } else {
-        // CFO approval required
-        finalStatus = 'pending_approval';
-        
-        await supabase.from('approvals').insert({
-          invoice_id,
-          user_id: user.id,
-          approval_status: 'pending',
-          approval_method: 'cfo_approval',
-          notes: 'Requires CFO approval: amount exceeds $25K',
-        });
+    // Fallback logic if HIL router didn't provide decision
+    if (!hilResult || hilError) {
+      // Check for duplicates
+      if (dupResult?.is_exact_duplicate) {
+        routingDecision = 'human_review';
+        requiresReview = true;
+        reviewReason = 'Exact duplicate detected';
+      } else if (dupResult?.potential_duplicates?.length > 0) {
+        requiresReview = true;
+        reviewReason = 'Potential duplicate matches found';
+      }
+      
+      // Check for validation errors
+      if (extractResult.validation_errors?.length > 0) {
+        routingDecision = 'human_review';
+        requiresReview = true;
+        reviewReason = reviewReason || extractResult.validation_errors.join('; ');
+      }
+      
+      // Check for budget issues
+      if (extractResult.budget_status === 'over_budget') {
+        requiresReview = true;
+        reviewReason = reviewReason || 'Invoice exceeds AFE budget';
+      }
+      
+      // Check confidence score
+      if (confidenceScore < 60) {
+        routingDecision = 'human_review';
+        requiresReview = true;
+        reviewReason = reviewReason || 'Low confidence score requires review';
       }
     }
 
     // ==================================================================
-    // STEP 5: Add to review queue if needed
+    // STEP 4: Update invoice status based on routing decision
     // ==================================================================
-    if (requiresReview) {
-      console.log('Step 5: Adding to review queue...');
+    console.log('Step 4: Updating invoice status based on routing decision...');
+    
+    let finalStatus = 'validated';
+    
+    if (routingDecision === 'auto_approve' && !requiresReview) {
+      finalStatus = 'approved_auto';
       
-      const priority = dupResult?.is_exact_duplicate ? 1 : 
-                      extractResult.budget_status === 'over_budget' ? 1 : 
-                      invoice.amount > THRESHOLD_MANAGER ? 1 : 2;
-      
-      await supabase.from('review_queue').insert({
+      // Create auto-approval record
+      await supabase.from('approvals').insert({
         invoice_id,
-        user_id: user.id,
-        reason: reviewReason,
-        confidence_score: extractResult.extracted_data?.confidence_scores?.overall || null,
-        risk_factors: dupResult?.is_exact_duplicate ? ['duplicate_detected'] : [],
+        approver_id: user.id,
+        status: 'approved',
+        amount_approved: invoice.amount,
+        approval_date: new Date().toISOString(),
+        comments: 'Auto-approved by HIL router',
+        auto_approved: true,
       });
+    } else if (requiresReview || routingDecision === 'human_review') {
+      finalStatus = 'needs_review';
+    } else {
+      finalStatus = 'processing';
     }
 
     // ==================================================================
@@ -232,18 +251,23 @@ Deno.serve(async (req) => {
         budget_remaining: extractResult.budget_remaining,
         validation_errors: extractResult.validation_errors,
         validation_warnings: extractResult.validation_warnings,
+        confidence_score: confidenceScore,
       },
       duplicate_detection: {
         is_duplicate: dupResult?.is_exact_duplicate || false,
         potential_matches: dupResult?.potential_duplicates?.length || 0,
         risk_score: dupResult?.risk_score || 0,
       },
+      hil_routing: {
+        routing_decision: routingDecision,
+        requires_review: requiresReview,
+        review_reason: reviewReason,
+      },
       approval: {
         requires_review: requiresReview,
         review_reason: reviewReason,
         auto_approved: finalStatus === 'approved_auto',
-        approval_level: invoice.amount < THRESHOLD_AUTO_APPROVE ? 'auto' :
-                       invoice.amount < THRESHOLD_MANAGER ? 'manager' : 'cfo'
+        routing_decision: routingDecision
       }
     };
 

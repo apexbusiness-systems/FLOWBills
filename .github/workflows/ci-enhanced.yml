@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20.x'
           cache: 'npm'
 
       - name: Install dependencies
@@ -32,11 +32,11 @@ jobs:
 
       - name: Run TypeScript Check
         run: npx tsc --noEmit
-        continue-on-error: true
+        # CRITICAL: Type errors must be fixed before merge
 
       - name: Run Lint
-        run: npm run lint
-        continue-on-error: true
+        run: npm run lint:check || npm run lint
+        # CRITICAL: Lint errors must be fixed before merge
 
       - name: Run Tests
         run: npm run test:unit || npm test || echo "No tests configured"
@@ -101,7 +101,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20.x'
           cache: 'npm'
 
       - name: Install dependencies
