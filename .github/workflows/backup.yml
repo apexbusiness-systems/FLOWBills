@@ -27,6 +27,8 @@ jobs:
   database-backup:
     runs-on: ubuntu-latest
     name: 💾 Database Backup
+    permissions:
+      contents: read
     
     outputs:
       backup-file: ${{ steps.backup.outputs.backup-file }}
@@ -36,6 +38,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: 🛡️ Pre-flight Secret Check
+        run: |
+          missing_secrets=0
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then echo "::error::Missing Secret: AWS_ACCESS_KEY_ID"; missing_secrets=1; fi
+          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then echo "::error::Missing Secret: AWS_SECRET_ACCESS_KEY"; missing_secrets=1; fi
+          if [ -z "${{ secrets.SUPABASE_DB_URL }}" ]; then echo "::error::Missing Secret: SUPABASE_DB_URL"; missing_secrets=1; fi
+          if [ -z "${{ secrets.BACKUP_BUCKET }}" ]; then echo "::error::Missing Secret: BACKUP_BUCKET"; missing_secrets=1; fi
+          
+          if [ $missing_secrets -eq 1 ]; then
+            echo "::error::Critical secrets are missing. Please run 'scripts/init-secrets.sh' locally to configure them."
+            exit 1
+          fi
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
