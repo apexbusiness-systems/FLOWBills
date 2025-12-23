@@ -15,9 +15,10 @@ export const queryClient = new QueryClient({
       gcTime: 10 * 60 * 1000, // 10 minutes (600000ms)
       refetchOnWindowFocus: false,
       refetchOnMount: false,
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Don't retry on 4xx errors
-        if (error?.status >= 400 && error?.status < 500) {
+        const httpError = error as { status?: number };
+        if (httpError?.status && httpError.status >= 400 && httpError.status < 500) {
           return false;
         }
         // Max 2 retries
@@ -31,9 +32,10 @@ export const queryClient = new QueryClient({
       },
     },
     mutations: {
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Never retry mutations on 4xx
-        if (error?.status >= 400 && error?.status < 500) {
+        const httpError = error as { status?: number };
+        if (httpError?.status && httpError.status >= 400 && httpError.status < 500) {
           return false;
         }
         // Max 1 retry for mutations
@@ -69,9 +71,9 @@ export interface PaginatedResponse<T> {
 /**
  * Fetch invoices with keyset pagination (no offset scans)
  */
-export async function fetchInvoicesPaginated(
+export async function fetchInvoicesPaginated<T = Record<string, unknown>>(
   params: KeysetPaginationParams = {}
-): Promise<PaginatedResponse<any>> {
+): Promise<PaginatedResponse<T>> {
   const { limit = 50, afterId, afterCreatedAt } = params;
   
   return deduper.once(`invoices-${afterId || 'first'}-${limit}`, async () => {

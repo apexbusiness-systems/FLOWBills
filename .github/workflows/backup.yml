@@ -21,6 +21,8 @@ jobs:
   database-backup:
     runs-on: ubuntu-latest
     name: 💾 Database Backup
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
