@@ -312,16 +312,33 @@ jobs:
     steps:
       - name: Send notification
         continue-on-error: true
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          channel: '#infrastructure'
-          text: |
-            Backup Job Status: ${{ job.status }}
-            Database Backup: ${{ needs.database-backup.result }}
-            Storage Backup: ${{ needs.storage-backup.result }}
-            Integrity Check: ${{ needs.verify-backup-integrity.result }}
-            Backup File: ${{ needs.database-backup.outputs.backup-file }}
-            Backup Size: ${{ needs.database-backup.outputs.backup-size }} bytes
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            STATUS_EMOJI="✅"
+            if [ "${{ job.status }}" != "success" ]; then
+              STATUS_EMOJI="❌"
+            fi
+            PAYLOAD=$(cat <<EOF
+            {
+              "text": "${STATUS_EMOJI} Backup Job: ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Backup Job Status*\nStatus: ${{ job.status }}\nDatabase Backup: ${{ needs.database-backup.result }}\nStorage Backup: ${{ needs.storage-backup.result }}\nIntegrity Check: ${{ needs.verify-backup-integrity.result }}\nBackup File: ${{ needs.database-backup.outputs.backup-file }}\nBackup Size: ${{ needs.database-backup.outputs.backup-size }} bytes"
+                  }
+                }
+              ]
+            }
+            EOF
+            )
+            curl -X POST "$SLACK_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD"
+            echo "Slack notification sent"
+          else
+            echo "SLACK_WEBHOOK_URL not configured - skipping notification"
+          fi
