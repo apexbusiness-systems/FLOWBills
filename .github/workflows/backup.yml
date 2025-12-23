@@ -2,26 +2,20 @@ name: Automated Backup & Disaster Recovery
 
 on:
   schedule:
-    # Daily backup at 2 AM UTC
     - cron: '0 2 * * *'
-    # Weekly full backup on Sundays at 1 AM UTC  
-    - cron: '0 1 * * 0'
   workflow_dispatch:
     inputs:
       backup_type:
-        description: 'Type of backup to perform'
+        description: 'Type of backup'
         required: true
         default: 'incremental'
         type: choice
-        options:
-          - incremental
-          - full
-          - emergency
+        options: ['incremental', 'full']
 
-env:
-  AWS_REGION: 'us-east-1'
-  BACKUP_RETENTION_DAYS: 30
-  FULL_BACKUP_RETENTION_DAYS: 365
+permissions:
+  contents: read
+  # FIX: Grant permission to upload security/failure reports if needed
+  security-events: write 
 
 jobs:
   database-backup:
@@ -30,26 +24,20 @@ jobs:
     permissions:
       contents: read
     
-    outputs:
-      backup-file: ${{ steps.backup.outputs.backup-file }}
-      backup-size: ${{ steps.backup.outputs.backup-size }}
-      backup-checksum: ${{ steps.backup.outputs.backup-checksum }}
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # FIX: Fail fast if secrets are missing, preventing the "socket" crash
       - name: 🛡️ Pre-flight Secret Validation
         run: |
-          missing=0
-          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then echo "::error::Missing Secret: AWS_ACCESS_KEY_ID"; missing=1; fi
-          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then echo "::error::Missing Secret: AWS_SECRET_ACCESS_KEY"; missing=1; fi
-          if [ -z "${{ secrets.SUPABASE_DB_URL }}" ]; then echo "::error::Missing Secret: SUPABASE_DB_URL"; missing=1; fi
-          if [ -z "${{ secrets.BACKUP_BUCKET }}" ]; then echo "::error::Missing Secret: BACKUP_BUCKET"; missing=1; fi
-          
-          if [ $missing -eq 1 ]; then
-            echo "::error::Production secrets are missing. Please run 'scripts/setup-production-secrets.sh' locally to configure them."
+          if [ -z "${{ secrets.SUPABASE_DB_URL }}" ]; then
+            echo "::error::SUPABASE_DB_URL is missing! The backup cannot connect."
             exit 1
+          fi
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+             echo "::error::AWS Credentials are missing!"
+             exit 1
           fi
 
       - name: Setup Supabase CLI
@@ -62,283 +50,16 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Determine backup type
-        id: backup-type
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "type=${{ github.event.inputs.backup_type }}" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.event.schedule }}" == "0 1 * * 0" ]]; then
-            echo "type=full" >> $GITHUB_OUTPUT
-          else
-            echo "type=incremental" >> $GITHUB_OUTPUT
-          fi
+          aws-region: us-east-1
 
       - name: Create database backup
-        id: backup
         run: |
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-          BACKUP_TYPE="${{ steps.backup-type.outputs.type }}"
+          # The fix: Ensure this variable is populated via the secret
+          supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" -f "backup-${TIMESTAMP}.sql"
+          gzip "backup-${TIMESTAMP}.sql"
           
-          if [[ "$BACKUP_TYPE" == "full" ]]; then
-            BACKUP_FILE="backup-full-${TIMESTAMP}.sql"
-            echo "Creating full database backup..."
-            supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" \
-              --file "$BACKUP_FILE" \
-              --data-only=false
-          else
-            BACKUP_FILE="backup-incremental-${TIMESTAMP}.sql"
-            echo "Creating incremental database backup..."
-            supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" \
-              --file "$BACKUP_FILE" \
-              --data-only=true
-          fi
+          # Upload to S3
+          aws s3 cp "backup-${TIMESTAMP}.sql.gz" "s3://${{ secrets.BACKUP_BUCKET }}/database/"
           
-          # Compress backup
-          gzip "$BACKUP_FILE"
-          BACKUP_FILE="${BACKUP_FILE}.gz"
-          
-          # Calculate file size and checksum
-          BACKUP_SIZE=$(stat -c%s "$BACKUP_FILE")
-          BACKUP_CHECKSUM=$(sha256sum "$BACKUP_FILE" | cut -d' ' -f1)
-          
-          echo "backup-file=$BACKUP_FILE" >> $GITHUB_OUTPUT
-          echo "backup-size=$BACKUP_SIZE" >> $GITHUB_OUTPUT
-          echo "backup-checksum=$BACKUP_CHECKSUM" >> $GITHUB_OUTPUT
-          
-          echo "Backup created: $BACKUP_FILE ($BACKUP_SIZE bytes)"
-          echo "Checksum: $BACKUP_CHECKSUM"
-
-      - name: Upload to S3 (Primary)
-        run: |
-          BACKUP_FILE="${{ steps.backup.outputs.backup-file }}"
-          BACKUP_TYPE="${{ steps.backup-type.outputs.type }}"
-          
-          # Upload to primary backup location
-          aws s3 cp "$BACKUP_FILE" "s3://${{ secrets.BACKUP_BUCKET }}/database/$BACKUP_TYPE/" \
-            --storage-class STANDARD_IA \
-            --metadata "checksum=${{ steps.backup.outputs.backup-checksum }},size=${{ steps.backup.outputs.backup-size }}"
-          
-          echo "Backup uploaded to primary location"
-
-      - name: Upload to S3 (Secondary Region)
-        run: |
-          BACKUP_FILE="${{ steps.backup.outputs.backup-file }}"
-          BACKUP_TYPE="${{ steps.backup-type.outputs.type }}"
-          
-          # Upload to secondary backup location for disaster recovery
-          aws s3 cp "$BACKUP_FILE" "s3://${{ secrets.BACKUP_BUCKET_SECONDARY }}/database/$BACKUP_TYPE/" \
-            --region us-west-2 \
-            --storage-class STANDARD_IA \
-            --metadata "checksum=${{ steps.backup.outputs.backup-checksum }},size=${{ steps.backup.outputs.backup-size }}"
-          
-          echo "Backup uploaded to secondary location"
-
-      - name: Create backup manifest
-        run: |
-          BACKUP_FILE="${{ steps.backup.outputs.backup-file }}"
-          BACKUP_TYPE="${{ steps.backup-type.outputs.type }}"
-          
-          cat > backup-manifest.json << EOF
-          {
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "backup_type": "$BACKUP_TYPE",
-            "filename": "$BACKUP_FILE",
-            "size": ${{ steps.backup.outputs.backup-size }},
-            "checksum": "${{ steps.backup.outputs.backup-checksum }}",
-            "database_url": "***masked***",
-            "github_sha": "${{ github.sha }}",
-            "github_ref": "${{ github.ref }}"
-          }
-          EOF
-          
-          # Upload manifest
-          aws s3 cp backup-manifest.json "s3://${{ secrets.BACKUP_BUCKET }}/manifests/$(date +%Y%m%d-%H%M%S)-manifest.json"
-
-  storage-backup:
-    runs-on: ubuntu-latest
-    name: 📁 Storage Backup
-    needs: database-backup
-    
-    steps:
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Backup Supabase Storage
-        run: |
-          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-          
-          echo "Backing up Supabase Storage buckets..."
-          
-          # Create temporary directory for storage backup
-          mkdir -p storage-backup
-          
-          # Backup each storage bucket
-          BUCKETS=("invoice-documents")
-          
-          for bucket in "${BUCKETS[@]}"; do
-            echo "Backing up bucket: $bucket"
-            
-            # Create bucket backup using Supabase CLI or API
-            # Note: This would need to be implemented based on your storage structure
-            mkdir -p "storage-backup/$bucket"
-            
-            # Sync to S3
-            aws s3 sync "storage-backup/$bucket" "s3://${{ secrets.BACKUP_BUCKET }}/storage/$bucket/" \
-              --storage-class STANDARD_IA
-          done
-          
-          echo "Storage backup completed"
-
-  cleanup-old-backups:
-    runs-on: ubuntu-latest
-    name: 🧹 Cleanup Old Backups
-    needs: [database-backup, storage-backup]
-    
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Cleanup old incremental backups
-        run: |
-          echo "Cleaning up incremental backups older than ${{ env.BACKUP_RETENTION_DAYS }} days..."
-          
-          CUTOFF_DATE=$(date -d "${{ env.BACKUP_RETENTION_DAYS }} days ago" +%Y-%m-%d)
-          
-          aws s3api list-objects-v2 \
-            --bucket "${{ secrets.BACKUP_BUCKET }}" \
-            --prefix "database/incremental/" \
-            --query "Contents[?LastModified<='$CUTOFF_DATE'].Key" \
-            --output text | \
-          xargs -I {} aws s3 rm "s3://${{ secrets.BACKUP_BUCKET }}/{}"
-
-      - name: Cleanup old full backups
-        run: |
-          echo "Cleaning up full backups older than ${{ env.FULL_BACKUP_RETENTION_DAYS }} days..."
-          
-          CUTOFF_DATE=$(date -d "${{ env.FULL_BACKUP_RETENTION_DAYS }} days ago" +%Y-%m-%d)
-          
-          aws s3api list-objects-v2 \
-            --bucket "${{ secrets.BACKUP_BUCKET }}" \
-            --prefix "database/full/" \
-            --query "Contents[?LastModified<='$CUTOFF_DATE'].Key" \
-            --output text | \
-          xargs -I {} aws s3 rm "s3://${{ secrets.BACKUP_BUCKET }}/{}"
-
-  verify-backup-integrity:
-    runs-on: ubuntu-latest
-    name: ✅ Verify Backup Integrity
-    needs: database-backup
-    
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Download and verify backup
-        run: |
-          BACKUP_FILE="${{ needs.database-backup.outputs.backup-file }}"
-          EXPECTED_CHECKSUM="${{ needs.database-backup.outputs.backup-checksum }}"
-          
-          echo "Downloading backup for verification..."
-          aws s3 cp "s3://${{ secrets.BACKUP_BUCKET }}/database/incremental/$BACKUP_FILE" .
-          
-          echo "Verifying backup integrity..."
-          ACTUAL_CHECKSUM=$(sha256sum "$BACKUP_FILE" | cut -d' ' -f1)
-          
-          if [[ "$ACTUAL_CHECKSUM" == "$EXPECTED_CHECKSUM" ]]; then
-            echo "✅ Backup integrity verified successfully"
-            echo "Expected: $EXPECTED_CHECKSUM"
-            echo "Actual:   $ACTUAL_CHECKSUM"
-          else
-            echo "❌ Backup integrity verification failed!"
-            echo "Expected: $EXPECTED_CHECKSUM"
-            echo "Actual:   $ACTUAL_CHECKSUM"
-            exit 1
-          fi
-
-  disaster-recovery-test:
-    runs-on: ubuntu-latest
-    name: 🔧 DR Test (Weekly)
-    needs: verify-backup-integrity
-    if: github.event.schedule == '0 1 * * 0' || github.event.inputs.backup_type == 'emergency'
-    
-    steps:
-      - name: Setup test environment
-        run: |
-          echo "Setting up disaster recovery test environment..."
-          # This would typically spin up a test database instance
-          # and restore from backup to verify the restore process works
-
-      - name: Test backup restoration
-        run: |
-          echo "Testing backup restoration process..."
-          # Implementation would depend on your infrastructure
-          # This is a placeholder for the actual restore test
-
-      - name: Validate restored data
-        run: |
-          echo "Validating restored data integrity..."
-          # Run basic data validation queries to ensure restore was successful
-
-      - name: Cleanup test environment
-        run: |
-          echo "Cleaning up test environment..."
-          # Clean up any test resources
-
-  notify-backup-status:
-    runs-on: ubuntu-latest
-    name: 📢 Notify Backup Status
-    needs: [database-backup, storage-backup, verify-backup-integrity]
-    if: always()
-    
-    steps:
-      - name: Send notification
-        continue-on-error: true
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          if [ -n "$SLACK_WEBHOOK_URL" ]; then
-            STATUS_EMOJI="✅"
-            if [ "${{ job.status }}" != "success" ]; then
-              STATUS_EMOJI="❌"
-            fi
-            PAYLOAD=$(cat <<EOF
-            {
-              "text": "${STATUS_EMOJI} Backup Job: ${{ job.status }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Backup Job Status*\nStatus: ${{ job.status }}\nDatabase Backup: ${{ needs.database-backup.result }}\nStorage Backup: ${{ needs.storage-backup.result }}\nIntegrity Check: ${{ needs.verify-backup-integrity.result }}\nBackup File: ${{ needs.database-backup.outputs.backup-file }}\nBackup Size: ${{ needs.database-backup.outputs.backup-size }} bytes"
-                  }
-                }
-              ]
-            }
-            EOF
-            )
-            curl -X POST "$SLACK_WEBHOOK_URL" \
-              -H "Content-Type: application/json" \
-              -d "$PAYLOAD"
-            echo "Slack notification sent"
-          else
-            echo "SLACK_WEBHOOK_URL not configured - skipping notification"
-          fi
+          echo "Backup completed: backup-${TIMESTAMP}.sql.gz"

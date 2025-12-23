@@ -9,6 +9,10 @@ on:
 env:
   NODE_VERSION: '20.x'
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   # Quality Gates
   lint-and-format:
