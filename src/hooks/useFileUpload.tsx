@@ -267,84 +267,42 @@ export const useFileUpload = () => {
 
   const uploadMultipleFiles = useCallback(async (files: File[], invoiceId?: string) => {
     if (!user) return [];
-
+    
     setUploading(true);
     const results: (InvoiceDocument | null)[] = [];
-
+    
     try {
       for (const file of files) {
         // Initialize progress tracking
         setUploadProgress(prev => [...prev, { fileName: file.name, progress: 0 }]);
-
+        
         // Update progress to show start
-        setUploadProgress(prev =>
+        setUploadProgress(prev => 
           prev.map(p => p.fileName === file.name ? { ...p, progress: 30 } : p)
         );
-
+        
         // Upload file
         const result = await uploadFile(file, invoiceId);
-
+        
         // Update progress to complete
-        setUploadProgress(prev =>
+        setUploadProgress(prev => 
           prev.map(p => p.fileName === file.name ? { ...p, progress: 100 } : p)
         );
-
+        
         results.push(result);
       }
-
+      
       // Clear progress after a short delay
       setTimeout(() => {
         setUploadProgress([]);
       }, 1000);
-
+      
     } catch (error) {
       console.error('Multi-upload error:', error);
     } finally {
       setUploading(false);
     }
-
-    return results.filter(Boolean) as InvoiceDocument[];
-  }, [user, uploadFile]);
-
-  // New function to upload files without invoice association initially
-  const uploadFilesWithoutInvoice = useCallback(async (files: File[]) => {
-    if (!user) return [];
-
-    setUploading(true);
-    const results: (InvoiceDocument | null)[] = [];
-
-    try {
-      for (const file of files) {
-        // Initialize progress tracking
-        setUploadProgress(prev => [...prev, { fileName: file.name, progress: 0 }]);
-
-        // Update progress to show start
-        setUploadProgress(prev =>
-          prev.map(p => p.fileName === file.name ? { ...p, progress: 30 } : p)
-        );
-
-        // Upload file without invoice association
-        const result = await uploadFile(file, undefined);
-
-        // Update progress to complete
-        setUploadProgress(prev =>
-          prev.map(p => p.fileName === file.name ? { ...p, progress: 100 } : p)
-        );
-
-        results.push(result);
-      }
-
-      // Clear progress after a short delay
-      setTimeout(() => {
-        setUploadProgress([]);
-      }, 1000);
-
-    } catch (error) {
-      console.error('Multi-upload error:', error);
-    } finally {
-      setUploading(false);
-    }
-
+    
     return results.filter(Boolean) as InvoiceDocument[];
   }, [user, uploadFile]);
 
@@ -359,6 +317,5 @@ export const useFileUpload = () => {
     downloadDocument,
     getFilePreviewUrl,
     uploadMultipleFiles,
-    uploadFilesWithoutInvoice,
   };
 };
