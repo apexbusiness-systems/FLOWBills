@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20.x'
           cache: 'npm'
 
       - name: Install dependencies
@@ -45,11 +45,12 @@ jobs:
             exit 1
           fi
           
-          # Check for JS bundle
-          if ls dist/assets/*.js 1> /dev/null 2>&1; then
+          # Check for JS bundle (Vite outputs to dist/assets/js/*.js)
+          if ls dist/assets/js/*.js 1> /dev/null 2>&1 || ls dist/assets/*.js 1> /dev/null 2>&1; then
             echo "✅ JavaScript bundles exist"
           else
             echo "❌ JavaScript bundles missing"
+            echo "Expected bundles in dist/assets/js/*.js or dist/assets/*.js"
             exit 1
           fi
           
