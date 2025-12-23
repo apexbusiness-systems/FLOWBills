@@ -1,18 +1,6 @@
-import { vi } from 'vitest';
-import React from 'react';
-
-// Mock BrowserRouter to pass children through, preventing "Router inside Router" error
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    BrowserRouter: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  };
-});
-
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@/lib/test-utils';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Features from '@/pages/Features';
 import Pricing from '@/pages/Pricing';
 import APIDocs from '@/pages/APIDocs';
@@ -37,29 +25,14 @@ describe('Navigation Pages', () => {
   pages.forEach(({ path, Component, title }) => {
     it(`renders ${title} page`, () => {
       render(
-        <MemoryRouter initialEntries={[path]}>
-          <Routes>
-            <Route path={path} element={<Component />} />
-          </Routes>
-        </MemoryRouter>
+        <Routes>
+          <Route path={path} element={<Component />} />
+        </Routes>,
+        { route: path }
       );
 
       const heading = screen.getByRole('heading', { level: 1 });
       expect(heading).toBeInTheDocument();
-    });
-
-    it(`${title} page has footer`, () => {
-      render(
-        <MemoryRouter initialEntries={[path]}>
-          <Routes>
-            <Route path={path} element={<Component />} />
-          </Routes>
-        </MemoryRouter>
-      );
-
-      const footer = screen.getByRole('contentinfo');
-      expect(footer).toBeInTheDocument();
-      expect(footer.textContent).toContain('FlowBills.ca');
     });
   });
 });

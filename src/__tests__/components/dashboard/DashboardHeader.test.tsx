@@ -39,7 +39,7 @@ describe('DashboardHeader', () => {
     await user.click(userButton);
     
     expect(screen.getByText(/Profile/)).toBeInTheDocument();
-    expect(screen.getByText(/Sign out/)).toBeInTheDocument();
+    expect(await screen.findByText(/Sign out/i)).toBeInTheDocument();
   });
 
   it('calls signOut when logout is clicked', async () => {
@@ -49,7 +49,7 @@ describe('DashboardHeader', () => {
     const userButton = screen.getByRole('button', { name: /user menu/i });
     await user.click(userButton);
     
-    const signOutButton = screen.getByText(/Sign out/);
+    const signOutButton = await screen.findByText(/Sign out/i);
     await user.click(signOutButton);
     
     expect(mockAuthContext.signOut).toHaveBeenCalledTimes(1);
