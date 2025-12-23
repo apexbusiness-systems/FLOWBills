@@ -8,29 +8,25 @@ import de from '@/locales/de.json';
 import ar from '@/locales/ar.json';
 import zh from '@/locales/zh.json';
 
-try {
-  i18n
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-      resources: {
-        en: { translation: en },
-        fr: { translation: fr },
-        de: { translation: de },
-        ar: { translation: ar },
-        zh: { translation: zh },
-      },
-      fallbackLng: 'en',
-      interpolation: {
-        escapeValue: false,
-      },
-      detection: {
-        order: ['localStorage', 'navigator'],
-        caches: ['localStorage'],
-      },
-    });
-} catch (error) {
-  throw error;
-}
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: { translation: en },
+      fr: { translation: fr },
+      de: { translation: de },
+      ar: { translation: ar },
+      zh: { translation: zh },
+    },
+    fallbackLng: 'en',
+    interpolation: {
+      escapeValue: false,
+    },
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage'],
+    },
+  });
 
 export default i18n;

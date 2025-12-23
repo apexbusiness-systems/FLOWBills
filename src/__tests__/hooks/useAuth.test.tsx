@@ -1,7 +1,5 @@
-import React from 'react';
-import { act } from '@testing-library/react';
 import { useAuth } from '@/hooks/useAuth';
-import { mockSupabase, setupTestEnvironment, waitFor, renderHook } from '@/lib/test-utils';
+import { mockSupabase, setupTestEnvironment, renderHook } from '@/lib/test-utils';
 import { vi, describe, it, beforeEach, expect } from 'vitest';
 
 // Mock Supabase client

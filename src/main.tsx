@@ -26,11 +26,7 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 // Apply CSP nonce at runtime
-try {
-  applySPNonce();
-} catch (error) {
-  throw error;
-}
+applySPNonce();
 
 // Initialize performance monitoring - only in production
 if (!import.meta.env.DEV) {
@@ -61,12 +57,9 @@ if (!rootElement) {
 rootElement.innerHTML = '';
 
 // Render the app
-try {
-  const root = createRoot(rootElement);
-  root.render(<App />);
-} catch (error) {
-  throw error;
-}
+console.log('[FlowBills] Starting React render');
+const root = createRoot(rootElement);
+root.render(<App />);
 
 // Remove loader after React renders - simple approach
 requestAnimationFrame(() => {
