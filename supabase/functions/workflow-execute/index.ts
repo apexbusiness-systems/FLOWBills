@@ -190,9 +190,10 @@ serve(async (req) => {
           })
           .eq('id', instance.id);
 
-      } catch (stepError: any) {
+      } catch (stepError: unknown) {
+        const errorMessage = stepError instanceof Error ? stepError.message : 'Unknown error';
         console.error(`Error executing step ${currentStep.name}:`, stepError);
-        stepResults[currentStep.id] = { error: stepError.message };
+        stepResults[currentStep.id] = { error: errorMessage };
         
         // Mark instance as failed
         await supabaseClient
@@ -203,7 +204,7 @@ serve(async (req) => {
           })
           .eq('id', instance.id);
 
-        throw stepError;
+        throw stepError instanceof Error ? stepError : new Error(errorMessage);
       }
 
       // Get next step
@@ -229,17 +230,18 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Workflow execution failed';
     console.error('Workflow execution error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
 
 // Helper function to evaluate conditions
-function evaluateConditions(conditions: WorkflowCondition[], data: any): boolean {
+function evaluateConditions(conditions: WorkflowCondition[], data: Record<string, unknown>): boolean {
   if (!conditions || conditions.length === 0) return true;
 
   return conditions.every(condition => {

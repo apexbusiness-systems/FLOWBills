@@ -99,3 +99,6 @@ verify_jwt = false
 # FlowC Silent Compliance Integration (CONFIDENTIAL)
 [functions.flowbills-compliance-hook]
 verify_jwt = false
+
+[functions.flowc-webhook]
+verify_jwt = false
