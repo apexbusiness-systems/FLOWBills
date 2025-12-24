@@ -183,12 +183,12 @@ jobs:
       - name: Run production tests
         run: npm run test:prod
 
-      - name: Deploy to Lovable
-        id: deploy
-        uses: lovable-dev/deploy-action@v1
-        with:
-          token: ${{ secrets.LOVABLE_TOKEN }}
-          project-id: ${{ secrets.LOVABLE_PROJECT_ID }}
+      # - name: Deploy to Lovable
+      #   id: deploy
+      #   uses: lovable-dev/deploy-action@v1
+      #   with:
+      #     token: ${{ secrets.LOVABLE_TOKEN }}
+      #     project-id: ${{ secrets.LOVABLE_PROJECT_ID }}
 
   # Database Backup
   backup:
