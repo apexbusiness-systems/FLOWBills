@@ -1,40 +1,62 @@
 name: Automated Backup & Disaster Recovery
 on:
-  schedule: [{cron: '0 2 * * *'}]
+  schedule:
+    - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
-      backup_type: {description: 'Type of backup', required: true, default: 'full', type: choice, options: ['incremental', 'full']}
-permissions: {contents: read, security-events: write}
+      backup_type:
+        description: 'Type of backup'
+        required: true
+        default: 'incremental'
+        type: choice
+        options: ['incremental', 'full']
+
+permissions:
+  contents: read
+  # FIX: Grant permission to upload security/failure reports if needed
+  security-events: write 
+
 jobs:
   database-backup:
     runs-on: ubuntu-latest
     name: 💾 Database Backup
-    timeout-minutes: 30
+    
     steps:
-      - uses: actions/checkout@v4
-      - name: Validate Secrets
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # FIX: Fail fast if secrets are missing, preventing the "socket" crash
+      - name: 🛡️ Pre-flight Secret Validation
         run: |
-          [ -n "${{ secrets.SUPABASE_DB_URL }}" ] || [ -n "${{ secrets.SUPABASE_PROJECT_ID }}" -a -n "${{ secrets.SUPABASE_DB_PASSWORD }}" ] || { echo "::error::Missing DB credentials"; exit 1; }
-      - uses: supabase/setup-cli@v1
-        with: {version: latest}
-      - if: env.AWS_ACCESS_KEY_ID != ''
+          if [ -z "${{ secrets.SUPABASE_DB_URL }}" ]; then
+            echo "::error::SUPABASE_DB_URL is missing! The backup cannot connect."
+            exit 1
+          fi
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+             echo "::error::AWS Credentials are missing!"
+             exit 1
+          fi
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
-        with: {aws-access-key-id: '${{ secrets.AWS_ACCESS_KEY_ID }}', aws-secret-access-key: '${{ secrets.AWS_SECRET_ACCESS_KEY }}', aws-region: us-east-1}
-        env: {AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'}
-      - name: Create Backup
-        env:
-          SUPABASE_DB_URL: '${{ secrets.SUPABASE_DB_URL }}'
-          SUPABASE_PROJECT_ID: '${{ secrets.SUPABASE_PROJECT_ID }}'
-          SUPABASE_DB_PASSWORD: '${{ secrets.SUPABASE_DB_PASSWORD }}'
-          BACKUP_BUCKET: '${{ secrets.BACKUP_BUCKET }}'
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Create database backup
         run: |
-          set -euo pipefail
-          mkdir -p backups; TS=$(date +%Y%m%d-%H%M%S)
-          if [ -n "${SUPABASE_DB_URL:-}" ]; then DB_URL="$SUPABASE_DB_URL"
-          else PASS=$(python3 -c "import urllib.parse,os;print(urllib.parse.quote_plus(os.environ['SUPABASE_DB_PASSWORD']))"); DB_URL="postgresql://postgres:${PASS}@db.${SUPABASE_PROJECT_ID}.supabase.co:5432/postgres?sslmode=require"; fi
-          timeout 30 psql "$DB_URL" -c "SELECT 1" || { echo "::error::Connection failed"; exit 1; }
-          supabase db dump --db-url "$DB_URL" -f "backups/backup-${TS}.sql" && gzip "backups/backup-${TS}.sql"
-          [ -n "${AWS_ACCESS_KEY_ID:-}" ] && aws s3 cp "backups/backup-${TS}.sql.gz" "s3://${BACKUP_BUCKET:-flowbills-backups}/database/" || true
-          echo "✅ Backup: backups/backup-${TS}.sql.gz"
-      - uses: actions/upload-artifact@v4
-        with: {name: 'database-backup-${{ github.run_number }}', path: 'backups/*.sql.gz', retention-days: 30}
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          # The fix: Ensure this variable is populated via the secret
+          supabase db dump --db-url "${{ secrets.SUPABASE_DB_URL }}" -f "backup-${TIMESTAMP}.sql"
+          gzip "backup-${TIMESTAMP}.sql"
+          
+          # Upload to S3
+          aws s3 cp "backup-${TIMESTAMP}.sql.gz" "s3://${{ secrets.BACKUP_BUCKET }}/database/"
+          
+          echo "Backup completed: backup-${TIMESTAMP}.sql.gz"
