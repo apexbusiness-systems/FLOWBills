@@ -53,14 +53,11 @@ export const SiteConfig = {
     enableProductionOnly: true,
   },
   observability: {
-    enableTracing: !import.meta.env.DEV,
     enableMetrics: true,
-    enableSLOMonitoring: !import.meta.env.DEV,
   },
   features: {
     allowMarketingIntegrations: false, // Block Klaviyo and similar
     enableThirdPartyScripts: false,
-    enableErrorTracking: !import.meta.env.DEV,
   }
 } as const;
 
