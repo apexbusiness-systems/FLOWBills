@@ -1,10 +1,11 @@
+# TEMPORARILY DISABLED - Configure SUPABASE_DB_URL and AWS secrets to re-enable
 # P14 — Weekly DR Drill (Saturday 02:00 America/Edmonton)
 name: DR Drill
 
 on:
-  schedule:
-    # Run Saturday at 02:00 America/Edmonton (09:00 UTC winter, 08:00 UTC summer)
-    - cron: '0 9 * * 6'
+  # DISABLED - schedule:
+  #   # Run Saturday at 02:00 America/Edmonton (09:00 UTC winter, 08:00 UTC summer)
+  #   - cron: '0 9 * * 6'
   workflow_dispatch: # Manual trigger
 
 jobs:
