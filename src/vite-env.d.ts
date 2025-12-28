@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL?: string;
-  readonly VITE_SUPABASE_PUBLISHABLE_KEY?: string;
+  readonly VITE_SUPABASE_ANON_KEY?: string;
   readonly DEV: boolean;
   readonly PROD: boolean;
   readonly MODE: string;
@@ -10,11 +10,4 @@ interface ImportMetaEnv {
 
 interface ImportMeta {
   readonly env: ImportMetaEnv;
-}
-interface ImportMetaEnv {
-  readonly VITE_SUPABASE_URL: string
-  readonly VITE_SUPABASE_ANON_KEY: string
-}
-interface ImportMeta {
-  readonly env: ImportMetaEnv
 }
