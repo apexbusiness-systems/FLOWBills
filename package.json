@@ -21,6 +21,7 @@
     "test:unit": "vitest run --coverage",
     "test:integration": "vitest run --coverage",
     "test:prod": "vitest run --coverage",
+    "test:e2e": "node scripts/e2e-validate-send.js",
     "test:watch": "vitest",
     "preview": "vite preview",
     "analyze:bundle": "node scripts/analyze-bundle.js",
