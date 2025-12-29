@@ -7,7 +7,15 @@ on:
     branches: [main, develop]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20.x'
+
+permissions:
+  contents: read
+  security-events: write
+
+permissions:
+  contents: read
+  security-events: write
 
 permissions:
   contents: read
@@ -190,7 +198,7 @@ jobs:
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Run production tests
         run: npm run test:prod
@@ -289,9 +297,33 @@ jobs:
     steps:
       - name: Send Slack notification
         continue-on-error: true
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          channel: '#deployments'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            STATUS_EMOJI="✅"
+            if [ "${{ job.status }}" != "success" ]; then
+              STATUS_EMOJI="❌"
+            fi
+            PAYLOAD=$(cat <<EOF
+            {
+              "text": "${STATUS_EMOJI} CI/CD Pipeline: ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*CI/CD Pipeline Status*\nStatus: ${{ job.status }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}"
+                  }
+                }
+              ]
+            }
+            EOF
+            )
+            curl -X POST "$SLACK_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD"
+            echo "Slack notification sent"
+          else
+            echo "SLACK_WEBHOOK_URL not configured - skipping notification"
+          fi

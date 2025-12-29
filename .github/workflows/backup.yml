@@ -1,5 +1,4 @@
 name: Automated Backup & Disaster Recovery
-
 on:
   schedule:
     - cron: '0 2 * * *'
