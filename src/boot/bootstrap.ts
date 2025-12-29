@@ -209,6 +209,11 @@ class ChunkRecoveryManager {
 
   private handleChunkError(message: string): void {
     const tracker = BootTracker.getInstance();
+    const bundleManager = BundleIntegrityManager.getInstance();
+    
+    // Log bundle diagnostics before handling error
+    bundleManager.logBundleDiagnostics();
+    
     tracker.recordError(`Chunk load error: ${message}`, true);
 
     if (this.hasRetried) {
@@ -385,6 +390,125 @@ class BootTimeoutMonitor {
   }
 }
 
+// Bundle Integrity Debug Manager
+class BundleIntegrityManager {
+  private static instance: BundleIntegrityManager;
+
+  static getInstance(): BundleIntegrityManager {
+    if (!BundleIntegrityManager.instance) {
+      BundleIntegrityManager.instance = new BundleIntegrityManager();
+    }
+    return BundleIntegrityManager.instance;
+  }
+
+  /**
+   * Log bundle integrity diagnostics when boot fails
+   * This helps diagnose production issues without blocking boot
+   */
+  logBundleDiagnostics(): void {
+    try {
+      const diagnostics: Record<string, any> = {
+        deploymentId: this.getDeploymentId(),
+        buildHash: this.getBuildHash(),
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        scripts: this.getScriptDiagnostics(),
+        chunks: this.getChunkDiagnostics(),
+      };
+
+      console.group('[FlowBills] Bundle Integrity Diagnostics');
+      console.log('Deployment ID:', diagnostics.deploymentId);
+      console.log('Build Hash:', diagnostics.buildHash);
+      console.log('Scripts:', diagnostics.scripts);
+      console.log('Chunks:', diagnostics.chunks);
+      console.log('Full Diagnostics:', diagnostics);
+      console.groupEnd();
+
+      // Store in boot data for error UI
+      if (window.__FLOWBILLS_BOOT__) {
+        window.__FLOWBILLS_BOOT__.details = {
+          ...window.__FLOWBILLS_BOOT__.details,
+          bundleDiagnostics: diagnostics,
+        };
+      }
+    } catch (error) {
+      console.warn('[FlowBills] Failed to collect bundle diagnostics:', error);
+      // Don't throw - diagnostics are non-blocking
+    }
+  }
+
+  private getDeploymentId(): string {
+    // Try to get from import.meta.env or injected build info
+    if (import.meta.env.VITE_DEPLOYMENT_ID) {
+      return import.meta.env.VITE_DEPLOYMENT_ID;
+    }
+    if (import.meta.env.VITE_VERCEL_DEPLOYMENT_ID) {
+      return import.meta.env.VITE_VERCEL_DEPLOYMENT_ID;
+    }
+    return 'unknown';
+  }
+
+  private getBuildHash(): string {
+    // Try to get from import.meta.env or injected build hash
+    if (import.meta.env.VITE_BUILD_HASH) {
+      return import.meta.env.VITE_BUILD_HASH;
+    }
+    // Fallback: try to extract from script src
+    const scripts = Array.from(document.scripts);
+    const mainScript = scripts.find(s => s.src.includes('/assets/'));
+    if (mainScript?.src) {
+      const match = mainScript.src.match(/[a-f0-9]{8,}/);
+      if (match) return match[0].substring(0, 8);
+    }
+    return 'unknown';
+  }
+
+  private getScriptDiagnostics(): Array<{ src: string; type: string; async: boolean; defer: boolean }> {
+    return Array.from(document.scripts).map(script => ({
+      src: script.src || 'inline',
+      type: script.type || 'text/javascript',
+      async: script.async,
+      defer: script.defer,
+    }));
+  }
+
+  private getChunkDiagnostics(): Array<{ url: string; status: string }> {
+    // This would be populated by intercepting fetch requests
+    // For now, return script sources that look like chunks
+    const scripts = Array.from(document.scripts);
+    return scripts
+      .filter(s => s.src && (s.src.includes('/assets/') || s.src.includes('chunk')))
+      .map(s => ({
+        url: s.src,
+        status: 'loaded', // Would be enhanced with actual fetch status
+      }));
+  }
+
+  /**
+   * Check if a failed chunk fetch returned HTML (indicating routing issue)
+   */
+  async checkChunkIntegrity(url: string): Promise<{ isValid: boolean; contentType?: string; isHtml?: boolean }> {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      const contentType = response.headers.get('content-type') || '';
+      const isHtml = contentType.includes('text/html');
+      
+      return {
+        isValid: response.ok && !isHtml,
+        contentType,
+        isHtml,
+      };
+    } catch (error) {
+      return {
+        isValid: false,
+        contentType: undefined,
+        isHtml: undefined,
+      };
+    }
+  }
+}
+
 // Third-party Script Manager
 class ThirdPartyManager {
   private static instance: ThirdPartyManager;
@@ -517,6 +641,10 @@ export async function bootstrap(): Promise<void> {
     tracker.updateStage('error', { error: error instanceof Error ? error.message : String(error) });
     tracker.recordError(`Boot failed: ${error}`, true);
 
+    // Log bundle diagnostics on boot failure
+    const bundleManager = BundleIntegrityManager.getInstance();
+    bundleManager.logBundleDiagnostics();
+
     // Show error UI
     showBootErrorUI(error instanceof Error ? error : new Error(String(error)));
   }
@@ -595,6 +723,8 @@ export const bootUtils = {
     sessionStorage.removeItem('__flowbills_chunk_retry');
   },
   forceChunkRecovery: () => ChunkRecoveryManager.getInstance()['hasRetried'] = false,
+  getBundleDiagnostics: () => BundleIntegrityManager.getInstance().logBundleDiagnostics(),
+  checkChunkIntegrity: (url: string) => BundleIntegrityManager.getInstance().checkChunkIntegrity(url),
 };
 
 // Expose to window for debugging

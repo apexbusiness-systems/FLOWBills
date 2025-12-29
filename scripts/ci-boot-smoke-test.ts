@@ -8,7 +8,7 @@
  * Usage: node scripts/ci-boot-smoke-test.ts [url]
  */
 
-const puppeteer = require('playwright');
+import { chromium } from 'playwright';
 
 interface TestResult {
   name: string;
@@ -43,7 +43,7 @@ async function runTest(name: string, testFn: () => Promise<void>): Promise<void>
 }
 
 async function testBasicBoot() {
-  const browser = await puppeteer.chromium.launch();
+  const browser = await chromium.launch();
   const page = await browser.newPage();
 
   try {
@@ -81,7 +81,7 @@ async function testBasicBoot() {
 }
 
 async function testBootWithServiceWorkerDisabled() {
-  const browser = await puppeteer.chromium.launch();
+  const browser = await chromium.launch();
   const page = await browser.newPage();
 
   try {
@@ -112,7 +112,7 @@ async function testBootWithServiceWorkerDisabled() {
 }
 
 async function testBootWithCachesDisabled() {
-  const browser = await puppeteer.chromium.launch();
+  const browser = await chromium.launch();
   const page = await browser.newPage();
 
   try {
@@ -143,7 +143,7 @@ async function testBootWithCachesDisabled() {
 }
 
 async function testChunkLoadRecovery() {
-  const browser = await puppeteer.chromium.launch();
+  const browser = await chromium.launch();
   const page = await browser.newPage();
 
   try {
@@ -177,7 +177,7 @@ async function testChunkLoadRecovery() {
 }
 
 async function testBootTimeout() {
-  const browser = await puppeteer.chromium.launch();
+  const browser = await chromium.launch();
   const page = await browser.newPage();
 
   try {
@@ -206,7 +206,7 @@ async function testBootTimeout() {
 }
 
 async function testUpscopeFailure() {
-  const browser = await puppeteer.chromium.launch();
+  const browser = await chromium.launch();
   const page = await browser.newPage();
 
   try {
