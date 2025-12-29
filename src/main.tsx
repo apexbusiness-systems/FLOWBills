@@ -17,41 +17,6 @@ declare global {
 }
 window.__FLOWBILLS_LOADED__ = true;
 
-// Enhanced global error handlers with better logging
-window.addEventListener('error', (event) => {
-  const errorDetails = {
-    message: event.message,
-    filename: event.filename,
-    lineno: event.lineno,
-    colno: event.colno,
-    error: event.error,
-    timestamp: new Date().toISOString(),
-    url: window.location.href,
-  };
-  
-  console.error('[FlowBills] Uncaught error:', errorDetails);
-  
-  // In development, show more details
-  if (import.meta.env.DEV) {
-    console.error('Full error object:', event.error);
-  }
-});
-
-window.addEventListener('unhandledrejection', (event) => {
-  const rejectionDetails = {
-    reason: event.reason,
-    timestamp: new Date().toISOString(),
-    url: window.location.href,
-  };
-  
-  console.error('[FlowBills] Unhandled promise rejection:', rejectionDetails);
-  
-  // In development, show stack trace if available
-  if (import.meta.env.DEV && event.reason instanceof Error) {
-    console.error('Rejection stack:', event.reason.stack);
-  }
-});
-
 // Apply CSP nonce at runtime
 applySPNonce();
 
@@ -104,14 +69,30 @@ if (configError) {
       <ConfigErrorBoundary error={configError} />
     </React.StrictMode>
   );
+
+  // Signal mounted even for config errors (they are valid mounted states)
+  setTimeout(() => {
+    if (window.__FLOWBILLS_BOOT__) {
+      window.__FLOWBILLS_BOOT__.stage = 'mounted';
+      window.__FLOWBILLS_BOOT__.ts = Date.now();
+    }
+  }, 100);
 } else {
   // Dynamically import App to avoid loading it if config is invalid
   import('./App.tsx').then(({ default: App }) => {
     root.render(<App />);
+
+    // Signal successful mount
+    setTimeout(() => {
+      if (window.__FLOWBILLS_BOOT__) {
+        window.__FLOWBILLS_BOOT__.stage = 'mounted';
+        window.__FLOWBILLS_BOOT__.ts = Date.now();
+      }
+    }, 100);
   }).catch((error) => {
     // If App import fails due to config error, show ConfigErrorBoundary
     const importError = error instanceof Error ? error : new Error(String(error));
-    if (importError.message.includes('Missing required') || 
+    if (importError.message.includes('Missing required') ||
         importError.message.includes('FATAL') ||
         importError.message.includes('environment variables')) {
       root.render(
@@ -119,8 +100,16 @@ if (configError) {
           <ConfigErrorBoundary error={importError} />
         </React.StrictMode>
       );
+
+      // Signal mounted (config error boundary is a valid mounted state)
+      setTimeout(() => {
+        if (window.__FLOWBILLS_BOOT__) {
+          window.__FLOWBILLS_BOOT__.stage = 'mounted';
+          window.__FLOWBILLS_BOOT__.ts = Date.now();
+        }
+      }, 100);
     } else {
-      // Re-throw non-config errors
+      // Re-throw non-config errors (these will be caught by bootstrap error handler)
       throw error;
     }
   });

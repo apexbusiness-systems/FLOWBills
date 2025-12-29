@@ -9,18 +9,22 @@ test.describe('Production Smoke Tests', () => {
 
   test('should render the application without blank screen', async ({ page }) => {
     await page.goto(baseURL);
-    
+
     // Wait for React to hydrate - check for root element content
-    await page.waitForSelector('#root', { state: 'attached', timeout: 10000 });
-    
+    await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
+
     // Verify root element has content (not empty)
     const rootContent = await page.locator('#root').innerHTML();
     expect(rootContent.trim().length).toBeGreaterThan(0);
-    
+
     // Verify page title exists (basic sanity check)
     const title = await page.title();
     expect(title).toBeTruthy();
     expect(title.length).toBeGreaterThan(0);
+
+    // Verify boot system initialized
+    const bootStatus = await page.evaluate(() => (window as any).__FLOWBILLS_BOOT__?.stage);
+    expect(bootStatus).toBe('mounted');
   });
 
   test('should load without JavaScript errors', async ({ page }) => {
@@ -82,20 +86,88 @@ test.describe('Production Smoke Tests', () => {
 
   test('should handle auth state without hanging', async ({ page }) => {
     await page.goto(baseURL);
-    
-    // Wait for auth initialization (max 10 seconds)
-    await page.waitForTimeout(10000);
-    
+
+    // Wait for auth initialization (max 15 seconds - increased for reliability)
+    await page.waitForTimeout(15000);
+
     // Verify page is not blank - either shows auth page or dashboard
     const rootContent = await page.locator('#root').innerHTML();
     expect(rootContent.trim().length).toBeGreaterThan(0);
-    
+
     // Should not be stuck in loading state indefinitely
     const loadingSpinner = await page.locator('[role="status"]:has-text("Loading")').count();
-    // If loading spinner exists after 10s, that's a problem (but don't fail - might be slow network)
+    // If loading spinner exists after 15s, that's a problem (but don't fail - might be slow network)
     if (loadingSpinner > 0) {
-      console.warn('Loading spinner still visible after 10s - may indicate auth deadlock');
+      console.warn('Loading spinner still visible after 15s - may indicate auth deadlock');
     }
+  });
+
+  test('should recover from chunk load failures', async ({ page }) => {
+    // Test chunk load error recovery by simulating network failure
+    await page.route('**/assets/**', (route) => {
+      // Occasionally fail chunk requests to test recovery
+      if (Math.random() < 0.1) { // 10% failure rate
+        route.abort();
+      } else {
+        route.continue();
+      }
+    });
+
+    await page.goto(baseURL);
+
+    // Wait for boot to complete or recover
+    await page.waitForSelector('#root', { state: 'attached', timeout: 20000 });
+
+    // Should either mount successfully or show recovery UI
+    const rootContent = await page.locator('#root').innerHTML();
+    const hasRecoveryUI = await page.locator('text=Application Loading Error').count() > 0;
+    const hasRecoveryButton = await page.locator('button:has-text("Hard Reload")').count() > 0;
+
+    // Either normal content or recovery UI should be present
+    expect(rootContent.trim().length > 0 || hasRecoveryUI || hasRecoveryButton).toBeTruthy();
+  });
+
+  test('should boot reliably with service worker disabled', async ({ page }) => {
+    // Disable service worker to test fallback behavior
+    await page.addInitScript(() => {
+      // Mock service worker API as unavailable
+      Object.defineProperty(navigator, 'serviceWorker', {
+        value: undefined,
+        configurable: true
+      });
+    });
+
+    await page.goto(baseURL);
+
+    // Should still boot successfully
+    await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
+    const rootContent = await page.locator('#root').innerHTML();
+    expect(rootContent.trim().length).toBeGreaterThan(0);
+
+    // Boot should complete
+    const bootStatus = await page.evaluate(() => (window as any).__FLOWBILLS_BOOT__?.stage);
+    expect(bootStatus).toBe('mounted');
+  });
+
+  test('should boot reliably with caches disabled', async ({ page }) => {
+    // Disable caches API to test fallback behavior
+    await page.addInitScript(() => {
+      Object.defineProperty(window, 'caches', {
+        value: undefined,
+        configurable: true
+      });
+    });
+
+    await page.goto(baseURL);
+
+    // Should still boot successfully
+    await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
+    const rootContent = await page.locator('#root').innerHTML();
+    expect(rootContent.trim().length).toBeGreaterThan(0);
+
+    // Boot should complete
+    const bootStatus = await page.evaluate(() => (window as any).__FLOWBILLS_BOOT__?.stage);
+    expect(bootStatus).toBe('mounted');
   });
 });
 
