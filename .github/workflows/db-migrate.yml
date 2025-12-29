@@ -1,0 +1,338 @@
+# Database Migration Workflow for Supabase
+# Fixes socket connection errors with pre-flight secret validation
+name: Database Migration
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'supabase/migrations/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      dry_run:
+        description: 'Run in dry-run mode (no actual changes)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  SUPABASE_VERSION: '1.200.3'
+
+jobs:
+  validate-migrations:
+    runs-on: ubuntu-latest
+    name: Validate Migration Files
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for migration file changes
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} -- 'supabase/migrations/**' | wc -l)
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'supabase/migrations/**' 2>/dev/null | wc -l || echo "0")
+          fi
+          echo "migration_files_changed=$CHANGED" >> $GITHUB_OUTPUT
+          echo "Found $CHANGED migration file(s) changed"
+
+      - name: Validate SQL syntax
+        if: steps.changes.outputs.migration_files_changed != '0'
+        run: |
+          echo "Validating SQL migration files..."
+          for file in supabase/migrations/*.sql; do
+            if [ -f "$file" ]; then
+              echo "Checking: $file"
+              # Basic SQL syntax validation
+              if ! head -1 "$file" | grep -qE "^(--|CREATE|ALTER|DROP|INSERT|UPDATE|DELETE|BEGIN|COMMIT|SET|DO|SELECT)" 2>/dev/null; then
+                echo "Warning: $file may have unusual SQL syntax"
+              fi
+            fi
+          done
+          echo "SQL validation complete"
+
+  migrate-staging:
+    runs-on: ubuntu-latest
+    name: Migrate Staging Database
+    needs: validate-migrations
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/develop') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # FIX: Pre-flight secret validation to prevent socket errors
+      - name: Pre-flight Secret Validation
+        id: validate-secrets
+        run: |
+          echo "Validating required secrets..."
+          MISSING_SECRETS=""
+
+          if [ -z "${{ secrets.STAGING_SUPABASE_PROJECT_REF }}" ]; then
+            MISSING_SECRETS="$MISSING_SECRETS STAGING_SUPABASE_PROJECT_REF"
+          fi
+
+          if [ -z "${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}" ]; then
+            MISSING_SECRETS="$MISSING_SECRETS STAGING_SUPABASE_DB_PASSWORD"
+          fi
+
+          if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            MISSING_SECRETS="$MISSING_SECRETS SUPABASE_ACCESS_TOKEN"
+          fi
+
+          if [ -n "$MISSING_SECRETS" ]; then
+            echo "::error::Missing required secrets:$MISSING_SECRETS"
+            echo "::error::This causes socket connection errors. Please configure these secrets in repository settings."
+            exit 1
+          fi
+
+          echo "All required secrets are configured"
+          echo "secrets_valid=true" >> $GITHUB_OUTPUT
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: ${{ env.SUPABASE_VERSION }}
+
+      - name: Link to Supabase project
+        run: |
+          supabase link --project-ref ${{ secrets.STAGING_SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Test database connection
+        id: test-connection
+        run: |
+          echo "Testing database connectivity..."
+          # Construct the connection URL properly
+          DB_URL="postgresql://postgres.${{ secrets.STAGING_SUPABASE_PROJECT_REF }}:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+
+          # Test connection with timeout to fail fast on socket errors
+          timeout 30 supabase db ping --db-url "$DB_URL" || {
+            echo "::error::Database connection failed. Check credentials and network connectivity."
+            exit 1
+          }
+          echo "Database connection successful"
+
+      - name: Run migrations (dry-run)
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "Running migrations in dry-run mode..."
+          supabase db diff --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Run migrations
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          echo "Applying migrations to staging..."
+          supabase db push --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Verify migration status
+        run: |
+          echo "Checking migration status..."
+          supabase migration list --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+  migrate-production:
+    runs-on: ubuntu-latest
+    name: Migrate Production Database
+    needs: validate-migrations
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # FIX: Pre-flight secret validation to prevent socket errors
+      - name: Pre-flight Secret Validation
+        id: validate-secrets
+        run: |
+          echo "Validating required secrets..."
+          MISSING_SECRETS=""
+
+          if [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
+            MISSING_SECRETS="$MISSING_SECRETS SUPABASE_PROJECT_REF"
+          fi
+
+          if [ -z "${{ secrets.SUPABASE_DB_PASSWORD }}" ]; then
+            MISSING_SECRETS="$MISSING_SECRETS SUPABASE_DB_PASSWORD"
+          fi
+
+          if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            MISSING_SECRETS="$MISSING_SECRETS SUPABASE_ACCESS_TOKEN"
+          fi
+
+          if [ -n "$MISSING_SECRETS" ]; then
+            echo "::error::Missing required secrets:$MISSING_SECRETS"
+            echo "::error::This causes socket connection errors. Please configure these secrets in repository settings."
+            exit 1
+          fi
+
+          echo "All required secrets are configured"
+          echo "secrets_valid=true" >> $GITHUB_OUTPUT
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: ${{ env.SUPABASE_VERSION }}
+
+      - name: Link to Supabase project
+        run: |
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Test database connection
+        id: test-connection
+        run: |
+          echo "Testing database connectivity..."
+          # Construct the connection URL properly
+          DB_URL="postgresql://postgres.${{ secrets.SUPABASE_PROJECT_REF }}:${{ secrets.SUPABASE_DB_PASSWORD }}@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+
+          # Test connection with timeout to fail fast on socket errors
+          timeout 30 supabase db ping --db-url "$DB_URL" || {
+            echo "::error::Database connection failed. Check credentials and network connectivity."
+            exit 1
+          }
+          echo "Database connection successful"
+
+      - name: Create pre-migration backup
+        run: |
+          echo "Creating pre-migration backup..."
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          supabase db dump --linked -f "pre-migration-backup-${TIMESTAMP}.sql"
+          echo "Backup created: pre-migration-backup-${TIMESTAMP}.sql"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Run migrations (dry-run)
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "Running migrations in dry-run mode..."
+          supabase db diff --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Run migrations
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          echo "Applying migrations to production..."
+          supabase db push --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Verify migration status
+        run: |
+          echo "Checking migration status..."
+          supabase migration list --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pre-migration-backup-${{ github.run_id }}
+          path: pre-migration-backup-*.sql
+          retention-days: 30
+
+  notify-completion:
+    runs-on: ubuntu-latest
+    name: Send Notifications
+    needs: [migrate-staging, migrate-production]
+    if: always()
+
+    steps:
+      - name: Determine migration status
+        id: status
+        run: |
+          if [ "${{ needs.migrate-staging.result }}" = "success" ] || [ "${{ needs.migrate-production.result }}" = "success" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "emoji=white_check_mark" >> $GITHUB_OUTPUT
+          elif [ "${{ needs.migrate-staging.result }}" = "failure" ] || [ "${{ needs.migrate-production.result }}" = "failure" ]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "emoji=x" >> $GITHUB_OUTPUT
+          else
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "emoji=fast_forward" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Slack notification
+        if: steps.status.outputs.status != 'skipped'
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            PAYLOAD=$(cat <<'SLACK_EOF'
+          {
+            "text": ":${{ steps.status.outputs.emoji }}: Database Migration: ${{ steps.status.outputs.status }}",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "Database Migration Report"
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Status:*\n${{ steps.status.outputs.status }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Branch:*\n${{ github.ref_name }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Triggered by:*\n${{ github.actor }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Run:*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                  }
+                ]
+              }
+            ]
+          }
+          SLACK_EOF
+            )
+            curl -s -X POST "$SLACK_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD"
+            echo "Slack notification sent"
+          else
+            echo "SLACK_WEBHOOK_URL not configured - skipping notification"
+          fi

@@ -69,36 +69,51 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Core vendor chunk
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-            return 'vendor-react';
-          }
-          // Router chunk
-          if (id.includes('node_modules/react-router')) {
-            return 'vendor-router';
-          }
-          // Supabase chunk
-          if (id.includes('node_modules/@supabase')) {
-            return 'vendor-supabase';
-          }
-          // Query chunk
-          if (id.includes('node_modules/@tanstack')) {
-            return 'vendor-query';
-          }
-          // UI components chunk
-          if (id.includes('node_modules/@radix-ui')) {
-            return 'vendor-ui';
-          }
-          // Charts chunk
-          if (id.includes('node_modules/recharts')) {
-            return 'vendor-charts';
-          }
-          // Other large dependencies
-          if (id.includes('node_modules')) {
-            return 'vendor-misc';
-          }
-        },
+        // PRODUCTION HOTFIX 2025-12-26: Removed broken manualChunks configuration
+        // that was generating empty vendor bundles (0.00 kB for vendor-react,
+        // vendor-supabase, vendor-ui). Main bundle was only 0.71 kB causing
+        // complete application failure in production.
+        //
+        // ROOT CAUSE: Module ID matching was failing, excluding all vendor code
+        // from output bundles.
+        //
+        // SOLUTION: Vite's automatic chunking is sufficient and reliable for
+        // production. It will properly split code based on size thresholds and
+        // shared dependencies.
+        //
+        // TODO POST-LAUNCH: Re-implement optimized chunking strategy with:
+        //   - Proper module ID normalization (path separators, absolute paths)
+        //   - Route-based code splitting with dynamic imports
+        //   - Bundle size validation in CI/CD
+        //   - Testing with vite-bundle-visualizer
+        //
+        // DO NOT RESTORE without testing and validation script in place.
+        //
+        // manualChunks: (id) => {
+        //   // BROKEN - DO NOT RESTORE WITHOUT TESTING
+        //   // This configuration generated 0.00 kB chunks, excluding all vendor code
+        //   if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+        //     return 'vendor-react';
+        //   }
+        //   if (id.includes('node_modules/react-router')) {
+        //     return 'vendor-router';
+        //   }
+        //   if (id.includes('node_modules/@supabase')) {
+        //     return 'vendor-supabase';
+        //   }
+        //   if (id.includes('node_modules/@tanstack')) {
+        //     return 'vendor-query';
+        //   }
+        //   if (id.includes('node_modules/@radix-ui')) {
+        //     return 'vendor-ui';
+        //   }
+        //   if (id.includes('node_modules/recharts')) {
+        //     return 'vendor-charts';
+        //   }
+        //   if (id.includes('node_modules')) {
+        //     return 'vendor-misc';
+        //   }
+        // },
         // Optimize asset file names for caching
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.');
@@ -113,10 +128,17 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
-      treeshake: {
-        moduleSideEffects: false,
-        propertyReadSideEffects: false,
-      },
+      // PRODUCTION HOTFIX 2025-12-26: Removed aggressive treeshaking that was
+      // treating application code as dead code. With moduleSideEffects: false,
+      // Rollup was removing main.tsx entirely (including createRoot().render())
+      // because it assumed no modules have side effects.
+      //
+      // Vite's default treeshaking is safe and sufficient.
+      //
+      // treeshake: {
+      //   moduleSideEffects: false,  // BROKEN - Removes all app code!
+      //   propertyReadSideEffects: false,
+      // },
     },
     target: 'es2020',
     cssCodeSplit: true,

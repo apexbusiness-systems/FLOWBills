@@ -4,6 +4,7 @@
  */
 
 import { StructuredLogger, TraceContext } from './observability';
+import { logger } from './logger';
 
 interface SpanContext {
   traceId: string;
@@ -70,7 +71,7 @@ class TracingManager {
   endSpan(spanId: string, status: 'ok' | 'error' = 'ok', error?: Error): void {
     const span = this.activeSpans.get(spanId);
     if (!span) {
-      console.warn(`Span not found: ${spanId}`);
+      logger.warn(`Span not found: ${spanId}`);
       return;
     }
     

@@ -1,10 +1,11 @@
+# TEMPORARILY DISABLED - Configure SLACK_WEBHOOK_URL to re-enable
 # P17 — Daily Report Scheduler (09:00 America/Edmonton)
 name: Daily Report
 
 on:
-  schedule:
-    # Run at 09:00 America/Edmonton (16:00 UTC in winter, 15:00 UTC in summer - DST aware)
-    - cron: '0 16 * * *'
+  # DISABLED - schedule:
+  #   # Run at 09:00 America/Edmonton (16:00 UTC in winter, 15:00 UTC in summer - DST aware)
+  #   - cron: '0 16 * * *'
   workflow_dispatch: # Manual trigger for testing
 
 jobs:

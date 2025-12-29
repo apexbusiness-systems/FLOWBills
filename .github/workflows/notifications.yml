@@ -1,0 +1,30 @@
+name: Notifications
+on:
+  workflow_call:
+    inputs:
+      status: {description: 'Status', required: true, type: string}
+      title: {description: 'Title', required: true, type: string}
+      message: {description: 'Message', required: false, type: string, default: ''}
+      environment: {description: 'Environment', required: false, type: string, default: 'unknown'}
+    secrets: {SLACK_WEBHOOK_URL: {required: false}}
+  workflow_dispatch:
+    inputs:
+      status: {description: 'Status', required: true, default: 'success', type: choice, options: [success, failure, cancelled]}
+      title: {description: 'Title', required: true, default: 'Test'}
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - if: env.SLACK_WEBHOOK_URL != ''
+        env: {SLACK_WEBHOOK_URL: '${{ secrets.SLACK_WEBHOOK_URL }}'}
+        run: |
+          set -euo pipefail; [ -z "${SLACK_WEBHOOK_URL:-}" ] && exit 0
+          case "${{ inputs.status }}" in success)E="✅";C="good";;failure)E="❌";C="danger";;*)E="⚠️";C="warning";;esac
+          P=$(cat <<'EOJ'
+          {"attachments":[{"color":"C","blocks":[{"type":"header","text":{"type":"plain_text","text":"T"}},{"type":"section","fields":[{"type":"mrkdwn","text":"*Status:*\nE S"},{"type":"mrkdwn","text":"*Env:*\nN"},{"type":"mrkdwn","text":"*Repo:*\nR"},{"type":"mrkdwn","text":"*By:*\nA"}]},{"type":"section","text":{"type":"mrkdwn","text":"*Details:*\nM"}},{"type":"context","elements":[{"type":"mrkdwn","text":"<U|View>"}]}]}]}
+          EOJ
+          )
+          P=$(echo "$P"|sed "s|C|$C|;s|E|$E|;s|T|${{ inputs.title }}|;s|S|${{ inputs.status }}|;s|N|${{ inputs.environment }}|;s|R|${{ github.repository }}|;s|A|${{ github.actor }}|;s|M|${{ inputs.message }}|;s|U|${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|")
+          for i in 1 2 3;do curl -X POST "$SLACK_WEBHOOK_URL" -H "Content-Type: application/json" -d "$P" --max-time 10 && { echo "✅ Sent"; exit 0; }; sleep 5; done
+          echo "⚠️ Failed (non-blocking)"; exit 0
