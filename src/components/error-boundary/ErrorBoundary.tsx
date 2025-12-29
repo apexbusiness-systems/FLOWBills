@@ -21,6 +21,15 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): State {
+    // Check if this is a config error that should show ConfigErrorBoundary
+    const isConfigError = error.message.includes('Missing required') || 
+                         error.message.includes('FATAL') ||
+                         error.message.includes('environment variables');
+    
+    if (isConfigError && import.meta.env.DEV) {
+      console.error('[ErrorBoundary] Config error detected - should be handled by ConfigErrorBoundary');
+    }
+    
     return { hasError: true, error };
   }
 

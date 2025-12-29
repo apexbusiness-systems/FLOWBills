@@ -21,11 +21,13 @@
     "test:unit": "vitest run --coverage",
     "test:integration": "vitest run --coverage",
     "test:prod": "vitest run --coverage",
-    "test:e2e": "node scripts/e2e-validate-send.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "test:watch": "vitest",
+    "test:boot-smoke": "node scripts/ci-boot-smoke-test.ts",
     "preview": "vite preview",
-    "analyze:bundle": "node scripts/analyze-bundle.js",
-    "ci": "npm run lint:check && npm run type-check && npm run test:unit && npm run build"
+    "ci": "npm run lint:check && npm run type-check && npm run test:unit && npm run build",
+    "postdeploy": "npm run test:boot-smoke"
   },
   "dependencies": {
     "@elevenlabs/react": "^0.11.0",
@@ -96,9 +98,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/typography": "^0.5.16",
-    "@types/node": "^22.16.5",
     "@types/dom-mediacapture-record": "^1.0.22",
+    "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react-swc": "^3.11.0",
@@ -108,6 +111,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "lovable-tagger": "^1.1.9",
+    "playwright": "^1.57.0",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.17",

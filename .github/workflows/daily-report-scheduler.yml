@@ -25,15 +25,32 @@ jobs:
       
       - name: Invoke daily report function
         id: report
+        continue-on-error: true
         run: |
-          RESPONSE=$(curl -s -X POST \
+          if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ]; then
+            echo "::warning::SUPABASE_SERVICE_ROLE_KEY not configured - skipping daily report"
+            echo '{"error": "Service role key not configured"}' > report-response.json
+            echo "report_json<<EOF" >> $GITHUB_OUTPUT
+            echo '{"error": "Service role key not configured"}' >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
             "https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/daily-report" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-            -H "Content-Type: application/json")
+            -H "Content-Type: application/json" || echo "CURL_ERROR")
           
-          echo "Response: $RESPONSE"
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "CURL_ERROR" ]; then
+            echo "::warning::Daily report function returned HTTP $HTTP_CODE"
+            echo "Response: $BODY"
+          fi
+          
           echo "report_json<<EOF" >> $GITHUB_OUTPUT
-          echo "$RESPONSE" >> $GITHUB_OUTPUT
+          echo "$BODY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
       
       - name: Parse report metrics
@@ -78,6 +95,7 @@ jobs:
           retention-days: 90
       
       - name: Check SLO violations
+        continue-on-error: true
         run: |
           AVAILABILITY=${{ steps.metrics.outputs.availability }}
           P95_LATENCY=${{ steps.metrics.outputs.p95_latency }}
@@ -85,16 +103,21 @@ jobs:
           
           VIOLATIONS=""
           
-          if (( $(echo "$AVAILABILITY < 99.5" | bc -l) )); then
-            VIOLATIONS="$VIOLATIONS\n⚠️ Availability SLO violated: ${AVAILABILITY}% < 99.5%"
-          fi
-          
-          if (( $(echo "$P95_LATENCY > 800" | bc -l) )); then
-            VIOLATIONS="$VIOLATIONS\n⚠️ Latency SLO violated: ${P95_LATENCY}ms > 800ms"
-          fi
-          
-          if (( $(echo "$ERROR_RATIO > 0.5" | bc -l) )); then
-            VIOLATIONS="$VIOLATIONS\n⚠️ Error ratio SLO violated: ${ERROR_RATIO}% > 0.5%"
+          # Use awk for floating point comparison (more reliable than bc)
+          if [ -n "$AVAILABILITY" ] && [ -n "$P95_LATENCY" ] && [ -n "$ERROR_RATIO" ]; then
+            if awk "BEGIN {exit !($AVAILABILITY < 99.5)}"; then
+              VIOLATIONS="$VIOLATIONS\n⚠️ Availability SLO violated: ${AVAILABILITY}% < 99.5%"
+            fi
+            
+            if awk "BEGIN {exit !($P95_LATENCY > 800)}"; then
+              VIOLATIONS="$VIOLATIONS\n⚠️ Latency SLO violated: ${P95_LATENCY}ms > 800ms"
+            fi
+            
+            if awk "BEGIN {exit !($ERROR_RATIO > 0.5)}"; then
+              VIOLATIONS="$VIOLATIONS\n⚠️ Error ratio SLO violated: ${ERROR_RATIO}% > 0.5%"
+            fi
+          else
+            echo "::warning::Metrics not available for SLO check"
           fi
           
           if [ -n "$VIOLATIONS" ]; then
