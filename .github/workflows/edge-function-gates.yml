@@ -22,7 +22,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v2.x
+          deno-version: v1.x
 
       - name: Deno Format Check
         run: deno fmt --check supabase/functions/
@@ -58,7 +58,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v2.x
+          deno-version: v1.x
 
       - name: Verify Control Function
         run: |
@@ -87,7 +87,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v2.x
+          deno-version: v1.x
 
       - name: Make script executable
         run: chmod +x scripts/equivalence-check.sh
@@ -225,7 +225,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v2.x
+          deno-version: v1.x
 
       - name: Run Golden Tests
         run: |
