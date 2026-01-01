@@ -9,6 +9,18 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['src/lib/test-utils.tsx'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'tests/**/*.test.ts', 'tests/**/*.test.tsx', 'tests/**/*.spec.ts', 'tests/**/*.spec.tsx'],
+    exclude: [
+      'supabase/functions/**', // Exclude Deno tests
+      'tests/e2e/**', // Exclude Playwright E2E tests from Unit/Integration runner
+      'node_modules/',
+      'src/lib/test-utils.tsx',
+      '**/*.d.ts',
+      '**/*.config.*',
+      'dist/',
+      '.next/',
+      'coverage/',
+    ],
     css: true,
     coverage: {
       provider: 'v8',
@@ -31,6 +43,12 @@ export default defineConfig({
         },
       },
     },
+    // Mock environment variables for Vitest
+    env: {
+      VITE_SUPABASE_URL: 'https://test.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
+    }
   },
   resolve: {
     alias: {

@@ -11,11 +11,15 @@ try {
   // Re-throw with ConfigError name for ErrorBoundary detection
   const configError = error instanceof Error ? error : new Error(String(error));
   configError.name = 'ConfigError';
-  throw configError;
+
+  // In test environment, we don't want to crash if env vars are missing
+  if (import.meta.env.MODE !== 'test') {
+    throw configError;
+  }
 }
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL!;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY!;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://example.supabase.co';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'test-anon-key';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
