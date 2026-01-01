@@ -42,9 +42,11 @@ export default defineConfig({
         },
       },
     },
+    // Mock environment variables for Vitest
     env: {
-      SUPABASE_URL: 'https://test.supabase.co',
-      SUPABASE_ANON_KEY: 'test-anon-key',
+      VITE_SUPABASE_URL: 'https://test.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
     }
   },
   resolve: {
