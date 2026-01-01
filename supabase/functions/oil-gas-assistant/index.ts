@@ -1,6 +1,12 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
+// Allow overriding createClient for testing
+export let createClientFn = createClient;
+export function setCreateClientFn(fn: typeof createClient) {
+  createClientFn = fn;
+}
+
 // CORS headers for web app compatibility
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,7 +16,7 @@ const corsHeaders = {
 import { assertLLMLock, DENO_MODEL_ID, DENO_ENDPOINT } from "../_shared/llm_guard.ts";
 
 // Oil & Gas Query Validation
-function validateOilGasQuery(query: string): void {
+export function validateOilGasQuery(query: string): void {
   if (!query || query.trim().length === 0) {
     throw new Error("Empty query not allowed");
   }
@@ -24,7 +30,7 @@ function validateOilGasQuery(query: string): void {
 }
 
 // Industry-specific RAG retrieval
-async function retrieveOilGasContext(
+export async function retrieveOilGasContext(
   query: string, 
   supabase: ReturnType<typeof createClient>
 ): Promise<string[]> {
@@ -112,7 +118,7 @@ async function retrieveOilGasContext(
 }
 
 // Main Oil & Gas Assistant Handler
-Deno.serve(async (req) => {
+export const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -122,7 +128,7 @@ Deno.serve(async (req) => {
     // Security: Verify LLM lock before any processing
     assertLLMLock();
 
-    const supabase = createClient(
+    const supabase = createClientFn(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
@@ -332,4 +338,8 @@ Remember: You must provide citations for any industry-specific claims. If you ca
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-});
+};
+
+if (import.meta.main) {
+  Deno.serve(handler);
+}
