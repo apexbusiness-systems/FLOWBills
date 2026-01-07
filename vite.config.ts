@@ -69,7 +69,12 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        // PRODUCTION HOTFIX 2025-12-26: Removed broken manualChunks configuration
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-slot', 'lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge'],
+          'vendor-supabase': ['@supabase/supabase-js']
+        },
+        // Optimize asset file names for caching
         // that was generating empty vendor bundles (0.00 kB for vendor-react,
         // vendor-supabase, vendor-ui). Main bundle was only 0.71 kB causing
         // complete application failure in production.

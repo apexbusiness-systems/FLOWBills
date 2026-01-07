@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -338,6 +338,22 @@ function App() {
 const AppLayout = () => {
   const { user, loading } = useAuth();
   const isAuthenticated = !!user;
+
+  useLayoutEffect(() => {
+    // 1. Mark Boot Success
+    if (window.__FLOWBILLS_BOOT__) {
+       window.__FLOWBILLS_BOOT__.stage = 'mounted';
+       window.__FLOWBILLS_BOOT__.ts = Date.now();
+    }
+
+    // 2. The Handshake: Remove the loader
+    const loader = document.getElementById('flowbills-loader');
+    if (loader) {
+      loader.style.opacity = '0';
+      loader.style.transition = 'opacity 0.5s ease';
+      setTimeout(() => loader.remove(), 500);
+    }
+  }, []);
   
   // Don't render headers while loading to prevent flash
   if (loading) {
