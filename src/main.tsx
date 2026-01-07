@@ -115,12 +115,18 @@ if (configError) {
   });
 }
 
-// Remove loader after React renders - simple approach
-requestAnimationFrame(() => {
-  requestAnimationFrame(() => {
-    const loader = document.getElementById('flowbills-loader');
-    if (loader) {
-      loader.remove();
-    }
-  });
-});
+// Define global helper for safe loader removal
+declare global {
+  interface Window {
+    removeFlowBillsLoader: () => void;
+  }
+}
+
+window.removeFlowBillsLoader = () => {
+  const loader = document.getElementById('flowbills-loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    loader.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => loader.remove(), 500);
+  }
+};
