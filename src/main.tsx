@@ -7,7 +7,6 @@ import { performanceMonitor } from "./lib/performance-monitor";
 import { queryOptimizer } from "./lib/query-optimizer";
 import { startPersistenceCleanup } from "./lib/persistence";
 import { ConfigErrorBoundary } from "./components/config/ConfigErrorBoundary";
-import { validateSupabaseConfig } from "./lib/config-validator";
 
 // Mark module as loaded immediately
 declare global {
@@ -48,72 +47,53 @@ if (!rootElement) {
 // This prevents React error #418 which occurs when React tries to hydrate existing content
 rootElement.innerHTML = '';
 
-// Validate config before importing App (which imports Supabase client)
-let configError: Error | null = null;
-try {
-  validateSupabaseConfig();
-} catch (error) {
-  configError = error instanceof Error ? error : new Error(String(error));
-  configError.name = 'ConfigError';
-  console.error('[FlowBills] Configuration error detected:', configError);
-}
-
-// Render the app - config errors will show ConfigErrorBoundary
+// Render the app
 console.log('[FlowBills] Starting React render');
 const root = createRoot(rootElement);
 
-if (configError) {
-  // Render config error screen instead of app
-  root.render(
-    <React.StrictMode>
-      <ConfigErrorBoundary error={configError} />
-    </React.StrictMode>
-  );
+// Helper function to remove loader
+const removeLoader = () => {
+  const loader = document.getElementById('flowbills-loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    loader.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => loader.remove(), 300);
+  }
+};
 
-  // Signal mounted even for config errors (they are valid mounted states)
+import('./App.tsx').then(({ default: App }) => {
+  root.render(<App />);
+  
+  // Remove loader immediately after render
+  removeLoader();
+
+  // Signal successful mount
   setTimeout(() => {
     if (window.__FLOWBILLS_BOOT__) {
       window.__FLOWBILLS_BOOT__.stage = 'mounted';
       window.__FLOWBILLS_BOOT__.ts = Date.now();
     }
   }, 100);
-} else {
-  // Dynamically import App to avoid loading it if config is invalid
-  import('./App.tsx').then(({ default: App }) => {
-    root.render(<App />);
+}).catch((error) => {
+  console.error('[FlowBills] App import failed:', error);
+  const importError = error instanceof Error ? error : new Error(String(error));
+  root.render(
+    <React.StrictMode>
+      <ConfigErrorBoundary error={importError} />
+    </React.StrictMode>
+  );
 
-    // Signal successful mount
-    setTimeout(() => {
-      if (window.__FLOWBILLS_BOOT__) {
-        window.__FLOWBILLS_BOOT__.stage = 'mounted';
-        window.__FLOWBILLS_BOOT__.ts = Date.now();
-      }
-    }, 100);
-  }).catch((error) => {
-    // If App import fails due to config error, show ConfigErrorBoundary
-    const importError = error instanceof Error ? error : new Error(String(error));
-    if (importError.message.includes('Missing required') ||
-        importError.message.includes('FATAL') ||
-        importError.message.includes('environment variables')) {
-      root.render(
-        <React.StrictMode>
-          <ConfigErrorBoundary error={importError} />
-        </React.StrictMode>
-      );
+  // Remove loader even on error (error boundary shows instead)
+  removeLoader();
 
-      // Signal mounted (config error boundary is a valid mounted state)
-      setTimeout(() => {
-        if (window.__FLOWBILLS_BOOT__) {
-          window.__FLOWBILLS_BOOT__.stage = 'mounted';
-          window.__FLOWBILLS_BOOT__.ts = Date.now();
-        }
-      }, 100);
-    } else {
-      // Re-throw non-config errors (these will be caught by bootstrap error handler)
-      throw error;
+  // Signal mounted (error boundary is a valid mounted state)
+  setTimeout(() => {
+    if (window.__FLOWBILLS_BOOT__) {
+      window.__FLOWBILLS_BOOT__.stage = 'mounted';
+      window.__FLOWBILLS_BOOT__.ts = Date.now();
     }
-  });
-}
+  }, 100);
+});
 
 // Define global helper for safe loader removal
 declare global {
