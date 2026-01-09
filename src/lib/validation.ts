@@ -58,25 +58,40 @@ export const searchQuerySchema = z.string()
   .max(100, "Search query too long")
   .regex(/^[A-Za-z0-9\s\-_().]+$/, "Invalid search query format");
 
+// Get file validation config from environment
+const getFileValidationConfig = () => {
+  const maxSizeMB = parseInt(import.meta.env.VITE_MAX_UPLOAD_MB || '20');
+  const allowedMimeTypes = (import.meta.env.VITE_ALLOWED_UPLOAD_MIME || 'application/pdf,image/jpeg,image/png').split(',').map((s: string) => s.trim());
+
+  return {
+    maxSizeBytes: maxSizeMB * 1024 * 1024,
+    allowedMimeTypes
+  };
+};
+
 export const fileUploadSchema = z.object({
   name: z.string()
     .min(1, "File name required")
     .max(255, "File name too long")
-    .regex(/^[A-Za-z0-9\s\-_.()]+\.(pdf|xlsx?|csv|xml)$/i, "Invalid file name or extension"),
-  
+    .regex(/^[A-Za-z0-9\s\-_.()]+\.(pdf|xlsx?|csv|xml|jpg|jpeg|png)$/i, "Invalid file name or extension"),
+
   size: z.number()
-    .positive("File size must be positive")
-    .max(20 * 1024 * 1024, "File size exceeds 20MB limit"),
-  
-  type: z.enum([
-    "application/pdf",
-    "application/vnd.ms-excel", 
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "text/csv",
-    "application/xml",
-    "text/xml"
-  ])
-});
+    .positive("File size must be positive"),
+
+  type: z.string()
+}).refine((data) => {
+  const config = getFileValidationConfig();
+  return data.size <= config.maxSizeBytes;
+}, (data) => ({
+  message: `File size exceeds ${import.meta.env.VITE_MAX_UPLOAD_MB || '20'}MB limit`,
+  path: ['size']
+})).refine((data) => {
+  const config = getFileValidationConfig();
+  return config.allowedMimeTypes.includes(data.type);
+}, (data) => ({
+  message: `File type ${data.type} not allowed. Allowed types: ${getFileValidationConfig().allowedMimeTypes.join(', ')}`,
+  path: ['type']
+}));
 
 // Error handler for validation
 export const handleValidationError = (error: z.ZodError) => {

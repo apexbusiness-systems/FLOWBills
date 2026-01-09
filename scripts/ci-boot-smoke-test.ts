@@ -205,27 +205,31 @@ async function testBootTimeout() {
   }
 }
 
-async function testUpscopeFailure() {
+// Note: Upscope is disabled by default in CI via VITE_UPSCOPE_ENABLED=false
+// This test ensures the app boots correctly without Upscope
+async function testBootWithoutUpscope() {
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
   try {
-    // Mock Upscope script failure
-    await page.route('https://code.upscope.io/remote-control-libs.js', (route) => {
-      route.abort();
-    });
-
+    // Ensure Upscope is disabled (default behavior)
     await page.goto(targetUrl);
     await page.waitForSelector('#root', { state: 'attached', timeout: 20000 });
 
     const rootContent = await page.locator('#root').innerHTML();
     if (rootContent.trim().length === 0) {
-      throw new Error('App failed to load when Upscope script failed');
+      throw new Error('App failed to load without Upscope');
     }
 
     const bootStatus = await page.evaluate(() => (window as any).__FLOWBILLS_BOOT__?.stage);
     if (bootStatus !== 'mounted') {
-      throw new Error(`Boot failed when Upscope failed, stage: ${bootStatus}`);
+      throw new Error(`Boot failed without Upscope, stage: ${bootStatus}`);
+    }
+
+    // Verify no Upscope scripts are loaded
+    const upscopeScripts = await page.locator('script[src*="upscope"]').count();
+    if (upscopeScripts > 0) {
+      throw new Error('Upscope scripts were loaded when they should be disabled');
     }
 
   } finally {
@@ -241,7 +245,7 @@ async function main() {
   await runTest('Boot without Caches API', testBootWithCachesDisabled);
   await runTest('Chunk Load Failure Recovery', testChunkLoadRecovery);
   await runTest('Boot Timeout Handling', testBootTimeout);
-  await runTest('Upscope Failure Resilience', testUpscopeFailure);
+  await runTest('Boot without Upscope', testBootWithoutUpscope);
 
   console.log('\n' + '='.repeat(60));
   console.log('📊 CI BOOT SMOKE TEST RESULTS');
