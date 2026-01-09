@@ -7,7 +7,8 @@ import { performanceMonitor } from "./lib/performance-monitor";
 import { queryOptimizer } from "./lib/query-optimizer";
 import { startPersistenceCleanup } from "./lib/persistence";
 import { ConfigErrorBoundary } from "./components/config/ConfigErrorBoundary";
-import { validateSupabaseConfig } from "./lib/config-validator";
+import { ApiErrorBoundary } from "./components/config/ApiErrorBoundary";
+import { validateSupabaseConfig, checkApiAvailability } from "./lib/config-validator";
 
 // Mark module as loaded immediately
 declare global {
@@ -50,8 +51,23 @@ rootElement.innerHTML = '';
 
 // Validate config before importing App (which imports Supabase client)
 let configError: Error | null = null;
+let apiError: Error | null = null;
+
 try {
   validateSupabaseConfig();
+
+  // Check API availability with timeout
+  console.log('[FlowBills] Checking API availability...');
+  const isApiAvailable = await checkApiAvailability(3000);
+
+  if (!isApiAvailable) {
+    apiError = new Error(
+      'Supabase API is unreachable. Please check your internet connection and try again.\n' +
+      'If the problem persists, the service may be experiencing downtime.'
+    );
+    apiError.name = 'ApiError';
+    console.error('[FlowBills] API availability check failed');
+  }
 } catch (error) {
   configError = error instanceof Error ? error : new Error(String(error));
   configError.name = 'ConfigError';
@@ -62,7 +78,22 @@ try {
 console.log('[FlowBills] Starting React render');
 const root = createRoot(rootElement);
 
-if (configError) {
+if (apiError) {
+  // Render API error screen instead of app
+  root.render(
+    <React.StrictMode>
+      <ApiErrorBoundary error={apiError} />
+    </React.StrictMode>
+  );
+
+  // Signal mounted even for API errors (they are valid mounted states)
+  setTimeout(() => {
+    if (window.__FLOWBILLS_BOOT__) {
+      window.__FLOWBILLS_BOOT__.stage = 'mounted';
+      window.__FLOWBILLS_BOOT__.ts = Date.now();
+    }
+  }, 100);
+} else if (configError) {
   // Render config error screen instead of app
   root.render(
     <React.StrictMode>
