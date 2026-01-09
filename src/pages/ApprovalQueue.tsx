@@ -57,7 +57,13 @@ const ApprovalQueue = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setItems(data || []);
+      // Map data to match ReviewQueueItem interface with defaults
+      const mappedItems: ReviewQueueItem[] = (data || []).map((item: any) => ({
+        ...item,
+        priority: item.priority ?? 0,
+        flagged_fields: item.flagged_fields ?? [],
+      }));
+      setItems(mappedItems);
     } catch (error) {
       console.error('Error fetching approval queue:', error);
     } finally {

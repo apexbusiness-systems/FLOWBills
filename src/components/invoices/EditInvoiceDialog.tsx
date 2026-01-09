@@ -97,7 +97,7 @@ export function EditInvoiceDialog({
         amount: invoice.amount.toString(),
         invoice_date: new Date(invoice.invoice_date),
         due_date: invoice.due_date ? new Date(invoice.due_date) : undefined,
-        status: invoice.status,
+        status: (invoice.status === 'pending' || invoice.status === 'approved' || invoice.status === 'rejected' || invoice.status === 'processing') ? invoice.status : 'pending',
         notes: invoice.notes || '',
       });
     }

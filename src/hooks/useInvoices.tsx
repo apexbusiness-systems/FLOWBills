@@ -7,17 +7,18 @@ import { queryOptimizer } from '@/lib/query-optimizer';
 export interface Invoice {
   id: string;
   invoice_number: string;
-  vendor_id?: string;
+  vendor_name: string;
   amount: number;
   invoice_date: string;
-  due_date?: string;
-  status: 'pending' | 'approved' | 'rejected' | 'processing';
-  notes?: string;
-  file_url?: string;
+  due_date?: string | null;
+  status: 'pending' | 'approved' | 'rejected' | 'processing' | string;
+  notes?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  duplicate_hash?: string | null;
   created_at: string;
   updated_at: string;
   user_id: string;
-  vendor_name?: string; // Computed field for display
 }
 
 type Page = { items: Invoice[]; nextCursor?: { created_at: string; id: string } };
@@ -88,16 +89,19 @@ export const useInvoices = () => {
     }
   }, [user, fetchPage, toast]);
 
-  const createInvoice = async (invoiceData: Omit<Invoice, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'vendor_name'>) => {
+  const createInvoice = async (invoiceData: { invoice_number?: string; vendor_name?: string; amount: number; invoice_date: string; due_date?: string; status?: string; notes?: string; file_url?: string }) => {
     if (!user) return null;
 
     setCreating(true);
     try {
-      const { vendor_name, ...dbData } = invoiceData as any;
+      // Prepare data for DB - vendor_name is required field
+      const { vendor_name = 'Unknown Vendor', invoice_number = `INV-${Date.now()}`, ...restData } = invoiceData;
       const { data, error } = await supabase
         .from('invoices')
         .insert([{
-          ...dbData,
+          ...restData,
+          invoice_number,
+          vendor_name,
           user_id: user.id,
         }])
         .select()

@@ -71,9 +71,9 @@ export interface PaginatedResponse<T> {
 /**
  * Fetch invoices with keyset pagination (no offset scans)
  */
-export async function fetchInvoicesPaginated<T = Record<string, unknown>>(
+export async function fetchInvoicesPaginated(
   params: KeysetPaginationParams = {}
-): Promise<PaginatedResponse<T>> {
+): Promise<PaginatedResponse<Record<string, unknown>>> {
   const { limit = 50, afterId, afterCreatedAt } = params;
   
   return deduper.once(`invoices-${afterId || 'first'}-${limit}`, async () => {
@@ -95,14 +95,15 @@ export async function fetchInvoicesPaginated<T = Record<string, unknown>>(
     
     if (error) throw error;
     
-    const hasMore = data.length > limit;
-    const items = hasMore ? data.slice(0, -1) : data;
-    const nextCursor = hasMore && items.length > 0
-      ? { id: items[items.length - 1].id, created_at: items[items.length - 1].created_at }
+    const items = data || [];
+    const hasMore = items.length > limit;
+    const resultItems = hasMore ? items.slice(0, -1) : items;
+    const nextCursor = hasMore && resultItems.length > 0
+      ? { id: resultItems[resultItems.length - 1].id, created_at: resultItems[resultItems.length - 1].created_at! }
       : undefined;
     
     return {
-      data: items,
+      data: resultItems as Record<string, unknown>[],
       nextCursor,
       hasMore,
     };

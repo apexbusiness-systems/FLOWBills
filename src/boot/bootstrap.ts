@@ -24,11 +24,16 @@ declare global {
 // Boot stage tracking
 class BootTracker {
   private static instance: BootTracker;
-  private bootData = {
-    stage: 'start' as const,
+  private bootData: {
+    stage: 'start' | 'sw-check' | 'import-app' | 'mounted' | 'error';
+    ts: number;
+    details: any;
+    errors: Array<{ message: string; ts: number; fatal?: boolean }>;
+  } = {
+    stage: 'start',
     ts: Date.now(),
     details: {},
-    errors: [] as Array<{ message: string; ts: number; fatal?: boolean }>
+    errors: []
   };
 
   static getInstance(): BootTracker {
@@ -731,3 +736,6 @@ export const bootUtils = {
 if (typeof window !== 'undefined') {
   (window as any).flowbillsBoot = bootUtils;
 }
+
+// Auto-run bootstrap when this module is loaded
+bootstrap();
