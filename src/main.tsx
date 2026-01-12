@@ -97,53 +97,27 @@ if (apiError) {
   // Render config error screen instead of app
   root.render(
     <React.StrictMode>
-      <ConfigErrorBoundary error={configError} />
+      <ConfigErrorBoundary error={importError} />
     </React.StrictMode>
   );
 
-  // Signal mounted even for config errors (they are valid mounted states)
+  // Remove loader even on error (error boundary shows instead)
+  removeLoader();
+
+  // Signal mounted (error boundary is a valid mounted state)
   setTimeout(() => {
     if (window.__FLOWBILLS_BOOT__) {
       window.__FLOWBILLS_BOOT__.stage = 'mounted';
       window.__FLOWBILLS_BOOT__.ts = Date.now();
     }
   }, 100);
-} else {
-  // Dynamically import App to avoid loading it if config is invalid
-  import('./App.tsx').then(({ default: App }) => {
-    root.render(<App />);
+});
 
-    // Signal successful mount
-    setTimeout(() => {
-      if (window.__FLOWBILLS_BOOT__) {
-        window.__FLOWBILLS_BOOT__.stage = 'mounted';
-        window.__FLOWBILLS_BOOT__.ts = Date.now();
-      }
-    }, 100);
-  }).catch((error) => {
-    // If App import fails due to config error, show ConfigErrorBoundary
-    const importError = error instanceof Error ? error : new Error(String(error));
-    if (importError.message.includes('Missing required') ||
-        importError.message.includes('FATAL') ||
-        importError.message.includes('environment variables')) {
-      root.render(
-        <React.StrictMode>
-          <ConfigErrorBoundary error={importError} />
-        </React.StrictMode>
-      );
-
-      // Signal mounted (config error boundary is a valid mounted state)
-      setTimeout(() => {
-        if (window.__FLOWBILLS_BOOT__) {
-          window.__FLOWBILLS_BOOT__.stage = 'mounted';
-          window.__FLOWBILLS_BOOT__.ts = Date.now();
-        }
-      }, 100);
-    } else {
-      // Re-throw non-config errors (these will be caught by bootstrap error handler)
-      throw error;
-    }
-  });
+// Define global helper for safe loader removal
+declare global {
+  interface Window {
+    removeFlowBillsLoader: () => void;
+  }
 }
 
 // Define global helper for safe loader removal

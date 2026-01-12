@@ -2,7 +2,6 @@
 // Service role keys must NEVER be in client-side code.
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
-import { validateSupabaseConfig } from '@/lib/config-validator';
 
 // Validate required environment variables at module load time
 let supabaseConfigError: Error | null = null;

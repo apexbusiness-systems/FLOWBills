@@ -18,6 +18,7 @@ import { ApprovalWorkflowStatus } from '@/components/dashboard/ApprovalWorkflowS
 import { TourTrigger } from '@/components/tour/TourTrigger';
 import { InvoiceTour } from '@/components/tour/InvoiceTour';
 import { ContextualTooltip } from '@/components/help/ContextualTooltip';
+import { RoleBasedWidgets } from '@/components/dashboard/RoleBasedWidgets';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -231,6 +232,11 @@ export default function Dashboard() {
       {/* Invoice Upload & Processing */}
       <div className="mb-6">
         <InvoiceUpload />
+      </div>
+
+      {/* Role-Based Dashboard Content */}
+      <div className="mb-6">
+        <RoleBasedWidgets />
       </div>
 
       {/* Status and Approvals Grid */}

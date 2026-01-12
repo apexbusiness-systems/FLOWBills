@@ -56,6 +56,7 @@ const ThreeWayMatching = React.lazy(() => import("./pages/ThreeWayMatching"));
 const PerformanceMonitoring = React.lazy(() => import("./pages/PerformanceMonitoring"));
 const Invoices = React.lazy(() => import("./pages/Invoices"));
 const ExtractionTest = React.lazy(() => import("./pages/ExtractionTest"));
+const UserRoleManagement = React.lazy(() => import("./pages/UserRoleManagement"));
 
 // QueryClient is now imported from @/lib/api-client to ensure single instance
 
@@ -219,6 +220,14 @@ const AuthRoutes = () => {
           } 
         />
         <Route 
+          path="/user-roles"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <UserRoleManagement />
+            </ProtectedRoute>
+          } 
+        />
+        <Route
           path="/features" 
           element={<Features />} 
         />

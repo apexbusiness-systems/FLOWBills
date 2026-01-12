@@ -1,6 +1,6 @@
 /**
- * Validates required environment variables at runtime.
- * Throws a descriptive error if any are missing.
+ * Validates required configuration at runtime.
+ * Now a no-op since Supabase config is hardcoded with public keys.
  */
 export function validateSupabaseConfig(): void {
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
