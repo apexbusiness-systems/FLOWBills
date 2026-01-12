@@ -61,11 +61,14 @@ const AdminWidgets = memo(() => {
           <p className="text-xs text-muted-foreground mt-1">
             Admin • Operator • Viewer
           </p>
-          <div className="flex gap-1 mt-3">
-            <Badge variant="default">Admin</Badge>
-            <Badge variant="secondary">Operator</Badge>
-            <Badge variant="outline">Viewer</Badge>
-          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mt-3 w-full"
+            onClick={() => navigate('/user-roles')}
+          >
+            Manage User Roles
+          </Button>
         </CardContent>
       </Card>
 
