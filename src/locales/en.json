@@ -14,10 +14,6 @@
     "signIn": "Sign In",
     "getStarted": "Get Started"
   },
-  "app": {
-    "loadingApp": "Loading application...",
-    "loadingPage": "Loading page..."
-  },
   "hero": {
     "title": "Automate Invoices. Approve Faster. Close with Confidence.",
     "subtitle": "AI-powered invoice processing built for Canadian oil & gas operations. From field tickets to financial close in minutes, not days.",
@@ -71,103 +67,7 @@
   "cta": {
     "title": "Ready to Transform Your AP Process?",
     "subtitle": "Join leading Canadian energy companies already saving hours every week",
-    "button": "Start Your Free Trial",
-    "primary": "Start Free Trial",
-    "secondary": "Contact Sales",
-    "primaryAria": "Start your free trial",
-    "secondaryAria": "Contact our sales team"
-  },
-  "landing": {
-    "hero": {
-      "ariaLabel": "Hero section",
-      "imageAlt": "Oil and gas industrial facility with pipelines and equipment",
-      "cta": {
-        "primaryAria": "Book a free demo",
-        "secondaryAria": "Calculate return on investment"
-      },
-      "stats": {
-        "ariaLabel": "Key statistics",
-        "processing": {
-          "aria": "95 percent",
-          "label": "Straight-Through Processing"
-        },
-        "cost": {
-          "aria": "80 percent",
-          "label": "Cost Reduction"
-        },
-        "uptime": {
-          "aria": "24 hours, 7 days",
-          "label": "Processing Uptime"
-        }
-      }
-    },
-    "features": {
-      "heading": "Enterprise-Grade Features for Oil & Gas Invoice Processing",
-      "description": "Comprehensive automation platform built for Canadian energy sector accounts payable teams. Process field tickets, vendor invoices, AFE documentation, and joint venture billing with industry-leading accuracy.",
-      "cards": {
-        "ocr": {
-          "title": "AI-Powered OCR & Data Extraction",
-          "description": "Advanced OCR with 99.5% accuracy extracts vendor information, amounts, dates, PO numbers, AFE codes, and line items from any document format including scanned paper invoices, PDFs, field tickets, and photos. Supports multi-page documents, handwritten notes, and complex table structures common in oil and gas invoicing.",
-          "bullets": [
-            "OCR & Data Extraction",
-            "Smart Field Mapping",
-            "Multi-format Support"
-          ]
-        },
-        "compliance": {
-          "title": "Canadian Compliance & Enterprise Security",
-          "description": "Built-in compliance with PIPEDA and CASL. SOC 2 Type II certified infrastructure with AES-256 encryption, role-based access control, multi-factor authentication, and comprehensive audit logging. Data residency in Canadian data centers supports provincial and federal regulations, including Alberta's PIPA and BC's PIPA.",
-          "bullets": [
-            "PIPEDA Compliant",
-            "CASL Email Consent",
-            "SOC 2 Ready"
-          ]
-        },
-        "workflow": {
-          "title": "Intelligent Workflow Automation",
-          "description": "Smart routing automatically processes high-confidence invoices straight-through to approval. Low-confidence cases route to human reviewers with highlighted discrepancies. Configurable approval hierarchies support joint ventures, working interest splits, and AFE authorization workflows. Duplicate detection uses fuzzy matching across vendor name, invoice number, date, amount, and PO.",
-          "bullets": [
-            "Duplicate Detection",
-            "Auto-Approval Rules",
-            "Exception Management"
-          ]
-        }
-      }
-    },
-    "faq": {
-      "heading": "Frequently Asked Questions",
-      "subtitle": "Everything you need to know about automated invoice processing",
-      "items": [
-        {
-          "question": "What is automated invoice processing for oil and gas?",
-          "answer": "Automated invoice processing uses AI and machine learning to extract data from oil and gas invoices, validate them against purchase orders, detect duplicates, and route them for approval. FlowBills processes invoices with 95% straight-through processing, reducing manual data entry by 80% and cutting processing costs significantly."
-        },
-        {
-          "question": "How does FlowBills ensure PIPEDA compliance?",
-          "answer": "FlowBills is built with PIPEDA compliance from the ground up. We implement encryption at rest and in transit, role-based access controls, audit logging, data retention policies, and privacy-by-design principles. Personal information is handled according to Canadian privacy law requirements, with consent management and data subject rights built into the platform."
-        },
-        {
-          "question": "Can FlowBills integrate with our existing accounting system?",
-          "answer": "Yes, FlowBills integrates with major accounting and ERP systems used in the oil and gas industry including SAP, Oracle, QuickBooks, Sage, and custom systems via API. Our integration supports bi-directional data sync for invoices, vendor information, purchase orders, and payment status."
-        },
-        {
-          "question": "How does duplicate invoice detection work?",
-          "answer": "FlowBills uses advanced algorithms to detect duplicate invoices by analyzing multiple data points including vendor name, invoice number, date, amount, and PO number. The system uses fuzzy matching to catch duplicates even when invoice numbers or amounts vary slightly, preventing duplicate payments before they occur."
-        },
-        {
-          "question": "What is the ROI timeline for implementing FlowBills?",
-          "answer": "Most Canadian oil and gas companies see ROI within 3-6 months. Typical savings include 80% reduction in invoice processing costs, 95% straight-through processing rate, elimination of duplicate payments, faster approval cycles, and reduced audit costs. The platform typically pays for itself through reduced labor costs and prevented duplicate payments alone."
-        },
-        {
-          "question": "Does FlowBills support e-invoicing and Peppol?",
-          "answer": "Yes, FlowBills supports e-invoicing standards including Peppol, EN 16931, and country-specific formats. The platform can receive, validate, and process electronic invoices while maintaining compliance with Canadian and international e-invoicing regulations."
-        },
-        {
-          "question": "How secure is my invoice data?",
-          "answer": "FlowBills implements enterprise-grade security including AES-256 encryption, SOC 2 compliant infrastructure, regular security audits, multi-factor authentication, and role-based access controls. All data is stored in Canadian data centers with comprehensive audit logs for compliance purposes."
-        }
-      ]
-    }
+    "button": "Start Your Free Trial"
   },
   "footer": {
     "tagline": "Built for Canadian oil & gas operations",
@@ -177,18 +77,7 @@
     "legal": "Legal",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
-    "apiDocs": "API Documentation",
-    "links": {
-      "features": "Features",
-      "pricing": "Pricing",
-      "api": "API",
-      "blog": "Blog",
-      "about": "About",
-      "contact": "Contact",
-      "help": "Help Center",
-      "security": "Security"
-    },
-    "companyLine": "Apex Business Systems • Edmonton, Alberta"
+    "apiDocs": "API Documentation"
   },
   "support": {
     "pageTitle": "24/7 Support Portal",
