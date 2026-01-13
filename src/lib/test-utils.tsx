@@ -23,6 +23,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/hooks/useAuth';
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
+import '@/i18n/config';
 
 // Polyfill ResizeObserver for components that rely on it (e.g., Radix UI)
 if (typeof global.ResizeObserver === 'undefined') {

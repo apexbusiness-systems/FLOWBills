@@ -21,6 +21,7 @@ import { PublicHeader } from "@/components/ui/public-header";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
 import { ThemeProvider } from "next-themes";
+import { useTranslation } from "react-i18next";
 
 // Lazy load all pages for code splitting
 const Auth = React.lazy(() => import("./pages/Auth"));
@@ -65,13 +66,14 @@ const DashboardHeader = React.lazy(() => import("./components/dashboard/Dashboar
 
 const AuthRoutes = () => {
   const { user, loading } = useAuth();
+  const { t } = useTranslation();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center" role="status" aria-live="polite">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" aria-hidden="true"></div>
-          <p className="text-muted-foreground">Loading application...</p>
+          <p className="text-muted-foreground">{t("app.loadingApp")}</p>
         </div>
       </div>
     );
@@ -86,7 +88,7 @@ const AuthRoutes = () => {
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center" role="status" aria-live="polite">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" aria-hidden="true"></div>
-            <p className="text-muted-foreground">Loading page...</p>
+            <p className="text-muted-foreground">{t("app.loadingPage")}</p>
           </div>
         </div>
       }>
