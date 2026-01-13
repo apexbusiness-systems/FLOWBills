@@ -7,16 +7,11 @@
   "nav": {
     "features": "功能",
     "pricing": "价格",
-    "help": "帮助",
     "about": "关于我们",
     "contact": "联系我们",
     "security": "安全性",
     "signIn": "登录",
     "getStarted": "开始使用"
-  },
-  "app": {
-    "loadingApp": "正在加载应用...",
-    "loadingPage": "正在加载页面..."
   },
   "hero": {
     "title": "自动化发票。加速审批。自信结算。",
@@ -71,103 +66,7 @@
   "cta": {
     "title": "准备好转型您的应付账款流程了吗？",
     "subtitle": "加入已经每周节省数小时的领先加拿大能源公司",
-    "button": "开始免费试用",
-    "primary": "开始免费试用",
-    "secondary": "联系销售",
-    "primaryAria": "开始免费试用",
-    "secondaryAria": "联系我们的销售团队"
-  },
-  "landing": {
-    "hero": {
-      "ariaLabel": "主视觉区域",
-      "imageAlt": "带有管道和设备的石油天然气工业设施",
-      "cta": {
-        "primaryAria": "预约免费演示",
-        "secondaryAria": "计算投资回报"
-      },
-      "stats": {
-        "ariaLabel": "关键统计",
-        "processing": {
-          "aria": "95%",
-          "label": "直通式处理"
-        },
-        "cost": {
-          "aria": "80%",
-          "label": "成本降低"
-        },
-        "uptime": {
-          "aria": "24 小时，7 天",
-          "label": "处理可用性"
-        }
-      }
-    },
-    "features": {
-      "heading": "面向油气发票处理的企业级功能",
-      "description": "面向加拿大能源行业应付账款团队打造的全面自动化平台。以行业领先的准确率处理现场票据、供应商发票、AFE 文档和合资计费。",
-      "cards": {
-        "ocr": {
-          "title": "AI 驱动的 OCR 与数据提取",
-          "description": "99.5% 准确率的高级 OCR 可从任何文档格式中提取供应商信息、金额、日期、PO 号码、AFE 代码和行项目，包括扫描发票、PDF、现场票据和照片。支持多页文档、手写备注和复杂表格。",
-          "bullets": [
-            "OCR 与数据提取",
-            "智能字段映射",
-            "多格式支持"
-          ]
-        },
-        "compliance": {
-          "title": "加拿大合规与企业级安全",
-          "description": "内置 PIPEDA 与 CASL 合规。SOC 2 Type II 认证基础设施，具备 AES-256 加密、基于角色的访问控制、多因素认证和全面审计日志。数据驻留在加拿大数据中心。",
-          "bullets": [
-            "符合 PIPEDA",
-            "CASL 邮件同意",
-            "SOC 2 就绪"
-          ]
-        },
-        "workflow": {
-          "title": "智能工作流自动化",
-          "description": "智能路由将高置信度发票自动处理至审批，低置信度案例转交人工并突出差异。可配置的审批层级支持合资、权益分摊与 AFE 工作流。通过模糊匹配检测重复。",
-          "bullets": [
-            "重复检测",
-            "自动审批规则",
-            "异常管理"
-          ]
-        }
-      }
-    },
-    "faq": {
-      "heading": "常见问题",
-      "subtitle": "关于自动化发票处理的一切",
-      "items": [
-        {
-          "question": "什么是油气行业的自动化发票处理？",
-          "answer": "自动化发票处理使用 AI 自动提取发票数据、与采购订单验证、检测重复并路由审批。FlowBills 的直通式处理率达 95%，将手工录入减少 80%。"
-        },
-        {
-          "question": "FlowBills 如何确保 PIPEDA 合规？",
-          "answer": "FlowBills 从底层实现 PIPEDA 合规，包括传输与静态加密、基于角色的访问控制、审计日志、数据保留政策以及隐私设计。"
-        },
-        {
-          "question": "FlowBills 能与现有会计系统集成吗？",
-          "answer": "可以。FlowBills 可与 SAP、Oracle、QuickBooks、Sage 以及自定义系统通过 API 集成，支持发票、供应商和付款状态的双向同步。"
-        },
-        {
-          "question": "重复发票检测如何工作？",
-          "answer": "FlowBills 分析供应商名称、发票号、日期、金额和 PO 号，并通过模糊匹配捕捉轻微差异的重复。"
-        },
-        {
-          "question": "部署 FlowBills 的 ROI 时间线是多久？",
-          "answer": "大多数加拿大油气公司在 3-6 个月内实现 ROI，通过降低处理成本、减少重复付款、加快审批周期。"
-        },
-        {
-          "question": "FlowBills 支持电子发票与 Peppol 吗？",
-          "answer": "支持。FlowBills 支持 Peppol、EN 16931 以及国家级格式，用于接收、验证和处理电子发票。"
-        },
-        {
-          "question": "我的发票数据有多安全？",
-          "answer": "FlowBills 提供 AES-256 加密、SOC 2 合规基础设施、定期安全审计、多因素认证和基于角色的访问控制。数据存储在加拿大。"
-        }
-      ]
-    }
+    "button": "开始免费试用"
   },
   "footer": {
     "tagline": "专为加拿大石油和天然气运营打造",
@@ -177,18 +76,7 @@
     "legal": "法律",
     "privacy": "隐私政策",
     "terms": "服务条款",
-    "apiDocs": "API文档",
-    "links": {
-      "features": "功能",
-      "pricing": "价格",
-      "api": "API",
-      "blog": "博客",
-      "about": "关于我们",
-      "contact": "联系我们",
-      "help": "帮助中心",
-      "security": "安全性"
-    },
-    "companyLine": "Apex Business Systems • Edmonton, Alberta"
+    "apiDocs": "API文档"
   },
   "support": {
     "pageTitle": "24/7 支持门户",

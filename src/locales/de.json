@@ -7,16 +7,11 @@
   "nav": {
     "features": "Funktionen",
     "pricing": "Preise",
-    "help": "Hilfe",
     "about": "Über uns",
     "contact": "Kontakt",
     "security": "Sicherheit",
     "signIn": "Anmelden",
     "getStarted": "Jetzt starten"
-  },
-  "app": {
-    "loadingApp": "Anwendung wird geladen...",
-    "loadingPage": "Seite wird geladen..."
   },
   "hero": {
     "title": "Rechnungen automatisieren. Schneller genehmigen. Sicher abschließen.",
@@ -71,103 +66,7 @@
   "cta": {
     "title": "Bereit, Ihren AP-Prozess zu transformieren?",
     "subtitle": "Schließen Sie sich führenden kanadischen Energieunternehmen an, die bereits jede Woche Stunden sparen",
-    "button": "Starten Sie Ihre kostenlose Testversion",
-    "primary": "Kostenlos testen",
-    "secondary": "Vertrieb kontaktieren",
-    "primaryAria": "Kostenlosen Test starten",
-    "secondaryAria": "Unser Vertriebsteam kontaktieren"
-  },
-  "landing": {
-    "hero": {
-      "ariaLabel": "Hero-Bereich",
-      "imageAlt": "Industrielle Öl- und Gasanlage mit Pipelines und Ausrüstung",
-      "cta": {
-        "primaryAria": "Kostenlose Demo buchen",
-        "secondaryAria": "Return on Investment berechnen"
-      },
-      "stats": {
-        "ariaLabel": "Wichtige Kennzahlen",
-        "processing": {
-          "aria": "95 Prozent",
-          "label": "Straight-Through-Verarbeitung"
-        },
-        "cost": {
-          "aria": "80 Prozent",
-          "label": "Kostensenkung"
-        },
-        "uptime": {
-          "aria": "24 Stunden, 7 Tage",
-          "label": "Verarbeitungs-Verfügbarkeit"
-        }
-      }
-    },
-    "features": {
-      "heading": "Enterprise-Funktionen für die Rechnungsverarbeitung im Öl- und Gasbereich",
-      "description": "Umfassende Automationsplattform für die kanadische Energiebranche. Verarbeiten Sie Field Tickets, Lieferantenrechnungen, AFE-Dokumente und Joint-Venture-Abrechnungen mit branchenführender Genauigkeit.",
-      "cards": {
-        "ocr": {
-          "title": "KI-gestützte OCR & Datenextraktion",
-          "description": "Fortschrittliche OCR mit 99,5 % Genauigkeit extrahiert Lieferantendaten, Beträge, Daten, PO-Nummern, AFE-Codes und Positionen aus jedem Dokumentformat, inklusive gescannter Rechnungen, PDFs, Field Tickets und Fotos. Unterstützt mehrseitige Dokumente, handschriftliche Notizen und komplexe Tabellen.",
-          "bullets": [
-            "OCR & Datenextraktion",
-            "Intelligente Feldzuordnung",
-            "Multi-Format-Unterstützung"
-          ]
-        },
-        "compliance": {
-          "title": "Kanadische Compliance & Enterprise-Sicherheit",
-          "description": "Integrierte Compliance mit PIPEDA und CASL. SOC 2 Type II zertifizierte Infrastruktur mit AES-256-Verschlüsselung, rollenbasierter Zugriffskontrolle, MFA und umfassendem Audit-Logging. Datenspeicherung in Kanada für provinzielle und föderale Anforderungen.",
-          "bullets": [
-            "PIPEDA-konform",
-            "CASL-E-Mail-Einwilligung",
-            "SOC 2 bereit"
-          ]
-        },
-        "workflow": {
-          "title": "Intelligente Workflow-Automatisierung",
-          "description": "Intelligentes Routing verarbeitet Rechnungen mit hoher Zuversicht automatisch bis zur Freigabe. Fälle mit niedriger Zuversicht werden an menschliche Prüfer mit markierten Abweichungen weitergeleitet. Konfigurierbare Freigabehierarchien unterstützen Joint Ventures, Working-Interest-Aufteilungen und AFE-Workflows. Dublettenprüfung per Fuzzy-Matching.",
-          "bullets": [
-            "Dubletten-Erkennung",
-            "Auto-Freigabe-Regeln",
-            "Ausnahmen-Management"
-          ]
-        }
-      }
-    },
-    "faq": {
-      "heading": "Häufig gestellte Fragen",
-      "subtitle": "Alles, was Sie über automatisierte Rechnungsverarbeitung wissen müssen",
-      "items": [
-        {
-          "question": "Was ist automatisierte Rechnungsverarbeitung für Öl und Gas?",
-          "answer": "Automatisierte Rechnungsverarbeitung nutzt KI, um Daten aus Rechnungen zu extrahieren, gegen Bestellungen zu prüfen, Dubletten zu erkennen und zur Freigabe zu routen. FlowBills erreicht 95 % Straight-Through-Verarbeitung und reduziert manuelle Dateneingabe um 80 %."
-        },
-        {
-          "question": "Wie stellt FlowBills PIPEDA-Compliance sicher?",
-          "answer": "FlowBills ist von Grund auf PIPEDA-konform: Verschlüsselung im Ruhezustand und bei Übertragung, rollenbasierte Zugriffskontrolle, Audit-Logging, Aufbewahrungsrichtlinien und Privacy-by-Design."
-        },
-        {
-          "question": "Kann FlowBills mit unserem bestehenden Buchhaltungssystem integriert werden?",
-          "answer": "Ja. FlowBills integriert sich mit SAP, Oracle, QuickBooks, Sage und kundenspezifischen Systemen per API. Die Integration unterstützt bidirektionale Synchronisation für Rechnungen, Lieferanten und Zahlungsstatus."
-        },
-        {
-          "question": "Wie funktioniert die Dubletten-Erkennung?",
-          "answer": "FlowBills analysiert Lieferant, Rechnungsnummer, Datum, Betrag und PO-Nummer und nutzt Fuzzy-Matching, um Dubletten auch bei leichten Abweichungen zu erkennen."
-        },
-        {
-          "question": "Wie schnell amortisiert sich FlowBills?",
-          "answer": "Die meisten kanadischen Öl- und Gasunternehmen sehen einen ROI nach 3–6 Monaten durch geringere Verarbeitungskosten, weniger Dubletten und schnellere Freigabezyklen."
-        },
-        {
-          "question": "Unterstützt FlowBills E-Invoicing und Peppol?",
-          "answer": "Ja. FlowBills unterstützt Peppol, EN 16931 und länderspezifische Formate für Empfang, Validierung und Verarbeitung elektronischer Rechnungen."
-        },
-        {
-          "question": "Wie sicher sind meine Rechnungsdaten?",
-          "answer": "FlowBills bietet AES-256-Verschlüsselung, SOC-2-konforme Infrastruktur, regelmäßige Audits, MFA und rollenbasierte Zugriffskontrolle. Daten werden in Kanada gespeichert."
-        }
-      ]
-    }
+    "button": "Starten Sie Ihre kostenlose Testversion"
   },
   "footer": {
     "tagline": "Entwickelt für kanadische Öl- und Gasoperationen",
@@ -177,18 +76,7 @@
     "legal": "Rechtliches",
     "privacy": "Datenschutzrichtlinie",
     "terms": "Nutzungsbedingungen",
-    "apiDocs": "API-Dokumentation",
-    "links": {
-      "features": "Funktionen",
-      "pricing": "Preise",
-      "api": "API",
-      "blog": "Blog",
-      "about": "Über uns",
-      "contact": "Kontakt",
-      "help": "Hilfezentrum",
-      "security": "Sicherheit"
-    },
-    "companyLine": "Apex Business Systems • Edmonton, Alberta"
+    "apiDocs": "API-Dokumentation"
   },
   "support": {
     "pageTitle": "24/7 Support-Portal",
