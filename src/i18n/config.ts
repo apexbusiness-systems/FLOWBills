@@ -20,6 +20,13 @@ i18n
       zh: { translation: zh },
     },
     fallbackLng: 'en',
+    returnNull: false,
+    saveMissing: import.meta.env.DEV,
+    missingKeyHandler: (lng, _namespace, key) => {
+      if (import.meta.env.DEV) {
+        console.warn(`[i18n] Missing translation key "${key}" for locale "${lng}".`);
+      }
+    },
     interpolation: {
       escapeValue: false,
     },

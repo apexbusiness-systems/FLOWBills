@@ -20,6 +20,16 @@ class ErrorBoundary extends Component<Props, State> {
     this.state = { hasError: false };
   }
 
+  componentDidMount(): void {
+    window.addEventListener('error', this.handleGlobalError);
+    window.addEventListener('unhandledrejection', this.handleGlobalRejection);
+  }
+
+  componentWillUnmount(): void {
+    window.removeEventListener('error', this.handleGlobalError);
+    window.removeEventListener('unhandledrejection', this.handleGlobalRejection);
+  }
+
   static getDerivedStateFromError(error: Error): State {
     // Check if this is a config error that should show ConfigErrorBoundary
     const isConfigError = error.message.includes('Missing required') || 
@@ -84,11 +94,52 @@ class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
+  handleGlobalError = (event: ErrorEvent) => {
+    if (this.state.hasError) return;
+    const error = event.error instanceof Error ? event.error : new Error(event.message);
+    this.setState({ hasError: true, error });
+  };
+
+  handleGlobalRejection = (event: PromiseRejectionEvent) => {
+    if (this.state.hasError) return;
+    const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
+    this.setState({ hasError: true, error });
+  };
+
+  handleClearSiteData = async () => {
+    const clearSiteData = (window as any).flowbillsClearSiteData as (() => Promise<void>) | undefined;
+    if (clearSiteData) {
+      await clearSiteData();
+      return;
+    }
+
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(reg => reg.unregister()));
+      }
+
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (error) {
+      console.error('[FlowBills] Clear site data failed:', error);
+    } finally {
+      window.location.reload();
+    }
+  };
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
       }
+
+      const bootStage = window.__FLOWBILLS_BOOT__?.stage ?? 'unknown';
 
       return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -103,6 +154,9 @@ class ErrorBoundary extends Component<Props, State> {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="text-xs text-muted-foreground">
+                Error code: APP_ERROR_BOUNDARY · Stage: {bootStage}
+              </div>
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="bg-muted p-3 rounded text-sm">
                   <summary className="cursor-pointer font-medium">Error Details</summary>
@@ -128,6 +182,16 @@ class ErrorBoundary extends Component<Props, State> {
                   Reload Page
                 </Button>
               </div>
+              <Button
+                onClick={this.handleClearSiteData}
+                variant="secondary"
+                className="w-full"
+              >
+                Clear Site Data
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Clearing site data removes cached assets and local storage. You may need to sign in again.
+              </p>
             </CardContent>
           </Card>
         </div>
