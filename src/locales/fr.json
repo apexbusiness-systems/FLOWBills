@@ -7,11 +7,16 @@
   "nav": {
     "features": "Fonctionnalités",
     "pricing": "Tarification",
+    "help": "Aide",
     "about": "À propos",
     "contact": "Contact",
     "security": "Sécurité",
     "signIn": "Connexion",
     "getStarted": "Commencer"
+  },
+  "app": {
+    "loadingApp": "Chargement de l'application...",
+    "loadingPage": "Chargement de la page..."
   },
   "hero": {
     "title": "Automatisez les factures. Approuvez plus vite. Clôturez en confiance.",
@@ -66,7 +71,103 @@
   "cta": {
     "title": "Prêt à transformer votre processus AP?",
     "subtitle": "Rejoignez les principales sociétés énergétiques canadiennes qui économisent déjà des heures chaque semaine",
-    "button": "Commencez votre essai gratuit"
+    "button": "Commencez votre essai gratuit",
+    "primary": "Essai gratuit",
+    "secondary": "Contacter les ventes",
+    "primaryAria": "Commencer votre essai gratuit",
+    "secondaryAria": "Contacter notre équipe commerciale"
+  },
+  "landing": {
+    "hero": {
+      "ariaLabel": "Section principale",
+      "imageAlt": "Installation industrielle pétrolière et gazière avec pipelines et équipements",
+      "cta": {
+        "primaryAria": "Réserver une démo gratuite",
+        "secondaryAria": "Calculer le retour sur investissement"
+      },
+      "stats": {
+        "ariaLabel": "Statistiques clés",
+        "processing": {
+          "aria": "95 pour cent",
+          "label": "Traitement direct"
+        },
+        "cost": {
+          "aria": "80 pour cent",
+          "label": "Réduction des coûts"
+        },
+        "uptime": {
+          "aria": "24 heures, 7 jours",
+          "label": "Disponibilité du traitement"
+        }
+      }
+    },
+    "features": {
+      "heading": "Fonctionnalités de niveau entreprise pour le traitement des factures pétrole et gaz",
+      "description": "Plateforme d'automatisation complète conçue pour les équipes fournisseurs du secteur énergétique canadien. Traitez les tickets de terrain, factures fournisseurs, documents AFE et facturation de coentreprise avec une précision de premier ordre.",
+      "cards": {
+        "ocr": {
+          "title": "OCR et extraction de données par IA",
+          "description": "OCR avancé avec une précision de 99,5 % qui extrait les informations fournisseurs, montants, dates, numéros PO, codes AFE et lignes depuis tout format de document, y compris les factures papier scannées, PDFs, tickets de terrain et photos. Prend en charge les documents multipages, notes manuscrites et tableaux complexes.",
+          "bullets": [
+            "OCR et extraction de données",
+            "Cartographie intelligente des champs",
+            "Prise en charge multi-format"
+          ]
+        },
+        "compliance": {
+          "title": "Conformité canadienne et sécurité d'entreprise",
+          "description": "Conformité intégrée à la LPRPDE et à la LCAP. Infrastructure certifiée SOC 2 Type II avec chiffrement AES-256, contrôle d'accès basé sur les rôles, MFA et journalisation complète. Résidence des données au Canada pour respecter les réglementations provinciales et fédérales.",
+          "bullets": [
+            "Conforme LPRPDE",
+            "Consentement LCAP par e-mail",
+            "Prêt pour SOC 2"
+          ]
+        },
+        "workflow": {
+          "title": "Automatisation intelligente des flux de travail",
+          "description": "Routage intelligent qui traite automatiquement les factures à forte confiance jusqu'à l'approbation. Les cas à faible confiance sont dirigés vers des réviseurs humains avec des écarts mis en évidence. Hiérarchies d'approbation configurables pour coentreprises, partages d'intérêts et workflows AFE. Détection des doublons par appariement flou.",
+          "bullets": [
+            "Détection des doublons",
+            "Règles d'auto-approbation",
+            "Gestion des exceptions"
+          ]
+        }
+      }
+    },
+    "faq": {
+      "heading": "Questions fréquemment posées",
+      "subtitle": "Tout ce qu'il faut savoir sur le traitement automatisé des factures",
+      "items": [
+        {
+          "question": "Qu'est-ce que le traitement automatisé des factures pour le pétrole et le gaz ?",
+          "answer": "Le traitement automatisé des factures utilise l'IA pour extraire les données des factures, les valider par rapport aux bons de commande, détecter les doublons et les acheminer pour approbation. FlowBills traite 95 % des factures en flux direct, réduisant la saisie manuelle de 80 %."
+        },
+        {
+          "question": "Comment FlowBills assure-t-il la conformité à la LPRPDE ?",
+          "answer": "FlowBills est conçu pour la conformité LPRPDE : chiffrement au repos et en transit, contrôles d'accès, journalisation d'audit, politiques de conservation et confidentialité dès la conception. Les informations personnelles sont gérées selon la législation canadienne."
+        },
+        {
+          "question": "FlowBills peut-il s'intégrer à notre système comptable existant ?",
+          "answer": "Oui. FlowBills s'intègre aux principaux ERP et systèmes comptables (SAP, Oracle, QuickBooks, Sage) ainsi qu'aux systèmes personnalisés via API. L'intégration prend en charge la synchronisation bidirectionnelle."
+        },
+        {
+          "question": "Comment fonctionne la détection des factures en double ?",
+          "answer": "FlowBills analyse plusieurs points de données (fournisseur, numéro de facture, date, montant, PO) avec appariement flou pour détecter les doublons, même en cas de légères variations."
+        },
+        {
+          "question": "Quel est le délai de ROI pour déployer FlowBills ?",
+          "answer": "La plupart des entreprises canadiennes constatent un ROI en 3 à 6 mois, grâce à la réduction des coûts de traitement, à la baisse des doublons et à des cycles d'approbation plus rapides."
+        },
+        {
+          "question": "FlowBills prend-il en charge la facturation électronique et Peppol ?",
+          "answer": "Oui. FlowBills prend en charge Peppol, EN 16931 et des formats spécifiques à certains pays, pour la réception, la validation et le traitement conformes."
+        },
+        {
+          "question": "À quel point mes données de facturation sont-elles sécurisées ?",
+          "answer": "FlowBills applique un chiffrement AES-256, une infrastructure conforme SOC 2, des audits réguliers, l'authentification multifacteur et des contrôles d'accès. Les données sont stockées au Canada."
+        }
+      ]
+    }
   },
   "footer": {
     "tagline": "Conçu pour les opérations pétrolières et gazières canadiennes",
@@ -76,7 +177,18 @@
     "legal": "Légal",
     "privacy": "Politique de confidentialité",
     "terms": "Conditions d'utilisation",
-    "apiDocs": "Documentation API"
+    "apiDocs": "Documentation API",
+    "links": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarification",
+      "api": "API",
+      "blog": "Blog",
+      "about": "À propos",
+      "contact": "Contact",
+      "help": "Centre d'aide",
+      "security": "Sécurité"
+    },
+    "companyLine": "Apex Business Systems • Edmonton, Alberta"
   },
   "support": {
     "pageTitle": "Portail d'assistance 24/7",
