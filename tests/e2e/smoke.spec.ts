@@ -11,7 +11,8 @@ test.describe('Production Smoke Tests', () => {
     await page.goto(baseURL);
 
     // Wait for React to hydrate - check for root element content
-    await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
+    // Wait for React to hydrate - check for root content with retry
+    await expect(page.locator('#root')).not.toBeEmpty({ timeout: 15000 });
 
     // Verify root element has content (not empty)
     const rootContent = await page.locator('#root').innerHTML();
@@ -29,33 +30,33 @@ test.describe('Production Smoke Tests', () => {
 
   test('should load without JavaScript errors', async ({ page }) => {
     const errors: string[] = [];
-    
+
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
         errors.push(msg.text());
       }
     });
-    
+
     page.on('pageerror', (error) => {
       errors.push(error.message);
     });
-    
+
     await page.goto(baseURL);
-    
+
     // Wait a bit for initial load
     await page.waitForTimeout(2000);
-    
+
     // Filter out known non-critical errors (config warnings, etc.)
-    const criticalErrors = errors.filter(err => 
+    const criticalErrors = errors.filter(err =>
       !err.includes('Missing required') && // Config errors are handled by ConfigErrorBoundary
       !err.includes('favicon') && // Favicon 404s are harmless
       !err.includes('sourcemap') // Sourcemap warnings are harmless
     );
-    
+
     if (criticalErrors.length > 0) {
       console.warn('Non-critical errors detected:', criticalErrors);
     }
-    
+
     // Page should still render even with warnings
     const rootContent = await page.locator('#root').innerHTML();
     expect(rootContent.trim().length).toBeGreaterThan(0);
@@ -65,21 +66,23 @@ test.describe('Production Smoke Tests', () => {
     // This test verifies that config errors are handled gracefully
     // In a real scenario, you'd mock missing env vars, but for smoke test
     // we just verify the error boundary component exists in the bundle
-    
+
     await page.goto(baseURL);
-    
+
     // If config error occurs, ConfigErrorBoundary should render
     // Check for error boundary indicators (but don't fail if not present - means no error)
     const hasErrorBoundary = await page.locator('text=Configuration Error').count() > 0 ||
-                            await page.locator('text=Something went wrong').count() > 0;
-    
+      await page.locator('text=Something went wrong').count() > 0;
+
     // If error boundary is shown, verify it has actionable UI
     if (hasErrorBoundary) {
       const hasReloadButton = await page.locator('button:has-text("Reload")').count() > 0;
       expect(hasReloadButton).toBeTruthy();
     }
-    
+
     // In normal operation, page should render app content
+    await expect(page.locator('#root')).not.toBeEmpty({ timeout: 15000 });
+
     const rootContent = await page.locator('#root').innerHTML();
     expect(rootContent.trim().length).toBeGreaterThan(0);
   });
@@ -115,8 +118,10 @@ test.describe('Production Smoke Tests', () => {
 
     await page.goto(baseURL);
 
-    // Wait for boot to complete or recover
-    await page.waitForSelector('#root', { state: 'attached', timeout: 20000 });
+    // Wait for boot to complete or recover (wait for content OR recovery UI)
+    await expect(
+      page.locator('#root:has(*)').or(page.locator('text="Application Loading Error"'))
+    ).toBeVisible({ timeout: 20000 });
 
     // Should either mount successfully or show recovery UI
     const rootContent = await page.locator('#root').innerHTML();
@@ -140,7 +145,9 @@ test.describe('Production Smoke Tests', () => {
     await page.goto(baseURL);
 
     // Should still boot successfully
-    await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
+    // Wait for React to hydrate - check for root content with retry
+    await expect(page.locator('#root')).not.toBeEmpty({ timeout: 15000 });
+
     const rootContent = await page.locator('#root').innerHTML();
     expect(rootContent.trim().length).toBeGreaterThan(0);
 
