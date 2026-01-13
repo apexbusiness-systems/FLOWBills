@@ -145,8 +145,7 @@ class SWHealthManager {
    * Register service worker safely (only after app is mounted)
    */
   async registerAfterMount(): Promise<void> {
-    const enableServiceWorker = import.meta.env.VITE_ENABLE_SW === 'true';
-    if (!('serviceWorker' in navigator) || import.meta.env.DEV || !enableServiceWorker) {
+    if (!('serviceWorker' in navigator) || import.meta.env.DEV) {
       return;
     }
 
@@ -300,7 +299,7 @@ class ChunkRecoveryManager {
 class BootTimeoutMonitor {
   private static instance: BootTimeoutMonitor;
   private timeoutId: number | null = null;
-  private readonly TIMEOUT_MS = 12000; // 12 seconds - fail fast with recovery UI
+  private readonly TIMEOUT_MS = 20000; // 20 seconds - realistic for slow networks
 
   static getInstance(): BootTimeoutMonitor {
     if (!BootTimeoutMonitor.instance) {
@@ -363,7 +362,6 @@ class BootTimeoutMonitor {
   }
 
   private showTimeoutError(message: string): void {
-    const bootStage = window.__FLOWBILLS_BOOT__?.stage ?? 'unknown';
     const overlay = document.createElement('div');
     overlay.style.cssText = `
       position: fixed;
@@ -383,17 +381,12 @@ class BootTimeoutMonitor {
       <div style="max-width: 500px; padding: 2rem; text-align: center;">
         <h2 style="color: #dc2626; margin-bottom: 1rem;">Application Loading Timeout</h2>
         <p style="margin-bottom: 1rem;">${message}</p>
-        <p style="color: #6b7280; font-size: 12px; margin-bottom: 1rem;">Error code: BOOT_TIMEOUT · Stage: ${bootStage}</p>
         <details style="margin-bottom: 1rem; text-align: left;">
           <summary style="cursor: pointer; margin-bottom: 0.5rem;">Boot Diagnostics</summary>
           <pre style="font-size: 12px; background: #f3f4f6; padding: 0.5rem; border-radius: 4px; overflow: auto;">${JSON.stringify(window.__FLOWBILLS_BOOT__, null, 2)}</pre>
         </details>
-        <p style="color: #6b7280; font-size: 12px; margin-bottom: 1rem;">If this persists, clear site data to remove stale cached assets.</p>
         <button onclick="window.location.reload()" style="background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
           Reload Application
-        </button>
-        <button onclick="window.flowbillsClearSiteData && window.flowbillsClearSiteData()" style="background: #111827; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-left: 8px;">
-          Clear Site Data
         </button>
       </div>
     `;
@@ -742,44 +735,6 @@ export const bootUtils = {
 // Expose to window for debugging
 if (typeof window !== 'undefined') {
   (window as any).flowbillsBoot = bootUtils;
-  (window as any).flowbillsClearSiteData = async () => {
-    try {
-      if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map(reg => reg.unregister()));
-      }
-
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-      }
-
-      try {
-        localStorage.clear();
-        sessionStorage.clear();
-      } catch (storageError) {
-        console.warn('[FlowBills] Storage cleanup failed:', storageError);
-      }
-
-      if ('indexedDB' in window && 'databases' in indexedDB) {
-        const databases = await indexedDB.databases();
-        await Promise.all(
-          databases
-            .filter(db => db.name)
-            .map(db => new Promise<void>((resolve) => {
-              const request = indexedDB.deleteDatabase(db.name as string);
-              request.onsuccess = () => resolve();
-              request.onerror = () => resolve();
-              request.onblocked = () => resolve();
-            }))
-        );
-      }
-    } catch (error) {
-      console.warn('[FlowBills] Clear site data failed:', error);
-    } finally {
-      window.location.reload();
-    }
-  };
 }
 
 // Auto-run bootstrap when this module is loaded
