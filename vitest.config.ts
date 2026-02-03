@@ -10,6 +10,15 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['src/lib/test-utils.tsx'],
     css: true,
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/*.config.*',
+      'tests/e2e/**',
+      'supabase/functions/**',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
