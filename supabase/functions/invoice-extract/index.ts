@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { z } from "zod";
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { corsHeaders } from '../_shared/cors.ts';
 
 // Input Validation Schema

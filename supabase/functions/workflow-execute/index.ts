@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,6 +25,12 @@ interface WorkflowStep {
   false_connection?: string;
 }
 
+const WorkflowExecuteSchema = z.object({
+  workflow_id: z.string().uuid(),
+  entity_type: z.string(),
+  entity_id: z.string().uuid(),
+});
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -41,7 +48,20 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { workflow_id, entity_type, entity_id } = await req.json();
+    const body = await req.json();
+    const validationResult = WorkflowExecuteSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return new Response(JSON.stringify({
+        error: 'Validation failed',
+        details: validationResult.error.errors
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { workflow_id, entity_type, entity_id } = validationResult.data;
 
     // Fetch workflow
     const { data: workflow, error: workflowError } = await supabaseClient
