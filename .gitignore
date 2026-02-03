@@ -27,3 +27,4 @@ test_output*.txt
 *.njsproj
 *.sln
 *.sw?
+coverage/
