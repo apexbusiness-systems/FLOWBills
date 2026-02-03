@@ -12,17 +12,18 @@ dist
 dist-ssr
 *.local
 
+# Test artifacts
+test-results/
+playwright-report/
+test_output*.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
-*.ntvs
+*.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-# Testing
-coverage
-test_output.log
