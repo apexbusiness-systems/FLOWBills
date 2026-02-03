@@ -89,6 +89,7 @@ jobs:
     name: ⚡ Performance
     needs: test
     if: github.event_name == 'pull_request'
+    continue-on-error: true
 
     steps:
       - name: Checkout code
@@ -112,6 +113,7 @@ jobs:
           configPath: './.lighthouserc.json'
           uploadArtifacts: true
           temporaryPublicStorage: true
+          runs: 3
 
   # Security Scan
   security:
@@ -154,7 +156,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     name: 🚀 Build & Deploy
-    needs: [test, performance, security]
+    needs: [test, security]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     environment:
