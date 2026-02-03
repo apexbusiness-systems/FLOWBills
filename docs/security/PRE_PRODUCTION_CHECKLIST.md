@@ -10,7 +10,7 @@
 
 ### 1. Enable Leaked Password Protection ⚠️ REQUIRED
 
-**Status:** ⬜ Not Started | ⬜ In Progress | ⬜ Complete
+**Status:** ❌ Failed Verification | ⬜ In Progress | ⬜ Complete
 
 **Guide:** `docs/security/LEAKED_PASSWORD_PROTECTION_SETUP.md`
 
@@ -145,9 +145,9 @@ supabase secrets set PEPPOL_WEBHOOK_SECRET=<generated_secret>
 
 ---
 
-### 5. Test E2E Flows ⬜ TODO
+### 5. Test E2E Flows ⚠️ Partial
 
-**Status:** ⬜ Not Started | ⬜ In Progress | ⬜ Complete
+**Status:** ⬜ Not Started | ⚠️ In Progress | ⬜ Complete
 
 **Test Cases:**
 

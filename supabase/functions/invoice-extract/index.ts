@@ -1,10 +1,14 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { z } from "zod";
+import { corsHeaders } from '../_shared/cors.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// Input Validation Schema
+const ExtractRequestSchema = z.object({
+  invoice_id: z.string().uuid("Invalid invoice_id format"),
+  file_content: z.string().min(1, "File content is required"),
+  file_type: z.string().optional(),
+});
 
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
@@ -19,10 +23,12 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // 1. Setup Supabase Client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // 2. Auth Check
     const authToken = req.headers.get('Authorization')?.replace('Bearer ', '');
     if (!authToken) {
       return new Response(JSON.stringify({ error: 'Authentication required' }), {
@@ -39,18 +45,25 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { invoice_id, file_content, file_type } = await req.json();
+    // 3. Input Validation
+    const body = await req.json();
+    const parseResult = ExtractRequestSchema.safeParse(body);
 
-    if (!invoice_id || !file_content) {
-      return new Response(JSON.stringify({ error: 'invoice_id and file_content required' }), {
+    if (!parseResult.success) {
+      return new Response(JSON.stringify({
+        error: 'Validation failed',
+        details: parseResult.error.issues
+      }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    const { invoice_id, file_content, file_type } = parseResult.data;
+
     console.log(`[Extract] Processing invoice ${invoice_id}, content type: ${file_type || 'unknown'}`);
 
-    // Create extraction record
+    // 4. Create extraction record
     const { data: extraction, error: extractionError } = await supabase
       .from('invoice_extractions')
       .insert({
@@ -73,13 +86,14 @@ Deno.serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
+    // 5. AI Extraction Logic
     let extractedData: any = {};
     const isImageOrPdf = isBase64Content(file_content) || 
       file_type?.includes('image') || 
       file_type?.includes('pdf');
 
     if (isImageOrPdf) {
-      // Use vision model for images/PDFs
+      // Vision model path
       console.log('[Extract] Using vision model for image/PDF extraction...');
       
       let imageUrl = file_content;
@@ -143,7 +157,6 @@ Respond with valid JSON only.`;
       const aiResult = await extractionResponse.json();
       const content = aiResult.choices?.[0]?.message?.content || '';
       
-      // Parse JSON from response
       try {
         const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
         const jsonStr = jsonMatch ? jsonMatch[1].trim() : content.trim();
@@ -154,7 +167,7 @@ Respond with valid JSON only.`;
       }
 
     } else {
-      // Use text extraction with tool calling for plain text content
+      // Text extraction path
       console.log('[Extract] Using text extraction with tool calling...');
       
       const extractionResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -241,13 +254,14 @@ Respond with valid JSON only.`;
 
     console.log('[Extract] Extracted data:', JSON.stringify(extractedData, null, 2));
 
-    // Validate against AFE budget
+    // 6. Business Logic Validation (Budget, UWI)
     let budgetStatus = 'no_afe';
     let budgetRemaining = null;
     let afeId = null;
     const validationErrors: string[] = [];
     const validationWarnings: string[] = [];
 
+    // AFE Validation
     if (extractedData.afe_number) {
       const { data: afe } = await supabase
         .from('afes')
@@ -286,7 +300,7 @@ Respond with valid JSON only.`;
       }
     }
 
-    // Look up UWI
+    // UWI Validation
     let uwiId = null;
     if (extractedData.uwi) {
       const { data: uwi } = await supabase
@@ -303,7 +317,7 @@ Respond with valid JSON only.`;
       }
     }
 
-    // Update extraction record
+    // 7. Update Records
     await supabase
       .from('invoice_extractions')
       .update({
@@ -328,7 +342,7 @@ Respond with valid JSON only.`;
       })
       .eq('id', extraction.id);
 
-    // Update invoice status
+    // Determine Invoice Status
     let invoiceStatus = 'pending';
     if (validationErrors.length > 0) {
       invoiceStatus = 'validation_failed';
@@ -347,7 +361,7 @@ Respond with valid JSON only.`;
       })
       .eq('id', invoice_id);
 
-    // Log audit event
+    // 8. Audit Log
     await supabase.from('audit_logs').insert({
       action: 'INVOICE_EXTRACTION',
       entity_type: 'invoice',

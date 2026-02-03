@@ -69,7 +69,12 @@ const Invoices = () => {
             }
 
             // Convert blob to base64
-            const fileContent = await fileBlob.text();
+            const reader = new FileReader();
+            const fileContent = await new Promise<string>((resolve, reject) => {
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(fileBlob);
+            });
 
             // Trigger extraction
             await extractInvoiceData(newInvoice.id, fileContent);
