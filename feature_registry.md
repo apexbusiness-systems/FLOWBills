@@ -18,3 +18,5 @@
 | **Admin & Compliance** | | | |
 | User Role Management | `src/pages/UserRoleManagement.tsx` | ⚠️ Audit Needed | Not deep-dived yet. |
 | Security Headers | `src/components/security/SecurityHeaders.tsx` | ✅ Pass | CSP configured. |
+| **DevOps & Infrastructure** | | | |
+| CI/CD Pipeline | `.github/workflows/ci.yml` | ✅ Pass | Fixed duplicate permissions syntax error. |

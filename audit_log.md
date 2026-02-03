@@ -12,3 +12,4 @@
 | 2025-05-20 | 12:35 | Security | Weak Password Check | ❌ | `password123` was accepted. **Action Required: Enable protection in Supabase Dashboard.** |
 | 2025-05-20 | 12:35 | Security | RLS Check | ✅ | 68 tables have RLS enabled in migrations. |
 | 2025-05-20 | 12:40 | Security | E2E Tests | ⚠️ | Timed out waiting for web server. |
+| 2025-05-20 | 13:00 | DevOps | Fix CI Workflow | ✅ | Fixed syntax error (duplicate keys) in `.github/workflows/ci.yml`. |
