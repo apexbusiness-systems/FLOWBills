@@ -1,6 +1,8 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@supabase/functions-js@^0.0.0-automated": "0.0.0-jsr-test.1",
+    "jsr:@supabase/supabase-js@2": "2.93.3",
     "npm:@elevenlabs/react@0.11": "0.11.3_react@18.3.1_@types+dom-mediacapture-record@1.0.22",
     "npm:@eslint/js@^9.32.0": "9.39.2",
     "npm:@hello-pangea/dnd@^18.0.1": "18.0.1_react@18.3.1_react-dom@18.3.1__react@18.3.1_@types+react@18.3.27_redux@5.0.1",
@@ -33,6 +35,10 @@
     "npm:@radix-ui/react-toggle-group@^1.1.10": "1.1.11_@types+react@18.3.27_@types+react-dom@18.3.7__@types+react@18.3.27_react@18.3.1_react-dom@18.3.1__react@18.3.1",
     "npm:@radix-ui/react-toggle@^1.1.9": "1.1.10_@types+react@18.3.27_@types+react-dom@18.3.7__@types+react@18.3.27_react@18.3.1_react-dom@18.3.1__react@18.3.1",
     "npm:@radix-ui/react-tooltip@^1.2.7": "1.2.8_@types+react@18.3.27_@types+react-dom@18.3.7__@types+react@18.3.27_react@18.3.1_react-dom@18.3.1__react@18.3.1",
+    "npm:@supabase/auth-js@2.93.3": "2.93.3",
+    "npm:@supabase/postgrest-js@2.93.3": "2.93.3",
+    "npm:@supabase/realtime-js@2.93.3": "2.93.3",
+    "npm:@supabase/storage-js@2.93.3": "2.93.3",
     "npm:@supabase/supabase-js@^2.58.0": "2.89.0",
     "npm:@tailwindcss/typography@~0.5.16": "0.5.19_tailwindcss@3.4.19__postcss@8.5.6__jiti@1.21.7",
     "npm:@tanstack/react-query@^5.83.0": "5.90.16_react@18.3.1",
@@ -87,6 +93,21 @@
     "npm:vite@^5.4.19": "5.4.21_@types+node@22.19.3",
     "npm:vitest@^3.2.4": "3.2.4_@types+node@22.19.3_jsdom@27.4.0_vite@5.4.21__@types+node@22.19.3",
     "npm:zod@^3.25.76": "3.25.76"
+  },
+  "jsr": {
+    "@supabase/functions-js@0.0.0-jsr-test.1": {
+      "integrity": "b1b37924af1f0011b4753201e1585a37b030e996c6682492e02575eb27d902b2"
+    },
+    "@supabase/supabase-js@2.93.3": {
+      "integrity": "e41bffc124ef8345e4f417b07069563a97803af318473991e63d39b16f979cc1",
+      "dependencies": [
+        "jsr:@supabase/functions-js",
+        "npm:@supabase/auth-js",
+        "npm:@supabase/postgrest-js",
+        "npm:@supabase/realtime-js",
+        "npm:@supabase/storage-js"
+      ]
+    }
   },
   "npm": {
     "@acemir/cssom@0.9.30": {
@@ -2549,6 +2570,12 @@
         "tslib"
       ]
     },
+    "@supabase/auth-js@2.93.3": {
+      "integrity": "sha512-JdnkHZPKexVGSNONtu89RHU4bxz3X9kxx+f5ZnR5osoCIX+vs/MckwWRPZEybAEvlJXt5xjomDb3IB876QCxWQ==",
+      "dependencies": [
+        "tslib"
+      ]
+    },
     "@supabase/functions-js@2.89.0": {
       "integrity": "sha512-XEueaC5gMe5NufNYfBh9kPwJlP5M2f+Ogr8rvhmRDAZNHgY6mI35RCkYDijd92pMcNM7g8pUUJov93UGUnqfyw==",
       "dependencies": [
@@ -2561,8 +2588,23 @@
         "tslib"
       ]
     },
+    "@supabase/postgrest-js@2.93.3": {
+      "integrity": "sha512-+iJ96g94skO2e4clsRSmEXg22NUOjh9BziapsJSAvnB1grOBf/BA8vGtCHjNOA+Z6lvKXL1jwBqcL9+fS1W/Lg==",
+      "dependencies": [
+        "tslib"
+      ]
+    },
     "@supabase/realtime-js@2.89.0": {
       "integrity": "sha512-aMOvfDb2a52u6PX6jrrjvACHXGV3zsOlWRzZsTIOAJa0hOVvRp01AwC1+nLTGUzxzezejrYeCX+KnnM1xHdl+w==",
+      "dependencies": [
+        "@types/phoenix",
+        "@types/ws",
+        "tslib",
+        "ws"
+      ]
+    },
+    "@supabase/realtime-js@2.93.3": {
+      "integrity": "sha512-gnYpcFzwy8IkezRP4CDbT5I8jOsiOjrWrqTY1B+7jIriXsnpifmlM6RRjLBm9oD7OwPG0/WksniGPdKW67sXOA==",
       "dependencies": [
         "@types/phoenix",
         "@types/ws",
@@ -2577,14 +2619,21 @@
         "tslib"
       ]
     },
+    "@supabase/storage-js@2.93.3": {
+      "integrity": "sha512-cw4qXiLrx3apglDM02Tx/w/stvFlrkKocC6vCvuFAz3JtVEl1zH8MUfDQDTH59kJAQVaVdbewrMWSoBob7REnA==",
+      "dependencies": [
+        "iceberg-js",
+        "tslib"
+      ]
+    },
     "@supabase/supabase-js@2.89.0": {
       "integrity": "sha512-KlaRwSfFA0fD73PYVMHj5/iXFtQGCcX7PSx0FdQwYEEw9b2wqM7GxadY+5YwcmuEhalmjFB/YvqaoNVF+sWUlg==",
       "dependencies": [
-        "@supabase/auth-js",
+        "@supabase/auth-js@2.89.0",
         "@supabase/functions-js",
-        "@supabase/postgrest-js",
-        "@supabase/realtime-js",
-        "@supabase/storage-js"
+        "@supabase/postgrest-js@2.89.0",
+        "@supabase/realtime-js@2.89.0",
+        "@supabase/storage-js@2.89.0"
       ]
     },
     "@surma/rollup-plugin-off-main-thread@2.2.3": {
