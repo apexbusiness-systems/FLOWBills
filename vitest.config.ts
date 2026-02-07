@@ -8,7 +8,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['src/lib/test-utils.tsx'],
+    setupFiles: ['src/lib/vitest.setup.ts', 'src/lib/test-utils.tsx'],
     css: true,
     exclude: [
       '**/node_modules/**',
@@ -30,6 +30,8 @@ export default defineConfig({
         'dist/',
         '.next/',
         'coverage/',
+        'tests/e2e/**',  // Exclude E2E tests from coverage
+        'supabase/functions/**',  // Exclude Supabase functions from coverage
       ],
       thresholds: {
         global: {
