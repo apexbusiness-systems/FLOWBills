@@ -28,8 +28,12 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     await supabase.from('audit_logs').insert({
+      action: 'NAV_CLICK',
+      entity_type: 'navigation',
+      entity_id: crypto.randomUUID(),
       event_type: 'nav_click',
       metadata: { href, source, ts },
+      new_values: { href, source, ts },
       created_at: new Date().toISOString(),
     });
 

@@ -9,6 +9,8 @@
  * - Never blocks app mounting on failures
  */
 
+import { cleanupFlowBillsCaches, registerSW } from '@/lib/sw';
+
 declare global {
   interface Window {
     __FLOWBILLS_BOOT__: {
@@ -117,23 +119,7 @@ class SWHealthManager {
     const tracker = BootTracker.getInstance();
 
     try {
-      // Clean service workers
-      if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        if (registrations.length > 0) {
-          console.log(`[FlowBills] Cleaning ${registrations.length} service worker(s)...`);
-          await Promise.all(registrations.map(reg => reg.unregister()));
-        }
-      }
-
-      // Clean caches
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        if (cacheNames.length > 0) {
-          console.log(`[FlowBills] Cleaning ${cacheNames.length} cache(s)...`);
-          await Promise.all(cacheNames.map(name => caches.delete(name)));
-        }
-      }
+      await cleanupFlowBillsCaches();
 
       console.log('[FlowBills] SW/Cache cleanup completed');
     } catch (error) {
@@ -150,10 +136,7 @@ class SWHealthManager {
     }
 
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/',
-        updateViaCache: 'none'
-      });
+      await registerSW();
 
       console.log('[FlowBills] Service Worker registered after mount');
     } catch (error) {
@@ -249,15 +232,7 @@ class ChunkRecoveryManager {
     // Clean everything
     await swManager.cleanupInBackground(2000); // Longer timeout for recovery
 
-    // Clear any remaining caches
-    if ('caches' in window) {
-      try {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-      } catch (error) {
-        console.warn('[FlowBills] Cache cleanup failed during recovery:', error);
-      }
-    }
+    await cleanupFlowBillsCaches();
   }
 
   private showRecoveryUI(errorMessage: string): void {

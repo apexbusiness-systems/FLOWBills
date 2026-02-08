@@ -83,16 +83,17 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate Service Worker - Delete ALL old caches for clean state
+// Activate Service Worker - delete only old FlowBills cache versions
 self.addEventListener('activate', (event) => {
-  console.log('FlowBills Service Worker activating - clearing all old caches...');
+  console.log('FlowBills Service Worker activating - clearing stale FlowBills caches...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
-      // Delete ALL caches (including old versions)
-      return Promise.all(cacheNames.map((cacheName) => {
-        console.log('Deleting cache:', cacheName);
-        return caches.delete(cacheName);
-      }));
+      return Promise.all(cacheNames
+        .filter((cacheName) => cacheName.startsWith('flowbills-') && cacheName !== CACHE_NAME)
+        .map((cacheName) => {
+          console.log('Deleting stale cache:', cacheName);
+          return caches.delete(cacheName);
+        }));
     }).then(() => {
       // Take control of all clients immediately
       return self.clients.claim();

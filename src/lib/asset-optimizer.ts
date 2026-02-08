@@ -270,17 +270,8 @@ class AssetOptimizer {
 
   // Enable service worker for caching
   async enableServiceWorker() {
-    if ('serviceWorker' in navigator) {
-      try {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        if (import.meta.env.DEV) {
-          console.log('Service Worker registered:', registration);
-        }
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error('Service Worker registration failed:', error);
-        }
-      }
+    if (import.meta.env.DEV) {
+      console.log('Service worker registration is centralized in src/lib/sw.ts');
     }
   }
 

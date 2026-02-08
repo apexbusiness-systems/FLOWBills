@@ -6,6 +6,7 @@ import { applySPNonce } from "./lib/security";
 import { performanceMonitor } from "./lib/performance-monitor";
 import { queryOptimizer } from "./lib/query-optimizer";
 import { startPersistenceCleanup } from "./lib/persistence";
+import { validateSupabaseConfig } from "./lib/config-validator";
 import { ConfigErrorBoundary } from "./components/config/ConfigErrorBoundary";
 
 // Mark module as loaded immediately
@@ -51,6 +52,13 @@ rootElement.innerHTML = '';
 console.log('[FlowBills] Starting React render');
 const root = createRoot(rootElement);
 
+let configError: Error | null = null;
+try {
+  validateSupabaseConfig();
+} catch (error) {
+  configError = error instanceof Error ? error : new Error(String(error));
+}
+
 // Helper function to remove loader
 const removeLoader = () => {
   const loader = document.getElementById('flowbills-loader');
@@ -61,6 +69,14 @@ const removeLoader = () => {
   }
 };
 
+if (configError) {
+  root.render(
+    <React.StrictMode>
+      <ConfigErrorBoundary error={configError} />
+    </React.StrictMode>
+  );
+  removeLoader();
+} else {
 import('./App.tsx').then(({ default: App }) => {
   root.render(<App />);
   
@@ -94,6 +110,7 @@ import('./App.tsx').then(({ default: App }) => {
     }
   }, 100);
 });
+}
 
 // Define global helper for safe loader removal
 declare global {
