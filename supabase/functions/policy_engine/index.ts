@@ -1,13 +1,15 @@
-import { createClient } from "jsr:@supabase/supabase-js@2"
 import { corsHeaders } from '../_shared/cors.ts'
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
+import { assertTenantAccess, createServiceClient, createUserClient, getTokenFromRequest, getUserFromJwt } from '../_shared/tenantShield.ts';
+import { ConditionSchema, evaluateCondition, hasStringExpression } from '../_shared/policyEvaluator.ts';
 
-// Input validation schema
 const PolicyRequestSchema = z.object({
   document_id: z.string().min(1, "Document ID is required"),
   policy_types: z.array(z.enum(['validation', 'approval', 'routing', 'fraud'])).optional(),
   context: z.record(z.any()).optional().default({}),
+  tenant_id: z.string().uuid("Tenant ID must be a UUID"),
 });
+
 
 interface PolicyEvaluationResult {
   policy_id: string;
@@ -17,129 +19,39 @@ interface PolicyEvaluationResult {
   details?: any;
 }
 
-// Simple expression evaluator (replace with proper CEL or similar)
-function evaluateExpression(expression: string, context: any): boolean {
-  try {
-    // Simple expressions like "amount > 1000" or "country_code == 'DE'"
-    // WARNING: This is a simplified implementation. Use a proper expression evaluator in production.
-    
-    // Replace context variables
-    let evaluableExpr = expression;
-    for (const [key, value] of Object.entries(context)) {
-      const regex = new RegExp(`\\b${key}\\b`, 'g');
-      if (typeof value === 'string') {
-        evaluableExpr = evaluableExpr.replace(regex, `"${value}"`);
-      } else {
-        evaluableExpr = evaluableExpr.replace(regex, String(value));
-      }
-    }
+function evaluatePolicy(policy: any, context: Record<string, any>): PolicyEvaluationResult {
+  const conditions = (policy.conditions || {}) as Record<string, unknown>;
+  const actions = Array.isArray(policy.actions) ? policy.actions : [];
 
-    // Simple evaluation - CAUTION: Only use with sanitized expressions
-    // In production, use a proper expression evaluator library
-    if (evaluableExpr.includes('&&') || evaluableExpr.includes('||')) {
-      // Handle boolean operators
-      return eval(evaluableExpr);
-    }
-    
-    // Handle simple comparisons
-    if (evaluableExpr.includes('>=')) {
-      const [left, right] = evaluableExpr.split('>=').map(s => s.trim());
-      return parseFloat(eval(left)) >= parseFloat(eval(right));
-    }
-    if (evaluableExpr.includes('<=')) {
-      const [left, right] = evaluableExpr.split('<=').map(s => s.trim());
-      return parseFloat(eval(left)) <= parseFloat(eval(right));
-    }
-    if (evaluableExpr.includes('>')) {
-      const [left, right] = evaluableExpr.split('>').map(s => s.trim());
-      return parseFloat(eval(left)) > parseFloat(eval(right));
-    }
-    if (evaluableExpr.includes('<')) {
-      const [left, right] = evaluableExpr.split('<').map(s => s.trim());
-      return parseFloat(eval(left)) < parseFloat(eval(right));
-    }
-    if (evaluableExpr.includes('==')) {
-      const [left, right] = evaluableExpr.split('==').map(s => s.trim());
-      return eval(left) === eval(right);
-    }
-    if (evaluableExpr.includes('!=')) {
-      const [left, right] = evaluableExpr.split('!=').map(s => s.trim());
-      return eval(left) !== eval(right);
-    }
-
-    return false;
-  } catch (error) {
-    console.error('Expression evaluation error:', error);
-    return false;
-  }
-}
-
-// Evaluate a single policy against document context
-function evaluatePolicy(policy: any, context: any): PolicyEvaluationResult {
-  const conditions = policy.conditions || {};
-  const actions = policy.actions || [];
-  
   let triggered = true;
   const details: any = {};
 
-  // Evaluate each condition
   for (const [conditionKey, conditionValue] of Object.entries(conditions)) {
-    if (typeof conditionValue === 'string') {
-      // Expression-based condition
-      const result = evaluateExpression(conditionValue, context);
-      details[conditionKey] = { expression: conditionValue, result };
+    const parsedCondition = ConditionSchema.safeParse(conditionValue);
+    if (!parsedCondition.success) {
+      details[conditionKey] = { result: false, error: 'Invalid condition schema' };
+      triggered = false;
+      continue;
+    }
+
+    try {
+      const result = evaluateCondition(parsedCondition.data, context);
+      details[conditionKey] = {
+        ...parsedCondition.data,
+        actual: context[parsedCondition.data.field],
+        result,
+      };
+
       if (!result) {
         triggered = false;
       }
-    } else if (typeof conditionValue === 'object' && conditionValue !== null) {
-      // Object-based conditions
-      const condition = conditionValue as any;
-      
-      if (condition.field && condition.operator && condition.value !== undefined) {
-        const fieldValue = context[condition.field];
-        let conditionMet = false;
-        
-        switch (condition.operator) {
-          case '>':
-            conditionMet = fieldValue > condition.value;
-            break;
-          case '<':
-            conditionMet = fieldValue < condition.value;
-            break;
-          case '>=':
-            conditionMet = fieldValue >= condition.value;
-            break;
-          case '<=':
-            conditionMet = fieldValue <= condition.value;
-            break;
-          case '==':
-            conditionMet = fieldValue === condition.value;
-            break;
-          case '!=':
-            conditionMet = fieldValue !== condition.value;
-            break;
-          case 'contains':
-            conditionMet = String(fieldValue).includes(String(condition.value));
-            break;
-          case 'matches':
-            conditionMet = new RegExp(condition.value).test(String(fieldValue));
-            break;
-          default:
-            conditionMet = false;
-        }
-        
-        details[conditionKey] = {
-          field: condition.field,
-          operator: condition.operator,
-          expected: condition.value,
-          actual: fieldValue,
-          result: conditionMet
-        };
-        
-        if (!conditionMet) {
-          triggered = false;
-        }
-      }
+    } catch (error) {
+      details[conditionKey] = {
+        ...parsedCondition.data,
+        result: false,
+        error: error instanceof Error ? error.message : 'Evaluation failed',
+      };
+      triggered = false;
     }
   }
 
@@ -148,26 +60,25 @@ function evaluatePolicy(policy: any, context: any): PolicyEvaluationResult {
     policy_name: policy.policy_name,
     triggered,
     actions: triggered ? actions : [],
-    details
+    details,
   };
 }
 
-// Calculate diff between before/after states
 function calculateDiff(before: any, after: any): any {
   const diff: any = {};
-  
+
   for (const key in after) {
     if (before[key] !== after[key]) {
       diff[key] = { before: before[key], after: after[key] };
     }
   }
-  
+
   for (const key in before) {
     if (!(key in after)) {
       diff[key] = { before: before[key], after: null };
     }
   }
-  
+
   return diff;
 }
 
@@ -177,50 +88,55 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const token = getTokenFromRequest(req);
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Authorization header required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    // Parse and validate request
+    const user = await getUserFromJwt(token);
+
     const body = await req.json();
     const parsed = PolicyRequestSchema.safeParse(body);
-    
+
     if (!parsed.success) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: 'Validation failed',
-          details: parsed.error.issues 
+          details: parsed.error.issues
         }),
-        { 
+        {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    const { document_id, policy_types = ['validation', 'approval', 'routing', 'fraud'], context } = parsed.data;
-    const tenantId = body.tenant_id || 'system';
+    const { document_id, policy_types = ['validation', 'approval', 'routing', 'fraud'], context, tenant_id } = parsed.data;
+    assertTenantAccess(tenant_id, { request: req, userId: user.id });
 
-    // Get document data for context
+    const supabase = createUserClient(token);
+    const serviceSupabase = createServiceClient();
+
     const { data: document, error: docError } = await supabase
       .from('einvoice_documents')
       .select('*')
       .eq('document_id', document_id)
-      .eq('tenant_id', tenantId)
+      .eq('tenant_id', tenant_id)
       .single();
 
     if (docError || !document) {
       return new Response(
         JSON.stringify({ error: 'Document not found' }),
-        { 
+        {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    // Build evaluation context
     const evaluationContext = {
       ...context,
       document_id: document.document_id,
@@ -237,11 +153,10 @@ Deno.serve(async (req) => {
       created_at: document.created_at
     };
 
-    // Fetch active policies for the tenant
     const { data: policies, error: policyError } = await supabase
       .from('einvoice_policies')
       .select('*')
-      .eq('tenant_id', tenantId)
+      .eq('tenant_id', tenant_id)
       .eq('is_active', true)
       .in('policy_type', policy_types)
       .order('priority', { ascending: true });
@@ -250,14 +165,36 @@ Deno.serve(async (req) => {
       console.error('Failed to fetch policies:', policyError);
       return new Response(
         JSON.stringify({ error: 'Failed to fetch policies' }),
-        { 
+        {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    // Evaluate each policy
+    const stringExpressionPolicy = (policies || []).find((policy: any) => hasStringExpression(policy.conditions || {}));
+    if (stringExpressionPolicy) {
+      await serviceSupabase.from('audit_logs').insert({
+        entity_type: 'policy_evaluation',
+        entity_id: document.id,
+        action: 'POLICY_STRING_EXPRESSION_REJECTED',
+        event_type: 'policy_rejected',
+        metadata: { reason: 'string_expression' },
+        user_id: user.id,
+        new_values: { policy_id: stringExpressionPolicy.id, policy_name: stringExpressionPolicy.policy_name },
+        ip_address: req.headers.get('x-forwarded-for')?.split(',')[0],
+        user_agent: req.headers.get('user-agent')
+      });
+
+      return new Response(JSON.stringify({
+        error: 'String expressions are not allowed in policy conditions',
+        policy_id: stringExpressionPolicy.id,
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const results: PolicyEvaluationResult[] = [];
     const triggeredPolicies: any[] = [];
     const beforeState = { ...document };
@@ -265,16 +202,15 @@ Deno.serve(async (req) => {
     for (const policy of policies || []) {
       const result = evaluatePolicy(policy, evaluationContext);
       results.push(result);
-      
+
       if (result.triggered) {
         triggeredPolicies.push(policy);
       }
     }
 
-    // Execute actions from triggered policies
     let finalDecision = 'approved';
     const executedActions: any[] = [];
-    
+
     for (const policy of triggeredPolicies) {
       for (const action of policy.actions || []) {
         switch (action.type) {
@@ -284,8 +220,7 @@ Deno.serve(async (req) => {
             break;
           case 'require_manual_review':
             finalDecision = 'requires_review';
-            // Add to review queue
-            await supabase.from('review_queue').insert({
+            await serviceSupabase.from('review_queue').insert({
               invoice_id: document.id,
               reason: `Policy triggered: ${policy.policy_name}`,
               priority: action.priority || 3,
@@ -294,17 +229,17 @@ Deno.serve(async (req) => {
             executedActions.push({ policy: policy.policy_name, action: 'routed_to_review' });
             break;
           case 'flag_for_fraud':
-            await supabase.from('fraud_flags_einvoice').insert({
+            await serviceSupabase.from('fraud_flags_einvoice').insert({
               document_id: document.id,
               flag_type: action.flag_type || 'vendor_mismatch',
               risk_score: action.risk_score || 50,
               details: { policy_triggered: policy.policy_name, ...action.details },
-              tenant_id: tenantId
+              tenant_id: tenant_id
             });
             executedActions.push({ policy: policy.policy_name, action: 'flagged_for_fraud' });
             break;
           case 'update_status':
-            await supabase
+            await serviceSupabase
               .from('einvoice_documents')
               .update({ status: action.new_status })
               .eq('id', document.id);
@@ -314,7 +249,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Get updated document state for diff calculation
     const { data: afterDocument } = await supabase
       .from('einvoice_documents')
       .select('*')
@@ -323,21 +257,21 @@ Deno.serve(async (req) => {
 
     const diff = calculateDiff(beforeState, afterDocument || document);
 
-    // Log policy evaluation
-    await supabase.from('audit_logs').insert({
+    await serviceSupabase.from('audit_logs').insert({
       entity_type: 'policy_evaluation',
       entity_id: document.id,
       action: 'POLICY_EVALUATION',
-      user_id: tenantId,
+      event_type: 'policy_evaluation',
+      metadata: { final_decision: finalDecision, triggered_policies: triggeredPolicies.length },
+      user_id: user.id,
       old_values: beforeState,
       new_values: afterDocument || document,
       ip_address: req.headers.get('x-forwarded-for')?.split(',')[0],
       user_agent: req.headers.get('user-agent')
     });
 
-    // Increment metrics
-    await supabase.from('model_stats').insert({
-      tenant_id: tenantId,
+    await serviceSupabase.from('model_stats').insert({
+      tenant_id: tenant_id,
       model: 'policy_engine',
       stage: 'evaluation',
       confidence: results.filter(r => r.triggered).length / Math.max(1, results.length),
@@ -365,7 +299,14 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Policy engine error:', error);
-    return new Response(JSON.stringify({ 
+    if (error instanceof Error && (error.message === 'Forbidden' || error.message === 'Unauthorized')) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: error.message === 'Forbidden' ? 403 : 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({
       error: 'Policy evaluation failed',
       message: error instanceof Error ? error.message : 'Unknown error'
     }), {

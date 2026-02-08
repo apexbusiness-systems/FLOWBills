@@ -100,13 +100,6 @@ class ProductionOptimizer {
    * Initialize caching strategies
    */
   private initializeCaching(): void {
-    // Enable service worker for offline caching
-    if ('serviceWorker' in navigator && !import.meta.env.DEV) {
-      navigator.serviceWorker.register('/sw.js').catch((error) => {
-        console.error('Service Worker registration failed:', error);
-      });
-    }
-
     // Implement stale-while-revalidate for API calls
     this.setupStaleWhileRevalidate();
   }
