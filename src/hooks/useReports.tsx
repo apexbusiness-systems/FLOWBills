@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { fetchUWIProductionDataOptimized, fetchUWIProductionDataLegacy, type UWIProductionData } from './useReports.utils';
 
 export interface AFESpendingReport {
   afe_number: string;
@@ -23,16 +24,7 @@ export interface FieldTicketSummary {
   average_amount: number;
 }
 
-export interface UWIProductionData {
-  uwi: string;
-  well_name: string | null;
-  status: string;
-  total_invoices: number;
-  total_amount: number;
-  total_field_tickets: number;
-  province: string | null;
-  operator: string | null;
-}
+export { type UWIProductionData };
 
 export const useReports = () => {
   const [loading, setLoading] = useState(false);
@@ -187,48 +179,11 @@ export const useReports = () => {
 
       if (uwiError) throw uwiError;
 
-      // Fetch associated data for each UWI
-      const report: UWIProductionData[] = await Promise.all(
-        (uwis || []).map(async (uwi) => {
-          const [extractionsResult, fieldTicketsResult] = await Promise.all([
-            supabase
-              .from('invoice_extractions')
-              .select('invoice_id, extracted_data')
-              .eq('uwi_id', uwi.id)
-              .eq('user_id', user.id),
-            supabase
-              .from('field_tickets')
-              .select('id')
-              .eq('uwi_id', uwi.id)
-              .eq('user_id', user.id),
-          ]);
+      const USE_OPTIMIZED_QUERY = import.meta.env.VITE_USE_OPTIMIZED_UWI_QUERY !== 'false';
 
-          // Get invoice amounts
-          let totalAmount = 0;
-          if (extractionsResult.data && extractionsResult.data.length > 0) {
-            const invoiceIds = extractionsResult.data.map(e => e.invoice_id);
-            const { data: invoices } = await supabase
-              .from('invoices')
-              .select('amount')
-              .in('id', invoiceIds);
-            
-            totalAmount = (invoices || []).reduce((sum, inv) => sum + Number(inv.amount), 0);
-          }
-
-          return {
-            uwi: uwi.uwi,
-            well_name: uwi.well_name,
-            status: uwi.status,
-            total_invoices: extractionsResult.data?.length || 0,
-            total_amount: totalAmount,
-            total_field_tickets: fieldTicketsResult.data?.length || 0,
-            province: uwi.province,
-            operator: uwi.operator,
-          };
-        })
-      );
-
-      return report;
+      return USE_OPTIMIZED_QUERY
+        ? await fetchUWIProductionDataOptimized(uwis || [], user.id, supabase)
+        : await fetchUWIProductionDataLegacy(uwis || [], user.id, supabase);
     } catch (error: any) {
       console.error('Error fetching UWI production data:', error);
       toast({
