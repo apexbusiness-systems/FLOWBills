@@ -3,12 +3,17 @@
 // CONFIDENTIAL - Internal Use Only
 // ============================================================
 
-import { getOmniLinkConfig, getOmniLinkStatus, isOmniLinkReady, type OmniLinkStatus } from './config';
-import type { OmniLinkEvent, OmniLinkResponse, OmniLinkHealthStatus } from './types';
+import {
+  getOmniLinkConfig,
+  getOmniLinkStatus,
+  isOmniLinkReady,
+  type OmniLinkStatus,
+} from "./config";
+import type { OmniLinkEvent, OmniLinkResponse, OmniLinkHealthStatus } from "./types";
 
 /**
  * OMNiLiNK Adapter - Handles communication with APEX OMNiLiNK Hub
- * 
+ *
  * This adapter is DORMANT by default and only activates when:
  * 1. VITE_OMNILINK_ENABLED=true
  * 2. VITE_OMNILINK_BASE_URL is configured
@@ -40,7 +45,7 @@ class OmniLinkAdapter {
     const status = getOmniLinkStatus();
 
     const baseStatus: OmniLinkHealthStatus = {
-      status: status === 'enabled' ? 'ok' : status === 'disabled' ? 'disabled' : 'error',
+      status: status === "enabled" ? "ok" : status === "disabled" ? "disabled" : "error",
       details: {
         enabled: config.enabled,
         baseUrlConfigured: !!config.baseUrl,
@@ -49,14 +54,14 @@ class OmniLinkAdapter {
     };
 
     // If enabled, perform a health check ping
-    if (status === 'enabled' && config.baseUrl) {
+    if (status === "enabled" && config.baseUrl) {
       try {
         const startTime = performance.now();
         const response = await fetch(`${config.baseUrl}/health`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'X-Tenant-ID': config.tenantId || '',
-            'X-API-Version': config.apiVersion,
+            "X-Tenant-ID": config.tenantId || "",
+            "X-API-Version": config.apiVersion,
           },
           signal: AbortSignal.timeout(5000),
         });
@@ -66,10 +71,10 @@ class OmniLinkAdapter {
         baseStatus.details.lastHeartbeat = new Date().toISOString();
 
         if (!response.ok) {
-          baseStatus.status = 'degraded';
+          baseStatus.status = "degraded";
         }
       } catch {
-        baseStatus.status = 'error';
+        baseStatus.status = "error";
       }
     }
 
@@ -86,7 +91,7 @@ class OmniLinkAdapter {
       return {
         success: true,
         timestamp: new Date().toISOString(),
-        data: { queued: false, reason: 'omnilink_disabled' },
+        data: { queued: false, reason: "omnilink_disabled" },
       };
     }
 
@@ -94,11 +99,11 @@ class OmniLinkAdapter {
 
     try {
       const response = await fetch(`${config.baseUrl}/events`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Tenant-ID': config.tenantId || '',
-          'X-API-Version': config.apiVersion,
+          "Content-Type": "application/json",
+          "X-Tenant-ID": config.tenantId || "",
+          "X-API-Version": config.apiVersion,
         },
         body: JSON.stringify({
           ...event,
@@ -128,12 +133,12 @@ class OmniLinkAdapter {
     } catch (error) {
       // Queue for retry on network errors
       this.eventQueue.push(event);
-      
+
       return {
         success: false,
         error: {
-          code: 'NETWORK_ERROR',
-          message: error instanceof Error ? error.message : 'Unknown error',
+          code: "NETWORK_ERROR",
+          message: error instanceof Error ? error.message : "Unknown error",
         },
         timestamp: new Date().toISOString(),
       };
@@ -158,14 +163,10 @@ class OmniLinkAdapter {
     }
 
     this.isProcessing = true;
-    const results: OmniLinkResponse[] = [];
     const events = [...this.eventQueue];
     this.eventQueue = [];
 
-    for (const event of events) {
-      const result = await this.sendEvent(event);
-      results.push(result);
-    }
+    const results = await Promise.all(events.map((event) => this.sendEvent(event)));
 
     this.isProcessing = false;
     return results;
@@ -187,13 +188,13 @@ class OmniLinkAdapter {
 
     try {
       const response = await fetch(`${config.baseUrl}/sync`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Tenant-ID': config.tenantId || '',
-          'X-API-Version': config.apiVersion,
+          "Content-Type": "application/json",
+          "X-Tenant-ID": config.tenantId || "",
+          "X-API-Version": config.apiVersion,
         },
-        body: JSON.stringify({ syncType: 'incremental' }),
+        body: JSON.stringify({ syncType: "incremental" }),
         signal: AbortSignal.timeout(config.timeout),
       });
 
@@ -218,8 +219,8 @@ class OmniLinkAdapter {
       return {
         success: false,
         error: {
-          code: 'SYNC_ERROR',
-          message: error instanceof Error ? error.message : 'Sync failed',
+          code: "SYNC_ERROR",
+          message: error instanceof Error ? error.message : "Sync failed",
         },
         timestamp: new Date().toISOString(),
       };
@@ -238,10 +239,10 @@ class OmniLinkAdapter {
 
     try {
       const response = await fetch(`${config.baseUrl}/events/pending`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'X-Tenant-ID': config.tenantId || '',
-          'X-API-Version': config.apiVersion,
+          "X-Tenant-ID": config.tenantId || "",
+          "X-API-Version": config.apiVersion,
         },
         signal: AbortSignal.timeout(config.timeout),
       });
