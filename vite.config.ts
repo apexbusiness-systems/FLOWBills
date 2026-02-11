@@ -2,6 +2,17 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
+
+function normalizeModuleId(id: string): string {
+  // Convert Windows paths to Unix (C:\Users\... → /Users/...)
+  const normalized = id.replace(/\\/g, '/');
+
+  // Extract package name from absolute path
+  // /path/to/node_modules/react-dom/index.js → react-dom
+  const match = normalized.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)/);
+  return match ? match[1] : '';
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -55,7 +66,13 @@ export default defineConfig(({ mode }) => ({
           }
         ]
       }
-    })
+    }),
+    visualizer({
+      filename: './dist/stats.html',
+      open: process.env.CI !== 'true',
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -69,56 +86,38 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-slot', 'lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge'],
-          'vendor-supabase': ['@supabase/supabase-js']
+        // Optimized vendor grouping for FLOWBills
+        manualChunks: (id) => {
+          const pkg = normalizeModuleId(id);
+
+          // Group 1: Core Framework (~200 KB)
+          if (['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'].includes(pkg)) {
+            return 'vendor-react';
+          }
+
+          // Group 2: UI Components (~300 KB)
+          if (pkg.startsWith('@radix-ui/') || ['lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge', 'cmdk', 'sonner', 'vaul'].includes(pkg)) {
+            return 'vendor-ui';
+          }
+
+          // Group 3: Backend & Auth (~150 KB)
+          if (pkg === '@supabase/supabase-js') {
+            return 'vendor-supabase';
+          }
+
+          // Group 4: Data Visualization (~250 KB)
+          if (['recharts', 'date-fns'].includes(pkg)) {
+            return 'vendor-charts';
+          }
+
+          // Group 5: Forms & Validation (~100 KB)
+          if (['react-hook-form', '@hookform/resolvers', 'zod', 'input-otp'].includes(pkg)) {
+            return 'vendor-forms';
+          }
+
+          // Return undefined for unmatched (let Vite handle)
+          return undefined;
         },
-        // Optimize asset file names for caching
-        // that was generating empty vendor bundles (0.00 kB for vendor-react,
-        // vendor-supabase, vendor-ui). Main bundle was only 0.71 kB causing
-        // complete application failure in production.
-        //
-        // ROOT CAUSE: Module ID matching was failing, excluding all vendor code
-        // from output bundles.
-        //
-        // SOLUTION: Vite's automatic chunking is sufficient and reliable for
-        // production. It will properly split code based on size thresholds and
-        // shared dependencies.
-        //
-        // TODO POST-LAUNCH: Re-implement optimized chunking strategy with:
-        //   - Proper module ID normalization (path separators, absolute paths)
-        //   - Route-based code splitting with dynamic imports
-        //   - Bundle size validation in CI/CD
-        //   - Testing with vite-bundle-visualizer
-        //
-        // DO NOT RESTORE without testing and validation script in place.
-        //
-        // manualChunks: (id) => {
-        //   // BROKEN - DO NOT RESTORE WITHOUT TESTING
-        //   // This configuration generated 0.00 kB chunks, excluding all vendor code
-        //   if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-        //     return 'vendor-react';
-        //   }
-        //   if (id.includes('node_modules/react-router')) {
-        //     return 'vendor-router';
-        //   }
-        //   if (id.includes('node_modules/@supabase')) {
-        //     return 'vendor-supabase';
-        //   }
-        //   if (id.includes('node_modules/@tanstack')) {
-        //     return 'vendor-query';
-        //   }
-        //   if (id.includes('node_modules/@radix-ui')) {
-        //     return 'vendor-ui';
-        //   }
-        //   if (id.includes('node_modules/recharts')) {
-        //     return 'vendor-charts';
-        //   }
-        //   if (id.includes('node_modules')) {
-        //     return 'vendor-misc';
-        //   }
-        // },
         // Optimize asset file names for caching
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.');
