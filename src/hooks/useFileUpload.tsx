@@ -195,6 +195,32 @@ export const useFileUpload = () => {
     return fetchDocuments(invoiceId);
   }, [fetchDocuments]);
 
+  const getDocumentCounts = useCallback(async (invoiceIds: string[]) => {
+    if (!user || invoiceIds.length === 0) return {};
+
+    try {
+      const { data, error } = await supabase
+        .from('invoice_documents')
+        .select('invoice_id')
+        .in('invoice_id', invoiceIds);
+
+      if (error) throw error;
+
+      // Count documents per invoice
+      const counts: Record<string, number> = {};
+      data.forEach((doc) => {
+        if (doc.invoice_id) {
+          counts[doc.invoice_id] = (counts[doc.invoice_id] || 0) + 1;
+        }
+      });
+
+      return counts;
+    } catch (error) {
+      console.error('Error fetching document counts:', error);
+      return {};
+    }
+  }, [user]);
+
   const downloadDocument = useCallback(async (documentId: string) => {
     if (!user) return null;
 
@@ -335,5 +361,6 @@ export const useFileUpload = () => {
     getFilePreviewUrl,
     uploadMultipleFiles,
     uploadFilesWithoutInvoice,
+    getDocumentCounts,
   };
 };
