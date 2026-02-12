@@ -211,6 +211,11 @@ Deno.serve(async (req) => {
     let finalDecision = 'approved';
     const executedActions: any[] = [];
 
+    // Collect batch operations
+    const reviewQueueInserts: any[] = [];
+    const fraudFlagInserts: any[] = [];
+    let finalStatusUpdate: string | null = null;
+
     for (const policy of triggeredPolicies) {
       for (const action of policy.actions || []) {
         switch (action.type) {
@@ -220,7 +225,7 @@ Deno.serve(async (req) => {
             break;
           case 'require_manual_review':
             finalDecision = 'requires_review';
-            await serviceSupabase.from('review_queue').insert({
+            reviewQueueInserts.push({
               invoice_id: document.id,
               reason: `Policy triggered: ${policy.policy_name}`,
               priority: action.priority || 3,
@@ -229,7 +234,7 @@ Deno.serve(async (req) => {
             executedActions.push({ policy: policy.policy_name, action: 'routed_to_review' });
             break;
           case 'flag_for_fraud':
-            await serviceSupabase.from('fraud_flags_einvoice').insert({
+            fraudFlagInserts.push({
               document_id: document.id,
               flag_type: action.flag_type || 'vendor_mismatch',
               risk_score: action.risk_score || 50,
@@ -239,14 +244,35 @@ Deno.serve(async (req) => {
             executedActions.push({ policy: policy.policy_name, action: 'flagged_for_fraud' });
             break;
           case 'update_status':
-            await serviceSupabase
-              .from('einvoice_documents')
-              .update({ status: action.new_status })
-              .eq('id', document.id);
+            finalStatusUpdate = action.new_status;
             executedActions.push({ policy: policy.policy_name, action: 'status_updated', new_status: action.new_status });
             break;
         }
       }
+    }
+
+    // Execute batch operations
+    const promises = [];
+
+    if (reviewQueueInserts.length > 0) {
+      promises.push(serviceSupabase.from('review_queue').insert(reviewQueueInserts));
+    }
+
+    if (fraudFlagInserts.length > 0) {
+      promises.push(serviceSupabase.from('fraud_flags_einvoice').insert(fraudFlagInserts));
+    }
+
+    if (finalStatusUpdate) {
+      promises.push(
+        serviceSupabase
+          .from('einvoice_documents')
+          .update({ status: finalStatusUpdate })
+          .eq('id', document.id)
+      );
+    }
+
+    if (promises.length > 0) {
+      await Promise.all(promises);
     }
 
     const { data: afterDocument } = await supabase
