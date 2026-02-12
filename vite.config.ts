@@ -5,11 +5,11 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 function normalizeModuleId(id: string): string {
-  // Convert Windows paths to Unix (C:\Users\... -> /Users/...)
+  // Convert Windows paths to Unix (C:\Users\... → /Users/...)
   const normalized = id.replace(/\\/g, '/');
 
   // Extract package name from absolute path
-  // /path/to/node_modules/react-dom/index.js -> react-dom
+  // /path/to/node_modules/react-dom/index.js → react-dom
   const match = normalized.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)/);
   return match ? match[1] : '';
 }
@@ -69,11 +69,10 @@ export default defineConfig(({ mode }) => ({
     }),
     visualizer({
       filename: './dist/stats.html',
-      open: false,
+      open: process.env.CI !== 'true',
       gzipSize: true,
       brotliSize: true,
-      template: 'treemap',
-    })
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -87,6 +86,7 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
+        // Optimized vendor grouping for FLOWBills
         manualChunks: (id) => {
           const pkg = normalizeModuleId(id);
 
@@ -115,7 +115,7 @@ export default defineConfig(({ mode }) => ({
             return 'vendor-forms';
           }
 
-          // CRITICAL: Return undefined for unmatched (let Vite handle)
+          // Return undefined for unmatched (let Vite handle)
           return undefined;
         },
         // Optimize asset file names for caching
