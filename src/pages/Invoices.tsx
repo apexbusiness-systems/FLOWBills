@@ -48,40 +48,43 @@ const Invoices = () => {
 
       if (newInvoice && newInvoice.id) {
         // Move documents to the new invoice
-        for (const doc of documents) {
+        if (documents.length > 0) {
+          const docIds = documents.map((doc) => doc.id);
           await supabase
             .from('invoice_documents')
             .update({ invoice_id: newInvoice.id })
-            .eq('id', doc.id);
+            .in('id', docIds);
         }
 
         // Trigger extraction for each document
-        for (const doc of documents) {
-          try {
-            // Get the file content from storage
-            const { data: fileBlob, error: downloadError } = await supabase.storage
-              .from('invoice-documents')
-              .download(doc.file_path);
+        await Promise.all(
+          documents.map(async (doc) => {
+            try {
+              // Get the file content from storage
+              const { data: fileBlob, error: downloadError } = await supabase.storage
+                .from('invoice-documents')
+                .download(doc.file_path);
 
-            if (downloadError) {
-              console.error('Error downloading file for extraction:', downloadError);
-              continue;
+              if (downloadError) {
+                console.error('Error downloading file for extraction:', downloadError);
+                return;
+              }
+
+              // Convert blob to base64
+              const reader = new FileReader();
+              const fileContent = await new Promise<string>((resolve, reject) => {
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(fileBlob);
+              });
+
+              // Trigger extraction
+              await extractInvoiceData(newInvoice.id, fileContent);
+            } catch (error) {
+              console.error(`Failed to extract data from ${doc.file_name}:`, error);
             }
-
-            // Convert blob to base64
-            const reader = new FileReader();
-            const fileContent = await new Promise<string>((resolve, reject) => {
-              reader.onload = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(fileBlob);
-            });
-
-            // Trigger extraction
-            await extractInvoiceData(newInvoice.id, fileContent);
-          } catch (error) {
-            console.error(`Failed to extract data from ${doc.file_name}:`, error);
-          }
-        }
+          })
+        );
       }
     } catch (error) {
       console.error('Error creating invoice for uploaded documents:', error);
