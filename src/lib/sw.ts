@@ -1,6 +1,6 @@
 const SW_PATH = '/sw.js';
 const FLOWBILLS_CACHE_PREFIX = 'flowbills-';
-const ACTIVE_CACHE_NAME = 'flowbills-v10';
+const ACTIVE_CACHE_NAME = 'flowbills-v11';
 
 export async function cleanupFlowBillsCaches(): Promise<void> {
   if (!('caches' in window)) return;

@@ -132,17 +132,6 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
-      // PRODUCTION HOTFIX 2025-12-26: Removed aggressive treeshaking that was
-      // treating application code as dead code. With moduleSideEffects: false,
-      // Rollup was removing main.tsx entirely (including createRoot().render())
-      // because it assumed no modules have side effects.
-      //
-      // Vite's default treeshaking is safe and sufficient.
-      //
-      // treeshake: {
-      //   moduleSideEffects: false,  // BROKEN - Removes all app code!
-      //   propertyReadSideEffects: false,
-      // },
     },
     target: 'es2020',
     cssCodeSplit: true,
