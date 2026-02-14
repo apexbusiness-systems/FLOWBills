@@ -145,7 +145,10 @@ The Flow Billing Platform has successfully completed Sprint 5 with comprehensive
 - **Binary Uploads**: Fixed a critical bug in `Invoices.tsx` where PDF/Image uploads were corrupted by incorrect Blob-to-String conversion. Implemented `FileReader` for correct Base64 encoding.
 - **Auth Flow**: Refactored `Auth.tsx` to remove unsafe `any` types and improve error logging.
 
-#### 4. Documentation
+#### 4. DevOps & Infrastructure
+- **CI/CD**: Fixed a syntax error (duplicate `permissions` keys) in the GitHub Actions workflow (`.github/workflows/ci.yml`), ensuring proper post-commit checks.
+
+#### 5. Documentation
 - **Feature Registry**: Created `feature_registry.md` cataloging all active functional units.
 - **Audit Log**: Maintained `audit_log.md` with timestamps of all findings and actions.
 

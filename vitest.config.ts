@@ -15,9 +15,9 @@ export default defineConfig({
       '**/dist/**',
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
-      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
-      '**/tests/e2e/**',  // Exclude Playwright E2E tests - run with Playwright, not Vitest
-      '**/supabase/functions/**',  // Exclude Supabase Edge Functions - tested in Deno environment
+      '**/*.config.*',
+      'tests/e2e/**',
+      'supabase/functions/**',
     ],
     coverage: {
       provider: 'v8',

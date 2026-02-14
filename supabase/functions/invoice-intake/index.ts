@@ -1,10 +1,16 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const InvoiceIntakeSchema = z.object({
+  invoice_id: z.string().min(1, "Invoice ID is required"),
+  file_content: z.string().min(1, "File content is required"),
+});
 
 /**
  * Invoice Intake Orchestration Function
@@ -43,14 +49,21 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { invoice_id, file_content } = await req.json();
+    // Validate request body
+    const body = await req.json();
+    const validationResult = InvoiceIntakeSchema.safeParse(body);
 
-    if (!invoice_id || !file_content) {
-      return new Response(JSON.stringify({ error: 'invoice_id and file_content required' }), {
+    if (!validationResult.success) {
+      return new Response(JSON.stringify({
+        error: 'Validation failed',
+        details: validationResult.error.errors
+      }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    const { invoice_id, file_content } = validationResult.data;
 
     console.log(`Starting invoice intake for invoice ${invoice_id}`);
 

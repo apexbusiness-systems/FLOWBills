@@ -23,6 +23,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/hooks/useAuth';
 import '@testing-library/jest-dom';
+import '@/i18n/config'; // Initialize i18next
 
 // Polyfill ResizeObserver for components that rely on it (e.g., Radix UI)
 if (typeof global.ResizeObserver === 'undefined') {

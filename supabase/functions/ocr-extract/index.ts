@@ -1,5 +1,5 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { z } from "zod";
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { toMessage } from "../_shared/errors.ts";
 import { corsHeaders } from '../_shared/cors.ts';
 

@@ -12,3 +12,9 @@
 | 2025-05-20 | 12:35 | Security | Weak Password Check | ❌ | `password123` was accepted. **Action Required: Enable protection in Supabase Dashboard.** |
 | 2025-05-20 | 12:35 | Security | RLS Check | ✅ | 68 tables have RLS enabled in migrations. |
 | 2025-05-20 | 12:40 | Security | E2E Tests | ⚠️ | Timed out waiting for web server. |
+| 2025-05-20 | 13:00 | DevOps | Fix CI Workflow | ✅ | Fixed syntax error (duplicate keys) in `.github/workflows/ci.yml`. |
+| 2025-05-20 | 13:15 | Backend | Audit `fraud_detect` | ✅ | Verified high quality (uses Zod). |
+| 2025-05-20 | 13:15 | Backend | Audit `stripe-webhook` | ✅ | Verified idempotency and signature checks. |
+| 2025-05-20 | 13:20 | Backend | Refactor `invoice-intake` | ✅ | Replaced fragile checks with Zod schema validation. |
+| 2025-05-20 | 13:25 | Backend | Refactor `workflow-execute` | ✅ | Replaced unsafe casting with Zod schema validation. |
+| 2025-05-20 | 13:30 | Frontend | Audit `EditInvoiceDialog` | ✅ | Verified use of Zod and React Hook Form. |
