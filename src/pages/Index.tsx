@@ -25,7 +25,7 @@ const Index = () => {
         }}
         aria-label="Hero section"
       >
-        <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
+        <div className="absolute inset-0 bg-black/75" aria-hidden="true" />
         <img 
           src={heroImage} 
           alt="Oil and gas industrial facility with pipelines and equipment" 
@@ -62,19 +62,19 @@ const Index = () => {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto" role="region" aria-label="Key statistics">
-            <Card className="bg-black/40 border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-black/50 hover:-translate-y-1">
+            <Card className="bg-black/60 border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-black/70 hover:-translate-y-1">
               <CardHeader>
                 <CardTitle className="text-5xl font-bold text-amber-400" aria-label="95 percent">95%</CardTitle>
                 <CardDescription className="text-white text-base">Straight-Through Processing</CardDescription>
               </CardHeader>
             </Card>
-            <Card className="bg-black/40 border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-black/50 hover:-translate-y-1">
+            <Card className="bg-black/60 border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-black/70 hover:-translate-y-1">
               <CardHeader>
                 <CardTitle className="text-5xl font-bold text-amber-400" aria-label="80 percent">80%</CardTitle>
                 <CardDescription className="text-white text-base">Cost Reduction</CardDescription>
               </CardHeader>
             </Card>
-            <Card className="bg-black/40 border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-black/50 hover:-translate-y-1">
+            <Card className="bg-black/60 border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-black/70 hover:-translate-y-1">
               <CardHeader>
                 <CardTitle className="text-5xl font-bold text-amber-400" aria-label="24 hours, 7 days">24/7</CardTitle>
                 <CardDescription className="text-white text-base">Processing Uptime</CardDescription>
