@@ -180,7 +180,7 @@ export const SecurityHeaders = () => {
     // Set security-focused viewport
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
     }
 
     // Disable right-click context menu in production
