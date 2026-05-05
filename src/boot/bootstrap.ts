@@ -448,9 +448,6 @@ class BundleIntegrityManager {
     if (import.meta.env.VITE_DEPLOYMENT_ID) {
       return import.meta.env.VITE_DEPLOYMENT_ID;
     }
-    if (import.meta.env.VITE_VERCEL_DEPLOYMENT_ID) {
-      return import.meta.env.VITE_VERCEL_DEPLOYMENT_ID;
-    }
     return 'unknown';
   }
 

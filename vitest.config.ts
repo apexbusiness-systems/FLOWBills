@@ -9,6 +9,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['src/lib/test-utils.tsx'],
+    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache', 'tests/e2e/**', 'supabase/functions/**'],
     css: true,
     coverage: {
       provider: 'v8',
