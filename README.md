@@ -56,3 +56,7 @@ This project is built with:
 - `npm run build` - Build for production
 - `npm run test:e2e` - Run end-to-end tests
 - `npm run db:lint` - Run database security linter
+
+## Production Deployment
+
+FLOWBills production frontend deployment targets Cloudflare. Use `npm run build` as the build command and `dist` as the output directory. Cloudflare deployment configuration, SPA fallback, and security headers are documented in `docs/DEPLOYMENT_GUIDE.md`.
