@@ -148,7 +148,7 @@ This document maps all CI jobs, their commands, and how to debug them locally.
 - **Commands**: Uses `8398a7/action-slack@v3` (deprecated)
 - **Status**: ❌ Needs update to maintained Slack action
 
-### 7. FlowAi CI/CD Pipeline (`.github/workflows/ci-tests.yml`)
+### 7. FLOWBills CI/CD Pipeline (`.github/workflows/ci-tests.yml`)
 
 **Job: `quality-gates`**
 - **Commands**: TypeScript check, ESLint, unit/integration tests

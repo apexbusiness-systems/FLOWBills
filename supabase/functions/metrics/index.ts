@@ -31,8 +31,8 @@ interface MetricsData {
   hil_average_resolution_time: number;
 
   // Performance metrics
-  http_request_duration_avg: number;
-  invoice_processing_duration_avg: number;
+  http_request_duration_avg: number | null;
+  invoice_processing_duration_avg: number | null;
 }
 
 Deno.serve(async (req) => {
@@ -222,8 +222,8 @@ async function collectMetrics(supabase: any, startTime: Date, endTime: Date): Pr
       hil_queue_size: queueSize.count || 0,
       hil_average_resolution_time: averageResolutionTime,
       
-      http_request_duration_avg: 150, // Mock data
-      invoice_processing_duration_avg: 2500, // Mock data in ms
+      http_request_duration_avg: null, // Hardware limitations
+      invoice_processing_duration_avg: null, // Awaiting instrumentation
     };
 
   } catch (err: unknown) {

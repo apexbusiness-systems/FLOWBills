@@ -229,7 +229,7 @@ Deno.serve(async (req) => {
     }
 
     // Update invoice status (confidence_score is stored in invoice_extractions, not invoices)
-    const newStatus = routingDecision === 'auto_approve' ? 'approved' : 'processing';
+    const newStatus = routingDecision === 'auto_approve' ? 'approved' : (routingDecision === 'human_review' ? 'needs_review' : 'processing');
     const { error: updateError } = await supabase
       .from('invoices')
       .update({ status: newStatus })

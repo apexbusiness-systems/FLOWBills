@@ -1,8 +1,8 @@
-# FlowAi Release & Rollback Runbook
+# FLOWBills Release & Rollback Runbook
 
 ## Overview
 
-This runbook provides step-by-step procedures for deploying FlowAi updates and handling rollbacks when issues occur. All deployments follow a controlled process with pre-flight checks, monitoring, and rollback procedures.
+This runbook provides step-by-step procedures for deploying FLOWBills updates and handling rollbacks when issues occur. All deployments follow a controlled process with pre-flight checks, monitoring, and rollback procedures.
 
 ## Pre-Flight Checklist
 

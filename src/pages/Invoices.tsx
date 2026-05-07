@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 import InvoiceList from '@/components/invoices/InvoiceList';
 import { EditInvoiceDialog } from '@/components/invoices/EditInvoiceDialog';
@@ -11,10 +12,51 @@ import WorkflowPipeline from '@/components/dashboard/WorkflowPipeline';
 import { supabase } from '@/integrations/supabase/client';
 
 const Invoices = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { invoices, loading, createInvoice, updateInvoice, deleteInvoice } = useInvoices();
   const { extractInvoiceData } = useInvoiceExtraction();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+
+  // Initialize tabs from URL or localStorage
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl === 'upload' || tabFromUrl === 'list' || tabFromUrl === 'workflow') {
+      return tabFromUrl;
+    }
+    const saved = localStorage.getItem('flowbills.invoices.activeTab');
+    return saved || 'list';
+  });
+
+  // Handle URL actions
+  useEffect(() => {
+    const create = searchParams.get('create');
+    const upload = searchParams.get('upload');
+
+    if (create === 'true') {
+      handleCreate();
+      // Remove query param to avoid reopening on refresh
+      setSearchParams(prev => {
+        prev.delete('create');
+        return prev;
+      });
+    } else if (upload === 'true') {
+      handleTabChange('upload');
+      setSearchParams(prev => {
+        prev.delete('upload');
+        return prev;
+      });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    localStorage.setItem('flowbills.invoices.activeTab', value);
+    setSearchParams(prev => {
+      prev.set('tab', value);
+      return prev;
+    });
+  };
 
   const handleEdit = (invoice: Invoice) => {
     setEditingInvoice(invoice);
@@ -69,7 +111,12 @@ const Invoices = () => {
             }
 
             // Convert blob to base64
-            const fileContent = await fileBlob.text();
+            const fileContent = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(fileBlob);
+            });
 
             // Trigger extraction
             await extractInvoiceData(newInvoice.id, fileContent);
@@ -94,7 +141,7 @@ const Invoices = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="upload" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="upload" className="flex items-center gap-2">
             <Upload className="h-4 w-4" />

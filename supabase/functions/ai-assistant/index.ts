@@ -103,11 +103,11 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: Deno.env.get("ASSISTANT_MODEL_ID") || "gpt-4o-mini",
         messages: [
           { 
             role: 'system', 
-            content: `You are FlowAi, a specialized AI assistant for oil & gas billing and invoice processing in Canadian operations.
+            content: `You are FLOWBills, a specialized AI assistant for oil & gas billing and invoice processing in Canadian operations.
 
 INDUSTRY EXPERTISE - Oil & Gas Billing:
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-FlowAi maintains high availability and performance through well-defined Service Level Objectives (SLOs) with multi-window burn-rate alerting based on Google SRE best practices.
+FLOWBills maintains high availability and performance through well-defined Service Level Objectives (SLOs) with multi-window burn-rate alerting based on Google SRE best practices.
 
 ## Core SLOs
 
@@ -213,4 +213,4 @@ sum(rate(http_request_duration_seconds_bucket{le="10"}[5m])) / sum(rate(http_req
 - [Google SRE Workbook - Alerting on SLOs](https://sre.google/workbook/alerting-on-slos/)
 - [Multi-Window, Multi-Burn-Rate Alerts](https://sre.google/workbook/alerting-on-slos/#6-multiwindow-multi-burn-rate-alerts)
 - [Prometheus Alert Manager](https://prometheus.io/docs/alerting/latest/alertmanager/)
-- [FlowAi Metrics Endpoint](https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/metrics)
+- [FLOWBills Metrics Endpoint](https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/metrics)

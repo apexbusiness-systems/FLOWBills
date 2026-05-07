@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
-import { queryOptimizer } from '@/lib/query-optimizer';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { INVOICE_STATUS, InvoiceStatus } from '@/lib/domain/constants';
 
 export interface Invoice {
   id: string;
@@ -11,7 +12,7 @@ export interface Invoice {
   amount: number;
   invoice_date: string;
   due_date?: string | null;
-  status: 'pending' | 'approved' | 'rejected' | 'processing' | string;
+  status: InvoiceStatus | string;
   notes?: string | null;
   file_url?: string | null;
   file_name?: string | null;
@@ -21,80 +22,45 @@ export interface Invoice {
   user_id: string;
 }
 
-type Page = { items: Invoice[]; nextCursor?: { created_at: string; id: string } };
-
 export const useInvoices = () => {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [updating, setUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const fetchPage = useCallback(async (cursor?: { created_at: string; id: string }): Promise<Page> => {
-    if (!user) return { items: [] };
+  const invoicesQueryKey = ['invoices', user?.id];
 
-    const cacheKey = `invoices_${user.id}_${cursor?.created_at || 'initial'}`;
-    
-    const result = await queryOptimizer.supabaseQuery(
-      'invoices',
-      async (client) => {
-        const q = client
-          .from('invoices')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .order('id', { ascending: false })
-          .limit(50);
-          
-        if (cursor) {
-          q.lt('created_at', cursor.created_at).or(`created_at.eq.${cursor.created_at},id.lt.${cursor.id}`);
-        }
-        
-        return await q;
-      },
-      cacheKey,
-      { ttl: 60000, cache: true }
-    );
-    
-    if (result.error) throw result.error;
-    
-    const mappedInvoices = result.data?.map(record => ({
-      ...record,
-      vendor_name: 'Unknown Vendor'
-    })) as Invoice[] || [];
-    
-    const last = mappedInvoices[mappedInvoices.length - 1];
-    return { 
-      items: mappedInvoices, 
-      nextCursor: last ? { created_at: last.created_at, id: last.id } : undefined 
-    };
-  }, [user]);
+  const { data: invoices = [], isLoading: loading, error } = useQuery({
+    queryKey: invoicesQueryKey,
+    queryFn: async () => {
+      if (!user) return [];
 
-  const fetchInvoices = useCallback(async () => {
-    if (!user) return;
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(100); // Or implement proper pagination using useInfiniteQuery
 
-    setLoading(true);
-    try {
-      const page = await fetchPage();
-      setInvoices(page.items);
-    } catch (error: any) {
-      console.error('Error fetching invoices:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load invoices",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [user, fetchPage, toast]);
+      if (error) {
+        console.error('Error fetching invoices:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load invoices",
+          variant: "destructive",
+        });
+        throw error;
+      }
 
-  const createInvoice = async (invoiceData: { invoice_number?: string; vendor_name?: string; amount: number; invoice_date: string; due_date?: string; status?: string; notes?: string; file_url?: string }) => {
-    if (!user) return null;
+      return data as Invoice[];
+    },
+    enabled: !!user,
+    staleTime: 60000, // 1 minute
+  });
 
-    setCreating(true);
-    try {
-      // Prepare data for DB - vendor_name is required field
+  const createMutation = useMutation({
+    mutationFn: async (invoiceData: { invoice_number?: string; vendor_name?: string; amount: number; invoice_date: string; due_date?: string; status?: string; notes?: string; file_url?: string }) => {
+      if (!user) throw new Error('Not authenticated');
+
       const { vendor_name = 'Unknown Vendor', invoice_number = `INV-${Date.now()}`, ...restData } = invoiceData;
       const { data, error } = await supabase
         .from('invoices')
@@ -108,33 +74,32 @@ export const useInvoices = () => {
         .single();
 
       if (error) throw error;
-
-      const mappedInvoice = { ...data, vendor_name: 'Unknown Vendor' } as Invoice;
-      setInvoices(prev => [mappedInvoice, ...prev]);
+      return data as Invoice;
+    },
+    onSuccess: (newInvoice) => {
+      // Optimistic update of the cache
+      queryClient.setQueryData(invoicesQueryKey, (old: Invoice[] | undefined) => {
+        return old ? [newInvoice, ...old] : [newInvoice];
+      });
       toast({
         title: "Success",
         description: "Invoice created successfully",
       });
-      
-      return data;
-    } catch (error: any) {
+    },
+    onError: (error) => {
       console.error('Error creating invoice:', error);
       toast({
         title: "Error",
         description: "Failed to create invoice",
         variant: "destructive",
       });
-      return null;
-    } finally {
-      setCreating(false);
     }
-  };
+  });
 
-  const updateInvoice = async (id: string, updates: Partial<Invoice>) => {
-    if (!user) return null;
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string, updates: Partial<Invoice> }) => {
+      if (!user) throw new Error('Not authenticated');
 
-    setUpdating(true);
-    try {
       const { data, error } = await supabase
         .from('invoices')
         .update(updates)
@@ -143,74 +108,89 @@ export const useInvoices = () => {
         .single();
 
       if (error) throw error;
-
-      const mappedInvoice = { ...data, vendor_name: 'Unknown Vendor' } as Invoice;
-      setInvoices(prev => 
-        prev.map(invoice => invoice.id === id ? mappedInvoice : invoice)
-      );
-      
+      return data as Invoice;
+    },
+    onSuccess: (updatedInvoice) => {
+      queryClient.setQueryData(invoicesQueryKey, (old: Invoice[] | undefined) => {
+        return old ? old.map(inv => inv.id === updatedInvoice.id ? updatedInvoice : inv) : [updatedInvoice];
+      });
       toast({
         title: "Success",
         description: "Invoice updated successfully",
       });
-      
-      return data;
-    } catch (error: any) {
+    },
+    onError: (error) => {
       console.error('Error updating invoice:', error);
       toast({
         title: "Error",
         description: "Failed to update invoice",
         variant: "destructive",
       });
-      return null;
-    } finally {
-      setUpdating(false);
     }
-  };
+  });
 
-  const deleteInvoice = async (id: string) => {
-    if (!user) return false;
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error('Not authenticated');
 
-    try {
       const { error } = await supabase
         .from('invoices')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
-
-      setInvoices(prev => prev.filter(invoice => invoice.id !== id));
+      return id;
+    },
+    onSuccess: (id) => {
+      queryClient.setQueryData(invoicesQueryKey, (old: Invoice[] | undefined) => {
+        return old ? old.filter(inv => inv.id !== id) : [];
+      });
       toast({
         title: "Success",
         description: "Invoice deleted successfully",
       });
-      
-      return true;
-    } catch (error: any) {
+    },
+    onError: (error) => {
       console.error('Error deleting invoice:', error);
       toast({
         title: "Error",
         description: "Failed to delete invoice",
         variant: "destructive",
       });
-      return false;
     }
-  };
+  });
 
-  const getInvoiceById = (id: string): Invoice | undefined => {
+  const createInvoice = useCallback(async (data: any) => {
+    return createMutation.mutateAsync(data);
+  }, [createMutation]);
+
+  const updateInvoice = useCallback(async (id: string, updates: Partial<Invoice>) => {
+    return updateMutation.mutateAsync({ id, updates });
+  }, [updateMutation]);
+
+  const deleteInvoice = useCallback(async (id: string) => {
+    await deleteMutation.mutateAsync(id);
+    return true;
+  }, [deleteMutation]);
+
+  const fetchInvoices = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: invoicesQueryKey });
+  }, [queryClient, invoicesQueryKey]);
+
+  const getInvoiceById = useCallback((id: string): Invoice | undefined => {
     return invoices.find(invoice => invoice.id === id);
-  };
+  }, [invoices]);
 
-  const getInvoicesByStatus = (status: Invoice['status']): Invoice[] => {
+  const getInvoicesByStatus = useCallback((status: Invoice['status']): Invoice[] => {
     return invoices.filter(invoice => invoice.status === status);
-  };
+  }, [invoices]);
 
   const getInvoicesStats = useMemo(() => {
     const totalAmount = invoices.reduce((sum, invoice) => sum + invoice.amount, 0);
-    const pendingCount = invoices.filter(inv => inv.status === 'pending').length;
-    const approvedCount = invoices.filter(inv => inv.status === 'approved').length;
-    const paidCount = invoices.filter(inv => inv.status === 'processing').length;
-    const rejectedCount = invoices.filter(inv => inv.status === 'rejected').length;
+    const pendingCount = invoices.filter(inv => inv.status === INVOICE_STATUS.PENDING).length;
+    const approvedCount = invoices.filter(inv => inv.status === INVOICE_STATUS.APPROVED).length;
+    const paidCount = invoices.filter(inv => inv.status === INVOICE_STATUS.PROCESSING).length;
+    const rejectedCount = invoices.filter(inv => inv.status === INVOICE_STATUS.REJECTED).length;
 
     return {
       totalAmount,
@@ -222,19 +202,12 @@ export const useInvoices = () => {
     };
   }, [invoices]);
 
-  useEffect(() => {
-    if (user) {
-      fetchInvoices();
-    }
-  }, [user]);
-
   return {
     invoices,
     loading,
-    creating,
-    updating,
+    creating: createMutation.isPending,
+    updating: updateMutation.isPending,
     fetchInvoices,
-    fetchPage,
     createInvoice,
     updateInvoice,
     deleteInvoice,

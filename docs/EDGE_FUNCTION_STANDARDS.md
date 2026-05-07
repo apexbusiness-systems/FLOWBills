@@ -1,6 +1,6 @@
 # Edge Function Standards (P0-P12)
 
-This document outlines the comprehensive standards and guardrails for all Supabase Edge Functions in FlowAi.
+This document outlines the comprehensive standards and guardrails for all Supabase Edge Functions in FLOWBills.
 
 ## P0 — Global Guardrails
 

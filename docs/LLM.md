@@ -1,8 +1,8 @@
-# FlowAi Oil & Gas LLM Documentation
+# FLOWBills Oil & Gas LLM Documentation
 
 ## Overview
 
-FlowAi uses a locked, industry-specific Large Language Model (LLM) configuration designed specifically for oil and gas operations. The system incorporates strict security controls, industry-standard RAG (Retrieval-Augmented Generation), and compliance monitoring.
+FLOWBills uses a locked, industry-specific Large Language Model (LLM) configuration designed specifically for oil and gas operations. The system incorporates strict security controls, industry-standard RAG (Retrieval-Augmented Generation), and compliance monitoring.
 
 ## Model Configuration
 
@@ -12,7 +12,7 @@ The LLM configuration is immutable at runtime and protected by cryptographic che
 
 ```json
 {
-  "name": "FlowAi-OilGas-Lock",
+  "name": "FLOWBills-OilGas-Lock",
   "provider": "openai", 
   "model_id": "gpt-4o",
   "temperature": 0.2,

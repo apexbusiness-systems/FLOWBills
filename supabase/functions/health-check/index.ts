@@ -3,7 +3,7 @@ import { corsHeaders } from '../_shared/cors.ts'
 
 // App version and build info for uptime monitoring
 const APP_VERSION = '1.0.0';
-const BUILD_TIMESTAMP = '2024-12-03T00:00:00Z'; // Updated on each deploy
+const BUILD_TIMESTAMP = Deno.env.get('BUILD_TIMESTAMP') || new Date().toISOString();
 const SERVICE_NAME = 'flowbills-api';
 
 Deno.serve(async (req) => {

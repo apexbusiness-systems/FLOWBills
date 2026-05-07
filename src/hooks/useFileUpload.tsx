@@ -39,12 +39,10 @@ export const useFileUpload = () => {
     try {
       setUploading(true);
 
-      // Generate unique file path
       const timestamp = Date.now();
       const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const filePath = `${user.id}/${invoiceId || 'temp'}/${timestamp}_${sanitizedFileName}`;
 
-      // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('invoice-documents')
         .upload(filePath, file, {
@@ -57,7 +55,6 @@ export const useFileUpload = () => {
         throw new Error(`Upload failed: ${uploadError.message}`);
       }
 
-      // Create database record
       const { data: document, error: dbError } = await supabase
         .from('invoice_documents')
         .insert({
@@ -72,7 +69,6 @@ export const useFileUpload = () => {
         .single();
 
       if (dbError) {
-        // Clean up uploaded file if database insert fails
         await supabase.storage
           .from('invoice-documents')
           .remove([uploadData.path]);
@@ -135,7 +131,6 @@ export const useFileUpload = () => {
     if (!user) return false;
 
     try {
-      // Get document details first
       const { data: document, error: fetchError } = await supabase
         .from('invoice_documents')
         .select('file_path')
@@ -147,7 +142,6 @@ export const useFileUpload = () => {
         throw new Error('Document not found');
       }
 
-      // Delete from storage
       const { error: storageError } = await supabase.storage
         .from('invoice-documents')
         .remove([document.file_path]);
@@ -156,7 +150,6 @@ export const useFileUpload = () => {
         console.error('Storage deletion error:', storageError);
       }
 
-      // Delete from database
       const { error: dbError } = await supabase
         .from('invoice_documents')
         .delete()
@@ -188,11 +181,39 @@ export const useFileUpload = () => {
     return fetchDocuments(invoiceId);
   }, [fetchDocuments]);
 
+  const getDocumentCounts = useCallback(async (invoiceIds: string[]) => {
+    if (!user || invoiceIds.length === 0) return {};
+
+    try {
+      const { data, error } = await supabase
+        .from('invoice_documents')
+        .select('invoice_id')
+        .in('invoice_id', invoiceIds);
+
+      if (error) throw error;
+
+      const counts: Record<string, number> = {};
+      invoiceIds.forEach(id => counts[id] = 0);
+
+      if (data) {
+        data.forEach(doc => {
+          if (doc.invoice_id) {
+            counts[doc.invoice_id] = (counts[doc.invoice_id] || 0) + 1;
+          }
+        });
+      }
+
+      return counts;
+    } catch (error) {
+      console.error('Error fetching document counts:', error);
+      return {};
+    }
+  }, [user]);
+
   const downloadDocument = useCallback(async (documentId: string) => {
     if (!user) return null;
 
     try {
-      // Get document details
       const { data: document, error: fetchError } = await supabase
         .from('invoice_documents')
         .select('file_path, file_name')
@@ -204,16 +225,14 @@ export const useFileUpload = () => {
         throw new Error('Document not found');
       }
 
-      // Get signed URL for download
       const { data: urlData, error: urlError } = await supabase.storage
         .from('invoice-documents')
-        .createSignedUrl(document.file_path, 60); // 60 seconds expiry
+        .createSignedUrl(document.file_path, 60);
 
       if (urlError || !urlData) {
         throw new Error('Failed to generate download URL');
       }
 
-      // Trigger download
       const anchor = window.document.createElement('a');
       anchor.href = urlData.signedUrl;
       anchor.download = document.file_name;
@@ -237,7 +256,6 @@ export const useFileUpload = () => {
     if (!user) return '/placeholder.svg';
 
     try {
-      // Get document details
       const { data: document, error: fetchError } = await supabase
         .from('invoice_documents')
         .select('file_path')
@@ -249,10 +267,9 @@ export const useFileUpload = () => {
         return '/placeholder.svg';
       }
 
-      // Get signed URL for preview
       const { data: urlData, error: urlError } = await supabase.storage
         .from('invoice-documents')
-        .createSignedUrl(document.file_path, 3600); // 1 hour expiry
+        .createSignedUrl(document.file_path, 3600);
 
       if (urlError || !urlData) {
         return '/placeholder.svg';
@@ -273,18 +290,14 @@ export const useFileUpload = () => {
 
     try {
       for (const file of files) {
-        // Initialize progress tracking
         setUploadProgress(prev => [...prev, { fileName: file.name, progress: 0 }]);
 
-        // Update progress to show start
         setUploadProgress(prev =>
           prev.map(p => p.fileName === file.name ? { ...p, progress: 30 } : p)
         );
 
-        // Upload file
         const result = await uploadFile(file, invoiceId);
 
-        // Update progress to complete
         setUploadProgress(prev =>
           prev.map(p => p.fileName === file.name ? { ...p, progress: 100 } : p)
         );
@@ -292,7 +305,6 @@ export const useFileUpload = () => {
         results.push(result);
       }
 
-      // Clear progress after a short delay
       setTimeout(() => {
         setUploadProgress([]);
       }, 1000);
@@ -306,7 +318,6 @@ export const useFileUpload = () => {
     return results.filter(Boolean) as InvoiceDocument[];
   }, [user, uploadFile]);
 
-  // New function to upload files without invoice association initially
   const uploadFilesWithoutInvoice = useCallback(async (files: File[]) => {
     if (!user) return [];
 
@@ -315,18 +326,14 @@ export const useFileUpload = () => {
 
     try {
       for (const file of files) {
-        // Initialize progress tracking
         setUploadProgress(prev => [...prev, { fileName: file.name, progress: 0 }]);
 
-        // Update progress to show start
         setUploadProgress(prev =>
           prev.map(p => p.fileName === file.name ? { ...p, progress: 30 } : p)
         );
 
-        // Upload file without invoice association
         const result = await uploadFile(file, undefined);
 
-        // Update progress to complete
         setUploadProgress(prev =>
           prev.map(p => p.fileName === file.name ? { ...p, progress: 100 } : p)
         );
@@ -334,7 +341,6 @@ export const useFileUpload = () => {
         results.push(result);
       }
 
-      // Clear progress after a short delay
       setTimeout(() => {
         setUploadProgress([]);
       }, 1000);
@@ -356,6 +362,7 @@ export const useFileUpload = () => {
     fetchDocuments,
     deleteDocument,
     getDocuments,
+    getDocumentCounts,
     downloadDocument,
     getFilePreviewUrl,
     uploadMultipleFiles,

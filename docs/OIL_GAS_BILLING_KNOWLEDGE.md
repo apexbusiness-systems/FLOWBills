@@ -3,7 +3,7 @@
 **Last Updated:** January 20, 2025  
 **Version:** 2.0.0
 
-This document outlines the specialized oil & gas billing knowledge integrated into FlowAi's LLM assistants to provide industry-specific support for Canadian oil & gas operations.
+This document outlines the specialized oil & gas billing knowledge integrated into FLOWBills's LLM assistants to provide industry-specific support for Canadian oil & gas operations.
 
 ---
 
@@ -20,7 +20,7 @@ This document outlines the specialized oil & gas billing knowledge integrated in
 - Transparent partner reporting and settlement
 - AFE-based cost tracking across joint ventures
 
-**FlowAi Implementation:**
+**FLOWBills Implementation:**
 - Automated cost allocation calculations
 - Partner distribution reports
 - JOA compliance validation
@@ -48,7 +48,7 @@ This document outlines the specialized oil & gas billing knowledge integrated in
 - Working interest owner information
 - Well identifier (UWI) linkage
 
-**FlowAi Implementation:**
+**FLOWBills Implementation:**
 - AFE budget validation on invoice receipt
 - Variance tracking and alerts
 - Change order management
@@ -77,7 +77,7 @@ This document outlines the specialized oil & gas billing knowledge integrated in
 - Rate verification against MSA
 - Authorization code checking
 
-**FlowAi Implementation:**
+**FLOWBills Implementation:**
 - Digital field ticket integration
 - GPS validation automation
 - Three-way matching with PO and Invoice
@@ -110,7 +110,7 @@ This document outlines the specialized oil & gas billing knowledge integrated in
 - Date range mismatches
 - Unauthorized services
 
-**FlowAi Implementation:**
+**FLOWBills Implementation:**
 - Automated three-way match validation
 - Tolerance-based approval routing
 - Exception workflow management
@@ -134,7 +134,7 @@ This document outlines the specialized oil & gas billing knowledge integrated in
 - Liability and indemnification
 - Term and renewal provisions
 
-**FlowAi Implementation:**
+**FLOWBills Implementation:**
 - Rate validation against MSA
 - Pricing compliance alerts
 - Volume discount calculation
@@ -349,14 +349,14 @@ This document outlines the specialized oil & gas billing knowledge integrated in
 
 ### Integration Points
 
-**Inbound to FlowAi:**
+**Inbound to FLOWBills:**
 - Vendor master data
 - Purchase orders
 - AFE budgets
 - Cost center hierarchies
 - GL account codes
 
-**Outbound from FlowAi:**
+**Outbound from FLOWBills:**
 - Approved invoice batches
 - GL distributions
 - Partner billing JIB summaries
@@ -466,7 +466,7 @@ This document outlines the specialized oil & gas billing knowledge integrated in
 ---
 
 **Document Control:**
-- Document Owner: FlowAi Product Team
+- Document Owner: FLOWBills Product Team
 - Review Frequency: Quarterly
 - Next Review: April 2025
 - Classification: Internal Use

@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
     // ==================================================================
     console.log('Step 4: Updating invoice status based on routing decision...');
     
-    let finalStatus = 'validated';
+    let finalStatus = "validated";
     
     if (routingDecision === 'auto_approve' && !requiresReview) {
       finalStatus = 'approved_auto';

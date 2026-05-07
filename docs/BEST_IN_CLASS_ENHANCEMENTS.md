@@ -1,7 +1,7 @@
 # Best-in-Class Enhancement Roadmap
-**FlowAi Enterprise Invoice Automation - Competitive Analysis & UX Enhancements**
+**FLOWBills Enterprise Invoice Automation - Competitive Analysis & UX Enhancements**
 
-> **Executive Summary**: Research of leading AP automation platforms (Bill.com, Stampli, Basware, Coupa, SAP Concur, Tipalti) and 2025 B2B SaaS UX trends reveals 47 high-impact enhancements that would position FlowAi as industry-leading.
+> **Executive Summary**: Research of leading AP automation platforms (Bill.com, Stampli, Basware, Coupa, SAP Concur, Tipalti) and 2025 B2B SaaS UX trends reveals 47 high-impact enhancements that would position FLOWBills as industry-leading.
 
 ---
 
@@ -627,7 +627,7 @@ Home > Invoices > Shell Canada > Invoice #12345
 
 ### 41. Zapier/Make Integration
 **No-code automation**:
-- Pre-built Zaps ("New invoice in FlowAi → Slack notification")
+- Pre-built Zaps ("New invoice in FLOWBills → Slack notification")
 - Triggers & actions
 - Connect to 5000+ apps
 
@@ -802,13 +802,13 @@ Home > Invoices > Shell Canada > Invoice #12345
 4. **Coupa**: Procurement integration
 5. **Tipalti**: International payments, tax compliance
 
-**FlowAi Opportunity**: Be the "modern, AI-first, mobile-friendly" alternative for mid-market oil & gas companies. None of the leaders truly excel at UX or industry specificity.
+**FLOWBills Opportunity**: Be the "modern, AI-first, mobile-friendly" alternative for mid-market oil & gas companies. None of the leaders truly excel at UX or industry specificity.
 
 ---
 
 ## 🎯 Competitive Positioning Statement
 
-> "FlowAi is the **first invoice automation platform designed for the way people actually work** - mobile-first, AI-powered, and built specifically for the oil & gas industry. While legacy platforms feel like software from 2010, FlowAi feels like the modern SaaS tools your team already loves (Linear, Notion, Figma). **Approve invoices from your phone in 30 seconds. Let AI handle the busywork. Focus on what matters.**"
+> "FLOWBills is the **first invoice automation platform designed for the way people actually work** - mobile-first, AI-powered, and built specifically for the oil & gas industry. While legacy platforms feel like software from 2010, FLOWBills feels like the modern SaaS tools your team already loves (Linear, Notion, Figma). **Approve invoices from your phone in 30 seconds. Let AI handle the busywork. Focus on what matters.**"
 
 ---
 
@@ -832,7 +832,7 @@ Home > Invoices > Shell Canada > Invoice #12345
 
 ## Appendix: Competitive Feature Matrix
 
-| Feature | FlowAi (Current) | Bill.com | Stampli | Basware | Coupa | Tipalti |
+| Feature | FLOWBills (Current) | Bill.com | Stampli | Basware | Coupa | Tipalti |
 |---------|------------------|----------|---------|---------|-------|---------|
 | Mobile App | ❌ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ |
 | AI GL Coding | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -847,4 +847,4 @@ Home > Invoices > Shell Canada > Invoice #12345
 
 **Legend**: ✅ Full feature | ⚠️ Partial | ❌ Missing
 
-**Opportunity**: FlowAi can leapfrog ALL competitors in UX modernization and become the reference for "what enterprise software should feel like in 2025".
+**Opportunity**: FLOWBills can leapfrog ALL competitors in UX modernization and become the reference for "what enterprise software should feel like in 2025".

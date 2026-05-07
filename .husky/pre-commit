@@ -1,8 +1,8 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-# FlowAi LLM Protection - Pre-commit Hook
-echo "🔒 FlowAi Pre-commit: Checking for protected file changes..."
+# FLOWBills LLM Protection - Pre-commit Hook
+echo "🔒 FLOWBills Pre-commit: Checking for protected file changes..."
 
 # Check if staged files include protected LLM directories
 if git diff --cached --name-only | grep -E '^(llm/|supabase/functions/llm/|supabase/functions/oil-gas-assistant/|rag/)'; then

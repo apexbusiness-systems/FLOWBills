@@ -34,7 +34,7 @@ export async function retrieveOilGasContext(
   query: string, 
   supabase: ReturnType<typeof createClient>
 ): Promise<string[]> {
-  console.log("📚 Retrieving O&G industry context...");
+  console.log("📚 Loading built-in O&G industry context...");
   
   try {
     // Enhanced industry context with billing-specific knowledge
@@ -140,11 +140,11 @@ export const handler = async (req: Request): Promise<Response> => {
 
     console.log(`🛢️ Processing O&G query for user: ${user_id || 'anonymous'}`);
 
-    // Retrieve industry-specific context via RAG
+    // Load static industry-specific context
     const industryContext = await retrieveOilGasContext(query, supabase);
 
     // Build system prompt with industry knowledge
-    const systemPrompt = `You are FlowAi, a specialized Oil & Gas AI assistant with deep knowledge of industry standards, billing practices, and operational workflows in Canadian oil & gas.
+    const systemPrompt = `You are FLOWBills, a specialized Oil & Gas AI assistant with deep knowledge of industry standards, billing practices, and operational workflows in Canadian oil & gas.
 
 TECHNICAL DATA STANDARDS:
 - WITSML, RESQML, PRODML data standards

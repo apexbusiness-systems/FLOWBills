@@ -13,7 +13,7 @@ const CSP_POLICY = {
   'script-src': [
     "'self'",
     "'unsafe-inline'",
-    "'unsafe-eval'", // Required for some dev tools
+    // "'unsafe-eval'", // Removing from production policy
     'https://unpkg.com',
     'https://cdn.jsdelivr.net',
     'https://cdn.gpteng.co', // Lovable scripts
@@ -180,7 +180,7 @@ export const SecurityHeaders = () => {
     // Set security-focused viewport
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
     }
 
     // Disable right-click context menu in production
@@ -205,14 +205,14 @@ export const SecurityHeaders = () => {
       }
     };
 
-    document.addEventListener('contextmenu', handleContextMenu);
-    document.addEventListener('keydown', handleKeyDown);
+
+
 
     // Cleanup
     return () => {
       document.removeEventListener('securitypolicyviolation', handleCSPViolation);
-      document.removeEventListener('contextmenu', handleContextMenu);
-      document.removeEventListener('keydown', handleKeyDown);
+
+
       if (securityObserver) {
         securityObserver.disconnect();
       }

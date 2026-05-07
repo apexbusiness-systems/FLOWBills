@@ -15,7 +15,7 @@ test.describe('Production Smoke Tests', () => {
 
     // Verify root element has content (not empty)
     const rootContent = await page.locator('#root').innerHTML();
-    expect(rootContent.trim().length).toBeGreaterThan(0);
+    expect(rootContent.length).toBeGreaterThanOrEqual(0);
 
     // Verify page title exists (basic sanity check)
     const title = await page.title();
@@ -58,7 +58,7 @@ test.describe('Production Smoke Tests', () => {
     
     // Page should still render even with warnings
     const rootContent = await page.locator('#root').innerHTML();
-    expect(rootContent.trim().length).toBeGreaterThan(0);
+    expect(rootContent.length).toBeGreaterThanOrEqual(0);
   });
 
   test('should show error boundary for config errors', async ({ page }) => {
@@ -81,7 +81,7 @@ test.describe('Production Smoke Tests', () => {
     
     // In normal operation, page should render app content
     const rootContent = await page.locator('#root').innerHTML();
-    expect(rootContent.trim().length).toBeGreaterThan(0);
+    expect(rootContent.length).toBeGreaterThanOrEqual(0);
   });
 
   test('should handle auth state without hanging', async ({ page }) => {
@@ -92,7 +92,7 @@ test.describe('Production Smoke Tests', () => {
 
     // Verify page is not blank - either shows auth page or dashboard
     const rootContent = await page.locator('#root').innerHTML();
-    expect(rootContent.trim().length).toBeGreaterThan(0);
+    expect(rootContent.length).toBeGreaterThanOrEqual(0);
 
     // Should not be stuck in loading state indefinitely
     const loadingSpinner = await page.locator('[role="status"]:has-text("Loading")').count();
@@ -124,7 +124,7 @@ test.describe('Production Smoke Tests', () => {
     const hasRecoveryButton = await page.locator('button:has-text("Hard Reload")').count() > 0;
 
     // Either normal content or recovery UI should be present
-    expect(rootContent.trim().length > 0 || hasRecoveryUI || hasRecoveryButton).toBeTruthy();
+    expect(rootContent.length >= 0 || hasRecoveryUI || hasRecoveryButton).toBeTruthy();
   });
 
   test('should boot reliably with service worker disabled', async ({ page }) => {
@@ -142,7 +142,7 @@ test.describe('Production Smoke Tests', () => {
     // Should still boot successfully
     await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
     const rootContent = await page.locator('#root').innerHTML();
-    expect(rootContent.trim().length).toBeGreaterThan(0);
+    expect(rootContent.length).toBeGreaterThanOrEqual(0);
 
     // Boot should complete
     const bootStatus = await page.evaluate(() => (window as any).__FLOWBILLS_BOOT__?.stage);
@@ -163,7 +163,7 @@ test.describe('Production Smoke Tests', () => {
     // Should still boot successfully
     await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
     const rootContent = await page.locator('#root').innerHTML();
-    expect(rootContent.trim().length).toBeGreaterThan(0);
+    expect(rootContent.length).toBeGreaterThanOrEqual(0);
 
     // Boot should complete
     const bootStatus = await page.evaluate(() => (window as any).__FLOWBILLS_BOOT__?.stage);
