@@ -2,7 +2,7 @@
 
 ## Purpose
 
-FLOWBills production frontend deployment is Cloudflare-only. If a pull request still shows a blocked external deployment check, that check is produced outside this repository and must be removed from repository or provider settings by a repository administrator.
+FLOWBills production frontend deployment is Cloudflare-only. `vercel.json` exists only to disable Vercel Git deployments while the external Vercel GitHub App remains attached. If a pull request still shows a blocked external deployment check, that check is produced outside this repository and must be removed from repository or provider settings by a repository administrator.
 
 ## Required Repository Settings Change
 
@@ -18,12 +18,13 @@ Run these repository checks after the settings change:
 
 ```bash
 git ls-files | sed 's#^#/#' | awk '
-  /\/(vercel\.json|now\.json|netlify\.toml)$/ { bad=1; print "legacy host config still tracked: " $0 }
+  /\/(now\.json|netlify\.toml)$/ { bad=1; print "legacy host config still tracked: " $0 }
   /\/\.vercel\// { bad=1; print "legacy provider directory still tracked: " $0 }
   END { exit bad }
 '
+node -e 'const c=require("./vercel.json"); if (c.git?.deploymentEnabled !== false || c.github?.enabled !== false) process.exit(1); console.log("Vercel Git kill switch active")'
 ruby -e 'require "yaml"; Dir[".github/workflows/*.yml"].each { |f| YAML.load_file(f) }; puts "workflow YAML parsed"'
 npm run build
 ```
 
-Expected result: no tracked legacy host config, workflow YAML parses, and the production build still emits `dist`.
+Expected result: no tracked legacy host config except the Vercel Git kill switch, workflow YAML parses, and the production build still emits `dist`.

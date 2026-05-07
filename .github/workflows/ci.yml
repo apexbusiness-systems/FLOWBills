@@ -28,10 +28,32 @@ jobs:
         run: |
           set -euo pipefail
           git ls-files | sed 's#^#/#' | awk '
-            /\/(vercel\.json|now\.json|netlify\.toml)$/ { bad=1; print "::error::legacy host config still tracked: " $0 }
+            /\/(now\.json|netlify\.toml)$/ { bad=1; print "::error::legacy host config still tracked: " $0 }
             /\/\.vercel\// { bad=1; print "::error::legacy provider directory still tracked: " $0 }
             END { exit bad }
           '
+
+      - name: Require Vercel Git kill switch
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const configPath = 'vercel.json';
+          if (!fs.existsSync(configPath)) {
+            console.error('::error::vercel.json kill switch is required while the external Vercel GitHub App remains attached.');
+            process.exit(1);
+          }
+          const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+          if (config?.git?.deploymentEnabled !== false) {
+            console.error('::error::vercel.json must set git.deploymentEnabled=false to stop Vercel Git deployments.');
+            process.exit(1);
+          }
+          if (config?.github?.enabled !== false) {
+            console.error('::error::vercel.json must set github.enabled=false as a compatibility kill switch.');
+            process.exit(1);
+          }
+          console.log('Vercel Git deployment kill switch is active.');
+          NODE
 
   # Quality Gates
   lint-and-format:
