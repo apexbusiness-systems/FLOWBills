@@ -12,6 +12,7 @@ Production frontend deployments target **Cloudflare**.
 
 - **Primary host:** Cloudflare Pages
 - **Compatible host:** Cloudflare Workers static assets
+- **Install command:** `npm ci`
 - **Build command:** `npm run build`
 - **Build output directory:** `dist`
 - **SPA fallback:** preserved for client-side routes without a copied `_redirects` file
@@ -26,7 +27,7 @@ Production frontend deployments target **Cloudflare**.
 | Workers SPA fallback | `wrangler.json` | `assets.not_found_handling` is `single-page-application`. |
 | Pages SPA fallback | Cloudflare Pages default SPA behavior | Serves the SPA shell for unmatched routes without adding a `_redirects` artifact. |
 | Security and cache headers | `public/_headers` | Cloudflare Pages applies security headers and cache policy from this file. |
-| Build command/output | `package.json`, `wrangler.json` | `npm run build` emits Vite output to `dist`. |
+| Build command/output | `package.json`, `package-lock.json`, `wrangler.json` | `npm ci` installs dependencies and `npm run build` emits Vite output to `dist`. |
 | Environment examples | `.env.example` | Defines public Vite/Supabase values and non-public local/edge secrets. |
 
 ### Legacy Deployment Audit
@@ -47,6 +48,8 @@ npm run test:unit
 npm run build
 ```
 
+Cloudflare must install with npm from `package-lock.json`; do not commit `bun.lock`, `bun.lockb`, `pnpm-lock.yaml`, or `yarn.lock`, because Pages may switch package managers and fail frozen-lockfile installs.
+
 The production build must create `dist/index.html`, hashed assets under `dist/assets/`, and copied Cloudflare header config (`dist/_headers`). Do not add `public/_redirects`: the same `dist` artifact is deployable to Workers, where `_redirects` rules are parsed as static-asset redirects and can conflict with Workers SPA fallback.
 
 ---
@@ -58,6 +61,7 @@ Configure the Cloudflare Pages project with these settings:
 | Setting | Value |
 | --- | --- |
 | Framework preset | Vite / None |
+| Install command | `npm ci` |
 | Build command | `npm run build` |
 | Build output directory | `dist` |
 | Root directory | repository root |

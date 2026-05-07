@@ -59,4 +59,4 @@ This project is built with:
 
 ## Production Deployment
 
-FLOWBills production frontend deployment targets Cloudflare. Use `npm run build` as the build command and `dist` as the output directory. Cloudflare deployment configuration, SPA fallback, and security headers are documented in `docs/DEPLOYMENT_GUIDE.md`.
+FLOWBills production frontend deployment targets Cloudflare. Use `npm ci` as the install command, `npm run build` as the build command, and `dist` as the output directory. Cloudflare deployment configuration, SPA fallback, and security headers are documented in `docs/DEPLOYMENT_GUIDE.md`.
