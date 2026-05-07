@@ -22,6 +22,7 @@ Production frontend deployments target **Cloudflare**.
 | Concern | File | Production assumption |
 | --- | --- | --- |
 | Cloudflare project/runtime config | `wrangler.json` | Uses `dist` as Pages output and Workers static asset directory. |
+| External Vercel kill switch | `vercel.json` | Disables Vercel Git deployments while the external GitHub App remains attached. |
 | Workers SPA fallback | `wrangler.json` | `assets.not_found_handling` is `single-page-application`. |
 | Pages SPA fallback | Cloudflare Pages default SPA behavior | Serves the SPA shell for unmatched routes without adding a `_redirects` artifact. |
 | Security and cache headers | `public/_headers` | Cloudflare Pages applies security headers and cache policy from this file. |
@@ -30,7 +31,7 @@ Production frontend deployments target **Cloudflare**.
 
 ### Legacy Deployment Audit
 
-No legacy hosted-platform runtime configuration is required for production. Cloudflare is the only frontend deployment source of truth in this repository; disconnect any external deployment app that still posts pull-request checks outside this codebase.
+`vercel.json` is retained only as a Vercel Git kill switch, not as a production deployment target. Cloudflare is the only frontend deployment source of truth in this repository; disconnect any external deployment app that still posts pull-request checks outside this codebase.
 
 ---
 
@@ -85,7 +86,7 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
 ```
 
-If a pull request still shows a failing check from an external legacy deployment app, follow `docs/CI/EXTERNAL_DEPLOYMENT_CHECK_REMOVAL.md` to disconnect that app from the repository or remove it from required branch protection checks. That check is generated outside this repository and is not controlled by GitHub Actions workflow files.
+`vercel.json` sets `git.deploymentEnabled=false` so Vercel Git deployments are disabled even before the external app is removed. If a pull request still shows a failing check from an external legacy deployment app, follow `docs/CI/EXTERNAL_DEPLOYMENT_CHECK_REMOVAL.md` to disconnect that app from the repository or remove it from required branch protection checks. That check is generated outside this repository and is not controlled by GitHub Actions workflow files.
 
 ### Deploy Command Options
 
