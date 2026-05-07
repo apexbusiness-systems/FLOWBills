@@ -1,41 +1,47 @@
-# Move Production Deployment Assumptions to Cloudflare
+# FlowBills Product Enhancements & Hardening
 
-## Summary
+This PR addresses all items in the primary work plan, aiming to make FLOWBills feel and behave like a category-leading oil & gas invoice automation app, WITHOUT adding any new dependencies, queues, vendors, or SaaS subscriptions.
 
-This branch makes Cloudflare the frontend deployment source of truth without changing UI, application routing code, business logic, or Supabase schema.
+## Part A: Canonical contracts and status normalization
+* Created `src/lib/domain/constants.ts` to centralize standard enums and IDs.
+* Refactored `src/hooks/useInvoices.tsx` and edge functions `invoice-intake`, `hil-router` to utilize these constants.
+* Added missing enums to DB schema (`validated`, `approved_auto`, `needs_review`) via new migration `20260309000000_update_invoice_status.sql`.
 
-## Deployment Inventory
+## Part B: Binary-safe extraction pipeline
+* `src/pages/Invoices.tsx` now downloads Blobs and converts them safely to Base64 using `FileReader.readAsDataURL` instead of the text-corrupting `Blob.text()`.
+* `src/hooks/useInvoiceExtraction.tsx` was extended with tests to verify proper payload construction to the extract edge function.
 
-- **Cloudflare Pages:** `wrangler.json` declares `pages_build_output_dir` as `dist` for Wrangler-aware Pages deployments.
-- **Cloudflare Workers static assets:** `wrangler.json` preserves the existing `assets.directory = dist` and SPA fallback behavior.
-- **SPA fallback:** no `_redirects` artifact is used; Pages relies on Cloudflare default SPA serving and Workers relies on `assets.not_found_handling = single-page-application`.
-- **Security headers:** `public/_headers` remains the Cloudflare-compatible header source for Pages deployments.
-- **Build command/output:** Cloudflare installs with `npm ci`; `npm run build` and `dist` are unchanged.
-- **Environment assumptions:** `.env.example` documents Cloudflare Pages public build variables and keeps the legacy Supabase anon alias for compatibility.
-- **CI/CD:** `.github/workflows/ci.yml` deploys production frontend builds through Cloudflare Pages secrets on `main` pushes, rejects legacy deployment artifacts, and verifies the Vercel Git deployment kill switch remains active.
-- **External provider shutdown:** `vercel.json` disables Vercel Git deployments; `docs/CI/EXTERNAL_DEPLOYMENT_CHECK_REMOVAL.md` documents the admin-only settings change required to remove any blocked external deployment check generated outside this repository.
-- **Security check fix:** `react-router-dom` is pinned to the patched 6.30.3 line, which pulls `react-router` 6.30.3 and `@remix-run/router` 1.23.2 for the React Router advisory.
-- **Performance check fix:** Lighthouse CI keeps category budgets as merge-blocking checks and demotes noisy per-audit opportunities to warnings while index metadata/preconnect hints are fixed.
-- **Cloudflare install fix:** removed the stale Bun lockfile and added a CI guard against non-npm lockfiles so Pages does not run `bun install --frozen-lockfile`.
+## Part C: Correctness fixes in invoice data loading
+* Prevented `vendor_name` from being forcibly overwritten to "Unknown Vendor" on read/write in `useInvoices.tsx`.
+* Replaced iterative single-document lookups with a batched array `.in()` search to solve N+1 performance bugs in `InvoiceListVirtualized.tsx`.
 
-## Verification
+## Part D: Query/cache modernization
+* Removed custom local loading and caching logic in `useInvoices.tsx` and replaced it with `useQuery`, `useMutation`, and `queryClient` from `@tanstack/react-query`.
+* Only updated invoices to safely contain scope.
 
-Run these checks before merge/deploy:
+## Part E: Metrics, health, and trustworthiness
+* Removed mock variables `http_request_duration_avg` and `invoice_processing_duration_avg` from `supabase/functions/metrics/index.ts`.
+* Removed hardcoded stale build dates from `supabase/functions/health-check/index.ts`.
+* Corrected endpoint path mapping from `/api/metrics` to `.../functions/v1/metrics` in `src/lib/performance-monitor.ts`.
 
-```bash
-npm run build
-npm run lint:check
-npm run type-check
-```
+## Part F: Security and accessibility hardening
+* Unlocked zooming capability for accessibility by removing `user-scalable=no` from the viewport meta.
+* Re-enabled right-click and keyboard developer commands (F12) for debugging flexibility.
+* Commented out `'unsafe-eval'` from CSP in production policy arrays.
 
-After deployment, verify:
+## Part G: AI surface cleanup and production-safe alignment
+* Decoupled Model IDs and API Endpoints to `Deno.env` boundaries across `oil-gas-assistant`, `ai-assistant` and `support-chat`.
+* Created an adapter seam in `support-chat` to prepare for WebRTC integration while keeping existing transport running.
+* Re-branded all instances of "FlowAi" to "FLOWBills".
+* Labeled AI retrieval components honestly to clarify built-in knowledge.
 
-- Deep links such as `/dashboard` return the SPA shell.
-- Static assets under `/assets/` return their asset content type, not `text/html`.
-- `dist/_redirects` is absent so Workers static-asset redirects cannot override SPA fallback.
-- Security headers from `public/_headers` are present.
-- Supabase service role secrets are not configured as public Cloudflare Pages variables.
+## Part H: E-invoicing honesty and resilience
+* Updated e-invoice validation payloads to output structured machine-readable error codes (e.g. `ERR-EN16931-01`).
+* Updated Edge functions and documentation to clarify validation is "preflight" and does not assert full standard compliance.
 
-## Rollback Plan
+## Part I: Best-in-class UX
+* Set up a global command palette (`cmdk`) to enable search, navigation, and upload actions via `Cmd/Ctrl+K` bindings.
+* Integrated system, light, and dark mode toggles seamlessly using `next-themes` and standard Tailwind configurations.
+* Saved views on the Invoices interface synchronize with URL `searchParams` and local storage allowing states to persist.
 
-Revert this branch or roll back to the previous Cloudflare Pages/Workers deployment version if post-deployment smoke tests fail.
+Tested against unit/integration vitest configs, strict type-checking, linter validation, and Playwright workflows.

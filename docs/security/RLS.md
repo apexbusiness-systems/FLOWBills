@@ -2,7 +2,7 @@
 
 ## Overview
 
-FlowAi implements comprehensive Row Level Security (RLS) policies to ensure tenant isolation and protect Personally Identifiable Information (PII). All tables containing sensitive data have RLS enabled with tenant-scoped access controls.
+FLOWBills implements comprehensive Row Level Security (RLS) policies to ensure tenant isolation and protect Personally Identifiable Information (PII). All tables containing sensitive data have RLS enabled with tenant-scoped access controls.
 
 ## RLS-Enabled Tables
 

@@ -41,7 +41,7 @@ if [[ "$2" == "--dry-run" ]]; then
 fi
 
 log "======================================"
-log "FlowAi Rollback Script"
+log "FLOWBills Rollback Script"
 log "======================================"
 log "Target SHA: $TARGET_SHA"
 log "Dry Run: $DRY_RUN"

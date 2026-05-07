@@ -1,8 +1,8 @@
-# FlowAi LLM Evaluation Documentation
+# FLOWBills LLM Evaluation Documentation
 
 ## Overview
 
-FlowAi maintains rigorous evaluation protocols to ensure the Oil & Gas LLM meets industry standards for accuracy, safety, and compliance. Our evaluation framework covers technical accuracy, citation quality, terminology fidelity, and policy adherence.
+FLOWBills maintains rigorous evaluation protocols to ensure the Oil & Gas LLM meets industry standards for accuracy, safety, and compliance. Our evaluation framework covers technical accuracy, citation quality, terminology fidelity, and policy adherence.
 
 ## Evaluation Framework
 

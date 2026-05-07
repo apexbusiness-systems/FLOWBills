@@ -1,179 +1,168 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
-Deno.serve(async (req) => {
-  if (req.headers.get("upgrade") !== "websocket") {
-    return new Response("Expected WebSocket", { status: 400 });
+// Use constants/env for model boundaries
+const MODEL_ID = Deno.env.get('SUPPORT_MODEL_ID') || "gpt-4o-realtime-preview-2024-12-17";
+const WS_ENDPOINT = Deno.env.get('SUPPORT_REALTIME_ENDPOINT') || `wss://api.openai.com/v1/realtime?model=${MODEL_ID}`;
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
   }
 
-  const { socket, response } = Deno.upgradeWebSocket(req);
-  let openAIWs: WebSocket | null = null;
+  // Ensure this is a WebSocket request
+  if (req.headers.get("upgrade") !== "websocket") {
+    return new Response(JSON.stringify({ error: "WebSocket upgrade required" }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
 
-  socket.onopen = async () => {
-    console.log("Client connected to support chat");
+  try {
+    // Authenticate the user
+    const authHeader = req.headers.get('Authorization') || '';
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
     
-    try {
-      // Connect to OpenAI Realtime API
-      // Note: Deno WebSocket doesn't support headers in constructor, use subprotocol array
-      openAIWs = new WebSocket(
-        "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17",
+    // We only create the client to verify the token
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error("Auth error:", authError);
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
+      throw new Error("Missing OPENAI_API_KEY");
+    }
+
+    // Accept the client WebSocket connection
+    const { socket: clientWebSocket, response } = Deno.upgradeWebSocket(req);
+
+    // Connect to OpenAI Realtime API
+    // Using current transport as requested but abstracting the URL
+    const openaiWebSocket = new WebSocket(
+        WS_ENDPOINT,
         ["realtime", `openai-insecure-api-key.${OPENAI_API_KEY}`, "openai-beta.realtime-v1"]
-      );
+    );
 
-      openAIWs.onopen = () => {
-        console.log("Connected to OpenAI Realtime API");
-      };
-
-      openAIWs.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log("OpenAI message:", data.type);
-        
-        // Send session update after receiving session.created
-        if (data.type === "session.created") {
-          const sessionConfig = {
-            type: "session.update",
-            session: {
-              modalities: ["text", "audio"],
-              instructions: `You are a 24/7 AI support assistant for FlowAi, an intelligent invoice processing platform specifically designed for Canadian oil & gas operations. 
-
-YOUR ROLE:
-- Answer general product questions about FlowAi features and capabilities
-- Provide technical support and troubleshooting guidance
-- Help with account and billing inquiries
-- Guide users through onboarding and training
-- Explain industry-specific billing concepts and workflows
-
-INDUSTRY-SPECIFIC KNOWLEDGE:
-
-Joint Interest Billing (JIB):
-- Specialized accounting for shared expenses among partners/working interest owners
-- Multiple parties share costs based on ownership percentages
-- Requires accurate allocation and transparent reporting
-- FlowAi automates cost allocation and partner distribution
-
-Authorization for Expenditure (AFE):
-- Capital expenditure approval workflow critical in oil & gas
-- Pre-authorization required before work begins
-- Tracks approved vs actual spend for project management
-- FlowAi validates invoices against AFE budgets and tracks variances
-
-Field Tickets:
-- Service verification documents from oilfield operations
-- Time tracking and equipment usage records
-- GPS-validated location and duration data
-- Critical for three-way matching: Field Ticket → Purchase Order → Invoice
-- FlowAi integrates field ticket validation before invoice approval
-
-Three-Way Matching Process:
-1. Purchase Order (PO) - what was ordered
-2. Field Ticket - what service was actually performed
-3. Invoice - what vendor is charging
-- FlowAi automatically validates all three documents match
-
-Canadian Standards & Compliance:
-- CAPL (Canadian Association of Petroleum Landmen) standards
-- Provincial regulatory requirements (Alberta, Saskatchewan, BC)
-- CER (Canada Energy Regulator) reporting compliance
-- FlowAi ensures adherence to Canadian regulatory frameworks
-
-Vendor Management:
-- Pricing agreement compliance validation
-- Master Service Agreements (MSA) enforcement
-- Rate card verification for common services
-- FlowAi flags pricing discrepancies automatically
-
-Approval Workflows:
-- Multi-level approvals based on invoice amount thresholds
-- AFE budget holder approvals for capital expenditures
-- Joint venture partner notifications
-- FlowAi provides configurable workflow automation
-
-KEY PRODUCT FEATURES:
-- AI-powered OCR for invoices and field tickets
-- Automated AFE budget tracking and variance reporting
-- JIB cost allocation and partner distribution
-- Three-way matching automation (PO, Field Ticket, Invoice)
-- Duplicate detection and fraud prevention
-- Real-time compliance validation
-- Integration with OpenInvoice/OpenTicket platforms
-- GPS-verified field service validation
-- Peppol e-invoicing standards support
-- Automated exception handling and routing
-
-COMMON USE CASES:
-- Drilling operations invoicing
-- Completion and production service billing
-- Equipment rental tracking and billing
-- Consultant and contractor time validation
-- Material and supply invoicing
-- Joint venture cost allocations
-
-Be helpful, professional, and industry-knowledgeable. Use proper oil & gas terminology. If you don't know something specific, be honest and offer to escalate to human support.`,
-              voice: "alloy",
-              input_audio_format: "pcm16",
-              output_audio_format: "pcm16",
-              input_audio_transcription: {
-                model: "whisper-1"
-              },
-              turn_detection: {
-                type: "server_vad",
-                threshold: 0.5,
-                prefix_padding_ms: 300,
-                silence_duration_ms: 1000
-              },
-              temperature: 0.8,
-              max_response_output_tokens: 4096
-            }
-          };
-          openAIWs?.send(JSON.stringify(sessionConfig));
-          console.log("Session configuration sent");
+    // Setup adapter seam (future WebRTC upgrade path)
+    const adapter = {
+      sendToClient: (data: string | ArrayBuffer) => {
+        if (clientWebSocket.readyState === WebSocket.OPEN) {
+          clientWebSocket.send(data);
         }
+      },
+      sendToModel: (data: string | ArrayBuffer) => {
+        if (openaiWebSocket.readyState === WebSocket.OPEN) {
+          openaiWebSocket.send(data);
+        }
+      }
+    };
 
-        // Forward all messages to client
-        if (socket.readyState === WebSocket.OPEN) {
-          socket.send(event.data);
+    // Relay messages from OpenAI to Client
+    openaiWebSocket.onmessage = (event) => {
+      adapter.sendToClient(event.data);
+    };
+
+    // Relay messages from Client to OpenAI
+    clientWebSocket.onmessage = (event) => {
+      adapter.sendToModel(event.data);
+    };
+
+    // Handle initialization when OpenAI connection opens
+    openaiWebSocket.onopen = () => {
+      console.log("Connected to OpenAI Realtime API");
+
+      // Initialize the session with specific instructions for FLOWBills Support
+      const initMessage = {
+        type: "session.update",
+        session: {
+          instructions: `You are a 24/7 AI support assistant for FLOWBills, an intelligent invoice processing platform specifically designed for Canadian oil & gas operations.
+
+          Your goal is to help users with:
+          - Invoice ingestion and processing workflows
+          - AFE (Authority for Expenditure) budget tracking and variance
+          - Field ticket validation and 3-way matching
+          - Duplicate detection and resolution
+          - Vendor management and compliance
+          - User roles, permissions, and approval workflows
+
+          Keep your responses concise, helpful, and professional. You are speaking directly with the user.
+          Do not hallucinate features. If asked about features not currently supported, honestly state they are not available yet.
+
+          Key FLOWBills terminology:
+          - 'STP' means Straight-Through Processing (invoices approved without human intervention)
+          - 'HIL' means Human-in-the-Loop (when invoices need manual review)
+          - 'UWI' means Unique Well Identifier
+          `,
+          voice: "alloy",
+          input_audio_format: "pcm16",
+          output_audio_format: "pcm16",
+          input_audio_transcription: {
+            model: "whisper-1"
+          },
+          turn_detection: {
+            type: "server_vad",
+            threshold: 0.5,
+            prefix_padding_ms: 300,
+            silence_duration_ms: 200,
+          }
         }
       };
 
-      openAIWs.onerror = (error) => {
-        console.error("OpenAI WebSocket error:", error);
-        socket.send(JSON.stringify({ 
-          type: "error", 
-          error: "Connection to AI service failed" 
-        }));
-      };
+      adapter.sendToModel(JSON.stringify(initMessage));
+    };
 
-      openAIWs.onclose = () => {
-        console.log("OpenAI WebSocket closed");
-        if (socket.readyState === WebSocket.OPEN) {
-          socket.close();
-        }
-      };
-    } catch (error) {
-      console.error("Error connecting to OpenAI:", error);
-      socket.send(JSON.stringify({ 
+    // Error handling
+    openaiWebSocket.onerror = (error) => {
+      console.error("OpenAI WebSocket Error:", error);
+      adapter.sendToClient(JSON.stringify({
         type: "error", 
-        error: error instanceof Error ? error.message : "Unknown error" 
+        error: { message: "Connection to AI service failed" }
       }));
-    }
-  };
+    };
 
-  socket.onmessage = (event) => {
-    if (openAIWs?.readyState === WebSocket.OPEN) {
-      openAIWs.send(event.data);
-    }
-  };
+    clientWebSocket.onerror = (error) => {
+      console.error("Client WebSocket Error:", error);
+    };
 
-  socket.onclose = () => {
-    console.log("Client disconnected");
-    openAIWs?.close();
-  };
+    // Cleanup on close
+    openaiWebSocket.onclose = () => {
+      console.log("OpenAI WebSocket Closed");
+      if (clientWebSocket.readyState === WebSocket.OPEN) {
+        clientWebSocket.close(1000, "AI service disconnected");
+      }
+    };
 
-  socket.onerror = (error) => {
-    console.error("Client WebSocket error:", error);
-    openAIWs?.close();
-  };
+    clientWebSocket.onclose = () => {
+      console.log("Client WebSocket Closed");
+      if (openaiWebSocket.readyState === WebSocket.OPEN) {
+        openaiWebSocket.close(1000, "Client disconnected");
+      }
+    };
 
-  return response;
+    return response;
+
+  } catch (err: any) {
+    console.error("Error setting up WebSocket:", err);
+    return new Response(JSON.stringify({ error: "Internal server error", message: err.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
 });

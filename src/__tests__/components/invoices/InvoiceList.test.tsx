@@ -64,7 +64,7 @@ describe('InvoiceList', () => {
     const loadingProps = { ...mockInvoiceListProps, loading: true, invoices: [] };
     render(<InvoiceList {...loadingProps} />);
     
-    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
+    expect(screen.getByText('Loading invoices...')).toBeInTheDocument();
   });
 
   it('shows empty state when no invoices exist', () => {

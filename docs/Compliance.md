@@ -1,8 +1,8 @@
-# FlowAi Compliance Framework
+# FLOWBills Compliance Framework
 
 ## Overview
 
-FlowAi implements a comprehensive compliance framework designed to meet the regulatory requirements of the oil & gas industry while ensuring data privacy, security, and auditability.
+FLOWBills implements a comprehensive compliance framework designed to meet the regulatory requirements of the oil & gas industry while ensuring data privacy, security, and auditability.
 
 ## Regulatory Standards Compliance
 
@@ -52,7 +52,7 @@ Our implementation addresses key ASVS controls across multiple categories:
 ### PIPEDA Compliance (Personal Information Protection and Electronic Documents Act)
 
 #### Principle 1: Accountability
-- **Data Controller**: FlowAi Energy Solutions designated as data controller
+- **Data Controller**: FLOWBills Energy Solutions designated as data controller
 - **Privacy Officer**: Appointed privacy officer responsible for compliance
 - **Documentation**: Comprehensive privacy policies and procedures maintained
 
@@ -134,14 +134,14 @@ await supabase.from('consent_logs').insert({
   email: userEmail,
   consent_type: 'email_marketing',
   consent_given: true,
-  consent_text: 'I consent to receive commercial electronic messages from FlowAi regarding invoice processing updates and product information.',
+  consent_text: 'I consent to receive commercial electronic messages from FLOWBills regarding invoice processing updates and product information.',
   ip_address: clientIP,
   user_agent: userAgent
 });
 ```
 
 #### Identification Requirements
-- **Sender Identification**: All emails clearly identify FlowAi as sender
+- **Sender Identification**: All emails clearly identify FLOWBills as sender
 - **Contact Information**: Valid contact information included in all messages
 - **Physical Address**: Business address included in commercial messages
 
@@ -171,7 +171,7 @@ await supabase.from('consent_logs').insert({
 
 ### PCI DSS v4.0.1 (Future Consideration)
 
-Currently, FlowAi does not process, store, or transmit cardholder data. If future requirements include payment processing:
+Currently, FLOWBills does not process, store, or transmit cardholder data. If future requirements include payment processing:
 
 #### Scope Considerations
 - **Data Flow Analysis**: Map all cardholder data flows

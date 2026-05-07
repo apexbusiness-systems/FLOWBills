@@ -1,5 +1,6 @@
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import * as React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 import { BulkActionsToolbar } from './BulkActionsToolbar';
 import { useBulkActions } from '@/hooks/useBulkActions';
@@ -31,39 +32,140 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { 
-  Search, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  FileText,
-  DollarSign,
-  Calendar,
-  Filter,
-  Paperclip
-} from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useFileUpload } from '@/hooks/useFileUpload';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/alert-dialog";
 import { Invoice } from '@/hooks/useInvoices';
 import { format } from 'date-fns';
+import { 
+  FileText,
+  Search, 
+  Filter,
+  Plus, 
+  Trash2,
+  Edit,
+  File,
+  AlertTriangle
+} from 'lucide-react';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 interface InvoiceListProps {
   invoices: Invoice[];
   loading: boolean;
   onEdit: (invoice: Invoice) => void;
-  onDelete: (invoiceId: string) => void;
+  onDelete: (id: string) => void;
   onCreate: () => void;
 }
 
-// Memoized component to prevent unnecessary re-renders
-const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceListProps) => {
+// Memoized row component for performance
+const InvoiceRow = memo(({
+  invoice,
+  isSelected,
+  canEdit,
+  canDelete,
+  onToggleSelect,
+  onEdit,
+  onDelete: handleDeleteClick,
+  documentCount,
+  formatCurrency,
+  formatDate,
+  getStatusBadgeVariant
+}: {
+  invoice: Invoice;
+  isSelected: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  onToggleSelect: (id: string) => void;
+  onEdit: (invoice: Invoice) => void;
+  onDelete: (invoice: Invoice) => void;
+  documentCount: number;
+  formatCurrency: (amount: number) => string;
+  formatDate: (date: string | null) => string;
+  getStatusBadgeVariant: (status: string) => "default" | "destructive" | "outline" | "secondary" | "pending" | "approved" | "rejected";
+}) => {
+  return (
+    <TableRow className={isSelected ? "bg-muted/50" : ""}>
+      <TableCell className="w-12">
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={() => onToggleSelect(invoice.id)}
+          aria-label={`Select invoice ${invoice.invoice_number}`}
+        />
+      </TableCell>
+      <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {invoice.vendor_name}
+          {invoice.duplicate_hash && (
+            <AlertTriangle className="h-4 w-4 text-amber-500" title="Potential Duplicate" />
+          )}
+        </div>
+      </TableCell>
+      <TableCell>{formatCurrency(invoice.amount)}</TableCell>
+      <TableCell>{formatDate(invoice.invoice_date)}</TableCell>
+      <TableCell>{formatDate(invoice.due_date)}</TableCell>
+      <TableCell>
+        <Badge variant={getStatusBadgeVariant(invoice.status)}>
+          {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1).replace('_', ' ')}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        {documentCount > 0 ? (
+          <div className="flex items-center text-xs text-muted-foreground">
+            <File className="h-3 w-3 mr-1" />
+            {documentCount} file{documentCount !== 1 ? 's' : ''}
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground">-</span>
+        )}
+      </TableCell>
+      {(canEdit || canDelete) && (
+        <TableCell className="text-right">
+          <div className="flex justify-end gap-2">
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => { e.stopPropagation(); onEdit(invoice); }}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:bg-destructive/10"
+                onClick={(e) => { e.stopPropagation(); handleDeleteClick(invoice); }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </TableCell>
+      )}
+    </TableRow>
+  );
+});
+
+InvoiceRow.displayName = 'InvoiceRow';
+
+const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceListProps) => {
   const { hasRole } = useAuth();
-  const { getDocuments } = useFileUpload();
+  const { getDocumentCounts } = useFileUpload();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [searchTerm, setSearchTerm] = useState(() => {
+    const fromUrl = searchParams.get('search');
+    return fromUrl || localStorage.getItem('flowbills.invoices.search') || '';
+  });
+
+  const [statusFilter, setStatusFilter] = useState<string>(() => {
+    const fromUrl = searchParams.get('status');
+    return fromUrl || localStorage.getItem('flowbills.invoices.status') || 'all';
+  });
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [documentCounts, setDocumentCounts] = useState<Record<string, number>>({});
@@ -74,62 +176,44 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
   const canDelete = hasRole('operator') || hasRole('admin');
   const canCreate = hasRole('operator') || hasRole('admin');
 
-  // Load document counts for invoices (optimized with batch loading)
-  React.useEffect(() => {
-    const loadDocumentCounts = async () => {
-      const counts: Record<string, number> = {};
+  // Update URL and localStorage when filters change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem('flowbills.invoices.search', searchTerm);
+      localStorage.setItem('flowbills.invoices.status', statusFilter);
       
-      // Batch load in parallel instead of sequential O(n) - reduces to O(1) time
-      const results = await Promise.allSettled(
-        invoices.map(async (invoice) => {
-          try {
-            await getDocuments(invoice.id);
-            return { id: invoice.id, count: 0 };
-          } catch {
-            return { id: invoice.id, count: 0 };
-          }
-        })
-      );
-      
-      results.forEach((result) => {
-        if (result.status === 'fulfilled') {
-          counts[result.value.id] = result.value.count;
-        }
+      setSearchParams(prev => {
+        if (searchTerm) prev.set('search', searchTerm);
+        else prev.delete('search');
+
+        if (statusFilter && statusFilter !== 'all') prev.set('status', statusFilter);
+        else prev.delete('status');
+
+        return prev;
       });
-      
-      setDocumentCounts(counts);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, statusFilter, setSearchParams]);
+
+  // Load document counts efficiently
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadDocumentCounts = async () => {
+      if (invoices.length === 0) return;
+      const ids = invoices.map(i => i.id);
+      const counts = await getDocumentCounts(ids);
+      if (isMounted) {
+        setDocumentCounts(counts);
+      }
     };
 
-    if (invoices.length > 0) {
-      loadDocumentCounts();
-    }
-  }, [invoices, getDocuments]);
+    loadDocumentCounts();
 
-  // Memoized badge variant calculation - O(1) lookup
-  const getStatusBadgeVariant = useCallback((status: Invoice['status']) => {
-    switch (status) {
-      case 'pending': return 'pending';
-      case 'approved': return 'approved';
-      case 'rejected': return 'rejected';
-      case 'processing': return 'default';
-      default: return 'outline';
-    }
-  }, []);
+    return () => { isMounted = false; };
+  }, [invoices, getDocumentCounts]);
 
-  // Memoized filtered invoices - prevents recalculation on every render
-  const filteredInvoices = useMemo(() => {
-    return invoices.filter(invoice => {
-      const matchesSearch = 
-        invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        invoice.vendor_name.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
-      
-      return matchesSearch && matchesStatus;
-    });
-  }, [invoices, searchTerm, statusFilter]);
-
-  // Memoized callbacks - stable references prevent child re-renders
   const handleDeleteClick = useCallback((invoice: Invoice) => {
     setInvoiceToDelete(invoice);
     setDeleteDialogOpen(true);
@@ -143,17 +227,37 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     }
   }, [invoiceToDelete, onDelete]);
 
-  const toggleInvoiceSelection = useCallback((invoiceId: string) => {
-    setSelectedInvoices(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(invoiceId)) {
-        newSet.delete(invoiceId);
-      } else {
-        newSet.add(invoiceId);
-      }
-      return newSet;
-    });
+  const getStatusBadgeVariant = useCallback((status: Invoice['status']) => {
+    switch (status) {
+      case 'pending': return 'pending';
+      case 'approved': return 'approved';
+      case 'rejected': return 'rejected';
+      case 'processing': return 'default';
+      default: return 'outline';
+    }
   }, []);
+
+  const filteredInvoices = useMemo(() => {
+    return invoices.filter(invoice => {
+      const matchesSearch = 
+        invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.vendor_name.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [invoices, searchTerm, statusFilter]);
+
+  const toggleInvoiceSelection = useCallback((id: string) => {
+    const newSelected = new Set(selectedInvoices);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedInvoices(newSelected);
+  }, [selectedInvoices]);
 
   const toggleSelectAll = useCallback(() => {
     if (selectedInvoices.size === filteredInvoices.length) {
@@ -165,23 +269,17 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
 
   const handleBulkApprove = useCallback(async () => {
     const success = await bulkApprove(Array.from(selectedInvoices));
-    if (success) {
-      setSelectedInvoices(new Set());
-    }
+    if (success) setSelectedInvoices(new Set());
   }, [selectedInvoices, bulkApprove]);
 
   const handleBulkReject = useCallback(async () => {
     const success = await bulkReject(Array.from(selectedInvoices));
-    if (success) {
-      setSelectedInvoices(new Set());
-    }
+    if (success) setSelectedInvoices(new Set());
   }, [selectedInvoices, bulkReject]);
 
   const handleBulkDelete = useCallback(async () => {
     const success = await bulkDelete(Array.from(selectedInvoices));
-    if (success) {
-      setSelectedInvoices(new Set());
-    }
+    if (success) setSelectedInvoices(new Set());
   }, [selectedInvoices, bulkDelete]);
 
   const handleBulkExport = useCallback(() => {
@@ -189,7 +287,6 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     bulkExport(selected);
   }, [filteredInvoices, selectedInvoices, bulkExport]);
 
-  // Memoized formatters - prevent recreation on every render
   const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -202,17 +299,11 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
     return format(new Date(dateString), 'MMM dd, yyyy');
   }, []);
 
-  // Memoized total calculation
-  const totalAmount = useMemo(() => 
-    filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0),
-    [filteredInvoices]
-  );
-
   if (loading) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center" data-testid="loading-skeleton">
+          <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading invoices...</p>
           </div>
@@ -233,16 +324,17 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
         onClearSelection={() => setSelectedInvoices(new Set())}
         disabled={processing}
       />
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Invoice Management
+                Invoice List
               </CardTitle>
               <CardDescription>
-                Manage and track invoice records
+                Manage and process incoming invoices
               </CardDescription>
             </div>
             {canCreate && (
@@ -254,7 +346,6 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
           </div>
         </CardHeader>
         <CardContent>
-          {/* Filters and Search */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -282,137 +373,59 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
             </div>
           </div>
 
-          {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-muted/50 p-4 rounded-lg">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <FileText className="h-4 w-4" />
-                Total Invoices
-              </div>
-              <div className="text-2xl font-bold">{filteredInvoices.length}</div>
-            </div>
-            <div className="bg-muted/50 p-4 rounded-lg">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <DollarSign className="h-4 w-4" />
-                Total Amount
-              </div>
-              <div className="text-2xl font-bold">{formatCurrency(totalAmount)}</div>
-            </div>
-            <div className="bg-muted/50 p-4 rounded-lg">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <Calendar className="h-4 w-4" />
-                Pending Count
-              </div>
-              <div className="text-2xl font-bold">
-                {filteredInvoices.filter(inv => inv.status === 'processing').length}
-              </div>
-            </div>
-          </div>
-
-          {/* Invoice Table */}
-          {filteredInvoices.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No invoices found</h3>
-              <p className="text-muted-foreground mb-4">
-                {invoices.length === 0 
-                  ? "Get started by creating your first invoice"
-                  : "Try adjusting your search criteria"
-                }
-              </p>
-              {canCreate && invoices.length === 0 && (
-                <Button onClick={onCreate}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create First Invoice
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={selectedInvoices.size === filteredInvoices.length && filteredInvoices.length > 0}
-                        onCheckedChange={toggleSelectAll}
-                      />
-                    </TableHead>
-                    <TableHead>Invoice #</TableHead>
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={selectedInvoices.size === filteredInvoices.length && filteredInvoices.length > 0}
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Select all"
+                    />
+                  </TableHead>
+                  <TableHead>Invoice #</TableHead>
                   <TableHead>Vendor</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Due Date</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Files</TableHead>
-                    {(canEdit || canDelete) && <TableHead className="text-right">Actions</TableHead>}
+                  {(canEdit || canDelete) && <TableHead className="text-right">Actions</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredInvoices.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={canEdit || canDelete ? 9 : 8} className="text-center h-32 text-muted-foreground">
+                      No invoices found.
+                      {invoices.length === 0 && canCreate ? " Create one to get started." : " Try adjusting your search filters."}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredInvoices.map((invoice) => (
-                    <TableRow key={invoice.id}>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedInvoices.has(invoice.id)}
-                          onCheckedChange={() => toggleInvoiceSelection(invoice.id)}
-                        />
-                      </TableCell>
-                      <TableCell>{invoice.invoice_number}</TableCell>
-                      <TableCell>{invoice.vendor_name}</TableCell>
-                      <TableCell className="font-mono">
-                        {formatCurrency(invoice.amount)}
-                      </TableCell>
-                      <TableCell>{formatDate(invoice.invoice_date)}</TableCell>
-                      <TableCell>{formatDate(invoice.due_date)}</TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(invoice.status)}>
-                          {invoice.status.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {documentCounts[invoice.id] > 0 && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Paperclip className="h-3 w-3" />
-                              {documentCounts[invoice.id]}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      {(canEdit || canDelete) && (
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {canEdit && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => onEdit(invoice)}
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                            )}
-                            {canDelete && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDeleteClick(invoice)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                ) : (
+                  filteredInvoices.map((invoice) => (
+                    <InvoiceRow
+                      key={invoice.id}
+                      invoice={invoice}
+                      isSelected={selectedInvoices.has(invoice.id)}
+                      canEdit={canEdit}
+                      canDelete={canDelete}
+                      onToggleSelect={toggleInvoiceSelection}
+                      onEdit={onEdit}
+                      onDelete={handleDeleteClick}
+                      documentCount={documentCounts[invoice.id] || 0}
+                      formatCurrency={formatCurrency}
+                      formatDate={formatDate}
+                      getStatusBadgeVariant={getStatusBadgeVariant}
+                    />
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -426,7 +439,7 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteConfirm}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>
@@ -435,6 +448,6 @@ const InvoiceList = memo(({ invoices, loading, onEdit, onDelete, onCreate }: Inv
       </AlertDialog>
     </>
   );
-});
+};
 
 export default InvoiceList;

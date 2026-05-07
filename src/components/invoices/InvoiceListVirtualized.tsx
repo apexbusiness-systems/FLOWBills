@@ -1,11 +1,4 @@
-import { useState, useMemo, useCallback, memo, useRef } from 'react';
-import * as React from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { BulkActionsToolbar } from './BulkActionsToolbar';
-import { useBulkActions } from '@/hooks/useBulkActions';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -14,14 +7,26 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+  FileText,
+  Search,
+  Filter,
+  Plus,
+  Trash2,
+  Edit,
+  File,
+  DollarSign,
+  Calendar,
+  AlertTriangle
+} from 'lucide-react';
+import { Invoice } from '@/hooks/useInvoices';
+import { useAuth } from '@/hooks/useAuth';
+import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,34 +36,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { VirtualList } from '@/components/ui/virtual-list';
-import { 
-  Search, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  FileText,
-  DollarSign,
-  Calendar,
-  Filter,
-  Paperclip
-} from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useFileUpload } from '@/hooks/useFileUpload';
+} from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
-import { Invoice } from '@/hooks/useInvoices';
-import { format } from 'date-fns';
+import { VirtualList } from '../ui/virtual-list';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useBulkActions } from '@/hooks/useBulkActions';
+import { BulkActionsToolbar } from './BulkActionsToolbar';
 
 interface InvoiceListVirtualizedProps {
   invoices: Invoice[];
   loading: boolean;
   onEdit: (invoice: Invoice) => void;
-  onDelete: (invoiceId: string) => void;
+  onDelete: (id: string) => void;
   onCreate: () => void;
 }
 
-// Memoized Invoice Row Component - prevents re-renders of unchanged rows
+// Memoized row component for virtualization performance
 const InvoiceRow = memo(({ 
   invoice, 
   isSelected,
@@ -66,7 +60,7 @@ const InvoiceRow = memo(({
   canDelete,
   onToggleSelect,
   onEdit,
-  onDelete,
+  onDelete: handleDeleteClick,
   documentCount,
   formatCurrency,
   formatDate,
@@ -82,48 +76,64 @@ const InvoiceRow = memo(({
   documentCount: number;
   formatCurrency: (amount: number) => string;
   formatDate: (date: string | null) => string;
-  getStatusBadgeVariant: (status: Invoice['status']) => string;
+  getStatusBadgeVariant: (status: string) => "default" | "destructive" | "outline" | "secondary" | "pending" | "approved" | "rejected";
 }) => {
-  const handleToggle = useCallback(() => onToggleSelect(invoice.id), [onToggleSelect, invoice.id]);
-  const handleEdit = useCallback(() => onEdit(invoice), [onEdit, invoice]);
-  const handleDelete = useCallback(() => onDelete(invoice), [onDelete, invoice]);
-
   return (
-    <TableRow>
-      <TableCell>
-        <Checkbox checked={isSelected} onCheckedChange={handleToggle} />
+    <TableRow className={isSelected ? "bg-muted/50" : ""}>
+      <TableCell className="w-12">
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={() => onToggleSelect(invoice.id)}
+          aria-label={`Select invoice ${invoice.invoice_number}`}
+        />
       </TableCell>
-      <TableCell>{invoice.invoice_number}</TableCell>
-      <TableCell>{invoice.vendor_name}</TableCell>
-      <TableCell className="font-mono">{formatCurrency(invoice.amount)}</TableCell>
-      <TableCell>{formatDate(invoice.invoice_date)}</TableCell>
-      <TableCell>{formatDate(invoice.due_date)}</TableCell>
-      <TableCell>
-        <Badge variant={getStatusBadgeVariant(invoice.status) as any}>
-          {invoice.status.toUpperCase()}
-        </Badge>
-      </TableCell>
+      <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          {documentCount > 0 && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Paperclip className="h-3 w-3" />
-              {documentCount}
-            </div>
+          {invoice.vendor_name}
+          {invoice.duplicate_hash && (
+            <AlertTriangle className="h-4 w-4 text-amber-500" title="Potential Duplicate" />
           )}
         </div>
       </TableCell>
+      <TableCell>{formatCurrency(invoice.amount)}</TableCell>
+      <TableCell>{formatDate(invoice.invoice_date)}</TableCell>
+      <TableCell>{formatDate(invoice.due_date)}</TableCell>
+      <TableCell>
+        <Badge variant={getStatusBadgeVariant(invoice.status)}>
+          {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1).replace('_', ' ')}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        {documentCount > 0 ? (
+          <div className="flex items-center text-xs text-muted-foreground">
+            <File className="h-3 w-3 mr-1" />
+            {documentCount} file{documentCount !== 1 ? 's' : ''}
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground">-</span>
+        )}
+      </TableCell>
       {(canEdit || canDelete) && (
         <TableCell className="text-right">
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex justify-end gap-2">
             {canEdit && (
-              <Button size="sm" variant="outline" onClick={handleEdit}>
-                <Edit className="h-3 w-3" />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => { e.stopPropagation(); onEdit(invoice); }}
+              >
+                <Edit className="h-4 w-4" />
               </Button>
             )}
             {canDelete && (
-              <Button size="sm" variant="outline" onClick={handleDelete}>
-                <Trash2 className="h-3 w-3" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:bg-destructive/10"
+                onClick={(e) => { e.stopPropagation(); handleDeleteClick(invoice); }}
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
             )}
           </div>
@@ -144,7 +154,7 @@ const InvoiceListVirtualized = memo(({
   onCreate 
 }: InvoiceListVirtualizedProps) => {
   const { hasRole } = useAuth();
-  const { getDocuments } = useFileUpload();
+  const { getDocumentCounts } = useFileUpload();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -161,32 +171,15 @@ const InvoiceListVirtualized = memo(({
   // Optimized batch document loading with parallel requests
   React.useEffect(() => {
     const loadDocumentCounts = async () => {
-      const counts: Record<string, number> = {};
-      
-      const results = await Promise.allSettled(
-        invoices.map(async (invoice) => {
-          try {
-            await getDocuments(invoice.id);
-            return { id: invoice.id, count: 0 };
-          } catch {
-            return { id: invoice.id, count: 0 };
-          }
-        })
-      );
-      
-      results.forEach((result) => {
-        if (result.status === 'fulfilled') {
-          counts[result.value.id] = result.value.count;
-        }
-      });
-      
+      const ids = invoices.map(i => i.id);
+      const counts = await getDocumentCounts(ids);
       setDocumentCounts(counts);
     };
 
     if (invoices.length > 0) {
       loadDocumentCounts();
     }
-  }, [invoices, getDocuments]);
+  }, [invoices, getDocumentCounts]);
 
   // Memoized status badge variant lookup
   const getStatusBadgeVariant = useCallback((status: Invoice['status']) => {
@@ -212,7 +205,7 @@ const InvoiceListVirtualized = memo(({
     });
   }, [invoices, searchTerm, statusFilter]);
 
-  // Memoized event handlers
+  // Handlers
   const handleDeleteClick = useCallback((invoice: Invoice) => {
     setInvoiceToDelete(invoice);
     setDeleteDialogOpen(true);
@@ -226,17 +219,15 @@ const InvoiceListVirtualized = memo(({
     }
   }, [invoiceToDelete, onDelete]);
 
-  const toggleInvoiceSelection = useCallback((invoiceId: string) => {
-    setSelectedInvoices(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(invoiceId)) {
-        newSet.delete(invoiceId);
-      } else {
-        newSet.add(invoiceId);
-      }
-      return newSet;
-    });
-  }, []);
+  const toggleInvoiceSelection = useCallback((id: string) => {
+    const newSelected = new Set(selectedInvoices);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedInvoices(newSelected);
+  }, [selectedInvoices]);
 
   const toggleSelectAll = useCallback(() => {
     if (selectedInvoices.size === filteredInvoices.length) {

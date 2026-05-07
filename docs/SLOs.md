@@ -1,8 +1,8 @@
-# FlowAi Service Level Objectives (SLOs)
+# FLOWBills Service Level Objectives (SLOs)
 
 ## Overview
 
-This document defines Service Level Objectives (SLOs) for FlowAi's invoice processing system. SLOs establish measurable targets for service reliability and performance, enabling proactive monitoring and incident response through burn rate alerting.
+This document defines Service Level Objectives (SLOs) for FLOWBills's invoice processing system. SLOs establish measurable targets for service reliability and performance, enabling proactive monitoring and incident response through burn rate alerting.
 
 ## Core SLOs
 

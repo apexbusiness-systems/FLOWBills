@@ -37,7 +37,7 @@ export const TwoFactorSetup = ({ isEnabled, onToggle }: TwoFactorSetupProps) => 
       setSecret(secretKey);
 
       // Generate QR code URL for authenticator apps
-      const qrCodeUrl = `otpauth://totp/FlowAi:${user?.email}?secret=${secretKey}&issuer=FlowAi`;
+      const qrCodeUrl = `otpauth://totp/FLOWBills:${user?.email}?secret=${secretKey}&issuer=FLOWBills`;
       setQrCode(qrCodeUrl);
 
       setStep('verify');

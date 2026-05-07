@@ -10,30 +10,35 @@ const ValidateRequestSchema = z.object({
   country_code: z.string().length(2, "Country code must be 2 characters").optional(),
 });
 
-// E-Invoice validation functions
-function validateEN16931(xmlContent: string): { valid: boolean; errors: string[]; warnings: string[] } {
-  const errors: string[] = [];
-  const warnings: string[] = [];
+type ValidationCode = {
+  code: string;
+  message: string;
+};
+
+// E-Invoice validation functions (Preflight/Profile validation)
+function validateEN16931(xmlContent: string): { valid: boolean; errors: ValidationCode[]; warnings: ValidationCode[] } {
+  const errors: ValidationCode[] = [];
+  const warnings: ValidationCode[] = [];
   
-  // Basic EN 16931 semantic validation
+  // Basic EN 16931 semantic preflight validation
   if (!xmlContent.includes('cbc:ID')) {
-    errors.push('Missing required element: cbc:ID (Invoice identifier)');
+    errors.push({ code: 'ERR-EN16931-01', message: 'Missing required element: cbc:ID (Invoice identifier)' });
   }
   
   if (!xmlContent.includes('cbc:IssueDate')) {
-    errors.push('Missing required element: cbc:IssueDate (Invoice issue date)');
+    errors.push({ code: 'ERR-EN16931-02', message: 'Missing required element: cbc:IssueDate (Invoice issue date)' });
   }
   
   if (!xmlContent.includes('cac:AccountingSupplierParty')) {
-    errors.push('Missing required element: cac:AccountingSupplierParty (Seller information)');
+    errors.push({ code: 'ERR-EN16931-03', message: 'Missing required element: cac:AccountingSupplierParty (Seller information)' });
   }
   
   if (!xmlContent.includes('cac:AccountingCustomerParty')) {
-    errors.push('Missing required element: cac:AccountingCustomerParty (Buyer information)');
+    errors.push({ code: 'ERR-EN16931-04', message: 'Missing required element: cac:AccountingCustomerParty (Buyer information)' });
   }
   
   if (!xmlContent.includes('cbc:DocumentCurrencyCode')) {
-    warnings.push('Missing recommended element: cbc:DocumentCurrencyCode');
+    warnings.push({ code: 'WARN-EN16931-01', message: 'Missing recommended element: cbc:DocumentCurrencyCode' });
   }
   
   return {
@@ -43,22 +48,22 @@ function validateEN16931(xmlContent: string): { valid: boolean; errors: string[]
   };
 }
 
-function validateBIS30(xmlContent: string): { valid: boolean; errors: string[]; warnings: string[] } {
-  const errors: string[] = [];
-  const warnings: string[] = [];
+function validateBIS30(xmlContent: string): { valid: boolean; errors: ValidationCode[]; warnings: ValidationCode[] } {
+  const errors: ValidationCode[] = [];
+  const warnings: ValidationCode[] = [];
   
   // Peppol BIS Billing 3.0 CIUS constraints
   const en16931Result = validateEN16931(xmlContent);
   errors.push(...en16931Result.errors);
   warnings.push(...en16931Result.warnings);
   
-  // BIS 3.0 specific validations
+  // BIS 3.0 specific preflight validations
   if (!xmlContent.includes('cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0')) {
-    errors.push('Invalid CustomizationID for Peppol BIS Billing 3.0');
+    errors.push({ code: 'ERR-BIS30-01', message: 'Invalid CustomizationID for Peppol BIS Billing 3.0' });
   }
   
   if (!xmlContent.includes('cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0')) {
-    errors.push('Invalid ProfileID for Peppol BIS Billing 3.0');
+    errors.push({ code: 'ERR-BIS30-02', message: 'Invalid ProfileID for Peppol BIS Billing 3.0' });
   }
   
   return {
@@ -68,22 +73,22 @@ function validateBIS30(xmlContent: string): { valid: boolean; errors: string[]; 
   };
 }
 
-function validateXRechnung(xmlContent: string): { valid: boolean; errors: string[]; warnings: string[] } {
-  const errors: string[] = [];
-  const warnings: string[] = [];
+function validateXRechnung(xmlContent: string): { valid: boolean; errors: ValidationCode[]; warnings: ValidationCode[] } {
+  const errors: ValidationCode[] = [];
+  const warnings: ValidationCode[] = [];
   
-  // XRechnung (Germany) specific validation
+  // XRechnung (Germany) specific preflight validation
   if (!xmlContent.includes('CrossIndustryInvoice')) {
-    errors.push('Missing root element: CrossIndustryInvoice (required for XRechnung)');
+    errors.push({ code: 'ERR-XRECHNUNG-01', message: 'Missing root element: CrossIndustryInvoice (required for XRechnung)' });
   }
   
   if (!xmlContent.includes('ram:ID')) {
-    errors.push('Missing required element: ram:ID (XRechnung identifier)');
+    errors.push({ code: 'ERR-XRECHNUNG-02', message: 'Missing required element: ram:ID (XRechnung identifier)' });
   }
   
   // Check for XRechnung profile
   if (!xmlContent.includes('urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung')) {
-    errors.push('Missing XRechnung CustomizationID');
+    errors.push({ code: 'ERR-XRECHNUNG-03', message: 'Missing XRechnung CustomizationID' });
   }
   
   return {
@@ -93,17 +98,17 @@ function validateXRechnung(xmlContent: string): { valid: boolean; errors: string
   };
 }
 
-function validateFacturX(xmlContent: string): { valid: boolean; errors: string[]; warnings: string[] } {
-  const errors: string[] = [];
-  const warnings: string[] = [];
+function validateFacturX(xmlContent: string): { valid: boolean; errors: ValidationCode[]; warnings: ValidationCode[] } {
+  const errors: ValidationCode[] = [];
+  const warnings: ValidationCode[] = [];
   
-  // Factur-X (France/Germany) specific validation
+  // Factur-X (France/Germany) specific preflight validation
   if (!xmlContent.includes('CrossIndustryDocument')) {
-    errors.push('Missing root element: CrossIndustryDocument (required for Factur-X)');
+    errors.push({ code: 'ERR-FACTURX-01', message: 'Missing root element: CrossIndustryDocument (required for Factur-X)' });
   }
   
   if (!xmlContent.includes('ram:ID')) {
-    errors.push('Missing required element: ram:ID (Factur-X identifier)');
+    errors.push({ code: 'ERR-FACTURX-02', message: 'Missing required element: ram:ID (Factur-X identifier)' });
   }
   
   return {
@@ -161,8 +166,8 @@ Deno.serve(async (req) => {
         ruleType = 'facturx';
         break;
       case 'pint':
-        // PINT validation stub (future implementation)
-        validationResult = { valid: true, errors: [], warnings: ['PINT validation not yet implemented'] };
+        // PINT validation stub
+        validationResult = { valid: false, errors: [], warnings: [{ code: 'WARN-UNSUPPORTED-PROFILE', message: 'PINT format is currently unsupported by the preflight validation engine.' }] };
         ruleType = 'en16931';
         break;
       default:
@@ -206,8 +211,8 @@ Deno.serve(async (req) => {
         rule_type: ruleType,
         country_code,
         validation_passed: validationResult.valid,
-        error_messages: validationResult.errors,
-        warnings: validationResult.warnings,
+        error_messages: validationResult.errors.map((e: any) => e.message),
+        warnings: validationResult.warnings.map((w: any) => w.message),
         validation_metadata: {
           format,
           confidence_score: confidenceScore,
@@ -243,7 +248,8 @@ Deno.serve(async (req) => {
       errors: validationResult.errors,
       warnings: validationResult.warnings,
       country_code,
-      validated_at: new Date().toISOString()
+      validated_at: new Date().toISOString(),
+      disclaimer: "This validation result represents a preflight format check. It does not constitute full standards-grade compliance."
     };
 
     return new Response(JSON.stringify(response), {

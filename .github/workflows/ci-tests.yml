@@ -1,4 +1,4 @@
-name: FlowAi CI/CD Pipeline
+name: FLOWBills CI/CD Pipeline
 
 on:
   push:
@@ -292,7 +292,7 @@ jobs:
     steps:
     - name: Quality Gate Results
       run: |
-        echo "📊 FlowAi Quality Gate Summary"
+        echo "📊 FLOWBills Quality Gate Summary"
         echo "==============================="
         
         echo "🧪 Quality Gates: ${{ needs.quality-gates.result }}"

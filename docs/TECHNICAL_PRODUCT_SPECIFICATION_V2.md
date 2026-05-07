@@ -13,7 +13,7 @@ This specification is designed for **critical technical stakeholders** performin
 
 ## 1. Executive Summary
 
-**FLOWBills.ca** (internally: FlowAi) is an enterprise-grade accounts payable automation platform purpose-built for the Canadian oil and gas industry. The platform addresses domain-specific complexities absent from generic AP tools: AFE (Authority for Expenditure) budget tracking, field ticket validation with GPS verification, UWI (Unique Well Identifier) cost allocation, and multi-jurisdictional Canadian regulatory compliance.
+**FLOWBills.ca** (internally: FLOWBills) is an enterprise-grade accounts payable automation platform purpose-built for the Canadian oil and gas industry. The platform addresses domain-specific complexities absent from generic AP tools: AFE (Authority for Expenditure) budget tracking, field ticket validation with GPS verification, UWI (Unique Well Identifier) cost allocation, and multi-jurisdictional Canadian regulatory compliance.
 
 ### Key Technical Differentiators
 

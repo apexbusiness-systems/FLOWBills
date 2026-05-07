@@ -23,7 +23,7 @@ SUPABASE_DB_URL="${SUPABASE_DB_URL:-}"
 TEST_DB_NAME="dr_drill_$(date +%Y%m%d_%H%M%S)"
 
 log "======================================"
-log "FlowAi DR Drill - Backup Restore Test"
+log "FLOWBills DR Drill - Backup Restore Test"
 log "======================================"
 log "Test DB: $TEST_DB_NAME"
 log "Backup Bucket: $BACKUP_BUCKET"

@@ -123,7 +123,7 @@ Before merging, verify locally:
 | Edge Function Gates | ✅ Working | Deno checks pass, import map validated |
 | LLM Integrity | ✅ Working | Structure validation only |
 | CI/CD Pipeline | ✅ Fixed | Node 20, Slack notifications fixed |
-| FlowAi CI/CD | ✅ Fixed | Node 20, bundle path corrected |
+| FLOWBills CI/CD | ✅ Fixed | Node 20, bundle path corrected |
 | Backup Notifications | ✅ Fixed | Slack notifications fixed |
 
 ## Next Steps

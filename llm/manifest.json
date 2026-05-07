@@ -1,5 +1,5 @@
 {
-  "name": "FlowAi-OilGas-Lock",
+  "name": "FLOWBills-OilGas-Lock",
   "provider": "openai",
   "endpoint": "https://api.openai.com/v1/chat/completions",
   "model_id": "gpt-4o",

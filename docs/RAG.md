@@ -1,8 +1,8 @@
-# FlowAi RAG (Retrieval-Augmented Generation) Documentation
+# FLOWBills RAG (Retrieval-Augmented Generation) Documentation
 
 ## Overview
 
-FlowAi's RAG system provides industry-grounded responses by retrieving relevant context from authoritative oil and gas sources before generating responses. This ensures accuracy, compliance, and proper citation of industry standards.
+FLOWBills's RAG system provides industry-grounded responses by retrieving relevant context from authoritative oil and gas sources before generating responses. This ensures accuracy, compliance, and proper citation of industry standards.
 
 ## Data Sources
 
