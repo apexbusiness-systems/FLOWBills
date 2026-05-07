@@ -44,7 +44,7 @@
 
 ### 3. Command Palette & Power User Features
 **Current Gap**: Mouse-dependent navigation  
-**Industry Standard**: Every modern B2B SaaS has Cmd+K palette (Linear, Notion, Vercel)
+**Industry Standard**: Every modern B2B SaaS has Cmd+K palette (Linear, Notion, enterprise SaaS dashboards)
 
 **Enhancements**:
 ```

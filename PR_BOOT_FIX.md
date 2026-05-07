@@ -35,8 +35,6 @@ Implemented a comprehensive resilient boot pipeline with:
 - ✅ 5-second timeouts prevent hanging
 
 ### Hosting Configuration
-- ✅ `vercel.json` - Cache headers for Vercel
-- ✅ `netlify.toml` - Cache headers for Netlify
 - ✅ `public/_headers` - Cache headers for Cloudflare Pages
 - ✅ `index.html` - Meta tags for cache control fallback
 
@@ -89,8 +87,6 @@ If issues occur, revert this PR. The changes are backward compatible but if need
 - `src/boot/bootstrap.ts` (new)
 - `src/main.tsx` (modified)
 - `index.html` (modified)
-- `vercel.json` (new)
-- `netlify.toml` (new)
 - `public/_headers` (new)
 - `tests/e2e/smoke.spec.ts` (modified)
 - `scripts/ci-boot-smoke-test.ts` (new)

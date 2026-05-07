@@ -8,7 +8,7 @@
 
 ## Deployment Target
 
-Production frontend deployments now target **Cloudflare** instead of Vercel or Lovable-hosted production assumptions.
+Production frontend deployments target **Cloudflare**.
 
 - **Primary host:** Cloudflare Pages
 - **Compatible host:** Cloudflare Workers static assets
@@ -28,9 +28,9 @@ Production frontend deployments now target **Cloudflare** instead of Vercel or L
 | Build command/output | `package.json`, `wrangler.json` | `npm run build` emits Vite output to `dist`. |
 | Environment examples | `.env.example` | Defines public Vite/Supabase values and non-public local/edge secrets. |
 
-### Vercel Assumption Audit
+### Legacy Deployment Audit
 
-No active `vercel.json`, `.vercel/`, or Vercel-specific runtime configuration is required for production. Historical references to Vercel should be treated as archived incident context, not deployment source of truth.
+No legacy hosted-platform runtime configuration is required for production. Cloudflare is the only frontend deployment source of truth in this repository; disconnect any external deployment app that still posts pull-request checks outside this codebase.
 
 ---
 
@@ -73,6 +73,19 @@ VITE_SUPABASE_ANON_KEY=your-publishable-anon-key
 ```
 
 Set non-public Supabase service role keys only in Supabase Edge Function secrets or another secure server-side secret store. Do not expose service role keys through Cloudflare Pages public build variables.
+
+### GitHub CI/CD Deployment
+
+The repository CI deploy job is Cloudflare-only and runs on `main` pushes after tests and security checks pass. Configure these GitHub repository secrets for that job:
+
+```bash
+CLOUDFLARE_ACCOUNT_ID=your-account-id
+CLOUDFLARE_API_TOKEN_FLOW=your-cloudflare-pages-token
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
+```
+
+If a pull request still shows a failing check from an external legacy deployment app, disconnect that app from the repository or remove it from required branch protection checks. That check is generated outside this repository and is not controlled by GitHub Actions workflow files.
 
 ### Deploy Command Options
 
