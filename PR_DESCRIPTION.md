@@ -12,7 +12,8 @@ This branch makes Cloudflare the frontend deployment source of truth without cha
 - **Security headers:** `public/_headers` remains the Cloudflare-compatible header source for Pages deployments.
 - **Build command/output:** `npm run build` and `dist` are unchanged.
 - **Environment assumptions:** `.env.example` documents Cloudflare Pages public build variables and keeps the legacy Supabase anon alias for compatibility.
-- **CI/CD:** `.github/workflows/ci.yml` deploys production frontend builds through Cloudflare Pages secrets on `main` pushes.
+- **CI/CD:** `.github/workflows/ci.yml` deploys production frontend builds through Cloudflare Pages secrets on `main` pushes and rejects tracked legacy deployment artifacts.
+- **Repository settings:** `docs/CI/EXTERNAL_DEPLOYMENT_CHECK_REMOVAL.md` documents the admin-only settings change required to remove any blocked external deployment check generated outside this repository.
 
 ## Verification
 

@@ -85,7 +85,7 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
 ```
 
-If a pull request still shows a failing check from an external legacy deployment app, disconnect that app from the repository or remove it from required branch protection checks. That check is generated outside this repository and is not controlled by GitHub Actions workflow files.
+If a pull request still shows a failing check from an external legacy deployment app, follow `docs/CI/EXTERNAL_DEPLOYMENT_CHECK_REMOVAL.md` to disconnect that app from the repository or remove it from required branch protection checks. That check is generated outside this repository and is not controlled by GitHub Actions workflow files.
 
 ### Deploy Command Options
 

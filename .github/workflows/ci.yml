@@ -15,6 +15,24 @@ permissions:
   security-events: write
 
 jobs:
+
+  deployment-provider-guard:
+    runs-on: ubuntu-latest
+    name: 🧭 Deployment Provider Guard
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Reject legacy deployment artifacts
+        run: |
+          set -euo pipefail
+          git ls-files | sed 's#^#/#' | awk '
+            /\/(vercel\.json|now\.json|netlify\.toml)$/ { bad=1; print "::error::legacy host config still tracked: " $0 }
+            /\/\.vercel\// { bad=1; print "::error::legacy provider directory still tracked: " $0 }
+            END { exit bad }
+          '
+
   # Quality Gates
   lint-and-format:
     runs-on: ubuntu-latest
@@ -49,7 +67,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: 🧪 Tests
-    needs: lint-and-format
+    needs: [deployment-provider-guard, lint-and-format]
 
     strategy:
       matrix:
@@ -118,7 +136,7 @@ jobs:
   security:
     runs-on: ubuntu-latest
     name: 🔒 Security
-    needs: lint-and-format
+    needs: [deployment-provider-guard, lint-and-format]
     
     steps:
       - name: Checkout code
