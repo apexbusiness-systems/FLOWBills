@@ -101,7 +101,7 @@ If automatic recovery fails:
 #### Hosting Configuration
 - `index.html`: `Cache-Control: no-cache, no-store, must-revalidate`
 - Assets: `Cache-Control: public, max-age=31536000, immutable`
-- Multiple hosting configs: `vercel.json`, `netlify.toml`, `public/_headers`
+- Cloudflare hosting config: `public/_headers` is copied into `dist/_headers` during the Vite build
 
 #### Feature Flags
 - `VITE_UPSCOPE_ENABLED=false` (default in production)

@@ -8,14 +8,7 @@ on:
 
 env:
   NODE_VERSION: '20.x'
-
-permissions:
-  contents: read
-  security-events: write
-
-permissions:
-  contents: read
-  security-events: write
+  CLOUDFLARE_PROJECT_NAME: flowbills
 
 permissions:
   contents: read
@@ -158,11 +151,11 @@ jobs:
       - name: Run npm audit
         run: npm audit --audit-level moderate
 
-  # Build and Deploy
+  # Build and Deploy to Cloudflare
   build-and-deploy:
     runs-on: ubuntu-latest
-    name: 🚀 Build & Deploy
-    needs: [test, performance, security]
+    name: 🚀 Build & Deploy Cloudflare
+    needs: [test, security]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     environment:
@@ -192,13 +185,22 @@ jobs:
             echo "::error::Missing required secret: VITE_SUPABASE_PUBLISHABLE_KEY"
             exit 1
           fi
+          if [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "::error::Missing required secret: CLOUDFLARE_ACCOUNT_ID"
+            exit 1
+          fi
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN_FLOW }}" ]; then
+            echo "::error::Missing required secret: CLOUDFLARE_API_TOKEN_FLOW"
+            exit 1
+          fi
           echo "✅ All required environment variables are set"
 
       - name: Build application
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
       - name: Run production tests
         run: npm run test:prod
@@ -207,9 +209,25 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E smoke tests
-        run: npm run test:e2e
+        run: |
+          set -euo pipefail
+          npm run preview -- --host 127.0.0.1 > /tmp/flowbills-preview.log 2>&1 &
+          PREVIEW_PID=$!
+          trap 'kill $PREVIEW_PID' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              cat /tmp/flowbills-preview.log
+              echo "::error::Vite preview server did not become ready"
+              exit 1
+            fi
+            sleep 1
+          done
+          npm run test:e2e
         env:
-          PLAYWRIGHT_TEST_BASE_URL: http://localhost:4173
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4173
         continue-on-error: false
 
       - name: Upload Playwright report
@@ -220,12 +238,15 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-      # - name: Deploy to Lovable
-      #   id: deploy
-      #   uses: lovable-dev/deploy-action@v1
-      #   with:
-      #     token: ${{ secrets.LOVABLE_TOKEN }}
-      #     project-id: ${{ secrets.LOVABLE_PROJECT_ID }}
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        run: |
+          set -euo pipefail
+          npx --yes wrangler pages deploy dist --project-name "${CLOUDFLARE_PROJECT_NAME}" --branch main
+          echo "url=https://${CLOUDFLARE_PROJECT_NAME}.pages.dev" >> "$GITHUB_OUTPUT"
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_FLOW }}
 
   # Database Backup
   backup:
