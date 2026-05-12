@@ -1,10 +1,20 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ORIGINS = Deno.env.get('ALLOWED_ORIGINS')
+  ?.split(',').map(o => o.trim()).filter(Boolean) ?? [];
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
+
+function buildCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const allowedOrigin = ALLOWED_ORIGINS.length === 0
+    ? '*'
+    : (ALLOWED_ORIGINS.includes(origin) ? origin : '');
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+}
 
 const BUCKET = new Map<string,{tokens:number,ts:number}>();
 const RATE = { refillPerSec: 1, burst: 10 };
@@ -38,7 +48,7 @@ function clientIp(req: Request): string {
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: buildCorsHeaders(req) });
   }
 
   try {
@@ -52,7 +62,7 @@ Deno.serve(async (req) => {
     if (!take(userId)) {
       return new Response("Too Many Requests", { 
         status: 429,
-        headers: corsHeaders
+        headers: buildCorsHeaders(req)
       });
     }
 
@@ -61,7 +71,7 @@ Deno.serve(async (req) => {
     if (!authToken) {
       return new Response(JSON.stringify({ error: 'Authentication required' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
@@ -71,16 +81,30 @@ Deno.serve(async (req) => {
       console.error('Auth verification failed:', authError);
       return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
-    const { prompt, context } = await req.json();
+    const contentLength = parseInt(req.headers.get('content-length') ?? '0', 10);
+    if (contentLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'Request body too large (max 10MB)' }), {
+        status: 413,
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+    const rawBody = await req.arrayBuffer();
+    if (rawBody.byteLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'Request body too large (max 10MB)' }), {
+        status: 413,
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+    const { prompt, context } = JSON.parse(new TextDecoder().decode(rawBody));
 
     if (!prompt) {
       return new Response(JSON.stringify({ error: 'Prompt is required' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
@@ -89,7 +113,7 @@ Deno.serve(async (req) => {
       console.error('OpenAI API key not configured');
       return new Response(JSON.stringify({ error: 'AI service not configured' }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
@@ -195,7 +219,7 @@ ${context ? `\nAdditional Context: ${context}` : ''}`
       console.error('OpenAI API error:', response.status, errorText);
       return new Response(JSON.stringify({ error: 'AI service temporarily unavailable' }), {
         status: 503,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
@@ -206,7 +230,7 @@ ${context ? `\nAdditional Context: ${context}` : ''}`
       console.error('No response from OpenAI');
       return new Response(JSON.stringify({ error: 'No response generated' }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
@@ -214,14 +238,14 @@ ${context ? `\nAdditional Context: ${context}` : ''}`
       response: generatedText,
       usage: data.usage 
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
     console.error('Error in ai-assistant function:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
     });
   }
 });

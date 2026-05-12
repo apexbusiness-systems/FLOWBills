@@ -1,10 +1,19 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ORIGINS = Deno.env.get('ALLOWED_ORIGINS')
+  ?.split(',').map(o => o.trim()).filter(Boolean) ?? [];
+
+function buildCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const allowedOrigin = ALLOWED_ORIGINS.length === 0
+    ? '*'
+    : (ALLOWED_ORIGINS.includes(origin) ? origin : '');
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+}
 
 // Use constants/env for model boundaries
 const MODEL_ID = Deno.env.get('SUPPORT_MODEL_ID') || "gpt-4o-realtime-preview-2024-12-17";
@@ -13,14 +22,14 @@ const WS_ENDPOINT = Deno.env.get('SUPPORT_REALTIME_ENDPOINT') || `wss://api.open
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: buildCorsHeaders(req) });
   }
 
   // Ensure this is a WebSocket request
   if (req.headers.get("upgrade") !== "websocket") {
     return new Response(JSON.stringify({ error: "WebSocket upgrade required" }), {
       status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' }
     });
   }
 
@@ -41,7 +50,7 @@ serve(async (req) => {
       console.error("Auth error:", authError);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' }
       });
     }
 
@@ -162,7 +171,7 @@ serve(async (req) => {
     console.error("Error setting up WebSocket:", err);
     return new Response(JSON.stringify({ error: "Internal server error", message: err.message }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' }
     });
   }
 });
