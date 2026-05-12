@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const Invoices = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { invoices, loading, createInvoice, updateInvoice, deleteInvoice } = useInvoices();
+  const { invoices, loading, createInvoice, updateInvoice, deleteInvoice, fetchNextPage, hasNextPage, isFetchingNextPage } = useInvoices();
   const { extractInvoiceData } = useInvoiceExtraction();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
@@ -171,6 +171,9 @@ const Invoices = () => {
             onEdit={handleEdit}
             onDelete={deleteInvoice}
             onCreate={handleCreate}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
           />
         </TabsContent>
 
