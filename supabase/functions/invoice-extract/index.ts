@@ -1,12 +1,26 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// Origin allowlist — set ALLOWED_ORIGINS env var as comma-separated list.
+// Falls back to '*' if unset to preserve backward compatibility.
+const ALLOWED_ORIGINS = Deno.env.get('ALLOWED_ORIGINS')
+  ?.split(',').map(o => o.trim()).filter(Boolean) ?? [];
+
+// Reject payloads larger than 10 MB to prevent memory exhaustion
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+
+function buildCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const allowedOrigin = ALLOWED_ORIGINS.length === 0
+    ? '*'
+    : (ALLOWED_ORIGINS.includes(origin) ? origin : '');
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+}
 
 // Detect if content is base64 image/PDF or plain text
 function isBase64Content(content: string): boolean {
@@ -15,7 +29,7 @@ function isBase64Content(content: string): boolean {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: buildCorsHeaders(req) });
   }
 
   try {
@@ -27,7 +41,7 @@ Deno.serve(async (req) => {
     if (!authToken) {
       return new Response(JSON.stringify({ error: 'Authentication required' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
@@ -35,16 +49,31 @@ Deno.serve(async (req) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
-    const { invoice_id, file_content, file_type } = await req.json();
+    // Body size guard — fast-reject via content-length header, then verify actual size
+    const contentLength = parseInt(req.headers.get('content-length') ?? '0', 10);
+    if (contentLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'Request body too large (max 10MB)' }), {
+        status: 413,
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+    const rawBody = await req.arrayBuffer();
+    if (rawBody.byteLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'Request body too large (max 10MB)' }), {
+        status: 413,
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+    const { invoice_id, file_content, file_type } = JSON.parse(new TextDecoder().decode(rawBody));
 
     if (!invoice_id || !file_content) {
       return new Response(JSON.stringify({ error: 'invoice_id and file_content required' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
@@ -65,7 +94,7 @@ Deno.serve(async (req) => {
       console.error('[Extract] Error creating extraction record:', extractionError);
       return new Response(JSON.stringify({ error: 'Failed to create extraction record' }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
       });
     }
 
@@ -372,7 +401,7 @@ Respond with valid JSON only.`;
       validation_errors: validationErrors,
       validation_warnings: validationWarnings
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
@@ -381,7 +410,7 @@ Respond with valid JSON only.`;
       error: error instanceof Error ? error.message : 'Internal server error' 
     }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
     });
   }
 });
