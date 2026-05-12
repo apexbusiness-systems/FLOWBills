@@ -43,7 +43,8 @@ import {
   Trash2,
   Edit,
   File,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { useAuth } from '@/hooks/useAuth';
@@ -55,6 +56,9 @@ interface InvoiceListProps {
   onEdit: (invoice: Invoice) => void;
   onDelete: (id: string) => void;
   onCreate: () => void;
+  fetchNextPage?: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
 }
 
 // Memoized row component for performance
@@ -150,7 +154,7 @@ const InvoiceRow = memo(({
 
 InvoiceRow.displayName = 'InvoiceRow';
 
-const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceListProps) => {
+const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate, fetchNextPage, hasNextPage, isFetchingNextPage }: InvoiceListProps) => {
   const { hasRole } = useAuth();
   const { getDocumentCounts } = useFileUpload();
   const { toast } = useToast();
@@ -423,6 +427,20 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
               </TableBody>
             </Table>
           </div>
+
+          {hasNextPage && (
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                onClick={() => fetchNextPage?.()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage
+                  ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading...</>
+                  : 'Load More Invoices'}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
