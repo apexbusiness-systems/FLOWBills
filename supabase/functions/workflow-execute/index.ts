@@ -1,10 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ORIGINS = Deno.env.get('ALLOWED_ORIGINS')
+  ?.split(',').map(o => o.trim()).filter(Boolean) ?? [];
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
+
+function buildCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const allowedOrigin = ALLOWED_ORIGINS.length === 0
+    ? '*'
+    : (ALLOWED_ORIGINS.includes(origin) ? origin : '');
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+}
 
 interface WorkflowCondition {
   field: string;
@@ -26,7 +36,7 @@ interface WorkflowStep {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: buildCorsHeaders(req) });
   }
 
   try {
@@ -41,7 +51,21 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { workflow_id, entity_type, entity_id } = await req.json();
+    const contentLength = parseInt(req.headers.get('content-length') ?? '0', 10);
+    if (contentLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'Request body too large (max 10MB)' }), {
+        status: 413,
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+    const rawBody = await req.arrayBuffer();
+    if (rawBody.byteLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'Request body too large (max 10MB)' }), {
+        status: 413,
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+    const { workflow_id, entity_type, entity_id } = JSON.parse(new TextDecoder().decode(rawBody));
 
     // Fetch workflow
     const { data: workflow, error: workflowError } = await supabaseClient
@@ -227,7 +251,7 @@ serve(async (req) => {
         instance_id: instance.id,
         results: stepResults,
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' } }
     );
 
   } catch (error: unknown) {
@@ -235,7 +259,7 @@ serve(async (req) => {
     console.error('Workflow execution error:', error);
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 400, headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' } }
     );
   }
 });

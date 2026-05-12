@@ -7,11 +7,20 @@ export function setCreateClientFn(fn: typeof createClient) {
   createClientFn = fn;
 }
 
-// CORS headers for web app compatibility
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ORIGINS = Deno.env.get('ALLOWED_ORIGINS')
+  ?.split(',').map(o => o.trim()).filter(Boolean) ?? [];
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
+
+function buildCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const allowedOrigin = ALLOWED_ORIGINS.length === 0
+    ? '*'
+    : (ALLOWED_ORIGINS.includes(origin) ? origin : '');
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+}
 
 import { assertLLMLock, DENO_MODEL_ID, DENO_ENDPOINT } from "../_shared/llm_guard.ts";
 
@@ -121,7 +130,7 @@ export async function retrieveOilGasContext(
 export const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: buildCorsHeaders(req) });
   }
 
   try {
@@ -133,7 +142,21 @@ export const handler = async (req: Request): Promise<Response> => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { query, user_id, context } = await req.json();
+    const contentLength = parseInt(req.headers.get('content-length') ?? '0', 10);
+    if (contentLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'Request body too large (max 10MB)' }), {
+        status: 413,
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+    const rawBody = await req.arrayBuffer();
+    if (rawBody.byteLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'Request body too large (max 10MB)' }), {
+        status: 413,
+        headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+    const { query, user_id, context } = JSON.parse(new TextDecoder().decode(rawBody));
     
     // Validate the incoming query
     validateOilGasQuery(query);
@@ -319,7 +342,7 @@ Remember: You must provide citations for any industry-specific claims. If you ca
       model: Deno.env.get('LLM_MODEL_ID'),
       context_used: industryContext.length > 0
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
@@ -335,7 +358,7 @@ Remember: You must provide citations for any industry-specific claims. If you ca
       details: Deno.env.get('NODE_ENV') === 'development' ? (error as Error).message : undefined
     }), {
       status: (error as Error).message?.includes('SECURITY:') ? 503 : 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...buildCorsHeaders(req), 'Content-Type': 'application/json' },
     });
   }
 };
