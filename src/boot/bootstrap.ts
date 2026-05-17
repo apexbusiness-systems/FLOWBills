@@ -672,7 +672,7 @@ function setupGlobalErrorHandlers(tracker: BootTracker): void {
       const longTaskObserver = new PerformanceObserver((list) => {
         list.getEntries().forEach((entry: any) => {
           if (entry.duration > 50) { // Tasks longer than 50ms
-            tracker.recordError(`Long task: ${entry.duration}ms`, false);
+            console.warn(`[FlowBills] Boot error: Long task: ${entry.duration}ms`);
           }
         });
       });

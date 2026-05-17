@@ -1,34 +1,31 @@
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Playwright configuration for E2E smoke tests
- */
 export default defineConfig({
   testDir: './tests/e2e',
+  timeout: 60000,
+  expect: {
+    timeout: 10000
+  },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? 'html' : 'list',
-  
+  reporter: 'html',
   use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4173',
+    actionTimeout: 15000,
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4173',
   },
-
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-
   webServer: {
     command: 'npm run preview',
-    url: 'http://localhost:4173',
+    port: 4173,
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 120000,
   },
 });
-

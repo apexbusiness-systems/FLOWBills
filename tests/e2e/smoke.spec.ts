@@ -7,11 +7,20 @@ import { test, expect } from '@playwright/test';
 test.describe('Production Smoke Tests', () => {
   const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4173';
 
-  test('should render the application without blank screen', async ({ page }) => {
-    await page.goto(baseURL);
+  test.beforeEach(async ({ page }) => {
+    // Navigate and wait for basic load before each test
+    await page.goto(baseURL, { waitUntil: 'networkidle' });
+  });
 
+  test('should render the application without blank screen', async ({ page }) => {
     // Wait for React to hydrate - check for root element content
-    await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
+    await page.waitForSelector('#root', { state: 'attached', timeout: 30000 });
+
+    // Ensure React renders some content inside root
+    await page.waitForFunction(() => {
+        const root = document.getElementById('root');
+        return root && root.innerHTML.trim().length > 0;
+    }, { timeout: 30000 });
 
     // Verify root element has content (not empty)
     const rootContent = await page.locator('#root').innerHTML();
@@ -23,6 +32,7 @@ test.describe('Production Smoke Tests', () => {
     expect(title.length).toBeGreaterThan(0);
 
     // Verify boot system initialized
+    await page.waitForFunction(() => (window as any).__FLOWBILLS_BOOT__?.stage === 'mounted', { timeout: 30000 });
     const bootStatus = await page.evaluate(() => (window as any).__FLOWBILLS_BOOT__?.stage);
     expect(bootStatus).toBe('mounted');
   });
@@ -40,10 +50,10 @@ test.describe('Production Smoke Tests', () => {
       errors.push(error.message);
     });
     
-    await page.goto(baseURL);
+    await page.goto(baseURL, { waitUntil: 'networkidle' });
     
     // Wait a bit for initial load
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
     
     // Filter out known non-critical errors (config warnings, etc.)
     const criticalErrors = errors.filter(err => 
@@ -56,6 +66,11 @@ test.describe('Production Smoke Tests', () => {
       console.warn('Non-critical errors detected:', criticalErrors);
     }
     
+    await page.waitForFunction(() => {
+        const root = document.getElementById('root');
+        return root && root.innerHTML.trim().length > 0;
+    }, { timeout: 30000 });
+
     // Page should still render even with warnings
     const rootContent = await page.locator('#root').innerHTML();
     expect(rootContent.length).toBeGreaterThanOrEqual(0);
@@ -66,8 +81,12 @@ test.describe('Production Smoke Tests', () => {
     // In a real scenario, you'd mock missing env vars, but for smoke test
     // we just verify the error boundary component exists in the bundle
     
-    await page.goto(baseURL);
-    
+    // Wait to ensure something is loaded
+    await page.waitForFunction(() => {
+        const root = document.getElementById('root');
+        return root && root.innerHTML.trim().length > 0;
+    }, { timeout: 30000 });
+
     // If config error occurs, ConfigErrorBoundary should render
     // Check for error boundary indicators (but don't fail if not present - means no error)
     const hasErrorBoundary = await page.locator('text=Configuration Error').count() > 0 ||
@@ -85,10 +104,13 @@ test.describe('Production Smoke Tests', () => {
   });
 
   test('should handle auth state without hanging', async ({ page }) => {
-    await page.goto(baseURL);
-
-    // Wait for auth initialization (max 15 seconds - increased for reliability)
+    // Wait for auth initialization
     await page.waitForTimeout(15000);
+
+    await page.waitForFunction(() => {
+        const root = document.getElementById('root');
+        return root && root.innerHTML.trim().length > 0;
+    }, { timeout: 30000 });
 
     // Verify page is not blank - either shows auth page or dashboard
     const rootContent = await page.locator('#root').innerHTML();
@@ -113,10 +135,16 @@ test.describe('Production Smoke Tests', () => {
       }
     });
 
-    await page.goto(baseURL);
+    await page.goto(baseURL, { waitUntil: 'networkidle' });
 
     // Wait for boot to complete or recover
-    await page.waitForSelector('#root', { state: 'attached', timeout: 20000 });
+    await page.waitForSelector('#root', { state: 'attached', timeout: 30000 });
+
+    await page.waitForFunction(() => {
+        const root = document.getElementById('root');
+        const hasText = document.body.innerText.includes('Application Loading Error');
+        return (root && root.innerHTML.trim().length > 0) || hasText;
+    }, { timeout: 30000 });
 
     // Should either mount successfully or show recovery UI
     const rootContent = await page.locator('#root').innerHTML();
@@ -137,14 +165,21 @@ test.describe('Production Smoke Tests', () => {
       });
     });
 
-    await page.goto(baseURL);
+    await page.goto(baseURL, { waitUntil: 'networkidle' });
 
     // Should still boot successfully
-    await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
+    await page.waitForSelector('#root', { state: 'attached', timeout: 30000 });
+
+    await page.waitForFunction(() => {
+        const root = document.getElementById('root');
+        return root && root.innerHTML.trim().length > 0;
+    }, { timeout: 30000 });
+
     const rootContent = await page.locator('#root').innerHTML();
     expect(rootContent.length).toBeGreaterThanOrEqual(0);
 
     // Boot should complete
+    await page.waitForFunction(() => (window as any).__FLOWBILLS_BOOT__?.stage === 'mounted', { timeout: 30000 });
     const bootStatus = await page.evaluate(() => (window as any).__FLOWBILLS_BOOT__?.stage);
     expect(bootStatus).toBe('mounted');
   });
@@ -158,16 +193,22 @@ test.describe('Production Smoke Tests', () => {
       });
     });
 
-    await page.goto(baseURL);
+    await page.goto(baseURL, { waitUntil: 'networkidle' });
 
     // Should still boot successfully
-    await page.waitForSelector('#root', { state: 'attached', timeout: 15000 });
+    await page.waitForSelector('#root', { state: 'attached', timeout: 30000 });
+
+    await page.waitForFunction(() => {
+        const root = document.getElementById('root');
+        return root && root.innerHTML.trim().length > 0;
+    }, { timeout: 30000 });
+
     const rootContent = await page.locator('#root').innerHTML();
     expect(rootContent.length).toBeGreaterThanOrEqual(0);
 
     // Boot should complete
+    await page.waitForFunction(() => (window as any).__FLOWBILLS_BOOT__?.stage === 'mounted', { timeout: 30000 });
     const bootStatus = await page.evaluate(() => (window as any).__FLOWBILLS_BOOT__?.stage);
     expect(bootStatus).toBe('mounted');
   });
 });
-

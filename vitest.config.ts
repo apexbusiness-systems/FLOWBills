@@ -11,6 +11,15 @@ export default defineConfig({
     setupFiles: ['src/lib/test-utils.tsx'],
     exclude: ['node_modules', 'dist', '.idea', '.git', '.cache', 'tests/e2e/**', 'supabase/functions/**'],
     css: true,
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
+      'supabase/functions/**',
+      'tests/e2e/**',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
